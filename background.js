@@ -18,37 +18,54 @@ browser.webRequest.onBeforeSendHeaders.addListener(
 
 
 function doOnBeforeSendHeaders(details){
+
 	console.log(details.requestHeaders);
+
 	let requestId = details.requestId;
 	let url = details.url;
 	let cookieHeader = Utils.getHeader(details.requestHeaders, "cookie");
 	let cookies = (cookieHeader === undefined)? "" : cookieHeader.value;
+	let refererHeader = Utils.getHeader(details.requestHeaders, "referer");
+	let referer = (refererHeader === undefined)? "" : refererHeader;
+	let time = Date.now();
 	let dlItem = {
 		url: url,
-		cookies: cookies
+		cookies: cookies,
+		referer: referer,
+		time: time
 	};
+
 	console.log("sending: ", requestId);
+
 	allRequests.put(requestId, dlItem);
 }
 
 function doOnHeadersReceived(details) {
+	
+	console.log("receiving: ", details.requestId);
 
 	let requestId = details.requestId;
-	console.log("receiving: ", requestId);
 	let url = details.url;
 	let requestOfThisResponse = allRequests.get(requestId);
+
 	if(typeof requestOfThisResponse === 'undefined'){
 		return;
 	}
-	let cookies = requestOfThisResponse.cookies;
 
+	let cookies = requestOfThisResponse.cookies;
+	let referer = requestOfThisResponse.referer;
+	let time = requestOfThisResponse.time;
+
+	//remove asap to save memory
 	allRequests.remove(requestId);
 
+	//creating a new object because we deleted the original from allRequests
 	let dlItem = {};
 	dlItem.requestId = requestId;
 	dlItem.url = url;
 	dlItem.cookies = cookies;
-	dlItem.hash = md5(url);
+	dlItem.referer = referer;
+	dlItem.time = time;
 
 	if (url.startsWith("ws://") || url.startsWith("wss://")) {
 		return {};
@@ -59,7 +76,7 @@ function doOnHeadersReceived(details) {
 		var fileSizeMB = contentLengthHeader.value / 1000000;
 		if (fileSizeMB > 5) {
 			dlItem.debug_reason = "content length: " + fileSizeMB.toFixed(1) + "MB";
-			addToAllDlItems(dlItem)
+			addToAllDlItems(dlItem);
 		}
 		return {};
 	}
@@ -69,7 +86,7 @@ function doOnHeadersReceived(details) {
 		var contentType = contentTypeHeader.value;
 		if (contentType.toLowerCase() == "application/octet-stream") {
 			dlItem.debug_reason =  "content type:" + contentType;
-			addToAllDlItems(dlItem)
+			addToAllDlItems(dlItem);
 		}
 		return {};
 	}
@@ -78,7 +95,7 @@ function doOnHeadersReceived(details) {
 	let extension = Utils.getExtensionFromURL(url);
 	if (extension && !extensionsToNotDownload.includes(extension)) {
 		dlItem.debug_reason =  "file extension: " + extension;
-		addToAllDlItems(dlItem)
+		addToAllDlItems(dlItem);
 		return {};
 	}
 
@@ -177,19 +194,19 @@ function Utils(){
 
 	this.downloadWithIDM = function (dlItem) {
 
-		let msgTemplate = "MSG#1#14#1#0:1,6=*url-len*:*url*,51=*cookies-len*:*cookies*,54=*useragent-len*:*useragent*";
+		let msgBase = "MSG#1#14#1#0:1";
 
 		let url = dlItem.url;
 		let userAgent = navigator.userAgent;
 		let cookies = dlItem.cookies;
+		let referer = dlItem.referer;
 
-		let IDMMessage = msgTemplate
-			.replace("*url*", url)
-			.replace("*url-len*", url.length)
-			.replace("*cookies*", cookies)
-			.replace("*cookies-len*", cookies.length)
-			.replace("*useragent*", userAgent)
-			.replace("*useragent-len*", userAgent.length);
+		let urlCode = ",6=" + url.length + ":" + url;
+		let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
+		let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
+		let refererCode = (referer)? (",50=" + refere.length + ":" + referer) : "";
+
+		let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode;
 
 		console.log("IDM MESSAGE: ", IDMMessage);
 
