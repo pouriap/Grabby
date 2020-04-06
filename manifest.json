@@ -1,0 +1,70 @@
+{
+
+	"manifest_version": 2,
+	"name": "Download Assist",
+	"description": "Assists in downloading a URL with external applications",
+	"version": "0.4",
+	"author": "Pouria Pirhadi",
+	"homepage_url": "https://github.com/pouriap/Firefox-DownloadAssist",
+
+	"permissions": [
+		"webRequest",
+		"webRequestBlocking",
+		"downloads",
+		"nativeMessaging",
+		"<all_urls>"
+	],
+
+	"applications": {
+		"gecko": {
+			"id": "dl_manager_helper@pouria.p",
+			"strict_min_version": "56.0"
+		}
+	},
+
+	"icons": {
+		"16": "images/icon16.png",
+		"32": "images/icon32.png",
+		"48": "images/icon48.png",
+		"96": "images/icon96.png"
+	},
+
+	"browser_action": {
+		"default_title": "Download Manager Helper",
+		"default_popup": "html/popup.html",
+		"browser_style": false,
+		"default_icon": {
+			"16": "images/icon16.png",
+			"32": "images/icon32.png",
+			"48": "images/icon48.png",
+			"96": "images/icon96.png"
+		},
+		"theme_icons": [
+			{
+				"dark": "images/icon16.png",
+				"light": "images/icon16-white.png",
+				"size": 16
+			}, 
+			{
+				"dark": "images/icon32.png",
+				"light": "images/icon32-white.png",
+				"size": 32
+			},
+			{
+				"dark": "images/icon48.png",
+				"light": "images/icon48-white.png",
+				"size": 48
+			},
+			{
+				"dark": "images/icon96.png",
+				"light": "images/icon96-white.png",
+				"size": 96
+			}
+		]
+	},
+
+	"background": {
+		"scripts": ["md5.js", "background.js"]
+	}
+
+}

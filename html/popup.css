@@ -1,0 +1,86 @@
+body {
+    text-align: center;
+	min-width: 200px;
+	overflow-y: auto;
+}
+
+ul, li{
+	list-style-type: none;
+	padding: 0;
+}
+
+#content{
+	padding: 0 20px;
+}
+
+#dls-list{
+	cursor: default;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/* hide 'no downloads' item */
+#dls-list #no-dl:last-child:after{
+	content: "No Downloads";
+}
+#no-dl{
+	display: inline;
+}
+
+.dl-item{
+	padding: 10px 5px;
+	font-weight: bold;
+	border-bottom: 1px solid #e5e5e5;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	width: 100%;
+}
+
+.dl-item:last-child {
+    border: none;
+}
+
+.dl-item:hover{
+	background-color: #e5e5e5 !important;
+}
+
+#actions-list{
+	display: none;
+}
+
+#actions-list .action {
+    padding: 5px 0;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+    text-align: center;
+	margin-bottom: 3px;
+	cursor: pointer;
+	transition: all 0.6s ease;
+}
+
+#actions-list .action:hover{
+	background-color: #e5e5e5 !important;
+}
+
+#actions-list #action-back{
+	transition: none;
+	border: none;
+	display: flex;
+	float: left;
+	padding: 5px;
+	margin: 10px 0 10px;
+	clear: both; 
+}
+
+#actions-list #action-desc{
+	font-weight: bold;
+	padding: 5px;
+	margin: 10px 0 10px;
+	cursor: default;
+	float: left;
+}
+
+.clear{
+	clear: both;
+}
