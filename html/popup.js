@@ -66,6 +66,7 @@ function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
 	document.getElementById("action-desc").innerHTML = Utils.getFilenameFromURL(dlItem.url);
+	document.getElementById("action-time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
 	hideElement(dlList);
 	showElement(actionList);
 	itemToDownload = dlItem;

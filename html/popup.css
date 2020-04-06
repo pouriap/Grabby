@@ -9,8 +9,15 @@ ul, li{
 	padding: 0;
 }
 
+.clear{
+	clear: both;
+}
+
 #content{
-	padding: 0 20px;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	padding: 0;
+	margin: 0 auto;
+	width: 250px;
 }
 
 #dls-list{
@@ -35,6 +42,7 @@ ul, li{
 	cursor: pointer;
 	transition: all 0.3s ease;
 	width: 100%;
+	font-size: 12px;
 }
 
 .dl-item:last-child {
@@ -70,7 +78,8 @@ ul, li{
 	float: left;
 	padding: 5px;
 	margin: 10px 0 10px;
-	clear: both; 
+	clear: both;
+	width: 20px;
 }
 
 #actions-list #action-desc{
@@ -79,8 +88,12 @@ ul, li{
 	margin: 10px 0 10px;
 	cursor: default;
 	float: left;
+	width: 210px;
+	word-break: break-all;
 }
 
-.clear{
-	clear: both;
+#actions-list #action-time{
+	margin: 10px 0;
+	font-size: 13px;
+	cursor: default;
 }
