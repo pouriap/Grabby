@@ -2,6 +2,9 @@ var allRequests = new FixedSizeMap(100);
 var allDlItems = new FixedSizeMap(20);
 var Utils = new Utils();
 
+
+//TODO: check all API levels and see exactly what is the minimum version
+
 browser.webRequest.onHeadersReceived.addListener(
 	doOnHeadersReceived, {
 		urls: ["*://*/*"]
@@ -194,6 +197,11 @@ function Utils(){
 
 	this.downloadWithIDM = function (dlItem) {
 
+		if(!idmAvailable){
+			console.log("IDM is not available");
+			return;
+		}
+
 		let msgBase = "MSG#1#14#1#0:1";
 
 		let url = dlItem.url;
@@ -206,13 +214,12 @@ function Utils(){
 		let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
 		let refererCode = (referer)? (",50=" + refere.length + ":" + referer) : "";
 
-		let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode;
-
-		console.log("IDM MESSAGE: ", IDMMessage);
+		let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode + ";";
 
 		let port = browser.runtime.connectNative("com.tonec.idm");
 		port.postMessage(IDMMessage);
 		port.disconnect();
+
 	}
 	
 	

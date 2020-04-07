@@ -1,7 +1,7 @@
 body {
     text-align: center;
-	min-width: 200px;
 	overflow-y: auto;
+	width: 280px;
 }
 
 ul, li{
@@ -13,11 +13,14 @@ ul, li{
 	clear: both;
 }
 
+.hidden{
+	display: none !important;
+}
+
 #content{
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	padding: 0;
+	padding: 0 5px;
 	margin: 0 auto;
-	width: 250px;
 }
 
 #dls-list{
@@ -53,10 +56,6 @@ ul, li{
 	background-color: #e5e5e5 !important;
 }
 
-#actions-list{
-	display: none;
-}
-
 #actions-list .action {
     padding: 5px 0;
     border: 1px solid #e5e5e5;
@@ -65,10 +64,17 @@ ul, li{
 	margin-bottom: 3px;
 	cursor: pointer;
 	transition: all 0.6s ease;
+	box-shadow: 0px 1px 1px #ededf0;
 }
 
 #actions-list .action:hover{
 	background-color: #e5e5e5 !important;
+}
+
+#actions-list .disabled-action, #actions-list .disabled-action:hover{
+	color: #d7d7db;
+	cursor: default;
+	background-color: inherit !important;
 }
 
 #actions-list #action-back{
@@ -96,4 +102,36 @@ ul, li{
 	margin: 10px 0;
 	font-size: 13px;
 	cursor: default;
+}
+
+#action-output{
+	margin: 5px 0;
+	font-size: 12px;
+	/* animaiton stuff */
+	animation-name: fadeinout;
+	animation-duration: 2s;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+    opacity: 1;
+}
+@keyframes fadeinout{
+	0%, 100% { opacity: 0; }
+	20% { opacity: 1 }
+}
+#action-output.fail{
+	color: #d70022;
+}
+#action-output.success{
+	color: #12bc00;
+}
+
+#hiddeninput{
+	width : '1px';
+	height: '1px';
+	padding: 0;
+	border: none;
+	outline: none;
+	box-shadow: none;
+	background : transparent;
+	opacity: 0;
 }

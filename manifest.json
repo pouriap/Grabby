@@ -3,7 +3,7 @@
 	"manifest_version": 2,
 	"name": "Download Assist",
 	"description": "Assists in downloading a URL with external applications",
-	"version": "0.4",
+	"version": "0.7",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Firefox-DownloadAssist",
 
@@ -12,12 +12,14 @@
 		"webRequestBlocking",
 		"downloads",
 		"nativeMessaging",
+		"clipboardWrite",
+		"notifications",
 		"<all_urls>"
 	],
 
 	"applications": {
 		"gecko": {
-			"id": "dl_manager_helper@pouria.p",
+			"id": "download_assist@pouria.p",
 			"strict_min_version": "56.0"
 		}
 	},
@@ -30,7 +32,7 @@
 	},
 
 	"browser_action": {
-		"default_title": "Download Manager Helper",
+		"default_title": "Downloads List",
 		"default_popup": "html/popup.html",
 		"browser_style": false,
 		"default_icon": {
@@ -64,7 +66,7 @@
 	},
 
 	"background": {
-		"scripts": ["md5.js", "background.js"]
+		"scripts": ["init.js", "md5.js", "background.js"]
 	}
 
 }
