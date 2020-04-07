@@ -1,16 +1,15 @@
+
+//all requests made by Firefox are stored here temporarily until we get their response
 var allRequests = new FixedSizeMap(100);
+
+// the last 20 downloadable items are stored here with their informations such as cookies,time,etc.
 var allDlItems = new FixedSizeMap(20);
+
+// utility function
 var Utils = new Utils();
 
 
 //TODO: check all API levels and see exactly what is the minimum version
-
-browser.webRequest.onHeadersReceived.addListener(
-	doOnHeadersReceived, {
-		urls: ["*://*/*"]
-	},
-	["responseHeaders"]
-);
 
 browser.webRequest.onBeforeSendHeaders.addListener(
 	doOnBeforeSendHeaders, {
@@ -19,7 +18,15 @@ browser.webRequest.onBeforeSendHeaders.addListener(
 	["requestHeaders"]
 );
 
+browser.webRequest.onHeadersReceived.addListener(
+	doOnHeadersReceived, {
+		urls: ["*://*/*"]
+	},
+	["responseHeaders"]
+);
 
+
+// is used to store cookies, referer and other request headers that are unavailable in reponse
 function doOnBeforeSendHeaders(details){
 
 	console.log(details.requestHeaders);

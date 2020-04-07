@@ -25,41 +25,41 @@
 	},
 
 	"icons": {
-		"16": "images/icon16.png",
-		"32": "images/icon32.png",
-		"48": "images/icon48.png",
-		"96": "images/icon96.png"
+		"16": "icons/icon16.png",
+		"32": "icons/icon32.png",
+		"48": "icons/icon48.png",
+		"96": "icons/icon96.png"
 	},
 
 	"browser_action": {
 		"default_title": "Downloads List",
-		"default_popup": "html/popup.html",
+		"default_popup": "popup/popup.html",
 		"browser_style": false,
 		"default_icon": {
-			"16": "images/icon16.png",
-			"32": "images/icon32.png",
-			"48": "images/icon48.png",
-			"96": "images/icon96.png"
+			"16": "icons/icon16.png",
+			"32": "icons/icon32.png",
+			"48": "icons/icon48.png",
+			"96": "icons/icon96.png"
 		},
 		"theme_icons": [
 			{
-				"dark": "images/icon16.png",
-				"light": "images/icon16-white.png",
+				"dark": "icons/icon16.png",
+				"light": "icons/icon16-white.png",
 				"size": 16
 			}, 
 			{
-				"dark": "images/icon32.png",
-				"light": "images/icon32-white.png",
+				"dark": "icons/icon32.png",
+				"light": "icons/icon32-white.png",
 				"size": 32
 			},
 			{
-				"dark": "images/icon48.png",
-				"light": "images/icon48-white.png",
+				"dark": "icons/icon48.png",
+				"light": "icons/icon48-white.png",
 				"size": 48
 			},
 			{
-				"dark": "images/icon96.png",
-				"light": "images/icon96-white.png",
+				"dark": "icons/icon96.png",
+				"light": "icons/icon96-white.png",
 				"size": 96
 			}
 		]
