@@ -1,6 +1,8 @@
 var idmAvailable = false;
+var app;
 
 initIDM();
+initApplication();
 
 
 function initIDM(){
@@ -34,4 +36,8 @@ function initIDM(){
 	//but just for added safety we disconnect it in a timeout
 	setTimeout( ()=> port.disconnect(), 500);
 
+}
+
+function initApplication(){
+	app = new DlAssistApp();
 }

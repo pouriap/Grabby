@@ -3,9 +3,9 @@ var Utils = {};
 var itemToDownload = {};
 
 //TODO: add user agent and other things to curl/wget to make them look more real
+//TODO: show latest downloads at top
 
-
-window.addEventListener('load', (event) => {
+document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.getElementById("action-back").addEventListener("click", function(evt){
 		showMainList();
@@ -34,8 +34,8 @@ window.addEventListener('load', (event) => {
 
 function onGot(page) {
 
-	allDlItems = page.allDlItems;
-	Utils = page.Utils;
+	allDlItems = page.app.allDlItems;
+	Utils = page.app.Utils;
 
 	//populate list of downloads
 	for (const key of allDlItems.getKeys()) {

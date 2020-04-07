@@ -1,36 +1,44 @@
 //TODO: check all API levels and see exactly what is the minimum version
 
-// all requests made by Firefox are stored here temporarily until we get their response
-var allRequests = new FixedSizeMap(100);
+/**
+ * This is the main application class and holds all states
+ * An instance of this is created in init.js as a global variable accessible 
+ * to anyonw who has access to 'background.js' scope
+ */
+function DlAssistApp(){
 
-// the last 20 downloadable items are stored here with their informations such as cookies,time,etc.
-//todo: options
-var allDlItems = new FixedSizeMap(20);
+	// all requests made by Firefox are stored here temporarily until we get their response
+	this.allRequests = new FixedSizeMap(100);
 
-// utility function
-var Utils = new Utils();
+	// the last 20 downloadable items are stored here with their informations such as cookies,time,etc.
+	//todo: options
+	this.allDlItems = new FixedSizeMap(20);
 
+	// utility function
+	this.Utils = new Utils();
 
-browser.webRequest.onBeforeSendHeaders.addListener(
-	doOnBeforeSendHeaders, {
-		urls: ["*://*/*"]
-	},
-	["requestHeaders"]
-);
+	browser.webRequest.onBeforeSendHeaders.addListener(
+		doOnBeforeSendHeaders, {
+			urls: ["*://*/*"]
+		},
+		["requestHeaders"]
+	);
 
-browser.webRequest.onHeadersReceived.addListener(
-	doOnHeadersReceived, {
-		urls: ["*://*/*"]
-	},
-	["responseHeaders"]
-);
+	browser.webRequest.onHeadersReceived.addListener(
+		doOnHeadersReceived, {
+			urls: ["*://*/*"]
+		},
+		["responseHeaders"]
+	);
 
-browser.webRequest.onCompleted.addListener(
-	doOnCompleted, {
-		urls: ["*://*/*"]
-	},
-	["responseHeaders"]
-);
+	browser.webRequest.onCompleted.addListener(
+		doOnCompleted, {
+			urls: ["*://*/*"]
+		},
+		["responseHeaders"]
+	);
+
+}
 
 
 /**
@@ -40,9 +48,9 @@ browser.webRequest.onCompleted.addListener(
 function doOnBeforeSendHeaders(details){
 
 	let requestId = details.requestId;
-	let cookieHeader = Utils.getHeader(details.requestHeaders, "cookie");
+	let cookieHeader = app.Utils.getHeader(details.requestHeaders, "cookie");
 	let cookies = (cookieHeader === undefined)? "" : cookieHeader.value;
-	let refererHeader = Utils.getHeader(details.requestHeaders, "referer");
+	let refererHeader = app.Utils.getHeader(details.requestHeaders, "referer");
 	let referer = (refererHeader === undefined)? "" : refererHeader;
 	let origin = details.originUrl;
 	let time = details.timeStamp;
@@ -55,10 +63,11 @@ function doOnBeforeSendHeaders(details){
 	dlItem.time = time;
 
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
-	allRequests.put(requestId, dlItem);
+	app.allRequests.put(requestId, dlItem);
 
 	console.log("sending: ", requestId);
 }
+
 
 /**
  * Runs once response headers are received 
@@ -71,7 +80,7 @@ function doOnHeadersReceived(details) {
 
 	let requestId = details.requestId;
 	let url = details.url;
-	let requestOfThisResponse = allRequests.get(requestId);
+	let requestOfThisResponse = app.allRequests.get(requestId);
 
 	if(typeof requestOfThisResponse === 'undefined'){
 		return;
@@ -93,7 +102,7 @@ function doOnHeadersReceived(details) {
 
 	// first we look at content-length
 	// if the file is big enough we consider it a download
-	let contentLengthHeader = Utils.getHeader(details.responseHeaders, "content-length");
+	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 	if (typeof contentLengthHeader !== 'undefined') {
 		var fileSizeMB = contentLengthHeader.value / 1000000;
 		//todo: options
@@ -106,7 +115,7 @@ function doOnHeadersReceived(details) {
 
 	// if content-lenght is not specified we look at content-type
 	// if content-type is 'application/octet-stream' we consider it a download
-	let contentTypeHeader = Utils.getHeader(details.responseHeaders, "content-type");
+	let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
 	if (typeof contentTypeHeader !== 'undefined') {
 		var contentType = contentTypeHeader.value;
 		if (contentType.toLowerCase() == "application/octet-stream") {
@@ -120,7 +129,7 @@ function doOnHeadersReceived(details) {
 	// we consider the file a download based on our inclusion/exclusion list
 	//todo: options
 	let extensionsToNotDownload = ['jpg', 'jpeg', 'png', 'gif', 'css', 'js', 'html', 'htm', 'php', 'asp', 'jsp'];
-	let extension = Utils.getExtensionFromURL(url);
+	let extension = app.Utils.getExtensionFromURL(url);
 	if (extension && !extensionsToNotDownload.includes(extension)) {
 		dlItem.debug_reason =  "file extension: " + extension;
 		addToAllDlItems(dlItem);
@@ -135,10 +144,11 @@ function doOnHeadersReceived(details) {
 		//we do this here because we don't want to run hash on requests we will not use
 		dlItem.hash = md5(dlItem.url);
 		//we put hash of URL as key to prevent the same URL being added by different requests
-		allDlItems.put(dlItem.hash, dlItem);
+		app.allDlItems.put(dlItem.hash, dlItem);
 	}
 
 }
+
 
 /**
  * Runs once a request is completed
@@ -146,11 +156,16 @@ function doOnHeadersReceived(details) {
 function doOnCompleted(details){
 	//remove the original dlItem from allRequests to save memory
 	//this isn't really necessary because allRequest is a fixed sized map
-	allRequests.remove(details.requestId);
+	app.allRequests.remove(details.requestId);
 }
 
 
-// Fixed size map class
+/**
+ * A fixed sized map with key->value pairs
+ * When size gets bigger than the limit first element is deleted and 
+ * the new element is put in
+ * Duplicate elements will rewrite the old ones
+ */
 function FixedSizeMap(size) {
 
 	size = (Number(size));
@@ -187,22 +202,10 @@ function FixedSizeMap(size) {
 
 }
 
-
-// Download list class
-function DownloadsList(size) {
-
-	this.list = new FixedSizeMap(size);
-
-	this.add = function (dlItem) {
-		let exists = this.list.find((dlItem) => dlItem.url === dlItem.url);
-		//don't add duplicates
-		if (exists === undefined) {
-			this.list.push(dlItem);
-		}
-	}
-}
-
-// A utility class of course!
+//todo: make this static (object)
+/**
+ * A utility class of course!
+ */
 function Utils(){
 
 	this.getHeader = function (headersArray, headerName){
