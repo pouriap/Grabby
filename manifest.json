@@ -3,7 +3,7 @@
 	"manifest_version": 2,
 	"name": "Download Assist",
 	"description": "Assists in downloading a URL with external applications",
-	"version": "0.7",
+	"version": "0.8",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Firefox-DownloadAssist",
 
