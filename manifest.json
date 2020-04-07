@@ -14,6 +14,7 @@
 		"nativeMessaging",
 		"clipboardWrite",
 		"notifications",
+		"storage",
 		"<all_urls>"
 	],
 
@@ -41,12 +42,11 @@
 			"48": "icons/icon48.png",
 			"96": "icons/icon96.png"
 		},
-		"theme_icons": [
-			{
+		"theme_icons": [{
 				"dark": "icons/icon16.png",
 				"light": "icons/icon16-white.png",
 				"size": 16
-			}, 
+			},
 			{
 				"dark": "icons/icon32.png",
 				"light": "icons/icon32-white.png",
@@ -65,8 +65,13 @@
 		]
 	},
 
+	"options_ui": {
+		"page": "options/options.html",
+		"browser_style": true
+	},
+
 	"background": {
-		"scripts": [ "md5.js", "background.js", "init.js"]
+		"scripts": ["md5.js", "options/default_options.js", "background.js", "init.js"]
 	}
 
 }

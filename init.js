@@ -2,7 +2,11 @@ var idmAvailable = false;
 var app;
 
 initIDM();
-initApplication();
+let loading = loadOptions();
+loading.then((options)=>{
+	app = new DlAssistApp();
+	app.options = options;
+});
 
 
 function initIDM(){
@@ -38,6 +42,24 @@ function initIDM(){
 
 }
 
-function initApplication(){
-	app = new DlAssistApp();
+function loadOptions(){
+
+	let loading = new Promise(function(resolve, reject){
+
+		function doLoadOptions(loadedOptions) {
+			console.log("loaded options: ", loadedOptions);
+			resolve(loadedOptions);
+		}
+	
+		function onError(error) {
+			console.log(`Error getting options: ${error}`);
+			resolve(defaultOptions);
+		}
+	
+		let getting = browser.storage.local.get(defaultOptions);
+		getting.then(doLoadOptions, onError);
+
+	});
+
+	return loading;
 }
