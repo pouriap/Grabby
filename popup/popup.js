@@ -4,6 +4,8 @@ var itemToDownload = {};
 
 //TODO: add user agent and other things to curl/wget to make them look more real
 //TODO: show latest downloads at top
+//todo: make icon svg
+//todo: do styles according to browser styles: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/user_interface/Browser_styles
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -64,7 +66,7 @@ function onGot(page) {
 	}
 
 	//enable/disable IDM download
-	if(page.idmAvailable){
+	if(page.app.runtime.idmAvailable){
 		document.getElementById('action-idm').classList.remove("disabled-action");
 	}
 	else{

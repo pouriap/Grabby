@@ -5,14 +5,15 @@
  * An instance of this is created in init.js as a global variable accessible 
  * to anyonw who has access to 'background.js' scope
  */
-function DlAssistApp(){
+function DlAssistApp(options){
+
+	this.options = options;
 
 	// all requests made by Firefox are stored here temporarily until we get their response
 	this.allRequests = new FixedSizeMap(100);
 
-	// the last 20 downloadable items are stored here with their informations such as cookies,time,etc.
-	//todo: options
-	this.allDlItems = new FixedSizeMap(20);
+	// the last X downloadable items are stored here with their informations such as cookies,time,etc.
+	this.allDlItems = new FixedSizeMap(options.dlListSize);
 
 	// utility function
 	this.Utils = new Utils();
@@ -105,8 +106,7 @@ function doOnHeadersReceived(details) {
 	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 	if (typeof contentLengthHeader !== 'undefined') {
 		var fileSizeMB = contentLengthHeader.value / 1000000;
-		//todo: options
-		if (fileSizeMB > 5) {
+		if (fileSizeMB > app.options.dlFilesBiggerThan) {
 			dlItem.debug_reason = "content length: " + fileSizeMB.toFixed(1) + "MB";
 			addToAllDlItems(dlItem);
 		}
@@ -236,7 +236,7 @@ function Utils(){
 
 	this.downloadWithIDM = function (dlItem) {
 
-		if(!idmAvailable){
+		if(!app.runtime.idmAvailable){
 			console.log("IDM is not available");
 			return;
 		}

@@ -1,4 +1,4 @@
 var defaultOptions = {
 	dlListSize: 20,
-	debug: 'lalala'
+	dlFilesBiggerThan: 5
 }
