@@ -3,7 +3,6 @@ var Utils = {};
 var itemToDownload = {};
 
 //TODO: add user agent and other things to curl/wget to make them look more real
-//TODO: show latest downloads at top
 //todo: make icon svg
 //todo: do styles according to browser styles: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/user_interface/Browser_styles
 
@@ -40,7 +39,11 @@ function onGot(page) {
 	Utils = page.app.Utils;
 
 	//populate list of downloads
-	for (const key of allDlItems.getKeys()) {
+	let keys = allDlItems.getKeys();
+	//reverse to show latest downloads on top
+	keys.reverse();
+
+	for (const key of keys) {
 
 		let dlItem = allDlItems.get(key);
 
@@ -82,9 +85,10 @@ function onError(error) {
 function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
-	document.getElementById("action-desc").innerHTML = Utils.getFilenameFromURL(dlItem.url);
-	document.getElementById("action-time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
-	document.getElementById("action-output").style.display = 'none';
+	document.getElementById("filename").innerHTML = Utils.getFilenameFromURL(dlItem.url);
+	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
+	document.getElementById("origin").innerHTML = dlItem.origin;
+	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);
 	itemToDownload = dlItem;
@@ -107,7 +111,7 @@ function dlWithIDM(){
 }
 
 function getCurlCommand(){
-	//let cmd = 'curl "' + itemToDownload.url + '" --cookie "' + itemToDownload.cookies + '"';
+	//todo: don't add cookie header if there's no cookie
 	let cmd = 'curl "' + itemToDownload.url + '" --header "Cookie: ' + itemToDownload.cookies + '"';
 	copyToClipBoard(cmd);
 }
@@ -182,17 +186,17 @@ function copyToClipBoard(content){
 		console.log('copy callback!');
 
 		if(success){
-			document.querySelector("#action-output").innerHTML = "copied successfully";
-			document.querySelector("#action-output").setAttribute("class", "success");
+			document.querySelector("#output").innerHTML = "copied successfully";
+			document.querySelector("#output").setAttribute("class", "success");
 		}
 		else{
-			document.querySelector("#action-output").innerHTML = "copy failed";
-			document.querySelector("#action-output").setAttribute("class", "fail");
+			document.querySelector("#output").innerHTML = "copy failed";
+			document.querySelector("#output").setAttribute("class", "fail");
 		}
 	
 		//flash the output text
-		document.querySelector("#action-output").style.display = 'block';
-		var oldItem = document.querySelector("#action-output");
+		document.querySelector("#output").style.display = 'block';
+		var oldItem = document.querySelector("#output");
 		var cloneItem = oldItem.cloneNode(true); 
 		document.querySelector("#actions-list").replaceChild(cloneItem, oldItem);	
 	}

@@ -1,4 +1,6 @@
 //TODO: check all API levels and see exactly what is the minimum version
+//todo: test with a redirect download
+//todo: remove unused permissions
 
 /**
  * This is the main application class and holds all states
@@ -106,7 +108,7 @@ function doOnHeadersReceived(details) {
 	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 	if (typeof contentLengthHeader !== 'undefined') {
 		var fileSizeMB = contentLengthHeader.value / 1000000;
-		if (fileSizeMB > app.options.dlFilesBiggerThan) {
+		if (fileSizeMB > app.options.grabFilesBiggerThan) {
 			dlItem.debug_reason = "content length: " + fileSizeMB.toFixed(1) + "MB";
 			addToAllDlItems(dlItem);
 		}

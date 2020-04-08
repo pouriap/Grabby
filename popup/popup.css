@@ -1,12 +1,13 @@
 body {
-    text-align: center;
 	overflow-y: auto;
-	width: 280px;
+	min-width: 280px;
+	font-size: 12px;
 }
 
 ul, li{
 	list-style-type: none;
 	padding: 0;
+	text-align: center;
 }
 
 .clear{
@@ -21,6 +22,13 @@ ul, li{
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	padding: 0 5px;
 	margin: 0 auto;
+	width: 100%;
+}
+
+#actions-list{
+	width: 80%;
+	margin: 0 auto;
+	padding: 0 0 20px 0;
 }
 
 #dls-list{
@@ -41,7 +49,7 @@ ul, li{
 .dl-item{
 	padding: 10px 5px;
 	font-weight: bold;
-	border-bottom: 1px solid #e5e5e5;
+	border-bottom: 1px solid #ededf0;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	width: 100%;
@@ -53,22 +61,22 @@ ul, li{
 }
 
 .dl-item:hover{
-	background-color: #e5e5e5 !important;
+	background-color: #ededf0 !important;
 }
 
 #actions-list .action {
     padding: 5px 0;
-    border: 1px solid #e5e5e5;
+    border: 1px solid #ededf0;
     border-radius: 3px;
     text-align: center;
 	margin-bottom: 3px;
 	cursor: pointer;
-	transition: all 0.6s ease;
-	box-shadow: 0px 1px 1px #ededf0;
+	transition: all 0.3s ease;
+	box-shadow: 0px 1px 1px #d7d7db;
 }
 
 #actions-list .action:hover{
-	background-color: #e5e5e5 !important;
+	background-color: #ededf0 !important;
 }
 
 #actions-list .disabled-action, #actions-list .disabled-action:hover{
@@ -78,33 +86,32 @@ ul, li{
 }
 
 #actions-list #action-back{
-	transition: none;
-	border: none;
-	display: flex;
-	float: left;
-	padding: 5px;
-	margin: 10px 0 10px;
-	clear: both;
-	width: 20px;
+	background: url('back.png') 5px 5px no-repeat;
+	width: 160px;
+	margin: 10px 0 40px;
+	text-align: right;
+	padding-right: 10px;
 }
 
-#actions-list #action-desc{
-	font-weight: bold;
-	padding: 5px;
-	margin: 10px 0 10px;
-	cursor: default;
-	float: left;
-	width: 210px;
+#actions-list .desc{
+	padding: 0 0 5px;
+	text-align: left;
 	word-break: break-all;
 }
 
-#actions-list #action-time{
-	margin: 10px 0;
-	font-size: 13px;
-	cursor: default;
+#actions-list .desc-name{
+	padding: 0;
 }
 
-#action-output{
+#actions-list #filename{
+	font-weight: bold;
+}
+
+#actions-list .spacer{
+	margin: 10px 0;
+}
+
+#actions-list #output{
 	margin: 5px 0;
 	font-size: 12px;
 	/* animaiton stuff */
@@ -118,10 +125,10 @@ ul, li{
 	0%, 100% { opacity: 0; }
 	20% { opacity: 1 }
 }
-#action-output.fail{
+#output.fail{
 	color: #d70022;
 }
-#action-output.success{
+#output.success{
 	color: #12bc00;
 }
 

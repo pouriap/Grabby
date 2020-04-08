@@ -2,16 +2,31 @@
 
 <html>
   <head>
-    <meta charset="utf-8">
+	<meta charset="utf-8">
+	<link rel="stylesheet" href="options.css">	
   </head>
 
   <body>
 
-    <form>
-        <label for="dlListSize">Number of items to keep in downloads list</label>
-		<input type="text" id="dlListSize" >
-        <button type="submit">Save</button>
-    </form>
+	<div id="content" class="browser-style">
+
+		<form>
+			
+			<div class="panel-formElements-item">
+				<label for="dlListSize">Number of items to keep in downloads list:</label>
+				<input type="text" id="dlListSize" >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="grabFilesBiggerThan">Grab files bigger than (MB):</label>
+				<input type="text" id="grabFilesBiggerThan" >
+			</div>
+
+			<button class="browser-style" type="submit">Save</button>
+			
+		</form>
+
+	</div>
 
 	<script src="default_options.js"></script>
     <script src="options.js"></script>

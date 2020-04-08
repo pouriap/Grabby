@@ -1,4 +1,4 @@
 var defaultOptions = {
 	dlListSize: 20,
-	dlFilesBiggerThan: 5
+	grabFilesBiggerThan: 5
 }

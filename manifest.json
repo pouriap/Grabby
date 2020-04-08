@@ -2,8 +2,8 @@
 
 	"manifest_version": 2,
 	"name": "Download Assist",
-	"description": "Assists in downloading a URL with external applications",
-	"version": "0.8",
+	"description": "Assists in downloading a file with external applications.",
+	"version": "0.9",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Firefox-DownloadAssist",
 
@@ -29,40 +29,21 @@
 		"16": "icons/icon16.png",
 		"32": "icons/icon32.png",
 		"48": "icons/icon48.png",
+		"64": "icons/icon64.png",
 		"96": "icons/icon96.png"
 	},
 
 	"browser_action": {
-		"default_title": "Downloads List",
+		"default_title": "Download Assist",
 		"default_popup": "popup/popup.html",
-		"browser_style": false,
+		"browser_style": true,
 		"default_icon": {
 			"16": "icons/icon16.png",
 			"32": "icons/icon32.png",
 			"48": "icons/icon48.png",
+			"64": "icons/icon64.png",
 			"96": "icons/icon96.png"
-		},
-		"theme_icons": [{
-				"dark": "icons/icon16.png",
-				"light": "icons/icon16-white.png",
-				"size": 16
-			},
-			{
-				"dark": "icons/icon32.png",
-				"light": "icons/icon32-white.png",
-				"size": 32
-			},
-			{
-				"dark": "icons/icon48.png",
-				"light": "icons/icon48-white.png",
-				"size": 48
-			},
-			{
-				"dark": "icons/icon96.png",
-				"light": "icons/icon96-white.png",
-				"size": 96
-			}
-		]
+		}
 	},
 
 	"options_ui": {
