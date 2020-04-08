@@ -2,6 +2,9 @@ var allDlItems = {};
 var Utils = {};
 var itemToDownload = {};
 
+//TODO: FIREFOX DEV SAYS getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
+//todo: use messaging instead and get rid of this madness
+
 //TODO: add user agent and other things to curl/wget to make them look more real
 //todo: make icon svg
 //todo: do styles according to browser styles: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/user_interface/Browser_styles
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 });
 
-function onGot(page) {
+function onGot(page) { 
 
 	allDlItems = page.app.allDlItems;
 	Utils = page.app.Utils;
@@ -79,7 +82,7 @@ function onGot(page) {
 }
 
 function onError(error) {
-	console.log(`Error: ${error}`);
+	console.log(`Error getting data from background: ${error}`);
 }
 
 function showDownloadPage(dlItem){

@@ -11,6 +11,19 @@ var app;
 
 })();
 
+function handleMessage(message, sender, sendResponse) {
+	console.log('message received:' + JSON.stringify(message));
+	if(message.type === "options"){
+		app.options = message.options;
+		return Promise.resolve(app.options);
+	}
+	else if(message.type === "get_app"){
+		return Promise.resolve(app);
+	}
+}
+  
+browser.runtime.onMessage.addListener(handleMessage);
+
 
 function initIDM(){
 

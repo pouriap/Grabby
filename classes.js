@@ -17,7 +17,21 @@ and any information it collects. Please consult our best practices guide for cre
  - If the add-on uses native messaging, the privacy policy must clearly disclose which 
 information is being exchanged with the native application. Data exchanged with the 
 native application must be in accordance with our No Surprises policy.
-/*
+*/
+
+//todo: options
+let excludedExtensions = [
+	//images
+	'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico',
+	//fonts
+	'ttf', 'otf', 'eot', 'woff2', 'woff',
+	//static content
+	'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'xml', 'rss',
+	//dynamic pages
+	'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
+	//certificates
+	//'cer', 'cert', 'der', 'pem'
+];
 
 /**
  * This is the main application class and holds all states
@@ -120,13 +134,22 @@ function doOnHeadersReceived(details) {
 		return {};
 	}
 
-	// first we look at content-length
+
+	//first we check if the file has an extension and if that extension is among excluded extensions
+	let extension = app.Utils.getExtensionFromURL(url);
+	if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
+		return {};
+	}
+
+	// then we look at content-length
 	// if the file is big enough we consider it a download
 	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 	if (typeof contentLengthHeader !== 'undefined') {
 		var fileSizeMB = contentLengthHeader.value / 1000000;
 		if (fileSizeMB > app.options.grabFilesBiggerThan) {
 			dlItem.debug_reason = "content length: " + fileSizeMB.toFixed(1) + "MB";
+			//todo: show size in desc 
+			dlItem.sizeMB = fileSizeMB;
 			addToAllDlItems(dlItem);
 		}
 		return {};
@@ -134,6 +157,7 @@ function doOnHeadersReceived(details) {
 
 	// if content-lenght is not specified we look at content-type
 	// if content-type is 'application/octet-stream' we consider it a download
+	//todo: vaghti mikhaim exclude nakonim va hameye faile ha ro download konim chi?
 	let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
 	if (typeof contentTypeHeader !== 'undefined') {
 		var contentType = contentTypeHeader.value;
@@ -145,11 +169,9 @@ function doOnHeadersReceived(details) {
 	}
 
 	// if contnet lenght and type are unavailable we look at the file extension
-	// we consider the file a download based on our inclusion/exclusion list
-	//todo: options
-	let extensionsToNotDownload = ['jpg', 'jpeg', 'png', 'gif', 'css', 'js', 'html', 'htm', 'php', 'asp', 'jsp'];
-	let extension = app.Utils.getExtensionFromURL(url);
-	if (extension && !extensionsToNotDownload.includes(extension)) {
+	// if the url contains a file extension we consider it a download
+	// if we're here it means this extension is not excluded
+	if (extension) {
 		dlItem.debug_reason =  "file extension: " + extension;
 		addToAllDlItems(dlItem);
 		return {};
