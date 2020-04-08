@@ -25,12 +25,6 @@ ul, li{
 	width: 100%;
 }
 
-#actions-list{
-	width: 80%;
-	margin: 0 auto;
-	padding: 0 0 20px 0;
-}
-
 #dls-list{
 	cursor: default;
 	display: flex;
@@ -38,12 +32,19 @@ ul, li{
 	align-items: center;
 }
 
+#dls-list .list-title{
+	width: 85%;
+	padding-bottom: 10px;
+}
+
+#dls-list #no-dl{
+	margin: 15px 0 0 0;
+	color:#737373;
+}
+
 /* hide 'no downloads' item */
 #dls-list #no-dl:last-child:after{
 	content: "No Downloads";
-}
-#no-dl{
-	display: inline;
 }
 
 .dl-item{
@@ -62,6 +63,12 @@ ul, li{
 
 .dl-item:hover{
 	background-color: #ededf0 !important;
+}
+
+#actions-list{
+	width: 80%;
+	margin: 0 auto;
+	padding: 0 0 20px 0;
 }
 
 #actions-list .action {

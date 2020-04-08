@@ -1,6 +1,23 @@
 //TODO: check all API levels and see exactly what is the minimum version
 //todo: test with a redirect download
 //todo: remove unused permissions
+//todo: store options in sync, what's wrong with me?
+//todo: save downloads list
+//todo: policies:
+/*
+- Add-ons must only request those permissions that are necessary for function
+- Add-ons should avoid including duplicate or unnecessary files
+- Add-on code must be written in a way that is reviewable and understandable. 
+Reviewers may ask you to refactor parts of the code if it is not reviewable.
+- You may include third-party libraries in your extension. In that case, when you upload 
+your extension to AMO, you will need to provide links to the library source code.
+- The add-on listing should have an easy-to-read description about everything it does, 
+and any information it collects. Please consult our best practices guide for creating
+ an appealing listing.
+ - If the add-on uses native messaging, the privacy policy must clearly disclose which 
+information is being exchanged with the native application. Data exchanged with the 
+native application must be in accordance with our No Surprises policy.
+/*
 
 /**
  * This is the main application class and holds all states
@@ -253,7 +270,7 @@ function Utils(){
 		let urlCode = ",6=" + url.length + ":" + url;
 		let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
 		let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
-		let refererCode = (referer)? (",50=" + refere.length + ":" + referer) : "";
+		let refererCode = (referer)? (",50=" + referer.length + ":" + referer) : "";
 
 		let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode + ";";
 
