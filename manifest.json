@@ -52,7 +52,12 @@
 	},
 
 	"background": {
-		"scripts": ["md5.js", "options/default_options.js", "background.js", "init.js"]
+		"scripts": [
+			"md5.js", 
+			"options/default_options.js", 
+			"classes.js", 
+			"background.js"
+		]
 	}
 
 }
