@@ -2,9 +2,7 @@ var allDlItems = {};
 var Utils = {};
 var itemToDownload = {};
 
-//TODO: FIREFOX DEV SAYS getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
-
-//todo: make icon svg
+//TODO:  getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -56,11 +54,12 @@ function onGot(page) {
 		listItem.setAttribute("class", "dl-item");
 		listItem.setAttribute("title", url);
 		listItem.setAttribute("data-hash", key);
-		listItem.innerHTML = Utils.getFilenameFromURL(url) + " (" + debug_reason + ")";
+		listItem.innerHTML = dlItem.filename + " (" + debug_reason + ")";
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");
 			let dlItem = allDlItems.get(hash);
+			console.log('item clicked: ', dlItem);
 			showDownloadPage(dlItem);
 		});
 
@@ -85,7 +84,7 @@ function onError(error) {
 function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
-	document.getElementById("filename").innerHTML = Utils.getFilenameFromURL(dlItem.url);
+	document.getElementById("filename").innerHTML = dlItem.filename;
 	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
 	document.getElementById("origin").innerHTML = dlItem.origin;
 	document.getElementById("size").innerHTML = dlItem.sizeMB || "unknown";

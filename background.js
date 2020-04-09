@@ -55,7 +55,6 @@ function doOnBeforeSendHeaders(details){
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
 	app.allRequests.put(requestId, dlItem);
 
-	console.log("sending: ", requestId);
 }
 
 
@@ -66,7 +65,7 @@ function doOnBeforeSendHeaders(details){
  */
 function doOnHeadersReceived(details) {
 	
-	console.log("receiving: ", details.requestId);
+	console.log("receiving: ", details.url);
 
 	let requestId = details.requestId;
 	let url = details.url;
@@ -84,9 +83,10 @@ function doOnHeadersReceived(details) {
 	dlItem.origin = requestOfThisResponse.origin;
 	dlItem.time = requestOfThisResponse.time;
 	dlItem.headers = requestOfThisResponse.headers;
+	dlItem.filename = getFileName(url, details.responseHeaders);
 
 	//first we make sure the request is not among excluded things
-	if(handleExclusions()){
+	if(handleFileExclusions()){
 		return {};
 	}
 
@@ -104,6 +104,11 @@ function doOnHeadersReceived(details) {
 		return {};
 	}
 
+	//see if there is a "Content-Disposition: attachment" header available
+	if(handleAttachment()){
+		return {};
+	}
+
 	// if contnet lenght and type are unavailable we look at the file extension
 	// if the url contains a file extension we consider it a download
 	// if we're here it means this extension is not excluded
@@ -115,7 +120,7 @@ function doOnHeadersReceived(details) {
 	console.log("ignoring url: ", url);
 	return {};
 
-	function handleExclusions(){
+	function handleFileExclusions(){
 		//exclude all websocket requests
 		if (url.startsWith("ws://") || url.startsWith("wss://")) {
 			return true;
@@ -131,7 +136,7 @@ function doOnHeadersReceived(details) {
 	function handleContentLength(){
 		let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 		if (typeof contentLengthHeader !== 'undefined') {
-			var fileSizeMB = (contentLengthHeader.value / 1000000).toFixed(1);
+			let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
 			if (fileSizeMB > app.options.grabFilesBiggerThan) {
 				dlItem.debug_reason = "content length: " + fileSizeMB + "MB";
 				dlItem.sizeMB = fileSizeMB  + "MB";
@@ -145,9 +150,31 @@ function doOnHeadersReceived(details) {
 	function handleContentType(){
 		let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
 		if (typeof contentTypeHeader !== 'undefined') {
-			var contentType = contentTypeHeader.value;
-			if (contentType.toLowerCase() == "application/octet-stream") {
+			let contentType = contentTypeHeader.value;
+			let typesToGrab = [
+				"application/octet-stream",
+				"application/gzip",
+				"application/zip", 
+				"application/x-tar",
+				"application/x-7z-compressed",
+				"application/x-bzip",
+				"application/x-bzip2",
+			];
+			if (typesToGrab.includes(contentType.toLowerCase())) {
 				dlItem.debug_reason =  "content type:" + contentType;
+				addToAllDlItems(dlItem);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	function handleAttachment(){
+		let contentDispHeader = app.Utils.getHeader(details.responseHeaders, "content-disposition");
+		if (typeof contentDispHeader !== 'undefined') {
+			let contentDisp = contentDispHeader.value;
+			if (contentDisp.toLowerCase().indexOf("attachment") != -1) {
+				dlItem.debug_reason =  "attachment";
 				addToAllDlItems(dlItem);
 			}
 			return true;
@@ -163,11 +190,45 @@ function doOnHeadersReceived(details) {
 		}
 	}	
 
+	/**
+	 * Adds a dlItem to our main list of downloads
+	 * @param {FixedHashMap} dlItem 
+	 */
 	function addToAllDlItems(dlItem){
 		//we do this here because we don't want to run hash on requests we will not use
 		dlItem.hash = md5(dlItem.url);
 		//we put hash of URL as key to prevent the same URL being added by different requests
 		app.allDlItems.put(dlItem.hash, dlItem);
+	}
+
+	/**
+	 * Tries to get the filename from either URL or from 
+	 * 'content-disposition' header if it's available
+	 * @param {string} url 
+	 * @param {array} responseHeaders 
+	 */
+	function getFileName(url, responseHeaders){
+
+		let contentDispHdr = app.Utils.getHeader(responseHeaders, 'content-disposition');
+		if(contentDispHdr){
+			let value = contentDispHdr.value;
+			if(value.toLowerCase().indexOf("filename") != -1){
+				const regex = /filename=["'](.*?)["']/i;
+				let filename = value.match(regex)[1];
+				if(filename){
+					return filename;
+				}
+			}
+		}
+		else{
+			const regex = /\/([^\/\n\?\=]*)(\?|$)/;
+			let filename = url.match(regex)[1];
+			if(filename){
+				return filename;
+			}
+		}
+
+		return "unknown_filename";
 	}
 
 }

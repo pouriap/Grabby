@@ -1,5 +1,4 @@
 //TODO: check all API levels and see exactly what is the minimum version
-//todo: test with a redirect download
 //todo: remove unused permissions
 //todo: store options in sync, what's wrong with me?
 //todo: save downloads list
