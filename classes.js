@@ -21,16 +21,27 @@ native application must be in accordance with our No Surprises policy.
 
 let excludedExtensions = [
 	//images
-	'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico',
+	'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff',
 	//fonts
 	'ttf', 'otf', 'eot', 'woff2', 'woff',
 	//static content
-	'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'xml', 'rss',
+	'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss', 'txt',
 	//dynamic pages
 	'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
 	//certificates
 	//'cer', 'cert', 'der', 'pem'
 ];
+
+let excludedMimes = [
+	//images
+	'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/vnd.microsoft.icon', 'image/bmp', 'image/webp', 'image/tiff',
+	//fonts
+	'font/ttf', 'font/otf', 'application/vnd.ms-fontobject', 'font/woff', 'font/woff2', 
+	//static content
+	'text/css', 'text/javascript', 'application/javascript', 'text/html', 'application/xhtml+xml', 'application/json', 'application/ld+json', 'application/xml', 'text/xml', 'text/plain',
+	//dynamic pages
+	'application/php', 
+]
 
 
 /**

@@ -89,7 +89,15 @@ function doOnHeadersReceived(details) {
 
 
 	//first we make sure the request is not among excluded things
-	if(handleFileExclusions()){
+	if(handleProtocolExclusions()){
+		return {};
+	}
+
+	if(handleContentTypeExclusions()){
+		return {};
+	}
+
+	if(handleExtensionExclusions()){
 		return {};
 	}
 
@@ -130,11 +138,27 @@ function doOnHeadersReceived(details) {
 	console.log("ignoring url: ", url);
 	return {};
 
-	function handleFileExclusions(){
+	function handleProtocolExclusions(){
 		//exclude all websocket requests
 		if (url.startsWith("ws://") || url.startsWith("wss://")) {
 			return true;
 		}
+	}
+
+	function handleContentTypeExclusions(){
+		let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
+		if (typeof contentTypeHeader !== 'undefined') {
+			let contentType = contentTypeHeader.value;
+			for(excludedType of excludedMimes){
+				if(contentType.toLowerCase().indexOf(excludedType) != -1){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	function handleExtensionExclusions(){
 		//we check if the file has an extension and if that extension is among excluded extensions
 		let extension = app.Utils.getExtensionFromURL(url);
 		if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
