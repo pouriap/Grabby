@@ -111,6 +111,7 @@ function dlWithIDM(){
 	Utils.downloadWithIDM(itemToDownload);
 }
 
+//todo: add -JLO to curl and equivalants to wget
 function copyCurlCommand(){
 
 	let cmd = `curl "${itemToDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;

@@ -65,12 +65,13 @@ function doOnBeforeSendHeaders(details){
  */
 function doOnHeadersReceived(details) {
 	
-	console.log("receiving: ", details.url);
+	console.log("receiving: ", details);
 
 	let requestId = details.requestId;
 	let url = details.url;
 	let requestOfThisResponse = app.allRequests.get(requestId);
 
+	
 	if(typeof requestOfThisResponse === 'undefined'){
 		return;
 	}
@@ -84,15 +85,29 @@ function doOnHeadersReceived(details) {
 	dlItem.time = requestOfThisResponse.time;
 	dlItem.headers = requestOfThisResponse.headers;
 	dlItem.filename = getFileName(url, details.responseHeaders);
+	dlItem.responseHeaders = details.responseHeaders;
+
 
 	//first we make sure the request is not among excluded things
 	if(handleFileExclusions()){
 		return {};
 	}
 
+	//handles should be sorted based on their certaintly
+	//for example if a file's size is big we definitely want to add it so size is first
+	//if it has an attachment we most certainly want to add it
+	//but if it's content-type doesn't match our list of included types it doesn't necessary
+	//mean we don't want it, so we put it later
+
 	// then we look at content-length
 	// if the file is big enough we consider it a download
+	//todo: vaghti limit ro kam bezarim hame chiz ro donwload mikone chon faghat be size nega mikone
 	if(handleContentLength()){
+		return {};
+	}
+
+	//see if there is a "Content-Disposition: attachment" header available
+	if(handleAttachment()){
 		return {};
 	}
 
@@ -101,11 +116,6 @@ function doOnHeadersReceived(details) {
 	//todo: vaghti mikhaim exclude nakonim va hameye faile ha ro download konim chi?
 	//todo: add all content types like you added all extensions
 	if(handleContentType()){
-		return {};
-	}
-
-	//see if there is a "Content-Disposition: attachment" header available
-	if(handleAttachment()){
 		return {};
 	}
 
@@ -156,13 +166,16 @@ function doOnHeadersReceived(details) {
 				"application/gzip",
 				"application/zip", 
 				"application/x-tar",
-				"application/x-7z-compressed",
+				"application/x-7z",
 				"application/x-bzip",
 				"application/x-bzip2",
 			];
-			if (typesToGrab.includes(contentType.toLowerCase())) {
-				dlItem.debug_reason =  "content type:" + contentType;
-				addToAllDlItems(dlItem);
+			for(type of typesToGrab){
+				if(contentType.toLowerCase().indexOf(type) != -1){
+					dlItem.debug_reason =  "content type:" + contentType;
+					addToAllDlItems(dlItem);
+					break;
+				}
 			}
 			return true;
 		}

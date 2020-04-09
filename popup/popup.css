@@ -2,6 +2,7 @@ body {
 	overflow-y: auto;
 	min-width: 280px;
 	font-size: 12px;
+	max-width: 400px;
 }
 
 ul, li{
@@ -96,7 +97,8 @@ ul, li{
 }
 
 #actions-list #action-back{
-	background: url('back.png') 5px 5px no-repeat;
+	background: url('back.png') 5px 7px no-repeat;
+	background-size: 12px;
 	width: 160px;
 	margin: 10px 0 40px;
 	text-align: right;
