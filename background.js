@@ -42,19 +42,15 @@ var app;
 function doOnBeforeSendHeaders(details){
 
 	let requestId = details.requestId;
-	let cookieHeader = app.Utils.getHeader(details.requestHeaders, "cookie");
-	let cookies = (cookieHeader === undefined)? "" : cookieHeader.value;
-	let refererHeader = app.Utils.getHeader(details.requestHeaders, "referer");
-	let referer = (refererHeader === undefined)? "" : refererHeader;
 	let origin = details.originUrl;
 	let time = details.timeStamp;
+	let headers = app.Utils.getHeaders(details.requestHeaders);
 
 	//create a dlItem object and put necessary information in it
 	let dlItem = {};
-	dlItem.cookies = cookies;
-	dlItem.referer = referer;
 	dlItem.origin = origin;
 	dlItem.time = time;
+	dlItem.headers = headers;
 
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
 	app.allRequests.put(requestId, dlItem);
@@ -85,60 +81,87 @@ function doOnHeadersReceived(details) {
 	let dlItem = {};
 	dlItem.requestId = requestId;
 	dlItem.url = url;
-	dlItem.cookies = requestOfThisResponse.cookies;
-	dlItem.referer = requestOfThisResponse.referer;
 	dlItem.origin = requestOfThisResponse.origin;
 	dlItem.time = requestOfThisResponse.time;
+	dlItem.headers = requestOfThisResponse.headers;
 
-	if (url.startsWith("ws://") || url.startsWith("wss://")) {
-		return {};
-	}
-
-
-	//first we check if the file has an extension and if that extension is among excluded extensions
-	let extension = app.Utils.getExtensionFromURL(url);
-	if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
+	//first we make sure the request is not among excluded things
+	if(handleExclusions()){
 		return {};
 	}
 
 	// then we look at content-length
 	// if the file is big enough we consider it a download
-	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
-	if (typeof contentLengthHeader !== 'undefined') {
-		var fileSizeMB = (contentLengthHeader.value / 1000000).toFixed(1);
-		if (fileSizeMB > app.options.grabFilesBiggerThan) {
-			dlItem.debug_reason = "content length: " + fileSizeMB + "MB";
-			dlItem.sizeMB = fileSizeMB  + "MB";
-			addToAllDlItems(dlItem);
-		}
+	if(handleContentLength()){
 		return {};
 	}
 
 	// if content-lenght is not specified we look at content-type
 	// if content-type is 'application/octet-stream' we consider it a download
 	//todo: vaghti mikhaim exclude nakonim va hameye faile ha ro download konim chi?
-	let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
-	if (typeof contentTypeHeader !== 'undefined') {
-		var contentType = contentTypeHeader.value;
-		if (contentType.toLowerCase() == "application/octet-stream") {
-			dlItem.debug_reason =  "content type:" + contentType;
-			addToAllDlItems(dlItem);
-		}
+	//todo: add all content types like you added all extensions
+	if(handleContentType()){
 		return {};
 	}
 
 	// if contnet lenght and type are unavailable we look at the file extension
 	// if the url contains a file extension we consider it a download
 	// if we're here it means this extension is not excluded
-	if (extension) {
-		dlItem.debug_reason =  "file extension: " + extension;
-		addToAllDlItems(dlItem);
+	if(handleExtension()){
 		return {};
 	}
 
 	// if the response doesn't math any of our criteria then it is not a download and we ignore it
 	console.log("ignoring url: ", url);
 	return {};
+
+	function handleExclusions(){
+		//exclude all websocket requests
+		if (url.startsWith("ws://") || url.startsWith("wss://")) {
+			return true;
+		}
+		//we check if the file has an extension and if that extension is among excluded extensions
+		let extension = app.Utils.getExtensionFromURL(url);
+		if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
+			return true;
+		}
+		return false;
+	}
+
+	function handleContentLength(){
+		let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
+		if (typeof contentLengthHeader !== 'undefined') {
+			var fileSizeMB = (contentLengthHeader.value / 1000000).toFixed(1);
+			if (fileSizeMB > app.options.grabFilesBiggerThan) {
+				dlItem.debug_reason = "content length: " + fileSizeMB + "MB";
+				dlItem.sizeMB = fileSizeMB  + "MB";
+				addToAllDlItems(dlItem);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	function handleContentType(){
+		let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
+		if (typeof contentTypeHeader !== 'undefined') {
+			var contentType = contentTypeHeader.value;
+			if (contentType.toLowerCase() == "application/octet-stream") {
+				dlItem.debug_reason =  "content type:" + contentType;
+				addToAllDlItems(dlItem);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	function handleExtension(){
+		if (extension) {
+			dlItem.debug_reason =  "file extension: " + extension;
+			addToAllDlItems(dlItem);
+			return {};
+		}
+	}	
 
 	function addToAllDlItems(dlItem){
 		//we do this here because we don't want to run hash on requests we will not use

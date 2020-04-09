@@ -3,11 +3,8 @@ var Utils = {};
 var itemToDownload = {};
 
 //TODO: FIREFOX DEV SAYS getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
-//todo: use messaging instead and get rid of this madness
 
-//TODO: add user agent and other things to curl/wget to make them look more real
 //todo: make icon svg
-//todo: do styles according to browser styles: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/user_interface/Browser_styles
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -24,11 +21,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
 	});
 
 	document.getElementById("action-curl").addEventListener("click", function(evt){
-		getCurlCommand();
+		copyCurlCommand();
 	});
 
 	document.getElementById("action-wget").addEventListener("click", function(evt){
-		getWgetCommand();
+		copyWgetCommand();
 	});
 
 	var getting = browser.runtime.getBackgroundPage();
@@ -115,14 +112,43 @@ function dlWithIDM(){
 	Utils.downloadWithIDM(itemToDownload);
 }
 
-function getCurlCommand(){
-	//todo: don't add cookie header if there's no cookie
-	let cmd = 'curl "' + itemToDownload.url + '" --header "Cookie: ' + itemToDownload.cookies + '"';
+function copyCurlCommand(){
+
+	let cmd = `curl "${itemToDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+
+	if(itemToDownload.headers['cookie']){
+		cmd = cmd + ` --header "Cookie: ${itemToDownload.headers['cookie']}"`;
+	}
+	if(itemToDownload.headers['referer']){
+		cmd = cmd + ` --header "Referer: ${itemToDownload.headers['referer']}"`;
+	}
+	if(itemToDownload.headers['accept']){
+		cmd = cmd + ` --header "Accept: ${itemToDownload.headers['accept']}"`;
+	}
+	if(itemToDownload.headers['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${itemToDownload.headers['accept-encoding']}"`;
+	}
+
 	copyToClipBoard(cmd);
 }
 
-function getWgetCommand(){
-	let cmd = 'wget "' + itemToDownload.url + '" --header "Cookie: ' + itemToDownload.cookies + '"';
+function copyWgetCommand(){
+
+	let cmd = `wget "${itemToDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+
+	if(itemToDownload.headers['cookie']){
+		cmd = cmd + ` --header "Cookie: ${itemToDownload.headers['cookie']}"`;
+	}
+	if(itemToDownload.headers['referer']){
+		cmd = cmd + ` --header "Referer: ${itemToDownload.headers['referer']}"`;
+	}
+	if(itemToDownload.headers['accept']){
+		cmd = cmd + ` --header "Accept: ${itemToDownload.headers['accept']}"`;
+	}
+	if(itemToDownload.headers['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${itemToDownload.headers['accept-encoding']}"`;
+	}
+
 	copyToClipBoard(cmd);
 }
 

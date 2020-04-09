@@ -20,7 +20,6 @@ native application must be in accordance with our No Surprises policy.
 */
 
 
-//todo: options
 let excludedExtensions = [
 	//images
 	'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico',
@@ -179,6 +178,22 @@ function Utils(){
 		return headersArray.find(header => header.name.toLowerCase() === headerName);
 	}
 
+	/**
+	 * @param {array} headers
+	 */
+	this.getHeaders = function(headers){
+
+		//convert the stupid array to an object (map)
+		let unStupidHeaders = {};
+		for(header of headers){
+			let name = header.name.toLowerCase();
+			let value = header.value;
+			unStupidHeaders[name] = value;
+		}
+
+		return unStupidHeaders;
+	}
+
 	this.getExtensionFromURL = function (url) {
 		const regex = /\.([\w]*)($|\?)/gm;
 		let match = regex.exec(url);
@@ -212,8 +227,8 @@ function Utils(){
 
 		let url = dlItem.url;
 		let userAgent = navigator.userAgent;
-		let cookies = dlItem.cookies;
-		let referer = dlItem.referer;
+		let cookies = dlItem.headers['cookie'];
+		let referer = dlItem.headers['referer'];
 
 		let urlCode = ",6=" + url.length + ":" + url;
 		let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
