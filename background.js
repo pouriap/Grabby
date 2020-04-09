@@ -164,14 +164,14 @@ function doOnCompleted(details){
  * Runs when a message is received from a script
  */
 function doOnMessage(message, sender, sendResponse) {
+
 	console.log('message received:' + JSON.stringify(message));
+
 	if(message.type === "options"){
-		app.options = message.options;
-		return Promise.resolve(app.options);
+		saveOptions(message.options);
+		return Promise.resolve();
 	}
-	else if(message.type === "get_app"){
-		return Promise.resolve(app);
-	}
+
 }
 
 
@@ -195,4 +195,13 @@ function loadOptions(){
 	});
 
 	return promise;
+}
+
+function saveOptions(options){
+	//set optoins
+	app.options = options;
+	//create a new download list based on options
+	app.allDlItems = new FixedSizeMap(options.dlListSize, app.allDlItems.list);
+
+	console.log('saved options: ', app.options);
 }

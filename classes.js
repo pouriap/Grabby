@@ -121,11 +121,11 @@ function DlAssistApp(options){
  * the new element is put in
  * Duplicate elements will rewrite the old ones
  */
-function FixedSizeMap(size) {
+function FixedSizeMap(size, listData) {
 
 	size = (Number(size));
 	this.limit = isNaN(size)? 100 : size;
-	this.list = {};
+	this.list = (listData)? trimListData(listData, size) : {};
 
 	this.getKeys = function(){
 		return Object.keys(this.list);
@@ -153,6 +153,19 @@ function FixedSizeMap(size) {
 
 	this.get = function(key){
 		return this.list[key];
+	}
+
+	function trimListData(listData, targetSize){
+		let keys = Object.keys(listData);
+		let size = keys.length;
+		if(targetSize < size){
+			let diff = size - targetSize;
+			for(i=0; i<diff; i++){
+				let k = keys[i];
+				delete listData[k];
+			}
+		}
+		return listData;
 	}
 
 }

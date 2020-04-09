@@ -36,8 +36,7 @@ function saveOptions(e) {
 		options: options
 	};
 
-	let sending = browser.runtime.sendMessage(message);
-	sending.then( (savedOptions)=> console.log("saved optons: ", JSON.stringify(savedOptions )) );
+	browser.runtime.sendMessage(message);
 
 }
 
