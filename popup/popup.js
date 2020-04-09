@@ -91,6 +91,8 @@ function showDownloadPage(dlItem){
 	document.getElementById("filename").innerHTML = Utils.getFilenameFromURL(dlItem.url);
 	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
 	document.getElementById("origin").innerHTML = dlItem.origin;
+	document.getElementById("size").innerHTML = dlItem.sizeMB || "unknown";
+	document.getElementById("url").innerHTML = dlItem.url;
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);

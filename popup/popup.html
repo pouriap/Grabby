@@ -13,15 +13,20 @@
 
 		<ul id="dls-list">
 			<li class="list-title">Recent Detected Downloads</li>
-			<li id="no-dl"></li>
+			<li id="no-dl" style="display:none;">No Downloads</li>
 		</ul>
 
 		<ul id="actions-list" class="hidden">
 			<li class="action" id="action-back">Back To Downloads List</li>
-			<li class="desc desc-name">File Name:</li>
 			<li class="desc" id="filename"></li>
-			<li class="desc desc-name">Last Accessed:</li>
-			<li class="desc" id="time"></li>
+			<li class="desc desc-name">
+				Size: <span class="desc" id="size"></span>
+			</li>
+			<li class="desc desc-name">
+				Last Accessed: <span class="desc" id="time"></span>
+			</li>
+			<li class="desc desc-name">URL:</li>
+			<li class="desc" id="url"></li>
 			<li class="desc desc-name">Origin Page:</li>
 			<li class="desc" id="origin"></li>
 			<li class="desc" id="output"></li>

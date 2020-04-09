@@ -38,13 +38,16 @@ ul, li{
 }
 
 #dls-list #no-dl{
-	margin: 15px 0 0 0;
-	color:#737373;
+	padding: 16px 0 0 0;
+	color:#b1b1b3;
+	width: 100%;
+	height: 50px;
+	background-color: #f9f9fa;
 }
 
-/* hide 'no downloads' item */
-#dls-list #no-dl:last-child:after{
-	content: "No Downloads";
+/* only show 'no downloads' if it's the last child */
+#dls-list #no-dl:last-child{
+	display: block !important;
 }
 
 .dl-item{
@@ -101,17 +104,18 @@ ul, li{
 }
 
 #actions-list .desc{
-	padding: 0 0 5px;
 	text-align: left;
 	word-break: break-all;
+	font-weight: normal;
 }
 
 #actions-list .desc-name{
-	padding: 0;
+	margin-top: 5px;
+	font-weight: bold;
 }
 
 #actions-list #filename{
-	font-weight: bold;
+	font-size: 16px;
 }
 
 #actions-list .spacer{

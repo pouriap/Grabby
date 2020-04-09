@@ -105,11 +105,10 @@ function doOnHeadersReceived(details) {
 	// if the file is big enough we consider it a download
 	let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
 	if (typeof contentLengthHeader !== 'undefined') {
-		var fileSizeMB = contentLengthHeader.value / 1000000;
+		var fileSizeMB = (contentLengthHeader.value / 1000000).toFixed(1);
 		if (fileSizeMB > app.options.grabFilesBiggerThan) {
-			dlItem.debug_reason = "content length: " + fileSizeMB.toFixed(1) + "MB";
-			//todo: show size in desc 
-			dlItem.sizeMB = fileSizeMB;
+			dlItem.debug_reason = "content length: " + fileSizeMB + "MB";
+			dlItem.sizeMB = fileSizeMB  + "MB";
 			addToAllDlItems(dlItem);
 		}
 		return {};

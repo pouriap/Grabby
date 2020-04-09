@@ -157,7 +157,6 @@ function FixedSizeMap(size) {
 
 }
 
-//todo: make this static (object)
 /**
  * A utility class of course!
  */
