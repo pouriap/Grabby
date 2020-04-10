@@ -155,3 +155,7 @@ ul, li{
 	background : transparent;
 	opacity: 0;
 }
+
+.debug_gray{
+	background-color: rgb(216, 216, 216);
+}

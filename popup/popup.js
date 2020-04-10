@@ -48,16 +48,12 @@ function onGot(page) {
 
 		let dlItem = allDlItems.get(key);
 
-		let url = dlItem.url;
-		let requestId = dlItem.requestId;
-		let debug_reason = dlItem.debug_reason;
-
 		let listItem = document.createElement("li");
-		listItem.setAttribute("id", "req_" + requestId);
-		listItem.setAttribute("class", "dl-item");
-		listItem.setAttribute("title", url);
+		listItem.setAttribute("id", "req_" + dlItem.requestId);
+		listItem.setAttribute("class", "dl-item " + dlItem.debug_gray);
+		listItem.setAttribute("title", dlItem.url);
 		listItem.setAttribute("data-hash", key);
-		listItem.innerHTML = dlItem.getFilename() + " (" + debug_reason + ")";
+		listItem.innerHTML = dlItem.getFilename() + " (" + dlItem.debug_reason + ")";
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");

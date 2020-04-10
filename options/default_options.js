@@ -47,7 +47,7 @@ var defaultOptions = {
 	],
 	mimeWhiteList : [
 		//other
-		'application/octet-stream',
+		'application/octet-stream', 'application/binray',
 		//compressed
 		'application/x-compressed', 'application/x-zip-compressed', 'application/zip', 
 		'application/x-gzip', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z',

@@ -122,7 +122,7 @@ class DlItem {
 
 			if(this.getContentDisposition() !== 'unknown'){
 				let disposition = this.getContentDisposition();
-				const regex = /filename=["'](.*?)["']/i;
+				const regex = /filename=["']?(.*?)["']?(\s|$)/i;
 				let matches = disposition.match(regex);
 				if(matches && matches[1]){
 					this.filename = matches[1];

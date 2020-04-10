@@ -114,10 +114,11 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
+	dlItem.debug_gray = 'debug_gray';
+	addToAllDlItems(dlItem);
+	
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
-
-	console.info("there's a gray item: ", dlItem);
 
 	/**
 	 * Adds a dlItem to our main list of downloads
