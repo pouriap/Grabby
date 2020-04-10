@@ -118,8 +118,8 @@ function dlWithIDM(){
 
 	let url = slctdDlItem.url;
 	let userAgent = navigator.userAgent;
-	let cookies = slctdDlItem.headers['cookie'];
-	let referer = slctdDlItem.headers['referer'];
+	let cookies = slctdDlItem.reqHeaders['cookie'];
+	let referer = slctdDlItem.reqHeaders['referer'];
 
 	let urlCode = ",6=" + url.length + ":" + url;
 	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
@@ -146,17 +146,17 @@ function copyCurlCommand(){
 
 	let cmd = `curl "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(slctdDlItem.headers['cookie']){
-		cmd = cmd + ` --header "Cookie: ${slctdDlItem.headers['cookie']}"`;
+	if(slctdDlItem.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${slctdDlItem.reqHeaders['cookie']}"`;
 	}
-	if(slctdDlItem.headers['referer']){
-		cmd = cmd + ` --header "Referer: ${slctdDlItem.headers['referer']}"`;
+	if(slctdDlItem.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${slctdDlItem.reqHeaders['referer']}"`;
 	}
-	if(slctdDlItem.headers['accept']){
-		cmd = cmd + ` --header "Accept: ${slctdDlItem.headers['accept']}"`;
+	if(slctdDlItem.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${slctdDlItem.reqHeaders['accept']}"`;
 	}
-	if(slctdDlItem.headers['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.headers['accept-encoding']}"`;
+	if(slctdDlItem.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -166,17 +166,17 @@ function copyWgetCommand(){
 
 	let cmd = `wget "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(slctdDlItem.headers['cookie']){
-		cmd = cmd + ` --header "Cookie: ${slctdDlItem.headers['cookie']}"`;
+	if(slctdDlItem.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${slctdDlItem.reqHeaders['cookie']}"`;
 	}
-	if(slctdDlItem.headers['referer']){
-		cmd = cmd + ` --header "Referer: ${slctdDlItem.headers['referer']}"`;
+	if(slctdDlItem.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${slctdDlItem.reqHeaders['referer']}"`;
 	}
-	if(slctdDlItem.headers['accept']){
-		cmd = cmd + ` --header "Accept: ${slctdDlItem.headers['accept']}"`;
+	if(slctdDlItem.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${slctdDlItem.reqHeaders['accept']}"`;
 	}
-	if(slctdDlItem.headers['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.headers['accept-encoding']}"`;
+	if(slctdDlItem.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);

@@ -47,13 +47,13 @@ function doOnBeforeSendHeaders(details){
 	let headers = Utils.getHeaders(details.requestHeaders);
 
 	//create a dlItem object and put necessary information in it
-	let dlItem = {};
-	dlItem.origin = origin;
-	dlItem.time = time;
-	dlItem.headers = headers;
+	let request = {};
+	request.origin = origin;
+	request.time = time;
+	request.headers = headers;
 
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
-	app.allRequests.put(requestId, dlItem);
+	app.allRequests.put(requestId, request);
 
 }
 
@@ -68,7 +68,6 @@ function doOnHeadersReceived(details) {
 	console.log("receiving: ", details);
 
 	let requestId = details.requestId;
-	let url = details.url;
 	let requestOfThisResponse = app.allRequests.get(requestId);
 
 	
@@ -78,14 +77,13 @@ function doOnHeadersReceived(details) {
 
 	//creating a new dlItem object because will delete the original from allRequests
 	//in doOnCompleted() after the request is completed
-	let dlItem = {};
-	dlItem.requestId = requestId;
-	dlItem.url = url;
-	dlItem.origin = requestOfThisResponse.origin;
-	dlItem.time = requestOfThisResponse.time;
-	dlItem.headers = requestOfThisResponse.headers;
-	dlItem.filename = getFileName(url, details.responseHeaders);
-	dlItem.responseHeaders = details.responseHeaders;
+	let url = details.url;
+	let origin = requestOfThisResponse.origin;
+	let time = requestOfThisResponse.time;
+	let filename = getFileName(url, details.responseHeaders);
+	let reqHeaders = requestOfThisResponse.headers;
+	let resHeaders = details.responseHeaders;
+	let dlItem = new DlItem(requestId, url, origin, time, filename, reqHeaders, resHeaders);
 
 
 	//first we make sure the request is not among excluded things

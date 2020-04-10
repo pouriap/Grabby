@@ -114,6 +114,31 @@ class DlAssistApp {
 }
 
 
+class DlItem {
+
+	/**
+	 * Creates a new DlIem
+	 * @param {int} requestId requestId in 'details'
+	 * @param {string} url url of resource
+	 * @param {string} origin page from which it was reqested
+	 * @param {int} time time of request
+	 * @param {string} filename name of the resource
+	 * @param {array} reqHeaders 
+	 * @param {array} resHeaders 
+	 */
+	constructor(requestId, url, origin, time, filename, reqHeaders, resHeaders){
+		this.requestId = requestId;
+		this.url = url;
+		this.origin = origin;
+		this.time = time;
+		this.filename = filename;
+		this.reqHeaders = reqHeaders;
+		this.resHeaders = resHeaders;
+	}
+
+}
+
+
 /**
  * A fixed sized map with key->value pairs
  * When size gets bigger than the limit first element is deleted and
