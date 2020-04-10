@@ -108,6 +108,7 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
+	//todo: should we put this before blacklists? because we always want to download "downloads"
 	if(filter.hasAttachment()){
 		dlItem.debug_reason = "attachment";
 		addToAllDlItems(dlItem);
@@ -154,6 +155,9 @@ function doOnMessage(message, sender, sendResponse) {
 	if(message.type === "options"){
 		saveOptions(message.options);
 		return Promise.resolve();
+	}
+	else if(message.type === "clear_list"){
+		app.allDlItems = new FixedSizeMap(app.options.dlListSize);
 	}
 
 }

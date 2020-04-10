@@ -6,7 +6,11 @@ var clickedDlItem = {};
 document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.getElementById("action-back").addEventListener("click", function(evt){
-		showMainList();
+		showDownloadsList();
+	});
+
+	document.getElementById("action-clearList").addEventListener("click", function(evt){
+		clearDownloadsList();
 	});
 	
 	document.getElementById("action-copy").addEventListener("click", function(evt){
@@ -59,7 +63,7 @@ function onGot(page) {
 			let hash = this.getAttribute("data-hash");
 			let dlItem = allDlItems.get(hash);
 			console.log('item clicked: ', dlItem);
-			showDownloadPage(dlItem);
+			showDownloadDetails(dlItem);
 		});
 
 		document.getElementById("dls-list").appendChild(listItem);
@@ -84,7 +88,7 @@ function onError(error) {
  * 
  * @param {DlItem} dlItem 
  */
-function showDownloadPage(dlItem){
+function showDownloadDetails(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
 	document.getElementById("filename").innerHTML = dlItem.getFilename();
@@ -98,11 +102,19 @@ function showDownloadPage(dlItem){
 	clickedDlItem = dlItem;
 }
 
-function showMainList(){
+function showDownloadsList(){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
 	hideElement(actionList);
 	showElement(dlList);
+}
+
+function clearDownloadsList(){
+	document.querySelectorAll(".dl-item").forEach((element)=>{
+        element.parentElement.removeChild(element);
+	});
+	let message = {type: 'clear_list'};
+	browser.runtime.sendMessage(message);
 }
 
 function copyLinkToClipboard(){

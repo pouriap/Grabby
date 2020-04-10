@@ -97,12 +97,20 @@ ul, li{
 }
 
 #actions-list #action-back{
-	background: url('back.png') 5px 7px no-repeat;
+	background: url('back.svg') 5px 7px no-repeat;
 	background-size: 12px;
 	width: 160px;
 	margin: 10px 0 40px;
 	text-align: right;
 	padding-right: 10px;
+}
+
+#dls-list #action-clearList{
+	width: 22px;
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	cursor: pointer;
 }
 
 #actions-list .desc{
