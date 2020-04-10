@@ -80,10 +80,10 @@ function doOnHeadersReceived(details) {
 	let url = details.url;
 	let origin = requestOfThisResponse.origin;
 	let time = requestOfThisResponse.time;
-	let filename = getFileName(url, details.responseHeaders);
 	let reqHeaders = requestOfThisResponse.headers;
 	let resHeaders = details.responseHeaders;
-	let dlItem = new DlItem(requestId, url, origin, time, filename, reqHeaders, resHeaders);
+
+	let dlItem = new DlItem(requestId, url, origin, time, reqHeaders, resHeaders);
 
 
 	//first we make sure the request is not among excluded things
@@ -227,43 +227,13 @@ function doOnHeadersReceived(details) {
 
 	/**
 	 * Adds a dlItem to our main list of downloads
-	 * @param {FixedHashMap} dlItem 
+	 * @param {DlItem} dlItem 
 	 */
 	function addToAllDlItems(dlItem){
 		//we do this here because we don't want to run hash on requests we will not use
 		dlItem.hash = md5(dlItem.url);
 		//we put hash of URL as key to prevent the same URL being added by different requests
 		app.allDlItems.put(dlItem.hash, dlItem);
-	}
-
-	/**
-	 * Tries to get the filename from either URL or from 
-	 * 'content-disposition' header if it's available
-	 * @param {string} url 
-	 * @param {array} responseHeaders 
-	 */
-	function getFileName(url, responseHeaders){
-
-		let contentDispHdr = Utils.getHeader(responseHeaders, 'content-disposition');
-		if(contentDispHdr){
-			let value = contentDispHdr.value;
-			if(value.toLowerCase().indexOf("filename") != -1){
-				const regex = /filename=["'](.*?)["']/i;
-				let filename = value.match(regex)[1];
-				if(filename){
-					return filename;
-				}
-			}
-		}
-		else{
-			const regex = /\/([^\/\n\?\=]*)(\?|$)/;
-			let filename = url.match(regex)[1];
-			if(filename){
-				return filename;
-			}
-		}
-
-		return "unknown_filename";
 	}
 
 }

@@ -122,20 +122,47 @@ class DlItem {
 	 * @param {string} url url of resource
 	 * @param {string} origin page from which it was reqested
 	 * @param {int} time time of request
-	 * @param {string} filename name of the resource
 	 * @param {array} reqHeaders 
 	 * @param {array} resHeaders 
 	 */
-	constructor(requestId, url, origin, time, filename, reqHeaders, resHeaders){
+	constructor(requestId, url, origin, time, reqHeaders, resHeaders){
 		this.requestId = requestId;
 		this.url = url;
 		this.origin = origin;
 		this.time = time;
-		this.filename = filename;
 		this.reqHeaders = reqHeaders;
 		this.resHeaders = resHeaders;
 	}
 
+	getFilename(){
+
+		if(!this.filename){
+
+			this.filename = "unknown_filename";
+
+			let contentDispHdr = Utils.getHeader(this.resHeaders, 'content-disposition');
+			if(contentDispHdr){
+				let value = contentDispHdr.value;
+				if(value.toLowerCase().indexOf("filename") != -1){
+					const regex = /filename=["'](.*?)["']/i;
+					let filename = value.match(regex)[1];
+					if(filename){
+						this.filename = filename;
+					}
+				}
+			}
+			else{
+				const regex = /\/([^\/\n\?\=]*)(\?|$)/;
+				let filename = this.url.match(regex)[1];
+				if(filename){
+					this.filename = filename;
+				}
+			}
+
+		}
+
+		return this.filename;
+	}
 }
 
 
@@ -232,15 +259,5 @@ class Utils {
 		}
 	}
 
-	static getFilenameFromURL(url) {
-		const regex = /\/([^\/\n\?\=]*)(\?|$)/gm;
-		let match = regex.exec(url);
-		if (match !== null) {
-			return match[1];
-		} 
-		else {
-			return "";
-		}
-	}
 
 }

@@ -53,7 +53,7 @@ function onGot(page) {
 		listItem.setAttribute("class", "dl-item");
 		listItem.setAttribute("title", url);
 		listItem.setAttribute("data-hash", key);
-		listItem.innerHTML = dlItem.filename + " (" + debug_reason + ")";
+		listItem.innerHTML = dlItem.getFilename() + " (" + debug_reason + ")";
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");
@@ -83,7 +83,7 @@ function onError(error) {
 function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
-	document.getElementById("filename").innerHTML = dlItem.filename;
+	document.getElementById("filename").innerHTML = dlItem.getFilename();
 	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
 	document.getElementById("origin").innerHTML = dlItem.origin;
 	document.getElementById("size").innerHTML = dlItem.sizeMB || "unknown";
