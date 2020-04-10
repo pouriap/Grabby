@@ -1,5 +1,5 @@
 var app;
-var slctdDlItem = {};
+var clickedDlItem = {};
 
 //TODO:  getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
@@ -80,18 +80,22 @@ function onError(error) {
 	console.log(`Error getting data from background: ${error}`);
 }
 
+/**
+ * 
+ * @param {DlItem} dlItem 
+ */
 function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
 	document.getElementById("filename").innerHTML = dlItem.getFilename();
 	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
 	document.getElementById("origin").innerHTML = dlItem.origin;
-	document.getElementById("size").innerHTML = dlItem.sizeMB || "unknown";
+	document.getElementById("size").innerHTML = dlItem.getSizeMB();
 	document.getElementById("url").innerHTML = dlItem.url;
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);
-	slctdDlItem = dlItem;
+	clickedDlItem = dlItem;
 }
 
 function showMainList(){
@@ -102,12 +106,12 @@ function showMainList(){
 }
 
 function copyLinkToClipboard(){
-	copyToClipBoard(slctdDlItem.url);
+	copyToClipBoard(clickedDlItem.url);
 }
 
 function dlWithIDM(){
 
-	console.log("dling with IDM: ", slctdDlItem);
+	console.log("dling with IDM: ", clickedDlItem);
 
 	if(!app.runtime.idmAvailable){
 		console.log("IDM is not available");
@@ -116,10 +120,10 @@ function dlWithIDM(){
 
 	let msgBase = "MSG#1#14#1#0:1";
 
-	let url = slctdDlItem.url;
+	let url = clickedDlItem.url;
 	let userAgent = navigator.userAgent;
-	let cookies = slctdDlItem.reqHeaders['cookie'];
-	let referer = slctdDlItem.reqHeaders['referer'];
+	let cookies = clickedDlItem.reqHeaders['cookie'];
+	let referer = clickedDlItem.reqHeaders['referer'];
 
 	let urlCode = ",6=" + url.length + ":" + url;
 	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
@@ -137,26 +141,26 @@ function dlWithIDM(){
 function downloadWithBrowser() {
 	browser.downloads.download({
 		saveAs: true,
-		url: slctdDlItem.url
+		url: clickedDlItem.url
 	});
 }
 
 //todo: add -JLO to curl and equivalants to wget
 function copyCurlCommand(){
 
-	let cmd = `curl "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(slctdDlItem.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${slctdDlItem.reqHeaders['cookie']}"`;
+	if(clickedDlItem.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${clickedDlItem.reqHeaders['cookie']}"`;
 	}
-	if(slctdDlItem.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${slctdDlItem.reqHeaders['referer']}"`;
+	if(clickedDlItem.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${clickedDlItem.reqHeaders['referer']}"`;
 	}
-	if(slctdDlItem.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${slctdDlItem.reqHeaders['accept']}"`;
+	if(clickedDlItem.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${clickedDlItem.reqHeaders['accept']}"`;
 	}
-	if(slctdDlItem.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.reqHeaders['accept-encoding']}"`;
+	if(clickedDlItem.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${clickedDlItem.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -164,19 +168,19 @@ function copyCurlCommand(){
 
 function copyWgetCommand(){
 
-	let cmd = `wget "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(slctdDlItem.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${slctdDlItem.reqHeaders['cookie']}"`;
+	if(clickedDlItem.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${clickedDlItem.reqHeaders['cookie']}"`;
 	}
-	if(slctdDlItem.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${slctdDlItem.reqHeaders['referer']}"`;
+	if(clickedDlItem.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${clickedDlItem.reqHeaders['referer']}"`;
 	}
-	if(slctdDlItem.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${slctdDlItem.reqHeaders['accept']}"`;
+	if(clickedDlItem.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${clickedDlItem.reqHeaders['accept']}"`;
 	}
-	if(slctdDlItem.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.reqHeaders['accept-encoding']}"`;
+	if(clickedDlItem.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${clickedDlItem.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);

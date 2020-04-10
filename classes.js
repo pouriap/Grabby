@@ -120,22 +120,20 @@ class DlItem {
 
 			this.filename = "unknown";
 
-			let contentDispHdr = Utils.getHeader(this.resHeaders, 'content-disposition');
-			if(contentDispHdr){
-				let value = contentDispHdr.value;
-				if(value.toLowerCase().indexOf("filename") != -1){
-					const regex = /filename=["'](.*?)["']/i;
-					let filename = value.match(regex)[1];
-					if(filename){
-						this.filename = filename;
-					}
+			if(this.getContentDisposition() !== 'unknown'){
+				let disposition = this.getContentDisposition();
+				const regex = /filename=["'](.*?)["']/i;
+				let matches = disposition.match(regex);
+				if(matches && matches[1]){
+					this.filename = matches[1];
 				}
+
 			}
 			else{
 				const regex = /\/([^\/\n\?\=]*)(\?|$)/;
-				let filename = this.url.match(regex)[1];
-				if(filename){
-					this.filename = filename;
+				let matches = this.url.match(regex);
+				if(matches && matches[1]){
+					this.filename = matches[1];
 				}
 			}
 
@@ -166,11 +164,11 @@ class DlItem {
 
 			this.fileExtension = "unknown";
 
-			const regex = /\.([\w]*)($|\?)/gm;
-			let match = regex.exec(this.url);
-			if (match !== null) {
-				this.fileExtension = match[1].toLowerCase();
-			} 
+			let filename = this.getFilename();
+			let chuncks = filename.split('.');
+			if(chuncks.length > 1){
+				this.fileExtension = chuncks[chuncks.length-1].toLowerCase();
+			}
 		}
 
 		return this.fileExtension;
@@ -189,6 +187,21 @@ class DlItem {
 		}
 
 		return this.contentType;
+	}
+
+	getContentDisposition(){
+
+		if(typeof this.contentDisp === "undefined"){
+
+			this.contentDisp = "unknown";
+
+			let contentDispHeader = Utils.getHeader(this.resHeaders, "content-disposition");
+			if (typeof contentDispHeader !== 'undefined') {
+				this.contentDisp = contentDispHeader.value.toLowerCase();
+			}
+		}
+
+		return this.contentDisp;
 	}
 
 
@@ -242,7 +255,7 @@ class ReqFilter {
 			for(let listMime of list){
 				//we search for the mim'es occurence in the content-type because sometimes 
 				//content-type has other things in it as well
-				if(mime.indexOf(listMime) != -1){
+				if(mime.indexOf(listMime) !== -1){
 					return true;
 				}
 			}
@@ -275,6 +288,9 @@ class ReqFilter {
 		return this._isInMimeList(app.options.mimeWhiteList);
 	}
 
+	hasAttachment(){
+		return this.dlItem.getContentDisposition().indexOf("attachment") !== -1;
+	}
 }
 
 

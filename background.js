@@ -108,6 +108,12 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
+	if(filter.hasAttachment()){
+		dlItem.debug_reason = "attachment";
+		addToAllDlItems(dlItem);
+		return;
+	}
+
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
 
