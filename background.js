@@ -44,7 +44,7 @@ function doOnBeforeSendHeaders(details){
 	let requestId = details.requestId;
 	let origin = details.originUrl;
 	let time = details.timeStamp;
-	let headers = app.Utils.getHeaders(details.requestHeaders);
+	let headers = Utils.getHeaders(details.requestHeaders);
 
 	//create a dlItem object and put necessary information in it
 	let dlItem = {};
@@ -146,10 +146,10 @@ function doOnHeadersReceived(details) {
 	}
 
 	function handleContentTypeExclusions(){
-		let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
+		let contentTypeHeader = Utils.getHeader(details.responseHeaders, "content-type");
 		if (typeof contentTypeHeader !== 'undefined') {
 			let contentType = contentTypeHeader.value;
-			for(excludedType of excludedMimes){
+			for(let excludedType of excludedMimes){
 				if(contentType.toLowerCase().indexOf(excludedType) != -1){
 					return true;
 				}
@@ -160,7 +160,7 @@ function doOnHeadersReceived(details) {
 
 	function handleExtensionExclusions(){
 		//we check if the file has an extension and if that extension is among excluded extensions
-		let extension = app.Utils.getExtensionFromURL(url);
+		let extension = Utils.getExtensionFromURL(url);
 		if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
 			return true;
 		}
@@ -168,7 +168,7 @@ function doOnHeadersReceived(details) {
 	}
 
 	function handleContentLength(){
-		let contentLengthHeader = app.Utils.getHeader(details.responseHeaders, "content-length");
+		let contentLengthHeader = Utils.getHeader(details.responseHeaders, "content-length");
 		if (typeof contentLengthHeader !== 'undefined') {
 			let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
 			if (fileSizeMB > app.options.grabFilesBiggerThan) {
@@ -182,7 +182,7 @@ function doOnHeadersReceived(details) {
 	}
 
 	function handleContentType(){
-		let contentTypeHeader = app.Utils.getHeader(details.responseHeaders, "content-type");
+		let contentTypeHeader = Utils.getHeader(details.responseHeaders, "content-type");
 		if (typeof contentTypeHeader !== 'undefined') {
 			let contentType = contentTypeHeader.value;
 			let typesToGrab = [
@@ -194,7 +194,7 @@ function doOnHeadersReceived(details) {
 				"application/x-bzip",
 				"application/x-bzip2",
 			];
-			for(type of typesToGrab){
+			for(let type of typesToGrab){
 				if(contentType.toLowerCase().indexOf(type) != -1){
 					dlItem.debug_reason =  "content type:" + contentType;
 					addToAllDlItems(dlItem);
@@ -207,7 +207,7 @@ function doOnHeadersReceived(details) {
 	}
 
 	function handleAttachment(){
-		let contentDispHeader = app.Utils.getHeader(details.responseHeaders, "content-disposition");
+		let contentDispHeader = Utils.getHeader(details.responseHeaders, "content-disposition");
 		if (typeof contentDispHeader !== 'undefined') {
 			let contentDisp = contentDispHeader.value;
 			if (contentDisp.toLowerCase().indexOf("attachment") != -1) {
@@ -246,7 +246,7 @@ function doOnHeadersReceived(details) {
 	 */
 	function getFileName(url, responseHeaders){
 
-		let contentDispHdr = app.Utils.getHeader(responseHeaders, 'content-disposition');
+		let contentDispHdr = Utils.getHeader(responseHeaders, 'content-disposition');
 		if(contentDispHdr){
 			let value = contentDispHdr.value;
 			if(value.toLowerCase().indexOf("filename") != -1){

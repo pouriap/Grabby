@@ -1,6 +1,5 @@
-var allDlItems = {};
-var Utils = {};
-var itemToDownload = {};
+var app;
+var slctdDlItem = {};
 
 //TODO:  getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
@@ -33,8 +32,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 function onGot(page) { 
 
-	allDlItems = page.app.allDlItems;
-	Utils = page.app.Utils;
+	app = page.app;
+	let allDlItems = app.allDlItems;
 
 	//populate list of downloads
 	let keys = allDlItems.getKeys();
@@ -92,7 +91,7 @@ function showDownloadPage(dlItem){
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);
-	itemToDownload = dlItem;
+	slctdDlItem = dlItem;
 }
 
 function showMainList(){
@@ -103,30 +102,61 @@ function showMainList(){
 }
 
 function copyLinkToClipboard(){
-	copyToClipBoard(itemToDownload.url);
+	copyToClipBoard(slctdDlItem.url);
 }
 
 function dlWithIDM(){
-	console.log("dling with IDM: ", itemToDownload);
-	Utils.downloadWithIDM(itemToDownload);
+
+	console.log("dling with IDM: ", slctdDlItem);
+
+	if(!app.runtime.idmAvailable){
+		console.log("IDM is not available");
+		return;
+	}
+
+	let msgBase = "MSG#1#14#1#0:1";
+
+	let url = slctdDlItem.url;
+	let userAgent = navigator.userAgent;
+	let cookies = slctdDlItem.headers['cookie'];
+	let referer = slctdDlItem.headers['referer'];
+
+	let urlCode = ",6=" + url.length + ":" + url;
+	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
+	let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
+	let refererCode = (referer)? (",50=" + referer.length + ":" + referer) : "";
+
+	let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode + ";";
+
+	let port = browser.runtime.connectNative("com.tonec.idm");
+	port.postMessage(IDMMessage);
+	port.disconnect();
+
+}
+
+function downloadWithBrowser() {
+	browser.downloads.download({
+		saveAs: true,
+		url: slctdDlItem.url
+	});
 }
 
 //todo: add -JLO to curl and equivalants to wget
 function copyCurlCommand(){
 
-	let cmd = `curl "${itemToDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(itemToDownload.headers['cookie']){
-		cmd = cmd + ` --header "Cookie: ${itemToDownload.headers['cookie']}"`;
+	if(slctdDlItem.headers['cookie']){
+		cmd = cmd + ` --header "Cookie: ${slctdDlItem.headers['cookie']}"`;
 	}
-	if(itemToDownload.headers['referer']){
-		cmd = cmd + ` --header "Referer: ${itemToDownload.headers['referer']}"`;
+	if(slctdDlItem.headers['referer']){
+		cmd = cmd + ` --header "Referer: ${slctdDlItem.headers['referer']}"`;
 	}
-	if(itemToDownload.headers['accept']){
-		cmd = cmd + ` --header "Accept: ${itemToDownload.headers['accept']}"`;
+	if(slctdDlItem.headers['accept']){
+		cmd = cmd + ` --header "Accept: ${slctdDlItem.headers['accept']}"`;
 	}
-	if(itemToDownload.headers['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${itemToDownload.headers['accept-encoding']}"`;
+	if(slctdDlItem.headers['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.headers['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -134,19 +164,19 @@ function copyCurlCommand(){
 
 function copyWgetCommand(){
 
-	let cmd = `wget "${itemToDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${slctdDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(itemToDownload.headers['cookie']){
-		cmd = cmd + ` --header "Cookie: ${itemToDownload.headers['cookie']}"`;
+	if(slctdDlItem.headers['cookie']){
+		cmd = cmd + ` --header "Cookie: ${slctdDlItem.headers['cookie']}"`;
 	}
-	if(itemToDownload.headers['referer']){
-		cmd = cmd + ` --header "Referer: ${itemToDownload.headers['referer']}"`;
+	if(slctdDlItem.headers['referer']){
+		cmd = cmd + ` --header "Referer: ${slctdDlItem.headers['referer']}"`;
 	}
-	if(itemToDownload.headers['accept']){
-		cmd = cmd + ` --header "Accept: ${itemToDownload.headers['accept']}"`;
+	if(slctdDlItem.headers['accept']){
+		cmd = cmd + ` --header "Accept: ${slctdDlItem.headers['accept']}"`;
 	}
-	if(itemToDownload.headers['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${itemToDownload.headers['accept-encoding']}"`;
+	if(slctdDlItem.headers['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${slctdDlItem.headers['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);
