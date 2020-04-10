@@ -1,3 +1,5 @@
+'use strict';
+
 // a super duper global variable
 var app;
 
@@ -69,7 +71,6 @@ function doOnHeadersReceived(details) {
 
 	let requestId = details.requestId;
 	let requestOfThisResponse = app.allRequests.get(requestId);
-
 	
 	if(typeof requestOfThisResponse === 'undefined'){
 		return;
@@ -84,146 +85,33 @@ function doOnHeadersReceived(details) {
 	let resHeaders = details.responseHeaders;
 
 	let dlItem = new DlItem(requestId, url, origin, time, reqHeaders, resHeaders);
+	let filter = new ReqFilter(dlItem);
 
-
-	//first we make sure the request is not among excluded things
-	if(handleProtocolExclusions()){
-		return {};
+	if(
+		filter.isProtocoLBlackListed() ||
+		filter.isSizeBlackListed() ||
+		filter.isExtensionBlackListed() ||
+		filter.isMimeBlackListed()
+	){
+		return;
 	}
 
-	if(handleContentTypeExclusions()){
-		return {};
+	if(filter.isExtensionWhiteListed()){
+		dlItem.debug_reason = "extension: " + dlItem.getFileExtension();
+		addToAllDlItems(dlItem);
+		return;
 	}
 
-	if(handleExtensionExclusions()){
-		return {};
+	if(filter.isMimeWhiteListed()){
+		dlItem.debug_reason = "mime: " + dlItem.getContentType();
+		addToAllDlItems(dlItem);
+		return;
 	}
 
-	//handles should be sorted based on their certaintly
-	//for example if a file's size is big we definitely want to add it so size is first
-	//if it has an attachment we most certainly want to add it
-	//but if it's content-type doesn't match our list of included types it doesn't necessary
-	//mean we don't want it, so we put it later
+	//now we're left with gray items
+	//wtf do we do with gray items? :|
 
-	// then we look at content-length
-	// if the file is big enough we consider it a download
-	//todo: vaghti limit ro kam bezarim hame chiz ro donwload mikone chon faghat be size nega mikone
-	if(handleContentLength()){
-		return {};
-	}
-
-	//see if there is a "Content-Disposition: attachment" header available
-	if(handleAttachment()){
-		return {};
-	}
-
-	// if content-lenght is not specified we look at content-type
-	// if content-type is 'application/octet-stream' we consider it a download
-	//todo: vaghti mikhaim exclude nakonim va hameye faile ha ro download konim chi?
-	//todo: add all content types like you added all extensions
-	if(handleContentType()){
-		return {};
-	}
-
-	// if contnet lenght and type are unavailable we look at the file extension
-	// if the url contains a file extension we consider it a download
-	// if we're here it means this extension is not excluded
-	if(handleExtension()){
-		return {};
-	}
-
-	// if the response doesn't math any of our criteria then it is not a download and we ignore it
-	console.log("ignoring url: ", url);
-	return {};
-
-	function handleProtocolExclusions(){
-		//exclude all websocket requests
-		if (url.startsWith("ws://") || url.startsWith("wss://")) {
-			return true;
-		}
-	}
-
-	function handleContentTypeExclusions(){
-		let contentTypeHeader = Utils.getHeader(details.responseHeaders, "content-type");
-		if (typeof contentTypeHeader !== 'undefined') {
-			let contentType = contentTypeHeader.value;
-			for(let excludedType of excludedMimes){
-				if(contentType.toLowerCase().indexOf(excludedType) != -1){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	function handleExtensionExclusions(){
-		//we check if the file has an extension and if that extension is among excluded extensions
-		let extension = Utils.getExtensionFromURL(url);
-		if (extension && app.options.excludeWebFiles && excludedExtensions.includes(extension)) {
-			return true;
-		}
-		return false;
-	}
-
-	function handleContentLength(){
-		let contentLengthHeader = Utils.getHeader(details.responseHeaders, "content-length");
-		if (typeof contentLengthHeader !== 'undefined') {
-			let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
-			if (fileSizeMB > app.options.grabFilesBiggerThan) {
-				dlItem.debug_reason = "content length: " + fileSizeMB + "MB";
-				dlItem.sizeMB = fileSizeMB  + "MB";
-				addToAllDlItems(dlItem);
-			}
-			return true;
-		}
-		return false;
-	}
-
-	function handleContentType(){
-		let contentTypeHeader = Utils.getHeader(details.responseHeaders, "content-type");
-		if (typeof contentTypeHeader !== 'undefined') {
-			let contentType = contentTypeHeader.value;
-			let typesToGrab = [
-				"application/octet-stream",
-				"application/gzip",
-				"application/zip", 
-				"application/x-tar",
-				"application/x-7z",
-				"application/x-bzip",
-				"application/x-bzip2",
-			];
-			for(let type of typesToGrab){
-				if(contentType.toLowerCase().indexOf(type) != -1){
-					dlItem.debug_reason =  "content type:" + contentType;
-					addToAllDlItems(dlItem);
-					break;
-				}
-			}
-			return true;
-		}
-		return false;
-	}
-
-	function handleAttachment(){
-		let contentDispHeader = Utils.getHeader(details.responseHeaders, "content-disposition");
-		if (typeof contentDispHeader !== 'undefined') {
-			let contentDisp = contentDispHeader.value;
-			if (contentDisp.toLowerCase().indexOf("attachment") != -1) {
-				dlItem.debug_reason =  "attachment";
-				addToAllDlItems(dlItem);
-			}
-			return true;
-		}
-		return false;
-	}
-
-	function handleExtension(){
-		if (extension) {
-			dlItem.debug_reason =  "file extension: " + extension;
-			addToAllDlItems(dlItem);
-			return {};
-		}
-	}	
+	console.info("there's a gray item: ", dlItem);
 
 	/**
 	 * Adds a dlItem to our main list of downloads

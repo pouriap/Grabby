@@ -1,3 +1,5 @@
+'use strict';
+
 //TODO: check all API levels and see exactly what is the minimum version
 //todo: remove unused permissions
 //todo: store options in sync, what's wrong with me?
@@ -19,29 +21,7 @@ native application must be in accordance with our No Surprises policy.
 */
 
 
-let excludedExtensions = [
-	//images
-	'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff',
-	//fonts
-	'ttf', 'otf', 'eot', 'woff2', 'woff',
-	//static content
-	'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss', 'txt',
-	//dynamic pages
-	'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
-	//certificates
-	//'cer', 'cert', 'der', 'pem'
-];
 
-let excludedMimes = [
-	//images
-	'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/vnd.microsoft.icon', 'image/bmp', 'image/webp', 'image/tiff',
-	//fonts
-	'font/ttf', 'font/otf', 'application/vnd.ms-fontobject', 'font/woff', 'font/woff2', 
-	//static content
-	'text/css', 'text/javascript', 'application/javascript', 'text/html', 'application/xhtml+xml', 'application/json', 'application/ld+json', 'application/xml', 'text/xml', 'text/plain',
-	//dynamic pages
-	'application/php', 
-]
 
 
 /**
@@ -136,9 +116,9 @@ class DlItem {
 
 	getFilename(){
 
-		if(!this.filename){
+		if(typeof this.filename === "undefined"){
 
-			this.filename = "unknown_filename";
+			this.filename = "unknown";
 
 			let contentDispHdr = Utils.getHeader(this.resHeaders, 'content-disposition');
 			if(contentDispHdr){
@@ -163,6 +143,138 @@ class DlItem {
 
 		return this.filename;
 	}
+
+	getSizeMB(){
+
+		if(typeof this.sizeMB === "undefined"){
+
+			this.sizeMB = "unknown";
+
+			let contentLengthHeader = Utils.getHeader(this.resHeaders, "content-length");
+			if (typeof contentLengthHeader !== 'undefined') {
+				let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
+				this.sizeMB = fileSizeMB;
+			}
+		}
+
+		return this.sizeMB;
+	}
+
+	getFileExtension(){
+
+		if(typeof this.fileExtension === "undefined"){
+
+			this.fileExtension = "unknown";
+
+			const regex = /\.([\w]*)($|\?)/gm;
+			let match = regex.exec(this.url);
+			if (match !== null) {
+				this.fileExtension = match[1].toLowerCase();
+			} 
+		}
+
+		return this.fileExtension;
+	}
+
+	getContentType(){
+
+		if(typeof this.contentType === "undefined"){
+
+			this.contentType = "unknown";
+
+			let contentTypeHeader = Utils.getHeader(this.resHeaders, "content-type");
+			if (typeof contentTypeHeader !== 'undefined') {
+				this.contentType = contentTypeHeader.value.toLowerCase();
+			}
+		}
+
+		return this.contentType;
+	}
+
+
+}
+
+
+class ReqFilter {
+
+	/**
+	 * 
+	 * @param {DlItem} dlItem 
+	 */
+	constructor(dlItem){
+		this.dlItem = dlItem;
+	}
+
+	/**
+	 * 
+	 * @param {array} list 
+	 */
+	_isInProtocolList(list){
+		for(let protocol of list){
+			if(this.dlItem.url.startsWith(protocol)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param {array} list 
+	 */
+	_isInExtensionList(list){
+		let extension = this.dlItem.getFileExtension();
+		if (extension !== "unknown" 
+			&& app.options.excludeWebFiles 
+			&& list.includes(extension)) {
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param {array} list 
+	 */
+	_isInMimeList(list){
+		let mime = this.dlItem.getContentType();
+		if (mime !== "unknown" && app.options.excludeWebFiles){
+			for(let listMime of list){
+				//we search for the mim'es occurence in the content-type because sometimes 
+				//content-type has other things in it as well
+				if(mime.indexOf(listMime) != -1){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	isProtocoLBlackListed(){
+		return this._isInProtocolList(app.options.protocolBlackList);
+	}
+
+	isSizeBlackListed(){
+		let size = this.dlItem.getSizeMB();
+		return size !== 'unknown' && size < app.options.grabFilesLargerThanMB;
+	}
+
+	isExtensionBlackListed(){
+		return this._isInExtensionList(app.options.extensionBlackList);
+	}
+
+	isMimeBlackListed(){
+		return this._isInMimeList(app.options.mimeBlackList);
+	}
+
+	isExtensionWhiteListed(){
+		return this._isInExtensionList(app.options.extensionWhiteList);
+	}
+
+	isMimeWhiteListed(){
+		return this._isInMimeList(app.options.mimeWhiteList);
+	}
+
 }
 
 
@@ -227,7 +339,7 @@ class FixedSizeMap {
  * A utility class of course!
  */
 class Utils {
-
+//todo: move these into dlItem as well
 	static getHeader(headersArray, headerName){
 		return headersArray.find(header => header.name.toLowerCase() === headerName);
 	}
@@ -247,17 +359,5 @@ class Utils {
 
 		return unStupidHeaders;
 	}
-
-	static getExtensionFromURL(url) {
-		const regex = /\.([\w]*)($|\?)/gm;
-		let match = regex.exec(url);
-		if (match !== null) {
-			return match[1];
-		} 
-		else {
-			return "";
-		}
-	}
-
 
 }
