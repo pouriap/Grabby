@@ -6,6 +6,7 @@ var defaultOptions = {
 	dlListSize: 20,
 	grabFilesLargerThanMB: 0,
 	excludeWebFiles : true,
+	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 	protocolBlackList : ["ws://", "wss://"],
 	extensionBlackList : [
 		//images

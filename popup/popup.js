@@ -13,8 +13,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		copyLinkToClipboard();
 	});
 
+	document.getElementById("action-firefox").addEventListener("click", function(evt){
+		downloadWithFirefox();
+	});
+
 	document.getElementById("action-idm").addEventListener("click", function(evt){
-		dlWithIDM();
+		downloadWithIDM();
 	});
 
 	document.getElementById("action-curl").addEventListener("click", function(evt){
@@ -88,7 +92,7 @@ function showDownloadPage(dlItem){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
 	document.getElementById("filename").innerHTML = dlItem.getFilename();
-	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US");
+	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US", app.options.dateForamt);
 	document.getElementById("origin").innerHTML = dlItem.origin;
 	document.getElementById("size").innerHTML = dlItem.getSizeMB();
 	document.getElementById("url").innerHTML = dlItem.url;
@@ -109,7 +113,7 @@ function copyLinkToClipboard(){
 	copyToClipBoard(clickedDlItem.url);
 }
 
-function dlWithIDM(){
+function downloadWithIDM(){
 
 	console.log("dling with IDM: ", clickedDlItem);
 
@@ -138,7 +142,7 @@ function dlWithIDM(){
 
 }
 
-function downloadWithBrowser() {
+function downloadWithFirefox() {
 	browser.downloads.download({
 		saveAs: true,
 		url: clickedDlItem.url
