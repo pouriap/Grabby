@@ -91,6 +91,17 @@ class DlAssistApp {
 
 	};
 
+	/**
+	 * Adds a dlItem to our main list of downloads
+	 * @param {DlItem} dlItem 
+	 */
+	addToAllDlItems(dlItem){
+		//we do this here because we don't want to run hash on requests we will not use
+		let hash = md5(dlItem.url);
+		//we put hash of URL as key to prevent the same URL being added by different requests
+		this.allDlItems.put(hash, dlItem);
+	}
+
 }
 
 

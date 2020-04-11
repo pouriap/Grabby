@@ -85,16 +85,9 @@ function doOnHeadersReceived(details) {
 
 	let filter = new ReqFilter(dlItem);
 
-	//always download responses with an "attachment" header
-	//even if they are black listed
-	if(filter.hasAttachment()){
-		dlItem.debug_reason = "attachment";
-		addToAllDlItems(dlItem);
-		return;
-	}
+	//the lists should be sorted from the least computationally intensive to the most
 
 	//blacklists
-	//these should be sorted from the least computationally intensive to the most
 	if(
 		filter.isTypeBlackListed() ||
 		filter.isProtocoLBlackListed() ||
@@ -106,34 +99,29 @@ function doOnHeadersReceived(details) {
 	}
 
 	//whitelists
+	if(filter.hasAttachment()){
+		dlItem.debug_reason = "attachment";
+		app.addToAllDlItems(dlItem);
+		return;
+	}
+
 	if(filter.isExtensionWhiteListed()){
 		dlItem.debug_reason = "extension: " + dlItem.getFileExtension();
-		addToAllDlItems(dlItem);
+		app.addToAllDlItems(dlItem);
 		return;
 	}
 
 	if(filter.isMimeWhiteListed()){
 		dlItem.debug_reason = "mime: " + dlItem.getContentType();
-		addToAllDlItems(dlItem);
+		app.addToAllDlItems(dlItem);
 		return;
 	}
 
 	dlItem.debug_gray = 'debug_gray';
-	addToAllDlItems(dlItem);
+	app.addToAllDlItems(dlItem);
 	
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
-
-	/**
-	 * Adds a dlItem to our main list of downloads
-	 * @param {DlItem} dlItem 
-	 */
-	function addToAllDlItems(dlItem){
-		//we do this here because we don't want to run hash on requests we will not use
-		dlItem.hash = md5(dlItem.url);
-		//we put hash of URL as key to prevent the same URL being added by different requests
-		app.allDlItems.put(dlItem.hash, dlItem);
-	}
 
 }
 
