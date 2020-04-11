@@ -53,6 +53,7 @@ function doOnBeforeSendHeaders(details){
 	request.origin = origin;
 	request.time = time;
 	request.headers = headers;
+	request.details = details;
 
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
 	app.allRequests.put(requestId, request);
@@ -85,6 +86,10 @@ function doOnHeadersReceived(details) {
 	let resHeaders = details.responseHeaders;
 
 	let dlItem = new DlItem(requestId, url, origin, time, reqHeaders, resHeaders);
+
+	dlItem.res_details = details;
+	dlItem.req_details = requestOfThisResponse.details;
+
 	let filter = new ReqFilter(dlItem);
 
 	if(

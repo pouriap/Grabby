@@ -119,6 +119,10 @@ ul, li{
 	font-weight: normal;
 }
 
+#actions-list .desc#size:after{
+	content: "MB";
+}
+
 #actions-list .desc-name{
 	margin-top: 5px;
 	font-weight: bold;

@@ -157,10 +157,9 @@ function downloadWithFirefox() {
 	});
 }
 
-//todo: add -JLO to curl and equivalants to wget
 function copyCurlCommand(){
 
-	let cmd = `curl "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl -JLO "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	if(clickedDlItem.reqHeaders['cookie']){
 		cmd = cmd + ` --header "Cookie: ${clickedDlItem.reqHeaders['cookie']}"`;
@@ -235,10 +234,6 @@ function copyToClipBoard(content){
 			hiddenText.style.width = '1px';
 			hiddenText.style.height = '1px';
 			hiddenText.style.padding = 0;
-			// fake.style.border = 'none';
-			// fake.style.outline = 'none';
-			// fake.style.boxShadow = 'none';
-			// fake.style.background = 'transparent';
 
 			document.querySelector("body").appendChild(hiddenText);
 			hiddenText.value = content;
