@@ -98,22 +98,41 @@ class DlItem {
 
 	/**
 	 * Creates a new DlIem
-	 * @param {int} requestId requestId in 'details'
-	 * @param {string} url url of resource
+	 * @param {object} details the 'details' object attached to a request
 	 * @param {string} origin page from which it was reqested
-	 * @param {int} time time of request
 	 * @param {array} reqHeaders 
 	 * @param {array} resHeaders 
 	 */
-	constructor(requestId, url, origin, time, reqHeaders, resHeaders){
-		this.requestId = requestId;
-		this.url = url;
+	constructor(details, origin, reqHeaders, resHeaders){
+		this.requestId = details.requestId;
+		this.url = details.url;
+		this.time = details.timeStamp;
+		this.resourceType = details.type;
 		this.origin = origin;
-		this.time = time;
 		this.reqHeaders = reqHeaders;
 		this.resHeaders = resHeaders;
 	}
 
+	/**
+	 * 	
+	 * @param {string} headerName 
+	 */
+	getRequestHeader(headerName){
+		return this.reqHeaders.find(header => header.name.toLowerCase() === headerName);
+	}
+
+	/**
+	 * 
+	 * @param {string} headerName 
+	 */
+	getResponseHeader(headerName){
+		return this.resHeaders.find(header => header.name.toLowerCase() === headerName);
+	}
+
+	/**
+	 * get file name (if available) of the resouce requested
+	 * @returns file name or "unknown" if now available
+	 */
 	getFilename(){
 
 		if(typeof this.filename === "undefined"){
@@ -142,13 +161,17 @@ class DlItem {
 		return this.filename;
 	}
 
+	/**
+	 * get content-length (if available) of the resource requested
+	 * @returns size in MB or "unknown" if not available
+	 */
 	getSizeMB(){
 
 		if(typeof this.sizeMB === "undefined"){
 
 			this.sizeMB = "unknown";
 
-			let contentLengthHeader = Utils.getHeader(this.resHeaders, "content-length");
+			let contentLengthHeader = this.getResponseHeader("content-length");
 			if (typeof contentLengthHeader !== 'undefined') {
 				let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
 				this.sizeMB = fileSizeMB;
@@ -158,6 +181,10 @@ class DlItem {
 		return this.sizeMB;
 	}
 
+	/**
+	 * gets the extension of the resource requested (if available)
+	 * @returns the extension in lower case or "unknown" if no extension if available
+	 */
 	getFileExtension(){
 
 		if(typeof this.fileExtension === "undefined"){
@@ -174,13 +201,17 @@ class DlItem {
 		return this.fileExtension;
 	}
 
+	/**
+	 * get the content-type (if available) of the resource requested
+	 * @returns the type in lower case or "unknown" if not available
+	 */
 	getContentType(){
 
 		if(typeof this.contentType === "undefined"){
 
 			this.contentType = "unknown";
 
-			let contentTypeHeader = Utils.getHeader(this.resHeaders, "content-type");
+			let contentTypeHeader = this.getResponseHeader("content-type");
 			if (typeof contentTypeHeader !== 'undefined') {
 				this.contentType = contentTypeHeader.value.toLowerCase();
 			}
@@ -189,13 +220,17 @@ class DlItem {
 		return this.contentType;
 	}
 
+	/**
+	 * get the value of the content-disposition header (if available)
+	 * @returns the value in lower case or "unknown" if not available
+	 */
 	getContentDisposition(){
 
 		if(typeof this.contentDisp === "undefined"){
 
 			this.contentDisp = "unknown";
 
-			let contentDispHeader = Utils.getHeader(this.resHeaders, "content-disposition");
+			let contentDispHeader = this.getResponseHeader("content-disposition");
 			if (typeof contentDispHeader !== 'undefined') {
 				this.contentDisp = contentDispHeader.value.toLowerCase();
 			}
@@ -203,7 +238,6 @@ class DlItem {
 
 		return this.contentDisp;
 	}
-
 
 }
 
@@ -217,6 +251,8 @@ class ReqFilter {
 	constructor(dlItem){
 		this.dlItem = dlItem;
 	}
+
+	/* private funcitons */
 
 	/**
 	 * 
@@ -263,6 +299,17 @@ class ReqFilter {
 		return false;
 	}
 
+	/**
+	 * 
+	 * @param {array} list list of webRequest.ResourceTypes 
+	 */
+	_isInTypeList(list){
+		return list.includes(this.dlItem.resourceType);
+	}
+
+	
+	/* public functions */
+
 	isProtocoLBlackListed(){
 		return this._isInProtocolList(app.options.protocolBlackList);
 	}
@@ -280,6 +327,10 @@ class ReqFilter {
 		return this._isInMimeList(app.options.mimeBlackList);
 	}
 
+	isTypeBlackListed(){
+		return this._isInTypeList(app.options.typeBlackList);
+	}
+
 	isExtensionWhiteListed(){
 		return this._isInExtensionList(app.options.extensionWhiteList);
 	}
@@ -288,16 +339,31 @@ class ReqFilter {
 		return this._isInMimeList(app.options.mimeWhiteList);
 	}
 
+	isTypeWhiteListed(){
+		return this._isInTypeList(app.options.typeWhiteList);
+	}
+
+	/**
+	 * does this request have an "attachment" header?
+	 */
 	hasAttachment(){
 		return this.dlItem.getContentDisposition().indexOf("attachment") !== -1;
 	}
+
+	/**
+	 * should we cancel the request and show DownloadAssist's download dialog?
+	 */
+	doesOverride(){
+		return this.hasAttachment();
+	}
+
 }
 
 
 /**
  * A fixed sized map with key->value pairs
- * When size gets bigger than the limit first element is deleted and
- * the new element is put in
+ * When size gets bigger than the limit, first element is deleted 
+ * and the new element is put in
  * Duplicate elements will rewrite the old ones
  */
 class FixedSizeMap {
@@ -349,31 +415,4 @@ class FixedSizeMap {
 		return listData;
 	}
 	
-}
-
-/**
- * A utility class of course!
- */
-class Utils {
-//todo: move these into dlItem as well
-	static getHeader(headersArray, headerName){
-		return headersArray.find(header => header.name.toLowerCase() === headerName);
-	}
-
-	/**
-	 * @param {array} headers
-	 */
-	static getHeaders(headers){
-
-		//convert the stupid array to an object (map)
-		let unStupidHeaders = {};
-		for(let header of headers){
-			let name = header.name.toLowerCase();
-			let value = header.value;
-			unStupidHeaders[name] = value;
-		}
-
-		return unStupidHeaders;
-	}
-
 }

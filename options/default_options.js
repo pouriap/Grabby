@@ -1,6 +1,7 @@
 'use strict';
 
 //todo: move the lists somewhere eles
+//todo: do we even need the image/font/css/script extension/mimes now that we have the type list?
 
 var defaultOptions = {
 	dlListSize: 20,
@@ -61,5 +62,13 @@ var defaultOptions = {
 		//documents
 		'application/msword', 'application/mspowerpoint', 'application/powerpoint', 
 		'application/x-mspowerpoint','application/excel', 'application/x-excel', 'application/pdf',
+	],
+	typeBlackList : [
+		'xmlhttprequest', 'font', 'image', 'imageset', 'stylesheet', 'script', 
+		'object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative', 
+		'web_manifest', 'websocket', 'xbl', 'xml_dtd', 'xslt',
+	],
+	typeWhiteList : [
+		'media'
 	]
 }

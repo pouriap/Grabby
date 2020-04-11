@@ -43,16 +43,11 @@ var app;
  */
 function doOnBeforeSendHeaders(details){
 
-	let requestId = details.requestId;
-	let origin = details.originUrl;
-	let time = details.timeStamp;
-	let headers = Utils.getHeaders(details.requestHeaders);
-
 	//create a dlItem object and put necessary information in it
 	let request = {};
-	request.origin = origin;
-	request.time = time;
-	request.headers = headers;
+	let requestId = details.requestId;
+	request.origin = details.originUrl;
+	request.headers = details.requestHeaders;
 	request.details = details;
 
 	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
@@ -79,20 +74,29 @@ function doOnHeadersReceived(details) {
 
 	//creating a new dlItem object because will delete the original from allRequests
 	//in doOnCompleted() after the request is completed
-	let url = details.url;
 	let origin = requestOfThisResponse.origin;
-	let time = requestOfThisResponse.time;
 	let reqHeaders = requestOfThisResponse.headers;
 	let resHeaders = details.responseHeaders;
 
-	let dlItem = new DlItem(requestId, url, origin, time, reqHeaders, resHeaders);
+	let dlItem = new DlItem(details, origin, reqHeaders, resHeaders);
 
 	dlItem.res_details = details;
 	dlItem.req_details = requestOfThisResponse.details;
 
 	let filter = new ReqFilter(dlItem);
 
+	//always download responses with an "attachment" header
+	//even if they are black listed
+	if(filter.hasAttachment()){
+		dlItem.debug_reason = "attachment";
+		addToAllDlItems(dlItem);
+		return;
+	}
+
+	//blacklists
+	//these should be sorted from the least computationally intensive to the most
 	if(
+		filter.isTypeBlackListed() ||
 		filter.isProtocoLBlackListed() ||
 		filter.isSizeBlackListed() ||
 		filter.isExtensionBlackListed() ||
@@ -101,6 +105,7 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
+	//whitelists
 	if(filter.isExtensionWhiteListed()){
 		dlItem.debug_reason = "extension: " + dlItem.getFileExtension();
 		addToAllDlItems(dlItem);
@@ -109,13 +114,6 @@ function doOnHeadersReceived(details) {
 
 	if(filter.isMimeWhiteListed()){
 		dlItem.debug_reason = "mime: " + dlItem.getContentType();
-		addToAllDlItems(dlItem);
-		return;
-	}
-
-	//todo: should we put this before blacklists? because we always want to download "downloads"
-	if(filter.hasAttachment()){
-		dlItem.debug_reason = "attachment";
 		addToAllDlItems(dlItem);
 		return;
 	}
