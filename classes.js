@@ -125,19 +125,31 @@ class DlItem {
 	}
 
 	/**
-	 * 	
-	 * @param {string} headerName 
+	 * gets a header associated with this reqeust
+	 * @param {string} headerName name of the header
+	 * @param {string} headerDirection either "request" or "response"
 	 */
-	getRequestHeader(headerName){
-		return this.reqHeaders.find(header => header.name.toLowerCase() === headerName);
-	}
+	getHeader(headerName, headerDirection){
 
-	/**
-	 * 
-	 * @param {string} headerName 
-	 */
-	getResponseHeader(headerName){
-		return this.resHeaders.find(header => header.name.toLowerCase() === headerName);
+		let headers;
+		if(headerDirection === 'request'){
+			headers = this.reqHeaders;
+		}
+		else{
+			headers = this.resHeaders;
+		}
+
+		let headerItem =  headers.find(function(header){
+			return header.name.toLowerCase() === headerName.toLowerCase();
+		});
+
+		if(headerItem){
+			return headerItem.value;
+		}
+		else{
+			return '';
+		}
+
 	}
 
 	/**
@@ -150,9 +162,11 @@ class DlItem {
 
 			this.filename = "unknown";
 
-			if(this.getContentDisposition() !== 'unknown'){
-				let disposition = this.getContentDisposition();
-				const regex = /filename=["']?(.*?)["']?(\s|$)/i;
+			//todo: add support for filename*=
+
+			let disposition = this.getHeader('content-disposition', 'response');
+			if(disposition){
+				const regex = /filename=["']?(.*?)["']?(;|$)/im;
 				let matches = disposition.match(regex);
 				if(matches && matches[1]){
 					this.filename = matches[1];
@@ -182,8 +196,8 @@ class DlItem {
 
 			this.sizeMB = "unknown";
 
-			let contentLengthHeader = this.getResponseHeader("content-length");
-			if (typeof contentLengthHeader !== 'undefined') {
+			let contentLengthHeader = this.getHeader("content-length", "response");
+			if (contentLengthHeader) {
 				let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
 				this.sizeMB = fileSizeMB;
 			}
@@ -210,44 +224,6 @@ class DlItem {
 		}
 
 		return this.fileExtension;
-	}
-
-	/**
-	 * get the content-type (if available) of the resource requested
-	 * @returns the type in lower case or "unknown" if not available
-	 */
-	getContentType(){
-
-		if(typeof this.contentType === "undefined"){
-
-			this.contentType = "unknown";
-
-			let contentTypeHeader = this.getResponseHeader("content-type");
-			if (typeof contentTypeHeader !== 'undefined') {
-				this.contentType = contentTypeHeader.value.toLowerCase();
-			}
-		}
-
-		return this.contentType;
-	}
-
-	/**
-	 * get the value of the content-disposition header (if available)
-	 * @returns the value in lower case or "unknown" if not available
-	 */
-	getContentDisposition(){
-
-		if(typeof this.contentDisp === "undefined"){
-
-			this.contentDisp = "unknown";
-
-			let contentDispHeader = this.getResponseHeader("content-disposition");
-			if (typeof contentDispHeader !== 'undefined') {
-				this.contentDisp = contentDispHeader.value.toLowerCase();
-			}
-		}
-
-		return this.contentDisp;
 	}
 
 }
@@ -297,8 +273,8 @@ class ReqFilter {
 	 * @param {array} list 
 	 */
 	_isInMimeList(list){
-		let mime = this.dlItem.getContentType();
-		if (mime !== "unknown" && app.options.excludeWebFiles){
+		let mime = this.dlItem.getHeader("content-type", "response").toLowerCase();
+		if (mime && app.options.excludeWebFiles){
 			for(let listMime of list){
 				//we search for the mim'es occurence in the content-type because sometimes 
 				//content-type has other things in it as well
@@ -358,7 +334,8 @@ class ReqFilter {
 	 * does this request have an "attachment" header?
 	 */
 	hasAttachment(){
-		return this.dlItem.getContentDisposition().indexOf("attachment") !== -1;
+		let disposition = this.dlItem.getHeader('content-disposition', 'response').toLowerCase();
+		return ( disposition && disposition.indexOf("attachment") !== -1 );
 	}
 
 	/**
