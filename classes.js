@@ -196,9 +196,9 @@ class DlItem {
 
 			this.sizeMB = "unknown";
 
-			let contentLengthHeader = this.getHeader("content-length", "response");
-			if (contentLengthHeader) {
-				let fileSizeMB = (contentLengthHeader.value / 1048576).toFixed(1);
+			let contentLength = this.getHeader("content-length", "response");
+			if (contentLength) {
+				let fileSizeMB = (contentLength / 1048576).toFixed(1);
 				this.sizeMB = fileSizeMB;
 			}
 		}
