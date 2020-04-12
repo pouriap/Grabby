@@ -34,7 +34,7 @@ class DlAssistApp {
 		// all requests made by Firefox are stored here temporarily until we get their response
 		this.allRequests = new FixedSizeMap(100);
 		// the last X downloadable items are stored here with their informations such as cookies,time,etc.
-		this.allDlItems = new FixedSizeMap(options.dlListSize);
+		this.allDownloads = new FixedSizeMap(options.dlListSize);
 		// utility function
 		this.runtime = {};
 		this.runtime.idmAvailable = false;
@@ -89,20 +89,20 @@ class DlAssistApp {
 	}
 
 	/**
-	 * Adds a dlItem to our main list of downloads
-	 * @param {DlItem} dlItem 
+	 * Adds a download to our main list of downloads
+	 * @param {Download} download 
 	 */
-	addToAllDlItems(dlItem){
+	addToAllDownloads(download){
 		//we do this here because we don't want to run hash on requests we will not use
-		let hash = md5(dlItem.url);
+		let hash = md5(download.url);
 		//we put hash of URL as key to prevent the same URL being added by different requests
-		this.allDlItems.put(hash, dlItem);
+		this.allDownloads.put(hash, download);
 	}
 
 }
 
 
-class DlItem {
+class Download {
 
 	/**
 	 * Creates a new DlIem
@@ -230,10 +230,10 @@ class ReqFilter {
 
 	/**
 	 * 
-	 * @param {DlItem} dlItem 
+	 * @param {Download} download 
 	 */
-	constructor(dlItem){
-		this.dlItem = dlItem;
+	constructor(download){
+		this.download = download;
 	}
 
 	/* private funcitons */
@@ -244,7 +244,7 @@ class ReqFilter {
 	 */
 	_isInProtocolList(list){
 		for(let protocol of list){
-			if(this.dlItem.url.startsWith(protocol)){
+			if(this.download.url.startsWith(protocol)){
 				return true;
 			}
 		}
@@ -256,7 +256,7 @@ class ReqFilter {
 	 * @param {array} list 
 	 */
 	_isInExtensionList(list){
-		let extension = this.dlItem.getFileExtension();
+		let extension = this.download.getFileExtension();
 		if (extension !== "unknown" 
 			&& app.options.excludeWebFiles 
 			&& list.includes(extension)) {
@@ -270,7 +270,7 @@ class ReqFilter {
 	 * @param {array} list 
 	 */
 	_isInMimeList(list){
-		let mime = this.dlItem.getHeader("content-type", "response").toLowerCase();
+		let mime = this.download.getHeader("content-type", "response").toLowerCase();
 		if (mime && app.options.excludeWebFiles){
 			for(let listMime of list){
 				//we search for the mim'es occurence in the content-type because sometimes 
@@ -288,7 +288,7 @@ class ReqFilter {
 	 * @param {array} list list of webRequest.ResourceTypes 
 	 */
 	_isInTypeList(list){
-		return list.includes(this.dlItem.resourceType);
+		return list.includes(this.download.resourceType);
 	}
 
 	
@@ -299,7 +299,7 @@ class ReqFilter {
 	}
 
 	isSizeBlackListed(){
-		let size = this.dlItem.getSizeMB();
+		let size = this.download.getSizeMB();
 		return size !== 'unknown' && size < app.options.grabFilesLargerThanMB;
 	}
 
@@ -331,7 +331,7 @@ class ReqFilter {
 	 * does this request have an "attachment" header?
 	 */
 	hasAttachment(){
-		let disposition = this.dlItem.getHeader('content-disposition', 'response').toLowerCase();
+		let disposition = this.download.getHeader('content-disposition', 'response').toLowerCase();
 		return ( disposition && disposition.indexOf("attachment") !== -1 );
 	}
 

@@ -64,7 +64,8 @@ var defaultOptions = {
 		'application/x-mspowerpoint','application/excel', 'application/x-excel', 'application/pdf',
 	],
 	typeBlackList : [
-		'xmlhttprequest', 'font', 'image', 'imageset', 'stylesheet', 'script', 
+		'xmlhttprequest', 
+		'font', 'image', 'imageset', 'stylesheet', 'script', 
 		'object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative', 
 		'web_manifest', 'websocket', 'xbl', 'xml_dtd', 'xslt',
 	],

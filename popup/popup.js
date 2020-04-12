@@ -1,5 +1,5 @@
 var app;
-var clickedDlItem = {};
+var clickedDownload = {};
 
 //TODO:  getBackgroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
@@ -41,29 +41,29 @@ document.addEventListener("DOMContentLoaded", (event) => {
 function onGot(page) { 
 
 	app = page.app;
-	let allDlItems = app.allDlItems;
+	let allDownloads = app.allDownloads;
 
 	//populate list of downloads
-	let keys = allDlItems.getKeys();
+	let keys = allDownloads.getKeys();
 	//reverse to show latest downloads on top
 	keys.reverse();
 
 	for (const key of keys) {
 
-		let dlItem = allDlItems.get(key);
+		let download = allDownloads.get(key);
 
 		let listItem = document.createElement("li");
-		listItem.setAttribute("id", "req_" + dlItem.requestId);
-		listItem.setAttribute("class", "dl-item " + dlItem.debug_gray);
-		listItem.setAttribute("title", dlItem.url);
+		listItem.setAttribute("id", "req_" + download.requestId);
+		listItem.setAttribute("class", "dl-item " + download.debug_gray);
+		listItem.setAttribute("title", download.url);
 		listItem.setAttribute("data-hash", key);
-		listItem.innerHTML = dlItem.getFilename() + " (" + dlItem.debug_reason + ")";
+		listItem.innerHTML = download.getFilename() + " (" + download.debug_reason + ")";
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");
-			let dlItem = allDlItems.get(hash);
-			console.log('item clicked: ', dlItem);
-			showDownloadDetails(dlItem);
+			let download = allDownloads.get(hash);
+			console.log('item clicked: ', download);
+			showDownloadDetails(download);
 		});
 
 		document.getElementById("dls-list").appendChild(listItem);
@@ -86,20 +86,20 @@ function onError(error) {
 
 /**
  * Shows the details popup for a particular download item
- * @param {DlItem} dlItem 
+ * @param {Download} download 
  */
-function showDownloadDetails(dlItem){
+function showDownloadDetails(download){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
-	document.getElementById("filename").innerHTML = dlItem.getFilename();
-	document.getElementById("time").innerHTML = (new Date(dlItem.time)).toLocaleString("en-US", app.options.dateForamt);
-	document.getElementById("origin").innerHTML = dlItem.origin;
-	document.getElementById("size").innerHTML = dlItem.getSizeMB();
-	document.getElementById("url").innerHTML = dlItem.url;
+	document.getElementById("filename").innerHTML = download.getFilename();
+	document.getElementById("time").innerHTML = (new Date(download.time)).toLocaleString("en-US", app.options.dateForamt);
+	document.getElementById("origin").innerHTML = download.origin;
+	document.getElementById("size").innerHTML = download.getSizeMB();
+	document.getElementById("url").innerHTML = download.url;
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);
-	clickedDlItem = dlItem;
+	clickedDownload = download;
 }
 
 /**
@@ -124,12 +124,12 @@ function clearDownloadsList(){
 }
 
 function copyLinkToClipboard(){
-	copyToClipBoard(clickedDlItem.url);
+	copyToClipBoard(clickedDownload.url);
 }
 
 function downloadWithIDM(){
 
-	console.log("dling with IDM: ", clickedDlItem);
+	console.log("dling with IDM: ", clickedDownload);
 
 	if(!app.runtime.idmAvailable){
 		console.log("IDM is not available");
@@ -138,10 +138,10 @@ function downloadWithIDM(){
 
 	let msgBase = "MSG#1#14#1#0:1";
 
-	let url = clickedDlItem.url;
+	let url = clickedDownload.url;
 	let userAgent = navigator.userAgent;
-	let cookies = clickedDlItem.reqHeaders['cookie'];
-	let referer = clickedDlItem.reqHeaders['referer'];
+	let cookies = clickedDownload.reqHeaders['cookie'];
+	let referer = clickedDownload.reqHeaders['referer'];
 
 	let urlCode = ",6=" + url.length + ":" + url;
 	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
@@ -159,25 +159,25 @@ function downloadWithIDM(){
 function downloadWithFirefox() {
 	browser.downloads.download({
 		saveAs: true,
-		url: clickedDlItem.url
+		url: clickedDownload.url
 	});
 }
 
 function copyCurlCommand(){
 
-	let cmd = `curl -JLO "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl -JLO "${clickedDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(clickedDlItem.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${clickedDlItem.reqHeaders['cookie']}"`;
+	if(clickedDownload.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
 	}
-	if(clickedDlItem.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${clickedDlItem.reqHeaders['referer']}"`;
+	if(clickedDownload.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${clickedDownload.reqHeaders['referer']}"`;
 	}
-	if(clickedDlItem.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${clickedDlItem.reqHeaders['accept']}"`;
+	if(clickedDownload.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${clickedDownload.reqHeaders['accept']}"`;
 	}
-	if(clickedDlItem.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${clickedDlItem.reqHeaders['accept-encoding']}"`;
+	if(clickedDownload.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${clickedDownload.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -185,19 +185,19 @@ function copyCurlCommand(){
 
 function copyWgetCommand(){
 
-	let cmd = `wget "${clickedDlItem.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${clickedDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(clickedDlItem.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${clickedDlItem.reqHeaders['cookie']}"`;
+	if(clickedDownload.reqHeaders['cookie']){
+		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
 	}
-	if(clickedDlItem.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${clickedDlItem.reqHeaders['referer']}"`;
+	if(clickedDownload.reqHeaders['referer']){
+		cmd = cmd + ` --header "Referer: ${clickedDownload.reqHeaders['referer']}"`;
 	}
-	if(clickedDlItem.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${clickedDlItem.reqHeaders['accept']}"`;
+	if(clickedDownload.reqHeaders['accept']){
+		cmd = cmd + ` --header "Accept: ${clickedDownload.reqHeaders['accept']}"`;
 	}
-	if(clickedDlItem.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${clickedDlItem.reqHeaders['accept-encoding']}"`;
+	if(clickedDownload.reqHeaders['accept-encoding']){
+		cmd = cmd + ` --header "Accept-Encoding: ${clickedDownload.reqHeaders['accept-encoding']}"`;
 	}
 
 	copyToClipBoard(cmd);

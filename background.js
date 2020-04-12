@@ -61,7 +61,7 @@ function doOnBeforeSendHeaders(details){
 
 /**
  * Runs once response headers are received 
- * We create a dlItem here if the response matches our criteria and add it 
+ * We create a download here if the response matches our criteria and add it 
  * to our list of downloads
  */
 function doOnHeadersReceived(details) {
@@ -75,18 +75,18 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
-	//creating a new dlItem object because will delete the original from allRequests
+	//creating a new download object because will delete the original from allRequests
 	//in doOnCompleted() after the request is completed
 	let origin = requestOfThisResponse.origin;
 	let reqHeaders = requestOfThisResponse.headers;
 	let resHeaders = details.responseHeaders;
 
-	let dlItem = new DlItem(details, origin, reqHeaders, resHeaders);
+	let download = new Download(details, origin, reqHeaders, resHeaders);
 
-	dlItem.res_details = details;
-	dlItem.req_details = requestOfThisResponse.details;
+	download.res_details = details;
+	download.req_details = requestOfThisResponse.details;
 
-	let filter = new ReqFilter(dlItem);
+	let filter = new ReqFilter(download);
 
 	//the lists should be sorted from the least computationally intensive to the most
 
@@ -103,25 +103,25 @@ function doOnHeadersReceived(details) {
 
 	//whitelists
 	if(filter.hasAttachment()){
-		dlItem.debug_reason = "attachment";
-		app.addToAllDlItems(dlItem);
+		download.debug_reason = "attachment";
+		app.addToAllDownloads(download);
 		return;
 	}
 
 	if(filter.isExtensionWhiteListed()){
-		dlItem.debug_reason = "extension: " + dlItem.getFileExtension();
-		app.addToAllDlItems(dlItem);
+		download.debug_reason = "extension: " + download.getFileExtension();
+		app.addToAllDownloads(download);
 		return;
 	}
 
 	if(filter.isMimeWhiteListed()){
-		dlItem.debug_reason = "mime: " + dlItem.getContentType();
-		app.addToAllDlItems(dlItem);
+		download.debug_reason = "mime: " + download.getContentType();
+		app.addToAllDownloads(download);
 		return;
 	}
 
-	dlItem.debug_gray = 'debug_gray';
-	app.addToAllDlItems(dlItem);
+	download.debug_gray = 'debug_gray';
+	app.addToAllDownloads(download);
 	
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
@@ -133,7 +133,7 @@ function doOnHeadersReceived(details) {
  * Runs once a request is completed
  */
 function doOnCompleted(details){
-	//remove the original dlItem from allRequests to save memory
+	//remove the original download from allRequests to save memory
 	//this isn't really necessary because allRequest is a fixed sized map
 	app.allRequests.remove(details.requestId);
 }
@@ -151,7 +151,7 @@ function doOnMessage(message, sender, sendResponse) {
 		return Promise.resolve();
 	}
 	else if(message.type === "clear_list"){
-		app.allDlItems = new FixedSizeMap(app.options.dlListSize);
+		app.allDownloads = new FixedSizeMap(app.options.dlListSize);
 	}
 
 }
@@ -183,7 +183,7 @@ function saveOptions(options){
 	//set optoins
 	app.options = options;
 	//create a new download list based on options
-	app.allDlItems = new FixedSizeMap(options.dlListSize, app.allDlItems.list);
+	app.allDownloads = new FixedSizeMap(options.dlListSize, app.allDownloads.list);
 
 	console.log('saved options: ', app.options);
 }
