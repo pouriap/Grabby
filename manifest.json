@@ -9,11 +9,9 @@
 
 	"permissions": [
 		"webRequest",
-		"webRequestBlocking",
 		"downloads",
 		"nativeMessaging",
 		"clipboardWrite",
-		"notifications",
 		"storage",
 		"<all_urls>"
 	],

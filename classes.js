@@ -1,7 +1,5 @@
 'use strict';
 
-//TODO: check all API levels and see exactly what is the minimum version
-//todo: remove unused permissions
 //todo: store options in sync, what's wrong with me?
 //todo: save downloads list
 //todo: policies:
@@ -57,10 +55,9 @@ class DlAssistApp {
 			resolve();
 		});
 
-		//this function returns a promis so that we can use 'await' on it
+		//this function returns a promise so that we can use 'await' on it
 		function initIDM() {
-			//todo: shayad init haii hast the addone IDM khodesh mikone ke ma kar mikonim
-			// pas beddone addone idm emtehan konim
+			//todo: try without IDM addon being installed and see if it works
 			return new Promise(function (resolve) {
 				var initMessage = "MSG#2#6#2#2321:1:0:1294:704:-7:-7:1.25,117=37:Toolbox - Extension / Download Assist;";
 				var port = browser.runtime.connectNative("com.tonec.idm");
@@ -89,7 +86,7 @@ class DlAssistApp {
 			});
 		}
 
-	};
+	}
 
 	/**
 	 * Adds a dlItem to our main list of downloads
@@ -356,6 +353,11 @@ class ReqFilter {
  */
 class FixedSizeMap {
 
+	/**
+	 * 
+	 * @param {int} size 
+	 * @param {object} listData (optional) the data to initialize this FixedSizeMap with
+	 */
 	constructor(size, listData) {
 		size = (Number(size));
 		this.limit = isNaN(size) ? 100 : size;

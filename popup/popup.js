@@ -1,7 +1,7 @@
 var app;
 var clickedDlItem = {};
 
-//TODO:  getBackGroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
+//TODO:  getBackgroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -85,7 +85,7 @@ function onError(error) {
 }
 
 /**
- * 
+ * Shows the details popup for a particular download item
  * @param {DlItem} dlItem 
  */
 function showDownloadDetails(dlItem){
@@ -102,6 +102,9 @@ function showDownloadDetails(dlItem){
 	clickedDlItem = dlItem;
 }
 
+/**
+ * shows the list of all download items
+ */
 function showDownloadsList(){
 	let dlList = document.getElementById("dls-list");
 	let actionList = document.getElementById("actions-list");
@@ -109,6 +112,9 @@ function showDownloadsList(){
 	showElement(dlList);
 }
 
+/**
+ * clears list of all download items
+ */
 function clearDownloadsList(){
 	document.querySelectorAll(".dl-item").forEach((element)=>{
         element.parentElement.removeChild(element);

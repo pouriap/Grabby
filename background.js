@@ -3,10 +3,13 @@
 // a super duper global variable
 var app;
 
+
 (async () => {
 
 	let options = await loadOptions();
 	app = new DlAssistApp(options);
+	// is used for developement
+	app.debug = true;
 	console.log('initializing app...');
 	await app.initialize();
 	console.log('app init finished');
@@ -43,14 +46,14 @@ var app;
  */
 function doOnBeforeSendHeaders(details){
 
-	//create a dlItem object and put necessary information in it
+	//create a request object and put necessary information in it
 	let request = {};
 	let requestId = details.requestId;
 	request.origin = details.originUrl;
 	request.headers = details.requestHeaders;
 	request.details = details;
 
-	//put the dlItem in allRequests so it can be accessed by it's requestId when response is received
+	//put the request in allRequests so it can be accessed by it's requestId when response is received
 	app.allRequests.put(requestId, request);
 
 }
