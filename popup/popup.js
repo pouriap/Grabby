@@ -98,7 +98,7 @@ function showDownloadDetails(download){
 	document.getElementById("size").innerHTML = 
 		download.getSizeMB() + ((download.getSizeMB() !== "unknown")? "MB" : "");
 	document.getElementById("time").innerHTML = 
-		(new Date(download.time)).toLocaleString("en-US", app.options.dateForamt);
+		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
 	document.getElementById("url").innerHTML = download.url;
 	document.getElementById("url").setAttribute("title", download.url);
 	document.getElementById("origin").innerHTML = download.origin;

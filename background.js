@@ -120,12 +120,14 @@ function doOnHeadersReceived(details) {
 		return;
 	}
 
-	download.debug_gray = 'debug_gray';
-	app.addToAllDownloads(download);
-	
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
-
+	if(DEBUG){
+		download.debug_reason = 'graylist';
+		download.debug_gray = 'debug_gray';
+		app.addToAllDownloads(download);
+	}
+	
 }
 
 
