@@ -1,5 +1,7 @@
 'use strict';
 
+var DEBUG = true;
+
 // a super duper global variable
 var app;
 
@@ -83,8 +85,8 @@ function doOnHeadersReceived(details) {
 
 	let download = new Download(details, origin, reqHeaders, resHeaders);
 
-	download.res_details = details;
-	download.req_details = requestOfThisResponse.details;
+	if(DEBUG) download.res_details = details;
+	if(DEBUG) download.req_details = requestOfThisResponse.details;
 
 	let filter = new ReqFilter(download);
 
@@ -103,19 +105,19 @@ function doOnHeadersReceived(details) {
 
 	//whitelists
 	if(filter.hasAttachment()){
-		download.debug_reason = "attachment";
+		if(DEBUG) download.debug_reason = "attachment";
 		app.addToAllDownloads(download);
 		return;
 	}
 
 	if(filter.isExtensionWhiteListed()){
-		download.debug_reason = "extension: " + download.getFileExtension();
+		if(DEBUG) download.debug_reason = "extension: " + download.getFileExtension();
 		app.addToAllDownloads(download);
 		return;
 	}
 
 	if(filter.isMimeWhiteListed()){
-		download.debug_reason = "mime: " + download.getContentType();
+		if(DEBUG) download.debug_reason = "mime: " + download.getContentType();
 		app.addToAllDownloads(download);
 		return;
 	}
