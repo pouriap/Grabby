@@ -258,7 +258,6 @@ class ReqFilter {
 	_isInExtensionList(list){
 		let extension = this.download.getFileExtension();
 		if (extension !== "unknown" 
-			&& app.options.excludeWebFiles 
 			&& list.includes(extension)) {
 				return true;
 		}
@@ -271,7 +270,7 @@ class ReqFilter {
 	 */
 	_isInMimeList(list){
 		let mime = this.download.getHeader("content-type", "response").toLowerCase();
-		if (mime && app.options.excludeWebFiles){
+		if (mime){
 			for(let listMime of list){
 				//we search for the mim'es occurence in the content-type because sometimes 
 				//content-type has other things in it as well
