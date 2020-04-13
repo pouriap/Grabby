@@ -66,7 +66,7 @@ function onGot(page) {
 			showDownloadDetails(download);
 		});
 
-		document.getElementById("dls-list").appendChild(listItem);
+		document.getElementById("downloads-list").appendChild(listItem);
 
 	}
 
@@ -89,8 +89,8 @@ function onError(error) {
  * @param {Download} download 
  */
 function showDownloadDetails(download){
-	let dlList = document.getElementById("dls-list");
-	let actionList = document.getElementById("actions-list");
+	let dlList = document.getElementById("downloads-list");
+	let actionList = document.getElementById("download-details");
 	document.getElementById("filename").innerHTML = download.getFilename();
 	document.getElementById("time").innerHTML = (new Date(download.time)).toLocaleString("en-US", app.options.dateForamt);
 	document.getElementById("origin").innerHTML = download.origin;
@@ -106,8 +106,8 @@ function showDownloadDetails(download){
  * shows the list of all download items
  */
 function showDownloadsList(){
-	let dlList = document.getElementById("dls-list");
-	let actionList = document.getElementById("actions-list");
+	let dlList = document.getElementById("downloads-list");
+	let actionList = document.getElementById("download-details");
 	hideElement(actionList);
 	showElement(dlList);
 }
@@ -276,7 +276,7 @@ function copyToClipBoard(content){
 		document.querySelector("#output").style.display = 'block';
 		var oldItem = document.querySelector("#output");
 		var cloneItem = oldItem.cloneNode(true); 
-		document.querySelector("#actions-list").replaceChild(cloneItem, oldItem);	
+		document.querySelector("#download-details").replaceChild(cloneItem, oldItem);	
 	}
 
 }

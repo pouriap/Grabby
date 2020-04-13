@@ -1,3 +1,5 @@
+/* hover color: #4a4a4f */
+
 body {
 	overflow-y: auto;
 	min-width: 280px;
@@ -24,21 +26,22 @@ ul, li{
 	padding: 0 5px;
 	margin: 0 auto;
 	width: 100%;
+	color: #202340;
 }
 
-#dls-list{
+#downloads-list{
 	cursor: default;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-#dls-list .list-title{
+#downloads-list .list-title{
 	width: 85%;
 	padding-bottom: 10px;
 }
 
-#dls-list #no-dl{
+#downloads-list #no-dl{
 	padding: 16px 0 0 0;
 	color:#b1b1b3;
 	width: 100%;
@@ -47,65 +50,80 @@ ul, li{
 }
 
 /* only show 'no downloads' if it's the last child */
-#dls-list #no-dl:last-child{
+#downloads-list #no-dl:last-child{
 	display: block !important;
 }
 
-.dl-item{
+#downloads-list .dl-item{
 	padding: 10px 5px;
-	font-weight: bold;
-	border-bottom: 1px solid #ededf0;
+	border-bottom: 1px solid #8c8fb1;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	width: 100%;
 	font-size: 12px;
 }
 
-.dl-item:last-child {
+#downloads-list .dl-item:last-child {
     border: none;
 }
 
-.dl-item:hover{
-	background-color: #ededf0 !important;
+#downloads-list .dl-item:hover{
+	background-color:#363959 !important;
+	color: #f9f9fa;
 }
 
-#actions-list{
+#download-details{
 	width: 80%;
 	margin: 0 auto;
 	padding: 0 0 20px 0;
 }
 
-#actions-list .action {
-    padding: 5px 0;
-    border: 1px solid #ededf0;
-    border-radius: 3px;
-    text-align: center;
-	margin-bottom: 3px;
+#download-details #info{
+	margin-bottom: 30px;
+}
+
+#download-details .action{
+	color: #0f1126 !important;
+	text-decoration: none;
+	background: #ffffff;
+	padding: 5px;
+	border: 1px solid #0f1126 !important;
+	transition: all 0.4s ease 0s;
+	margin: 5px 20px;
 	cursor: pointer;
-	transition: all 0.3s ease;
-	box-shadow: 0px 1px 1px #d7d7db;
+	border-radius: 2px;
+	font-weight: bold;
 }
 
-#actions-list .action:hover{
-	background-color: #ededf0 !important;
+#download-details .action:hover{
+	color: #ffffff !important;
+	background: #363959;
+	border-color: #363959 !important;
+	transition: all 0.4s ease 0s;
 }
 
-#actions-list .disabled-action, #actions-list .disabled-action:hover{
+#download-details .disabled-action, #download-details .disabled-action:hover{
 	color: #d7d7db;
 	cursor: default;
 	background-color: inherit !important;
 }
 
-#actions-list #action-back{
-	background: url('back.svg') 5px 7px no-repeat;
+#download-details #action-back{
+	background-image: url('back.svg');
+	background-position:  5px 7px;
+	background-repeat:  no-repeat;
 	background-size: 12px;
-	width: 160px;
+	width: 170px;
 	margin: 10px 0 40px;
 	text-align: right;
 	padding-right: 10px;
 }
 
-#dls-list #action-clearList{
+#download-details #action-back:hover{
+	background-image: url('back-white.svg');
+}
+
+#downloads-list #action-clearList{
 	width: 22px;
 	position: absolute;
 	left: 10px;
@@ -113,30 +131,32 @@ ul, li{
 	cursor: pointer;
 }
 
-#actions-list .desc{
+#download-details .desc{
 	text-align: left;
 	word-break: break-all;
 	font-weight: normal;
 }
 
-#actions-list .desc#size:after{
+#download-details .desc#size:after{
 	content: "MB";
 }
 
-#actions-list .desc-name{
+#download-details .desc-name{
 	margin-top: 5px;
 	font-weight: bold;
 }
 
-#actions-list #filename{
-	font-size: 16px;
+#download-details #filename{
+	font-size: 18px;
+	font-weight: bold;
+	margin-bottom: 10px;
 }
 
-#actions-list .spacer{
+#download-details .spacer{
 	margin: 10px 0;
 }
 
-#actions-list #output{
+#download-details #output{
 	margin: 5px 0;
 	font-size: 12px;
 	/* animaiton stuff */
