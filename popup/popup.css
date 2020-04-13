@@ -166,7 +166,7 @@ ul, li{
 }
 
 #download-details #output{
-	margin: 5px 0;
+	margin: 10px 0 -10px;
 	font-size: 12px;
 	/* animaiton stuff */
 	animation-name: fadeinout;

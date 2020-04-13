@@ -285,7 +285,7 @@ function copyToClipBoard(content){
 		document.querySelector("#output").style.display = 'block';
 		var oldItem = document.querySelector("#output");
 		var cloneItem = oldItem.cloneNode(true); 
-		document.querySelector("#download-details").replaceChild(cloneItem, oldItem);	
+		document.querySelector("#info").replaceChild(cloneItem, oldItem);
 	}
 
 }
