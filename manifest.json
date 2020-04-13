@@ -1,11 +1,11 @@
 {
 
 	"manifest_version": 2,
-	"name": "Download Assist",
-	"description": "Assists in downloading a file with external applications.",
-	"version": "0.9",
+	"name": "Download Grab",
+	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
+	"version": "0.10",
 	"author": "Pouria Pirhadi",
-	"homepage_url": "https://github.com/pouriap/Firefox-DownloadAssist",
+	"homepage_url": "https://github.com/pouriap/Firefox-DownloadGrab",
 
 	"permissions": [
 		"webRequest",
@@ -18,7 +18,7 @@
 
 	"applications": {
 		"gecko": {
-			"id": "download_assist@pouria.p",
+			"id": "download_grab@pouria.p",
 			"strict_min_version": "56.0"
 		}
 	},
@@ -32,7 +32,6 @@
 	},
 
 	"browser_action": {
-		"default_title": "Download Assist",
 		"default_popup": "popup/popup.html",
 		"browser_style": true,
 		"default_icon": {

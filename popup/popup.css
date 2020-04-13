@@ -1,10 +1,10 @@
 /* hover color: #4a4a4f */
 
-body {
+html, body {
 	overflow-y: auto;
-	min-width: 280px;
+	min-width: 280px !important;
 	font-size: 12px;
-	max-width: 400px;
+	max-width: 350px !important;
 }
 
 ul, li{
@@ -38,7 +38,8 @@ ul, li{
 
 #downloads-list .list-title{
 	width: 85%;
-	padding-bottom: 10px;
+	margin-bottom: 20px;
+	font-size: 14px;
 }
 
 #downloads-list #no-dl{
@@ -103,9 +104,15 @@ ul, li{
 }
 
 #download-details .disabled-action, #download-details .disabled-action:hover{
-	color: #d7d7db;
+	color: #b1b1b3 !important;
+	text-decoration: none;
+	background: #ffffff;
+	padding: 5px;
+	border: 1px solid #b1b1b3 !important;
+	transition: all 0.4s ease 0s;
+	margin: 5px 20px;
 	cursor: default;
-	background-color: inherit !important;
+	border-radius: 2px;
 }
 
 #download-details #action-back{
@@ -132,13 +139,15 @@ ul, li{
 }
 
 #download-details .desc{
-	text-align: left;
+	/* text-align: left;
 	word-break: break-all;
+	font-weight: normal; */
+	text-align: justify;
 	font-weight: normal;
-}
-
-#download-details .desc#size:after{
-	content: "MB";
+	max-height: 50px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 #download-details .desc-name{

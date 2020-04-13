@@ -7,7 +7,7 @@ var app;
 (async () => {
 
 	let options = await loadOptions();
-	app = new DlAssistApp(options);
+	app = new DlGrabApp(options);
 	// is used for developement
 	app.debug = true;
 	console.log('initializing app...');

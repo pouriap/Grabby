@@ -73,9 +73,11 @@ function onGot(page) {
 	//enable/disable IDM download
 	if(page.app.runtime.idmAvailable){
 		document.getElementById('action-idm').classList.remove("disabled-action");
+		document.getElementById('action-idm').removeAttribute("title");
 	}
 	else{
 		document.getElementById('action-idm').classList.add("disabled-action");
+		document.getElementById('action-idm').setAttribute("title", "Cannot communicate with IDM");
 	}
 
 }
@@ -92,10 +94,15 @@ function showDownloadDetails(download){
 	let dlList = document.getElementById("downloads-list");
 	let actionList = document.getElementById("download-details");
 	document.getElementById("filename").innerHTML = download.getFilename();
-	document.getElementById("time").innerHTML = (new Date(download.time)).toLocaleString("en-US", app.options.dateForamt);
-	document.getElementById("origin").innerHTML = download.origin;
-	document.getElementById("size").innerHTML = download.getSizeMB();
+	document.getElementById("filename").setAttribute("title", download.getFilename());
+	document.getElementById("size").innerHTML = 
+		download.getSizeMB() + ((download.getSizeMB() !== "unknown")? "MB" : "");
+	document.getElementById("time").innerHTML = 
+		(new Date(download.time)).toLocaleString("en-US", app.options.dateForamt);
 	document.getElementById("url").innerHTML = download.url;
+	document.getElementById("url").setAttribute("title", download.url);
+	document.getElementById("origin").innerHTML = download.origin;
+	document.getElementById("origin").setAttribute("title", download.origin);
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);

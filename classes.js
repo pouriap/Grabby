@@ -27,7 +27,7 @@ native application must be in accordance with our No Surprises policy.
  * An instance of this is created in init.js as a global variable accessible
  * to anyonw who has access to 'background.js' scope
  */
-class DlAssistApp {
+class DlGrabApp {
 
 	constructor(options) {
 		this.options = options;
@@ -59,7 +59,7 @@ class DlAssistApp {
 		function initIDM() {
 			//todo: try without IDM addon being installed and see if it works
 			return new Promise(function (resolve) {
-				var initMessage = "MSG#2#6#2#2321:1:0:1294:704:-7:-7:1.25,117=37:Toolbox - Extension / Download Assist;";
+				var initMessage = "MSG#2#6#2#2321:1:0:1294:704:-7:-7:1.25,117=37:Toolbox - Extension / Download Grab;";
 				var port = browser.runtime.connectNative("com.tonec.idm");
 				//this will only be called when IDM is available and reachable
 				port.onMessage.addListener(function (m) {
@@ -288,7 +288,7 @@ class ReqFilter {
 	 * @param {array} list list of webRequest.ResourceTypes 
 	 */
 	_isInTypeList(list){
-		return list.includes(this.download.resourceType);
+		return list.includes(this.download.resourceType) && app.options.excludeWebFiles;
 	}
 
 	
@@ -336,7 +336,7 @@ class ReqFilter {
 	}
 
 	/**
-	 * should we cancel the request and show DownloadAssist's download dialog?
+	 * should we cancel the request and show Download Grab's download dialog?
 	 */
 	doesOverride(){
 		return this.hasAttachment();
