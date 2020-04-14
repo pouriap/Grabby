@@ -3,6 +3,7 @@
 var DEBUG = true;
 
 // a super duper global variable
+/** @type {DlGrabApp} */
 var app;
 
 
@@ -27,7 +28,7 @@ var app;
 		doOnHeadersReceived, {
 			urls: ["*://*/*"]
 		},
-		["responseHeaders"]
+		["responseHeaders", "blocking"]
 	);
 
 	browser.webRequest.onCompleted.addListener(
@@ -104,31 +105,39 @@ function doOnHeadersReceived(details) {
 	}
 
 	//whitelists
-	if(filter.hasAttachment()){
+	if(filter.hasAttachment() && !filter.isAJAX()){
 		if(DEBUG) download.debug_reason = "attachment";
 		app.addToAllDownloads(download);
-		return;
 	}
-
-	if(filter.isExtensionWhiteListed()){
+	
+	else if(filter.isExtensionWhiteListed()){
 		if(DEBUG) download.debug_reason = "extension: " + download.getFileExtension();
 		app.addToAllDownloads(download);
-		return;
 	}
 
-	if(filter.isMimeWhiteListed()){
+	else if(filter.isMimeWhiteListed()){
 		if(DEBUG) download.debug_reason = "mime: " + download.getContentType();
 		app.addToAllDownloads(download);
-		return;
 	}
 
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
-	if(DEBUG){
+	else if(DEBUG){
 		download.debug_reason = 'graylist';
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
+
+	if(app.options.overrideDlDialog || DEBUG){
+		if(download.debug_reason !== 'graylist' && !filter.isMedia()){
+			app.showDlDialog(download);
+			console.log("download override: ", download);
+			return {
+				cancel: true
+			}
+		}
+	}
+
 	
 }
 
@@ -152,11 +161,20 @@ function doOnMessage(message, sender, sendResponse) {
 
 	if(message.type === "options"){
 		saveOptions(message.options);
-		return Promise.resolve();
 	}
 	else if(message.type === "clear_list"){
 		app.allDownloads = new FixedSizeMap(app.options.dlListSize);
 	}
+	else if(message.type === "dl_dialog_populate_request"){
+		let hash = app.downloadDialogs[message.windowId];
+		let response = {downloadHash: hash};
+		return Promise.resolve(response);
+	}
+	else if(message.type === "dl_dialog_closing"){
+		delete app.downloadDialogs[message.windowId];
+	}
+
+	return Promise.resolve();
 
 }
 

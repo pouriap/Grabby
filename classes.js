@@ -38,6 +38,7 @@ class DlGrabApp {
 		// utility function
 		this.runtime = {};
 		this.runtime.idmAvailable = false;
+		this.downloadDialogs = {};
 	}
 
 	/**
@@ -94,9 +95,46 @@ class DlGrabApp {
 	 */
 	addToAllDownloads(download){
 		//we do this here because we don't want to run hash on requests we will not use
-		let hash = md5(download.url);
+		let hash = download.getHash();
 		//we put hash of URL as key to prevent the same URL being added by different requests
 		this.allDownloads.put(hash, download);
+	}
+
+	/**
+	 * opens the download dialog
+	 * here's how things happen because WebExtensions suck ass:
+	 * we open the download dialog window
+	 * we store the windowId along with the associated download's hash in app.downloadDialogs
+	 * after the dialog loads it sends a message to the background script requesting the download hash
+	 * background script gives download dialogs the hash based on the windowId 
+	 * download dialog gets the Download object from the hash and populates the dialog
+	 * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
+	 */
+	showDlDialog(dl) {
+
+		var download = dl;
+		let screenW = window.screen.width;
+		let screenH = window.screen.height;
+		let windowW = 350;
+		let windowH = 450;
+		let leftMargin = (screenW/2) - (windowW/2);
+		let topMargin = (screenH/2) - (windowH/2);
+
+		let createData = {
+			type: "detached_panel",
+			url: "popup/download.html",
+			allowScriptsToClose : true,
+			width: windowW,
+			height: windowH,
+			left: leftMargin,
+			top: topMargin
+		};
+		let creating = browser.windows.create(createData);
+
+		creating.then((windowInfo) => {
+			let windowId = windowInfo.id;
+			app.downloadDialogs[windowId] = download.getHash();
+		});
 	}
 
 }
@@ -119,6 +157,10 @@ class Download {
 		this.origin = origin;
 		this.reqHeaders = reqHeaders;
 		this.resHeaders = resHeaders;
+	}
+
+	getHash(){
+		return md5(this.url);
 	}
 
 	/**
@@ -277,6 +319,9 @@ class ReqFilter {
 				if(mime.indexOf(listMime) !== -1){
 					return true;
 				}
+				else{
+					console.log(mime, " does not contain ", listMime);
+				}
 			}
 		}
 		return false;
@@ -299,6 +344,9 @@ class ReqFilter {
 
 	isSizeBlackListed(){
 		let size = this.download.getSizeMB();
+		if(size === 0){
+			return true;
+		}
 		return size !== 'unknown' && size < app.options.grabFilesLargerThanMB;
 	}
 
@@ -334,11 +382,12 @@ class ReqFilter {
 		return ( disposition && disposition.indexOf("attachment") !== -1 );
 	}
 
-	/**
-	 * should we cancel the request and show Download Grab's download dialog?
-	 */
-	doesOverride(){
-		return this.hasAttachment();
+	isAJAX(){
+		return this.download.resourceType === 'xmlhttprequest';
+	}
+
+	isMedia(){
+		return this.download.resourceType === 'media';
 	}
 
 }
@@ -439,7 +488,7 @@ var constants = {
 	],
 	mimeWhiteList : [
 		//other
-		'application/octet-stream', 'application/binray',
+		'application/octet-stream', 'application/binary',
 		//compressed
 		'application/x-compressed', 'application/x-zip-compressed', 'application/zip', 
 		'application/x-gzip', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z',

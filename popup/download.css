@@ -1,0 +1,20 @@
+html, body {
+	min-width: auto !important;
+	max-width: none !important;
+	margin: 0 auto !important;
+	height: 100% !important;
+}
+
+#content {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	padding: 10px;
+	margin: 0 auto;
+	width: 90%;
+	color: #202340;
+}
+
+#download-details {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
