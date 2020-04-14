@@ -47,8 +47,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 });
 
+//todo: add report button 
 window.addEventListener("beforeunload", (event) => {
-	let message = {type: 'dl_dialog_closing', windowId: windowId};
+	let downloadPageTabId = download.req_details.tabId;
+	let message = {type: 'dl_dialog_closing', windowId: windowId, downloadPageTabId: downloadPageTabId};
 	browser.runtime.sendMessage(message);
 });
 

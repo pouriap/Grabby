@@ -314,13 +314,10 @@ class ReqFilter {
 		let mime = this.download.getHeader("content-type", "response").toLowerCase();
 		if (mime){
 			for(let listMime of list){
-				//we search for the mim'es occurence in the content-type because sometimes 
+				//we search for the mime's occurence in the content-type because sometimes 
 				//content-type has other things in it as well
 				if(mime.indexOf(listMime) !== -1){
 					return true;
-				}
-				else{
-					console.log(mime, " does not contain ", listMime);
 				}
 			}
 		}

@@ -172,6 +172,13 @@ function doOnMessage(message, sender, sendResponse) {
 	}
 	else if(message.type === "dl_dialog_closing"){
 		delete app.downloadDialogs[message.windowId];
+		let downloadPageTabId = message.downloadPageTabId;
+		browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
+			if(tabInfo.url === "about:blank"){
+				console.log('closing tab: ', tabInfo);
+				browser.tabs.remove(tabInfo.id);
+			}
+		});
 	}
 
 	return Promise.resolve();
