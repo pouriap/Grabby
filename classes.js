@@ -222,6 +222,13 @@ class Download {
 					this.filename = matches[1];
 				}
 			}
+			//todo: create a mime<->extension mapping and give extension to files that don't have it
+			//if the file has no extension give it a serial number
+			//useful for urls like 'media.tenor.com/videos/9dd6603af0ac712c6a38dde9255746cd/mp4'
+			//where lots of resources have the same path and hence the same filename
+			if(this.filename !== "unknown" && this.filename.indexOf(".") === -1){
+				this.filename = this.filename + "_" + this.requestId;
+			}
 
 		}
 

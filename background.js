@@ -97,7 +97,8 @@ function doOnHeadersReceived(details) {
 	if(
 		filter.isWebSocket() ||
 		filter.isSizeBlocked() ||
-		!filter.isStatusOK()
+		!filter.isStatusOK() ||
+		filter.isAJAX()
 	){
 		return;
 	}
@@ -143,12 +144,13 @@ function doOnHeadersReceived(details) {
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
-
+	//todo: mkv is considered media and not downloaded
+	//todo: pdf is downloaded and not opened with browser
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
-			download.debug_reason !== 'graylist' && 
-			!filter.isMedia()  && 
-			!filter.isAJAX()
+			download.debug_reason !== 'graylist'
+			 && !filter.isMedia()
+			// && !filter.isAJAX()
 		){
 			app.showDlDialog(download);
 			console.log("download override: ", download);
