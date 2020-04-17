@@ -1,5 +1,11 @@
 var DEBUG = true;
+/**
+ * @type {DlGrabApp}
+ */
 var app;
+/**
+ * @type {Download}
+ */
 var clickedDownload = {};
 
 //TODO:  getBackgroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
@@ -98,7 +104,7 @@ function showDownloadDetails(download){
 	document.getElementById("filename").innerHTML = download.getFilename();
 	document.getElementById("filename").setAttribute("title", download.getFilename());
 	document.getElementById("size").innerHTML = 
-		download.getSizeMB() + ((download.getSizeMB() !== "unknown")? "MB" : "");
+		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
 	document.getElementById("time").innerHTML = 
 		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
 	document.getElementById("url").innerHTML = download.url;
@@ -174,7 +180,7 @@ function downloadWithFirefox() {
 
 function copyCurlCommand(){
 
-	let cmd = `curl -JLO "${clickedDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl -JL "${clickedDownload.url}" -o "${clickedDownload.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	if(clickedDownload.reqHeaders['cookie']){
 		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
@@ -194,7 +200,7 @@ function copyCurlCommand(){
 
 function copyWgetCommand(){
 
-	let cmd = `wget "${clickedDownload.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${clickedDownload.url}" -o "${clickedDownload.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	if(clickedDownload.reqHeaders['cookie']){
 		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
@@ -228,10 +234,10 @@ function copyToClipBoard(content){
 
 		copying.then(function() {
 			//success
-			copyCallBack(true);
+			_copyCallBack(true);
 		}, function() {
 			//fail
-			copyCallBack(false);
+			_copyCallBack(false);
 		});
 
 		console.log("API copy performed");
@@ -260,15 +266,15 @@ function copyToClipBoard(content){
 
 			console.log('legacy copy performed');
 
-			copyCallBack(success);
+			_copyCallBack(success);
 
 		}catch(error){
 			console.log("legacy copy failed: ", error);
-			copyCallBack(false);
+			_copyCallBack(false);
 		}
 	}
 
-	function copyCallBack(success){
+	function _copyCallBack(success){
 
 		console.log('copy callback!');
 

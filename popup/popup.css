@@ -77,6 +77,7 @@ ul, li{
 	width: 80%;
 	margin: 0 auto;
 	padding: 0 0 20px 0;
+	-moz-user-select: text !important;
 }
 
 #download-details #info{
@@ -179,10 +180,10 @@ ul, li{
 	0%, 100% { opacity: 0; }
 	20% { opacity: 1 }
 }
-#output.fail{
+.fail{
 	color: #d70022;
 }
-#output.success{
+.success{
 	color: #12bc00;
 }
 
@@ -199,4 +200,11 @@ ul, li{
 
 .debug_gray{
 	background-color: rgb(216, 216, 216);
+}
+
+#report{
+	display: block;
+	padding: 4px;
+	font-family: Segoe UI;
+	font-size: 12px;
 }

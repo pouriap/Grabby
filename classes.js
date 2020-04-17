@@ -17,8 +17,8 @@ and any information it collects. Please consult our best practices guide for cre
 information is being exchanged with the native application. Data exchanged with the 
 native application must be in accordance with our No Surprises policy.
 */
-
-
+//todo: how does firefox determine mime types:
+//https://developer.mozilla.org/en-US/docs/Mozilla/How_Mozilla_determines_MIME_Types
 
 
 
@@ -152,6 +152,7 @@ class Download {
 	constructor(details, origin, reqHeaders, resHeaders){
 		this.requestId = details.requestId;
 		this.url = details.url;
+		this.statusCode = details.statusCode;
 		this.time = details.timeStamp;
 		this.resourceType = details.type;
 		this.origin = origin;
@@ -186,7 +187,7 @@ class Download {
 			return headerItem.value;
 		}
 		else{
-			return '';
+			return undefined;
 		}
 
 	}
@@ -212,7 +213,8 @@ class Download {
 				}
 
 			}
-			else{
+			//use URL if content-disposition didn't provide a file name
+			if(this.filename === "unknown"){
 				const regex = /\/([^\/\n\?\=]*)(\?|$)/;
 				let matches = this.url.match(regex);
 				if(matches && matches[1]){
@@ -229,20 +231,20 @@ class Download {
 	 * get content-length (if available) of the resource requested
 	 * @returns size in MB or "unknown" if not available
 	 */
-	getSizeMB(){
+	getSize(){
 
-		if(typeof this.sizeMB === "undefined"){
+		if(typeof this.fileSize === "undefined"){
 
-			this.sizeMB = "unknown";
+			this.fileSize = "unknown";
 
 			let contentLength = this.getHeader("content-length", "response");
-			if (contentLength) {
-				let fileSizeMB = (contentLength / 1048576).toFixed(1);
-				this.sizeMB = fileSizeMB;
+			let size = Number(contentLength);
+			if(Number.isInteger(size)){
+				this.fileSize = size;
 			}
 		}
 
-		return this.sizeMB;
+		return this.fileSize;
 	}
 
 	/**
@@ -311,8 +313,9 @@ class ReqFilter {
 	 * @param {array} list 
 	 */
 	_isInMimeList(list){
-		let mime = this.download.getHeader("content-type", "response").toLowerCase();
+		let mime = this.download.getHeader("content-type", "response");
 		if (mime){
+			mime = mime.toLowerCase();
 			for(let listMime of list){
 				//we search for the mime's occurence in the content-type because sometimes 
 				//content-type has other things in it as well
@@ -329,62 +332,128 @@ class ReqFilter {
 	 * @param {array} list list of webRequest.ResourceTypes 
 	 */
 	_isInTypeList(list){
-		return list.includes(this.download.resourceType) && app.options.excludeWebFiles;
+		return list.includes(this.download.resourceType);
 	}
 
 	
 	/* public functions */
 
-	isProtocoLBlackListed(){
-		return this._isInProtocolList(constants.protocolBlackList);
-	}
-
-	isSizeBlackListed(){
-		let size = this.download.getSizeMB();
+	isSizeBlocked(){
+		let size = this.download.getSize();
 		if(size === 0){
 			return true;
 		}
 		return size !== 'unknown' && size < app.options.grabFilesLargerThanMB;
 	}
 
-	isExtensionBlackListed(){
-		return this._isInExtensionList(constants.extensionBlackList);
+	isWebSocket(){
+		if(typeof this._isWebSocket === 'undefined'){
+			this._isWebSocket = 
+				this._isInTypeList(constants.webSocketTypes) ||
+				this._isInProtocolList(constants.webSocketProtos);
+		}
+		return this._isWebSocket; 
 	}
 
-	isMimeBlackListed(){
-		return this._isInMimeList(constants.mimeBlackList);
+	isImage(){
+		if(typeof this._isImage === 'undefined'){
+			this._isImage = 
+			this._isInTypeList(constants.imageTypes) ||
+			this._isInExtensionList(constants.imageExts) ||
+			this._isInMimeList(constants.imageMimes);
+		}
+		return this._isImage;
 	}
 
-	isTypeBlackListed(){
-		return this._isInTypeList(constants.typeBlackList);
+	isFont(){
+		if(typeof this._isFont === 'undefined'){
+			this._isFont = 
+				this._isInTypeList(constants.fontTypes) ||
+				this._isInExtensionList(constants.fontExts) ||
+				this._isInMimeList(constants.fontMimes);
+		}
+		return this._isFont;
 	}
 
-	isExtensionWhiteListed(){
-		return this._isInExtensionList(constants.extensionWhiteList);
+	isTextual(){
+		if(typeof this._isTextual === 'undefined'){
+			this._isTextual = 
+				this._isInTypeList(constants.textualTypes) ||
+				this._isInExtensionList(constants.textualExts) ||
+				this._isInMimeList(constants.textualMimes);
+		}
+		return this._isTextual;
 	}
 
-	isMimeWhiteListed(){
-		return this._isInMimeList(constants.mimeWhiteList);
+	isOtherWebResource(){
+		if(typeof this._isWebResource === 'undefined'){
+			this._isWebSocket = this._isInTypeList(constants.otherWebTypes);
+		}
+		return this._isWebSocket;
 	}
 
-	isTypeWhiteListed(){
-		return this._isInTypeList(constants.typeWhiteList);
+	isMedia(){
+		if(typeof this._isMedia === 'undefined'){
+			this._isMedia = 
+				this._isInTypeList(constants.mediaTypes) ||
+				this._isInExtensionList(constants.mediaExts) ||
+				this._isInMimeList(constants.mediaMimes);
+		}
+		return this._isMedia;
+	}
+
+	isCompressed(){
+		if(typeof this._isCompressed === 'undefined'){
+			this._isCompressed = 
+				this._isInExtensionList(constants.compressedExts) ||
+				this._isInMimeList(constants.compressedMimes);
+		}
+		return this._isCompressed;
+	}
+
+	isDocument(){
+		if(typeof this._isDocument === 'undefined'){
+			this._isDocument = 
+				this._isInExtensionList(constants.documentExts) ||
+				this._isInMimeList(constants.documentMimes);
+		}
+		return this._isDocument;
+	}
+
+	isOtherBinary(){
+		if(typeof this._isOtherBinary === 'undefined'){
+			this._isOtherBinary = 
+				this._isInExtensionList(constants.otherBinaryExts) ||
+				this._isInMimeList(constants.otherBinaryMimes);
+		}
+		return this._isOtherBinary;
 	}
 
 	/**
 	 * does this request have an "attachment" header?
 	 */
 	hasAttachment(){
-		let disposition = this.download.getHeader('content-disposition', 'response').toLowerCase();
-		return ( disposition && disposition.indexOf("attachment") !== -1 );
+		if(typeof this._hasAttachment === 'undefined'){
+			let disposition = this.download.getHeader('content-disposition', 'response');
+			this._hasAttachment = ( disposition && disposition.toLowerCase().indexOf("attachment") !== -1 );
+		}
+		return this._hasAttachment;
 	}
 
 	isAJAX(){
-		return this.download.resourceType === 'xmlhttprequest';
+		if(typeof this._isAJAX === 'undefined'){
+			this._isAJAX = this._isInTypeList(constants.ajaxTypes);
+		}
+		return this._isAJAX;
 	}
 
-	isMedia(){
-		return this.download.resourceType === 'media';
+	isStatusOK(){
+		if(typeof this._isStatusOK === 'undefined'){
+			this._isStatusOK = 
+				(this.download.statusCode == 200) || 
+				(this.download.statusCode == 206);
+		}
+		return this._isStatusOK;
 	}
 
 }
@@ -454,60 +523,101 @@ class FixedSizeMap {
 
 var constants = {
 	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
-	protocolBlackList : ["ws://", "wss://"],
-	extensionBlackList : [
+
+
+	webSocketProtos : ["ws://", "wss://"],
+	webSocketTypes: ['websocket'],
+
+	imageExts: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff'],
+	imageMimes: [
+		'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/vnd.microsoft.icon', 
+		'image/bmp', 'image/webp', 'image/tiff',
+	],
+	imageTypes: ['image', 'imageset'],
+
+
+	fontExts: ['ttf', 'otf', 'eot', 'woff2', 'woff'],
+	fontMimes: [
+		'font/ttf', 'font/otf', 'application/vnd.ms-fontobject', 'font/woff', 'font/woff2', 
+	],
+	fontTypes: [
+		'font'
+	],
+
+
+	textualExts : [
 		//static content
-		'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss', 'txt',
+		'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss', 'txt',
 		//dynamic pages
 		'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
 	],
-	mimeBlackList : [
+	textualMimes : [
 		//static content
-		'text/html', 'application/xhtml+xml', 
+		'text/css', 'text/javascript', 'application/javascript', 'text/html', 'application/xhtml+xml', 
 		'application/json', 'application/ld+json', 'application/xml', 'text/xml', 'text/plain',
 		//dynamic pages
 		'application/php', 
 	],
-	extensionWhiteList : [
-		//compressed 
+	textualTypes: ['stylesheet', 'script', 'xbl', 'xml_dtd', 'xslt', 'web_manifest'],
+
+
+	otherWebTypes: ['object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative'],
+
+
+	ajaxTypes: ['xmlhttprequest'],
+
+
+	compressedExts: [
 		'zip', 'gzip', 'gz', 'bz', 'bz2', '7z', 'tar', 'tgz', 'rar', 'jar', 'xpi', 'apk',
-		//platform-specific
-		'exe', 'msi', 'deb', 'rpm', 'pkg', 'dmg', 'app', 
-		//audio 
-		'wav', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma',
-		//video 
-		'avi', 'flv', 'swf', 'wmv', 'mov', 'qt', 'ts', 'mp4', 'm4p', 'm4v', 'mkv', 'mpg', 'mpeg',
-		'mp2', 'mpv', 'mpe', 'avchd',  
-		//documents
-		'doc', 'xls', 'ppt', 'docx', 'xlsx', 'pptx', 'pdf', 'epub', 'mobi', 'djvu', 'cbr',
-		//other
-		'bin', 'iso',
 	],
-	mimeWhiteList : [
-		//other
-		'application/octet-stream', 'application/binary',
-		//compressed
+	compressedMimes: [
 		'application/x-compressed', 'application/x-zip-compressed', 'application/zip', 
 		'application/x-gzip', 'application/x-bzip', 'application/x-bzip2', 'application/x-7z',
 		'application/x-tar', 'application/gnutar', 	'application/x-rar-compressed',
+	],
+
+
+	mediaExts: [
+		//audio 
+		'wav', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
+		//video 
+		'avi', 'flv', 'swf', 'wmv', 'mov', 'qt', 'ts', 'mp4', 'm4p', 'm4v', 'mkv', 'mpg', 'mpeg',
+		'mp2', 'mpv', 'mpe', 'avchd', 'webm',
+	],
+	mediaMimes: [
 		//audio
 		'audio/wav', 'audio/aiff', 'audio/x-aiff', 'audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg-3', 
-		'audio/aac', 'audio/x-aac',
+		'audio/aac', 'audio/x-aac', 'audio/mp3', 'audio/webm',
 		//video
 		'application/x-troff-msvideo', 'video/avi', 'video/msvideo', 'video/x-msvideo', 
-		'application/x-shockwave-flash', 'video/quicktime', 'video/mp2t', 'video/mpeg',
+		'application/x-shockwave-flash', 'video/quicktime', 'video/mp2t', 'video/mpeg', 
+		'video/mp4', 'video/webm',
+	],
+	mediaTypes : [
+		'media'
+	],
+
+
+	documentExts : [
 		//documents
+		'doc', 'xls', 'ppt', 'docx', 'xlsx', 'pptx', 'pdf', 'epub', 'mobi', 'djvu', 'cbr',
+	],
+	documentMimes: [
 		'application/msword', 'application/mspowerpoint', 'application/powerpoint', 
 		'application/x-mspowerpoint','application/excel', 'application/x-excel', 'application/pdf',
 	],
-	typeBlackList : [
-		'xmlhttprequest', 
-		'font', 'image', 'imageset', 'stylesheet', 'script', 
-		'object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative', 
-		'web_manifest', 'websocket', 'xbl', 'xml_dtd', 'xslt',
+
+
+	otherBinaryExts: [
+		//platform-specific
+		'exe', 'msi', 'deb', 'rpm', 'pkg', 'dmg', 'app', 
+		//other
+		'bin', 'iso',
 	],
-	typeWhiteList : [
-		'media'
-	]
+	otherBinaryMimes : [
+		//other
+		'application/octet-stream', 'application/binary',
+	],
+
 
 }

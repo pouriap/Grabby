@@ -34,6 +34,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		copyWgetCommand();
 	});
 
+	document.getElementById("report").addEventListener("click", function(evt){
+		reportDownload();
+	});
+
 	browser.windows.getCurrent().then((windowInfo)=>{
 		windowId = windowInfo.id;
 		let message = {type: 'dl_dialog_populate_request', windowId: windowId};
@@ -72,9 +76,7 @@ function onGot(page) {
 	document.getElementById("filename").innerHTML = download.getFilename();
 	document.getElementById("filename").setAttribute("title", download.getFilename());
 	document.getElementById("size").innerHTML = 
-		download.getSizeMB() + ((download.getSizeMB() !== "unknown")? "MB" : "");
-	document.getElementById("time").innerHTML = 
-		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
+		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
 	document.getElementById("url").innerHTML = download.url;
 	document.getElementById("url").setAttribute("title", download.url);
 	document.getElementById("origin").innerHTML = download.origin;
@@ -82,6 +84,9 @@ function onGot(page) {
 	document.getElementById("output").style.display = 'none';
 
 }
+
+//todo: replicate accept-ranges request headers
+//todo: put all these in the same file
 
 function onError(error) {
 	console.log(`Error getting data from background: ${error}`);
@@ -134,7 +139,7 @@ function downloadWithFirefox() {
 
 function copyCurlCommand(){
 
-	let cmd = `curl -JLO "${download.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `curl -JL "${download.url}" -o "${download.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	if(download.reqHeaders['cookie']){
 		cmd = cmd + ` --header "Cookie: ${download.reqHeaders['cookie']}"`;
@@ -156,7 +161,7 @@ function copyCurlCommand(){
 
 function copyWgetCommand(){
 
-	let cmd = `wget "${download.url}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${download.url}" -o "${download.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	if(download.reqHeaders['cookie']){
 		cmd = cmd + ` --header "Cookie: ${download.reqHeaders['cookie']}"`;
@@ -185,10 +190,10 @@ function copyToClipBoard(content){
 
 		copying.then(function() {
 			//success
-			copyCallBack(true);
+			_copyCallBack(true);
 		}, function() {
 			//fail
-			copyCallBack(false);
+			_copyCallBack(false);
 		});
 
 		console.log("API copy performed");
@@ -217,15 +222,15 @@ function copyToClipBoard(content){
 
 			console.log('legacy copy performed');
 
-			copyCallBack(success);
+			_copyCallBack(success);
 
 		}catch(error){
 			console.log("legacy copy failed: ", error);
-			copyCallBack(false);
+			_copyCallBack(false);
 		}
 	}
 
-	function copyCallBack(success){
+	function _copyCallBack(success){
 
 		console.log('copy callback!');
 
@@ -246,3 +251,45 @@ function copyToClipBoard(content){
 	}
 
 }
+
+
+function reportDownload(download){
+
+	//remove possibly identifying information
+	for(let i=0; i<download.reqHeaders.length; i++){
+		let headerName = download.reqHeaders[i].name;
+		if(headerName.toLowerCase() === "cookie"){
+			delete download.reqHeaders[i];
+			break;
+		}
+	}
+	delete download.req_details.requestHeaders;
+
+	let json = JSON.stringify(download);
+	let data = "value1=" + encodeURIComponent(json);
+	let iftttURL = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";
+	_sendPOSTRequest(iftttURL, data);
+
+	function _sendPOSTRequest(url, data){
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", url, true);
+		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+		xhr.onreadystatechange = function() {
+			console.log("state changed");
+			if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+				document.getElementById("report").innerHTML = "Report submitted. Thank you.";
+				document.getElementById("report").setAttribute("class", "success");
+			}
+			else{
+				document.getElementById("report").innerHTML = "Failed to submit error.";
+				document.getElementById("report").setAttribute("class", "fail");
+			}
+			document.getElementById("report").setAttribute("disabled", "disabled");
+		}
+
+		xhr.send(data);
+	}
+
+}
+

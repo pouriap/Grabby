@@ -2,17 +2,16 @@
 
 var DEBUG = true;
 
-// a super duper global variable
-/** @type {DlGrabApp} */
+/**
+ * a super duper global variable
+ * @type {DlGrabApp}
+ */
 var app;
-
 
 (async () => {
 
 	let options = await loadOptions();
 	app = new DlGrabApp(options);
-	// is used for developement
-	app.debug = true;
 	console.log('initializing app...');
 	await app.initialize();
 	console.log('app init finished');
@@ -52,7 +51,7 @@ function doOnBeforeSendHeaders(details){
 	//create a request object and put necessary information in it
 	let request = {};
 	let requestId = details.requestId;
-	request.origin = details.originUrl;
+	request.origin = details.originUrl || "N/A";
 	request.headers = details.requestHeaders;
 	request.details = details;
 
@@ -94,29 +93,46 @@ function doOnHeadersReceived(details) {
 	//the lists should be sorted from the least computationally intensive to the most
 
 	//blacklists
+
 	if(
-		filter.isTypeBlackListed() ||
-		filter.isProtocoLBlackListed() ||
-		filter.isSizeBlackListed() ||
-		filter.isExtensionBlackListed() ||
-		filter.isMimeBlackListed()
+		filter.isWebSocket() ||
+		filter.isSizeBlocked() ||
+		!filter.isStatusOK()
 	){
 		return;
 	}
 
+	if(app.options.excludeWebFiles){
+		if(
+			filter.isImage() ||
+			filter.isFont() ||
+			filter.isTextual() ||
+			filter.isOtherWebResource()
+		){
+			return;
+		}
+	}
+
+	
 	//whitelists
-	if(filter.hasAttachment() && !filter.isAJAX()){
+	if(filter.hasAttachment()){
 		if(DEBUG) download.debug_reason = "attachment";
 		app.addToAllDownloads(download);
 	}
-	
-	else if(filter.isExtensionWhiteListed()){
-		if(DEBUG) download.debug_reason = "extension: " + download.getFileExtension();
+	else if(filter.isCompressed()){
+		if(DEBUG) download.debug_reason = "compressed"
 		app.addToAllDownloads(download);
 	}
-
-	else if(filter.isMimeWhiteListed()){
-		if(DEBUG) download.debug_reason = "mime: " + download.getContentType();
+	else if(filter.isDocument()){
+		if(DEBUG) download.debug_reason = "document"
+		app.addToAllDownloads(download);
+	}
+	else if(filter.isOtherBinary()){
+		if(DEBUG) download.debug_reason = "binary"
+		app.addToAllDownloads(download);
+	}
+	else if(filter.isMedia()){
+		if(DEBUG) download.debug_reason = "media"
 		app.addToAllDownloads(download);
 	}
 
@@ -129,7 +145,11 @@ function doOnHeadersReceived(details) {
 	}
 
 	if(app.options.overrideDlDialog || DEBUG){
-		if(download.debug_reason !== 'graylist' && !filter.isMedia()){
+		if(
+			download.debug_reason !== 'graylist' && 
+			!filter.isMedia()  && 
+			!filter.isAJAX()
+		){
 			app.showDlDialog(download);
 			console.log("download override: ", download);
 			return {
