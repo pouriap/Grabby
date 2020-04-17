@@ -85,11 +85,11 @@ ul, li{
 }
 
 #download-details .action{
-	color: #0f1126 !important;
+	color: #0f1126;
 	text-decoration: none;
 	background: #ffffff;
 	padding: 5px;
-	border: 1px solid #0f1126 !important;
+	border: 1px solid #0f1126;
 	transition: all 0.4s ease 0s;
 	margin: 5px 20px;
 	cursor: pointer;
@@ -98,22 +98,10 @@ ul, li{
 }
 
 #download-details .action:hover{
-	color: #ffffff !important;
+	color: #ffffff;
 	background: #363959;
-	border-color: #363959 !important;
+	border-color: #363959;
 	transition: all 0.4s ease 0s;
-}
-
-#download-details .disabled-action, #download-details .disabled-action:hover{
-	color: #b1b1b3 !important;
-	text-decoration: none;
-	background: #ffffff;
-	padding: 5px;
-	border: 1px solid #b1b1b3 !important;
-	transition: all 0.4s ease 0s;
-	margin: 5px 20px;
-	cursor: default;
-	border-radius: 2px;
 }
 
 #download-details #action-back{
@@ -131,12 +119,38 @@ ul, li{
 	background-image: url('back-white.svg');
 }
 
+#download-details #action-report{
+	display: block;
+	padding: 4px;
+	font-family: Segoe UI;
+	font-size: 12px;
+	color: #d70022;
+	border-color: #d70022;
+}
+
+#download-details #action-report:hover{
+	background-color: #d70022;
+	color: white;
+}
+
 #downloads-list #action-clearList{
 	width: 22px;
 	position: absolute;
 	left: 10px;
 	top: 10px;
 	cursor: pointer;
+}
+
+#download-details .disabled-action, #download-details .disabled-action:hover{
+	color: #b1b1b3 !important;
+	text-decoration: none;
+	background-color: #ffffff !important;
+	padding: 5px;
+	border: 1px solid #b1b1b3 !important;
+	transition: all 0.4s ease 0s;
+	margin: 5px 20px;
+	cursor: default;
+	border-radius: 2px;
 }
 
 #download-details .desc{
@@ -162,8 +176,9 @@ ul, li{
 	margin-bottom: 10px;
 }
 
-#download-details .spacer{
-	margin: 10px 0;
+li.spacer{
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
 
 #download-details #output{
@@ -200,11 +215,4 @@ ul, li{
 
 .debug_gray{
 	background-color: rgb(216, 216, 216);
-}
-
-#report{
-	display: block;
-	padding: 4px;
-	font-family: Segoe UI;
-	font-size: 12px;
 }

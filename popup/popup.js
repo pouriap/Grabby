@@ -14,32 +14,10 @@ var selectedDl = {};
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
-	document.getElementById("action-back").addEventListener("click", function(evt){
-		showDownloadsList();
-	});
-
-	document.getElementById("action-clearList").addEventListener("click", function(evt){
-		clearDownloadsList();
-	});
-	
-	document.getElementById("action-copy").addEventListener("click", function(evt){
-		copyLinkToClipboard(selectedDl);
-	});
-
-	document.getElementById("action-firefox").addEventListener("click", function(evt){
-		downloadWithFirefox(selectedDl);
-	});
-
-	document.getElementById("action-idm").addEventListener("click", function(evt){
-		downloadWithIDM(selectedDl);
-	});
-
-	document.getElementById("action-curl").addEventListener("click", function(evt){
-		copyCurlCommand(selectedDl);
-	});
-
-	document.getElementById("action-wget").addEventListener("click", function(evt){
-		copyWgetCommand(selectedDl);
+	document.querySelectorAll(".action").forEach(function(action){
+		action.addEventListener('click', (evt)=>{
+			actionClicked(selectedDl, action);
+		});
 	});
 
 	var getting = browser.runtime.getBackgroundPage();
@@ -81,14 +59,7 @@ function onGot(page) {
 	}
 
 	//enable/disable IDM download
-	if(page.app.runtime.idmAvailable){
-		document.getElementById('action-idm').classList.remove("disabled-action");
-		document.getElementById('action-idm').removeAttribute("title");
-	}
-	else{
-		document.getElementById('action-idm').classList.add("disabled-action");
-		document.getElementById('action-idm').setAttribute("title", "Cannot communicate with IDM");
-	}
+	setActionEnabled(document.getElementById('action-idm'), page.app.runtime.idmAvailable);
 
 }
 

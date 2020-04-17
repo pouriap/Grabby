@@ -1,4 +1,51 @@
 /**
+ * 
+ * @param {Download} selectedDl 
+ * @param {Element} clickedAction 
+ */
+function actionClicked(selectedDl, clickedAction){
+
+	let id = clickedAction.id;
+	let disabled = clickedAction.getAttribute("class").indexOf("disabled-action") !== -1;
+
+	if(disabled){
+		return;
+	}
+
+	switch(id){
+		case "action-copy":
+			copyLinkToClipboard(selectedDl);
+			break;
+
+		case "action-firefox":
+			downloadWithFirefox(selectedDl);
+			break;
+		
+		case "action-idm":
+			downloadWithIDM(selectedDl);
+			break;
+
+		case "action-curl":
+			copyCurlCommand(selectedDl);
+			break;
+
+		case "action-wget":
+			copyWgetCommand(selectedDl);
+			break;
+
+		case "action-report":
+			let source = (window.location.href.indexOf("popup.html") !== -1)? "popup dialog" : "download dialog";
+			reportDownload(selectedDl, source);
+			break;
+
+		default:
+			break;
+		
+	}
+
+}
+
+/**
  * @param {Download} download 
  */
 function copyLinkToClipboard(download){
@@ -168,7 +215,13 @@ function copyToClipBoard(content){
 /**
  * @param {Download} download 
  */
-function reportDownload(download){
+function reportDownload(download, source){
+
+	if(download.reported){
+		document.getElementById("action-report").innerHTML = "Already reported";
+		setActionEnabled(document.getElementById("action-report"), false);
+		return;
+	}
 
 	//remove possibly identifying information
 	for(let i=0; i<download.reqHeaders.length; i++){
@@ -182,6 +235,7 @@ function reportDownload(download){
 
 	let json = JSON.stringify(download);
 	let data = "value1=" + encodeURIComponent(json);
+	data = data + "&value2=" + source;
 	let iftttURL = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";
 	_sendPOSTRequest(iftttURL, data);
 
@@ -193,14 +247,15 @@ function reportDownload(download){
 		xhr.onreadystatechange = function() {
 			console.log("state changed");
 			if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-				document.getElementById("report").innerHTML = "Report submitted. Thank you.";
-				document.getElementById("report").setAttribute("class", "success");
+				document.getElementById("action-report").innerHTML = "Report submitted. Thank you.";
+				document.getElementById("action-report").setAttribute("class", "success");
+				download.reported = true;
 			}
 			else{
-				document.getElementById("report").innerHTML = "Failed to submit error.";
-				document.getElementById("report").setAttribute("class", "fail");
+				document.getElementById("action-report").innerHTML = "Failed to submit error.";
+				document.getElementById("action-report").setAttribute("class", "fail");
 			}
-			document.getElementById("report").setAttribute("disabled", "disabled");
+			setActionEnabled(document.getElementById("action-report"), false);
 		}
 
 		xhr.send(data);
@@ -214,4 +269,17 @@ function hideElement(element){
 
 function showElement(element){
 	element.classList.remove("hidden");
+}
+
+/**
+ * @param {Element} element 
+ * @param {boolean} enabled 
+ */
+function setActionEnabled(element, enabled){
+	if(enabled){
+		element.classList.remove("disabled-action");
+	}
+	else{
+		element.classList.add("disabled-action");
+	}
 }
