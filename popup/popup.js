@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
+	document.getElementById("action-back").addEventListener("click", function(evt){
+		showDownloadsList();
+	});
+
+	document.getElementById("action-clearList").addEventListener("click", function(evt){
+		clearDownloadsList();
+	});
+
 	var getting = browser.runtime.getBackgroundPage();
 	getting.then(onGot, onError);
 
@@ -78,6 +86,7 @@ function showDownloadDetails(download){
 	document.getElementById("filename").setAttribute("title", download.getFilename());
 	document.getElementById("size").innerHTML = 
 		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
+	document.getElementById("host").innerHTML = download.getHost();
 	document.getElementById("time").innerHTML = 
 		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
 	document.getElementById("url").innerHTML = download.url;

@@ -235,6 +235,19 @@ class Download {
 		return this.filename;
 	}
 
+	getHost(){
+
+		if(typeof this.host === "undefined"){
+			this.host = "unknown";
+			let host = this.getHeader("host", "request");
+			if(host){
+				this.host = host;
+			}
+		}
+
+		return this.host;
+	}
+
 	/**
 	 * get content-length (if available) of the resource requested
 	 * @returns size in MB or "unknown" if not available
