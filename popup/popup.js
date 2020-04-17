@@ -1,12 +1,14 @@
 var DEBUG = true;
+
 /**
  * @type {DlGrabApp}
  */
 var app;
+
 /**
  * @type {Download}
  */
-var clickedDownload = {};
+var selectedDl = {};
 
 //TODO:  getBackgroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
 
@@ -21,23 +23,23 @@ document.addEventListener("DOMContentLoaded", (event) => {
 	});
 	
 	document.getElementById("action-copy").addEventListener("click", function(evt){
-		copyLinkToClipboard();
+		copyLinkToClipboard(selectedDl);
 	});
 
 	document.getElementById("action-firefox").addEventListener("click", function(evt){
-		downloadWithFirefox();
+		downloadWithFirefox(selectedDl);
 	});
 
 	document.getElementById("action-idm").addEventListener("click", function(evt){
-		downloadWithIDM();
+		downloadWithIDM(selectedDl);
 	});
 
 	document.getElementById("action-curl").addEventListener("click", function(evt){
-		copyCurlCommand();
+		copyCurlCommand(selectedDl);
 	});
 
 	document.getElementById("action-wget").addEventListener("click", function(evt){
-		copyWgetCommand();
+		copyWgetCommand(selectedDl);
 	});
 
 	var getting = browser.runtime.getBackgroundPage();
@@ -69,9 +71,9 @@ function onGot(page) {
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");
-			let download = allDownloads.get(hash);
-			console.log('item clicked: ', download);
-			showDownloadDetails(download);
+			selectedDl = allDownloads.get(hash);
+			console.log('item clicked: ', selectedDl);
+			showDownloadDetails(selectedDl);
 		});
 
 		document.getElementById("downloads-list").appendChild(listItem);
@@ -114,7 +116,6 @@ function showDownloadDetails(download){
 	document.getElementById("output").style.display = 'none';
 	hideElement(dlList);
 	showElement(actionList);
-	clickedDownload = download;
 }
 
 /**
@@ -136,162 +137,4 @@ function clearDownloadsList(){
 	});
 	let message = {type: 'clear_list'};
 	browser.runtime.sendMessage(message);
-}
-
-function copyLinkToClipboard(){
-	copyToClipBoard(clickedDownload.url);
-}
-
-function downloadWithIDM(){
-
-	console.log("dling with IDM: ", clickedDownload);
-
-	if(!app.runtime.idmAvailable){
-		console.log("IDM is not available");
-		return;
-	}
-
-	let msgBase = "MSG#1#14#1#0:1";
-
-	let url = clickedDownload.url;
-	let userAgent = navigator.userAgent;
-	let cookies = clickedDownload.reqHeaders['cookie'];
-	let referer = clickedDownload.reqHeaders['referer'];
-
-	let urlCode = ",6=" + url.length + ":" + url;
-	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
-	let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
-	let refererCode = (referer)? (",50=" + referer.length + ":" + referer) : "";
-
-	let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode + ";";
-
-	let port = browser.runtime.connectNative("com.tonec.idm");
-	port.postMessage(IDMMessage);
-	port.disconnect();
-
-}
-
-function downloadWithFirefox() {
-	browser.downloads.download({
-		saveAs: true,
-		url: clickedDownload.url
-	});
-}
-
-function copyCurlCommand(){
-
-	let cmd = `curl -JL "${clickedDownload.url}" -o "${clickedDownload.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
-
-	if(clickedDownload.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
-	}
-	if(clickedDownload.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${clickedDownload.reqHeaders['referer']}"`;
-	}
-	if(clickedDownload.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${clickedDownload.reqHeaders['accept']}"`;
-	}
-	if(clickedDownload.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${clickedDownload.reqHeaders['accept-encoding']}"`;
-	}
-
-	copyToClipBoard(cmd);
-}
-
-function copyWgetCommand(){
-
-	let cmd = `wget "${clickedDownload.url}" -o "${clickedDownload.getFileExtension()}" --header "User-Agent: ${navigator.userAgent}"`;
-
-	if(clickedDownload.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${clickedDownload.reqHeaders['cookie']}"`;
-	}
-	if(clickedDownload.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${clickedDownload.reqHeaders['referer']}"`;
-	}
-	if(clickedDownload.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${clickedDownload.reqHeaders['accept']}"`;
-	}
-	if(clickedDownload.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${clickedDownload.reqHeaders['accept-encoding']}"`;
-	}
-
-	copyToClipBoard(cmd);
-}
-
-function hideElement(element){
-	element.classList.add("hidden");
-}
-
-function showElement(element){
-	element.classList.remove("hidden");
-}
-
-function copyToClipBoard(content){
-
-	try{
-
-		let copying = navigator.clipboard.writeText(content);
-
-		copying.then(function() {
-			//success
-			_copyCallBack(true);
-		}, function() {
-			//fail
-			_copyCallBack(false);
-		});
-
-		console.log("API copy performed");
-
-	}catch(error){
-
-		console.log("API copy failed: ", error);
-
-		try{
-
-			let hiddenText = document.createElement("textarea");
-			hiddenText.style.position = 'fixed';
-			hiddenText.style.top = 0;
-			hiddenText.style.left = 0;
-			hiddenText.style.width = '1px';
-			hiddenText.style.height = '1px';
-			hiddenText.style.padding = 0;
-
-			document.querySelector("body").appendChild(hiddenText);
-			hiddenText.value = content;
-			hiddenText.focus();
-			hiddenText.select();
-			hiddenText.setSelectionRange(0, 99999);	//for mobile devices
-			let success = document.execCommand('copy');
-			document.querySelector("body").removeChild(hiddenText);
-
-			console.log('legacy copy performed');
-
-			_copyCallBack(success);
-
-		}catch(error){
-			console.log("legacy copy failed: ", error);
-			_copyCallBack(false);
-		}
-	}
-
-	function _copyCallBack(success){
-
-		console.log('copy callback!');
-
-		if(success){
-			document.querySelector("#output").innerHTML = "copied successfully";
-			document.querySelector("#output").setAttribute("class", "success");
-		}
-		else{
-			document.querySelector("#output").innerHTML = "copy failed";
-			document.querySelector("#output").setAttribute("class", "fail");
-		}
-	
-		//flash the output text
-		document.querySelector("#output").style.display = 'block';
-		var oldItem = document.querySelector("#output");
-		var cloneItem = oldItem.cloneNode(true); 
-		document.querySelector("#info").replaceChild(cloneItem, oldItem);
-	}
-
 }

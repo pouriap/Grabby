@@ -216,7 +216,8 @@ class Download {
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
 				const regex = /\/([^\/\n\?\=]*)(\?|$)/;
-				let matches = this.url.match(regex);
+				let url = decodeURI(this.url);
+				let matches = url.match(regex);
 				if(matches && matches[1]){
 					this.filename = matches[1];
 				}
