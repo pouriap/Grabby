@@ -88,6 +88,7 @@ function downloadWithIDM(download){
  */
 function downloadWithFirefox(download) {
 	browser.downloads.download({
+		filename: download.getFilename(),
 		saveAs: true,
 		url: download.url
 	});
