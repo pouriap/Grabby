@@ -1,17 +1,11 @@
 var DEBUG = true;
 
 /**
- * @type {DlGrabApp}
- */
-var app;
-
-/**
  * @type {Download}
  */
 var selectedDl = {};
 
 var windowId;
-var downloadHash;
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -21,33 +15,26 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
-	browser.windows.getCurrent().then((windowInfo)=>{
-		windowId = windowInfo.id;
-		let message = {type: 'dl_dialog_populate_request', windowId: windowId};
-		let sending = browser.runtime.sendMessage(message);
-		sending.then((response)=>{
-			downloadHash = response.downloadHash;
-			var getting = browser.runtime.getBackgroundPage();
-			getting.then(onGot, onError);
-		});
+	globalizeApp().then(async function(){
+		windowId = (await browser.windows.getCurrent()).id;
+		let hash = app.downloadDialogs[windowId];
+		selectedDl = app.allDownloads.get(hash);
+		onGot();
 	});
 
 });
 
 //todo: add report button 
-window.addEventListener("beforeunload", (event) => {
+window.addEventListener("beforeunload", async function() {
 	let downloadPageTabId = selectedDl.req_details.tabId;
 	let message = {type: 'dl_dialog_closing', windowId: windowId, downloadPageTabId: downloadPageTabId};
 	browser.runtime.sendMessage(message);
 });
 
-function onGot(page) { 
-
-	app = page.app;
-	selectedDl = app.allDownloads.get(downloadHash);
+function onGot() { 
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), page.app.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), app.runtime.idmAvailable);
 
 	document.getElementById("filename").innerHTML = selectedDl.getFilename();
 	document.getElementById("filename").setAttribute("title", selectedDl.getFilename());

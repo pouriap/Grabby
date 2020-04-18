@@ -1,4 +1,17 @@
 /**
+ * adds the app variable to this popup's global scope
+ */
+function globalizeApp(){
+	return new Promise(async function(resolve){
+		let windowId = (await browser.windows.getCurrent()).id;
+		let message = {type: 'request_app_instance', windowId: windowId};
+		await browser.runtime.sendMessage(message);
+		console.log("got app instance: ", app);
+		resolve();
+	});
+}
+
+/**
  * 
  * @param {Download} selectedDl 
  * @param {Element} clickedAction 

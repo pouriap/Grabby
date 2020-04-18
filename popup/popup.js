@@ -1,11 +1,6 @@
 var DEBUG = true;
 
 /**
- * @type {DlGrabApp}
- */
-var app;
-
-/**
  * @type {Download}
  */
 var selectedDl = {};
@@ -28,14 +23,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		clearDownloadsList();
 	});
 
-	var getting = browser.runtime.getBackgroundPage();
-	getting.then(onGot, onError);
+	globalizeApp().then(()=>onGot());
 
 });
 
-function onGot(page) { 
+function onGot() { 
 
-	app = page.app;
 	let allDownloads = app.allDownloads;
 
 	//populate list of downloads
@@ -67,12 +60,8 @@ function onGot(page) {
 	}
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), page.app.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), app.runtime.idmAvailable);
 
-}
-
-function onError(error) {
-	console.log(`Error getting data from background: ${error}`);
 }
 
 /**

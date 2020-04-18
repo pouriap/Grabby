@@ -187,10 +187,10 @@ function doOnMessage(message, sender, sendResponse) {
 	else if(message.type === "clear_list"){
 		app.allDownloads = new FixedSizeMap(app.options.dlListSize);
 	}
-	else if(message.type === "dl_dialog_populate_request"){
-		let hash = app.downloadDialogs[message.windowId];
-		let response = {downloadHash: hash};
-		return Promise.resolve(response);
+	else if(message.type === "request_app_instance"){
+		let window = browser.extension.getViews({windowId: message.windowId})[0];
+		window.app = app;
+		return Promise.resolve();
 	}
 	else if(message.type === "dl_dialog_closing"){
 		delete app.downloadDialogs[message.windowId];
