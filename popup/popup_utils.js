@@ -81,8 +81,8 @@ function downloadWithIDM(download){
 
 	let url = download.url;
 	let userAgent = navigator.userAgent;
-	let cookies = download.reqHeaders['cookie'];
-	let referer = download.reqHeaders['referer'];
+	let cookies = download.getHeader('cookie');
+	let referer = download.getHeader('referer');
 
 	let urlCode = ",6=" + url.length + ":" + url;
 	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
@@ -114,17 +114,22 @@ function copyCurlCommand(download){
 
 	let cmd = `curl -JL "${download.url}" -o "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(download.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${download.reqHeaders['cookie']}"`;
+	let cookie = download.getHeader('cookie', 'request');
+	let referer = download.getHeader('referer', 'request');
+	let accept = download.getHeader('accept', 'request');
+	let acceptEncoding = download.getHeader('accept-encoding', 'request');
+
+	if(cookie){
+		cmd = cmd + ` --header "Cookie: ${cookie}"`;
 	}
-	if(download.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${download.reqHeaders['referer']}"`;
+	if(referer){
+		cmd = cmd + ` --header "Referer: ${referer}"`;
 	}
-	if(download.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${download.reqHeaders['accept']}"`;
+	if(accept){
+		cmd = cmd + ` --header "Accept: ${accept}"`;
 	}
-	if(download.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${download.reqHeaders['accept-encoding']}"`;
+	if(acceptEncoding){
+		cmd = cmd + ` --header "Accept-Encoding: ${acceptEncoding}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -137,17 +142,22 @@ function copyWgetCommand(download){
 
 	let cmd = `wget "${download.url}" -o "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
 
-	if(download.reqHeaders['cookie']){
-		cmd = cmd + ` --header "Cookie: ${download.reqHeaders['cookie']}"`;
+	let cookie = download.getHeader('cookie', 'request');
+	let referer = download.getHeader('referer', 'request');
+	let accept = download.getHeader('accept', 'request');
+	let acceptEncoding = download.getHeader('accept-encoding', 'request');
+
+	if(cookie){
+		cmd = cmd + ` --header "Cookie: ${cookie}"`;
 	}
-	if(download.reqHeaders['referer']){
-		cmd = cmd + ` --header "Referer: ${download.reqHeaders['referer']}"`;
+	if(referer){
+		cmd = cmd + ` --header "Referer: ${referer}"`;
 	}
-	if(download.reqHeaders['accept']){
-		cmd = cmd + ` --header "Accept: ${download.reqHeaders['accept']}"`;
+	if(accept){
+		cmd = cmd + ` --header "Accept: ${accept}"`;
 	}
-	if(download.reqHeaders['accept-encoding']){
-		cmd = cmd + ` --header "Accept-Encoding: ${download.reqHeaders['accept-encoding']}"`;
+	if(acceptEncoding){
+		cmd = cmd + ` --header "Accept-Encoding: ${acceptEncoding}"`;
 	}
 
 	copyToClipBoard(cmd);
@@ -237,17 +247,19 @@ function reportDownload(download, source){
 		return;
 	}
 
-	//remove possibly identifying information
-	for(let i=0; i<download.reqHeaders.length; i++){
-		let headerName = download.reqHeaders[i].name;
+	downloadClone = JSON.parse(JSON.stringify(download));
+
+	//remove privacy/security breaching headers
+	let requestHeaders = downloadClone.reqDetails.requestHeaders;
+	for(let i=0; i<requestHeaders.length; i++){
+		let headerName = requestHeaders[i].name;
 		if(headerName.toLowerCase() === "cookie"){
-			delete download.reqHeaders[i];
+			delete requestHeaders[i];
 			break;
 		}
 	}
-	delete download.req_details.requestHeaders;
 
-	let json = JSON.stringify(download);
+	let json = JSON.stringify(downloadClone);
 	let data = "value1=" + encodeURIComponent(json);
 	data = data + "&value2=" + source;
 	let iftttURL = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";

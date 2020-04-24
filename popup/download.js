@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 //todo: add report button 
 window.addEventListener("beforeunload", async function() {
-	let downloadPageTabId = selectedDl.req_details.tabId;
+	let downloadPageTabId = selectedDl.reqDetails.tabId;
 	let message = {type: 'dl_dialog_closing', windowId: windowId, downloadPageTabId: downloadPageTabId};
 	browser.runtime.sendMessage(message);
 });

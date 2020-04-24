@@ -143,21 +143,19 @@ class DlGrabApp {
 class Download {
 
 	/**
-	 * Creates a new DlIem
-	 * @param {object} details the 'details' object attached to a request
-	 * @param {string} origin page from which it was reqested
-	 * @param {array} reqHeaders 
-	 * @param {array} resHeaders 
+	 * Creates a new Download object
+	 * @param {object} reqDetails the 'details' object attached to a request
+	 * @param {object} resDetails the 'details' object attached to a response
 	 */
-	constructor(details, origin, reqHeaders, resHeaders){
-		this.requestId = details.requestId;
-		this.url = details.url;
-		this.statusCode = details.statusCode;
-		this.time = details.timeStamp;
-		this.resourceType = details.type;
-		this.origin = origin;
-		this.reqHeaders = reqHeaders;
-		this.resHeaders = resHeaders;
+	constructor(reqDetails, resDetails){
+		this.requestId = resDetails.requestId;
+		this.url = resDetails.url;
+		this.statusCode = resDetails.statusCode;
+		this.time = resDetails.timeStamp;
+		this.resourceType = resDetails.type;
+		this.origin = reqDetails.originUrl || "N/A";
+		this.reqDetails = reqDetails;
+		this.resDetails = resDetails;
 	}
 
 	getHash(){
@@ -173,10 +171,10 @@ class Download {
 
 		let headers;
 		if(headerDirection === 'request'){
-			headers = this.reqHeaders;
+			headers = this.reqDetails.requestHeaders;
 		}
 		else{
-			headers = this.resHeaders;
+			headers = this.resDetails.responseHeaders;
 		}
 
 		let headerItem =  headers.find(function(header){

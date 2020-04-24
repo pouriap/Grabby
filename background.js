@@ -48,15 +48,13 @@ var app;
  */
 function doOnBeforeSendHeaders(details){
 
-	//create a request object and put necessary information in it
+	//store request details
+	//when the response is received request and response details are used to create a Download obj
 	let request = {};
-	let requestId = details.requestId;
-	request.origin = details.originUrl || "N/A";
-	request.headers = details.requestHeaders;
 	request.details = details;
 
 	//put the request in allRequests so it can be accessed by it's requestId when response is received
-	app.allRequests.put(requestId, request);
+	app.allRequests.put(details.requestId, request);
 
 }
 
@@ -79,14 +77,7 @@ function doOnHeadersReceived(details) {
 
 	//creating a new download object because will delete the original from allRequests
 	//in doOnCompleted() after the request is completed
-	let origin = requestOfThisResponse.origin;
-	let reqHeaders = requestOfThisResponse.headers;
-	let resHeaders = details.responseHeaders;
-
-	let download = new Download(details, origin, reqHeaders, resHeaders);
-
-	if(DEBUG) download.res_details = details;
-	if(DEBUG) download.req_details = requestOfThisResponse.details;
+	let download = new Download(requestOfThisResponse.details, details);
 
 	let filter = new ReqFilter(download);
 
