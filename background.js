@@ -105,7 +105,7 @@ function doOnHeadersReceived(details) {
 		}
 	}
 
-	
+	//todo: private browsing downloads are added to all downloads, maybe add a separate list for them
 	//whitelists
 	if(filter.hasAttachment()){
 		if(DEBUG) download.debug_reason = "attachment";
@@ -178,10 +178,9 @@ function doOnMessage(message, sender, sendResponse) {
 	else if(message.type === "clear_list"){
 		app.allDownloads = new FixedSizeMap(app.options.dlListSize);
 	}
-	else if(message.type === "request_app_instance"){
-		let window = browser.extension.getViews({windowId: message.windowId})[0];
-		window.app = app;
-		return Promise.resolve();
+	else if(message.type === "get_bg_data"){
+		let data = {downloads: app.allDownloads, appJSON: app};
+		return Promise.resolve(data);
 	}
 	else if(message.type === "dl_dialog_closing"){
 		delete app.downloadDialogs[message.windowId];

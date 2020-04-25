@@ -1,11 +1,15 @@
 var DEBUG = true;
 
 /**
+ * the Download object for the clicked link
  * @type {Download}
  */
 var selectedDl = {};
 
-//TODO:  getBackgroundPage() doesn't work in private window https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/getBackgroundPage
+/**
+ * a JSON serialized instance of global 'app' we got through messaging
+ */
+var appJSON;
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -23,13 +27,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		clearDownloadsList();
 	});
 
-	globalizeApp().then(()=>onGot());
+	getBackgroundData().then(onGot);
 
 });
 
-function onGot() { 
+function onGot(data) { 
 
-	let allDownloads = app.allDownloads;
+	appJSON = data.appJSON;
+	let allDownloads = data.allDownloads;
 
 	//populate list of downloads
 	let keys = allDownloads.getKeys();
@@ -60,7 +65,7 @@ function onGot() {
 	}
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), app.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), appJSON.runtime.idmAvailable);
 
 }
 

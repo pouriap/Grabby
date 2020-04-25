@@ -1,14 +1,27 @@
 /**
- * adds the app variable to this popup's global scope
+ * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
  */
-function globalizeApp(){
-	return new Promise(async function(resolve){
-		let windowId = (await browser.windows.getCurrent()).id;
-		let message = {type: 'request_app_instance', windowId: windowId};
-		await browser.runtime.sendMessage(message);
-		console.log("got app instance: ", app);
-		resolve();
+async function getBackgroundData(){
+	
+	let message = {type: "get_bg_data"};
+	let response = await browser.runtime.sendMessage(message);
+	let limit = response.downloads.limit;
+	let allDlsJSON = response.downloads.list;
+	let allDownloads = new FixedSizeMap(limit);
+
+	//populate our local version of allDownloads using the JSON data
+	Object.keys(allDlsJSON).forEach(function(downloadHash){
+		let downloadJSON = allDlsJSON[downloadHash];
+		reqDetails = downloadJSON.reqDetails;
+		resDetails = downloadJSON.resDetails;
+		let download = new Download(reqDetails, resDetails);
+		download.debug_reason = downloadJSON.debug_reason;
+		allDownloads.put(downloadHash, download);
 	});
+
+	let appJSON = response.appJSON;
+	let data = {allDownloads: allDownloads, appJSON: appJSON};
+	return Promise.resolve(data);
 }
 
 /**
@@ -72,7 +85,7 @@ function downloadWithIDM(download){
 
 	console.log("dling with IDM: ", download);
 
-	if(!app.runtime.idmAvailable){
+	if(!appJSON.runtime.idmAvailable){
 		console.log("IDM is not available");
 		return;
 	}

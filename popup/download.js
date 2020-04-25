@@ -1,11 +1,21 @@
 var DEBUG = true;
 
 /**
+ * the Download object for the clicked link
  * @type {Download}
  */
 var selectedDl = {};
 
+/**
+ * id of this download dialog
+ * used for closing blank tabs after a download dialog is closed
+ */
 var windowId;
+
+/**
+ * a JSON serialized instance of global 'app' we got through messaging
+ */
+var appJSON;
 
 document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -15,16 +25,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
-	globalizeApp().then(async function(){
+	getBackgroundData().then(async function(data){
+		appJSON = data.appJSON;
+		let allDownloads = data.allDownloads;
 		windowId = (await browser.windows.getCurrent()).id;
-		let hash = app.downloadDialogs[windowId];
-		selectedDl = app.allDownloads.get(hash);
+		let hash = appJSON.downloadDialogs[windowId];
+		selectedDl = allDownloads.get(hash);
 		onGot();
 	});
 
 });
 
-//todo: add report button 
 window.addEventListener("beforeunload", async function() {
 	let downloadPageTabId = selectedDl.reqDetails.tabId;
 	let message = {type: 'dl_dialog_closing', windowId: windowId, downloadPageTabId: downloadPageTabId};
@@ -34,7 +45,7 @@ window.addEventListener("beforeunload", async function() {
 function onGot() { 
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), app.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), appJSON.runtime.idmAvailable);
 
 	document.getElementById("filename").innerHTML = selectedDl.getFilename();
 	document.getElementById("filename").setAttribute("title", selectedDl.getFilename());
@@ -49,7 +60,6 @@ function onGot() {
 }
 
 //todo: replicate accept-ranges request headers
-//todo: put all these in the same file
 
 function onError(error) {
 	console.log(`Error getting data from background: ${error}`);

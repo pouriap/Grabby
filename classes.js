@@ -17,7 +17,7 @@ and any information it collects. Please consult our best practices guide for cre
 information is being exchanged with the native application. Data exchanged with the 
 native application must be in accordance with our No Surprises policy.
 */
-//todo: how does firefox determine mime types:
+//todo: how firefox determines mime types:
 //https://developer.mozilla.org/en-US/docs/Mozilla/How_Mozilla_determines_MIME_Types
 
 
