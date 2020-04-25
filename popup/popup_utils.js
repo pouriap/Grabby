@@ -254,8 +254,16 @@ function copyToClipBoard(content){
  */
 function reportDownload(download, source){
 
+	//don't allow report if already reported
 	if(download.reported){
 		document.getElementById("action-report").innerHTML = "Already reported";
+		setActionEnabled(document.getElementById("action-report"), false);
+		return;
+	}
+
+	//don't allow reports from private windows because privacy
+	if(download.reqDetails.incognito){
+		document.getElementById("action-report").innerHTML = "Report not enabled in private browsing";
 		setActionEnabled(document.getElementById("action-report"), false);
 		return;
 	}
@@ -288,6 +296,7 @@ function reportDownload(download, source){
 			if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
 				document.getElementById("action-report").innerHTML = "Report submitted. Thank you.";
 				document.getElementById("action-report").setAttribute("class", "success");
+				//todo: this doesn't work anymore because we have a JSON copy of downloads now
 				download.reported = true;
 			}
 			else{
