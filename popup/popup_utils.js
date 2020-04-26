@@ -268,23 +268,17 @@ function reportDownload(download, source){
 		return;
 	}
 
-	downloadClone = JSON.parse(JSON.stringify(download));
-
-	//remove privacy/security breaching headers
-	let requestHeaders = downloadClone.reqDetails.requestHeaders;
-	for(let i=0; i<requestHeaders.length; i++){
-		let headerName = requestHeaders[i].name;
-		if(headerName.toLowerCase() === "cookie"){
-			delete requestHeaders[i];
-			break;
-		}
-	}
-
-	let json = JSON.stringify(downloadClone);
-	let data = "value1=" + encodeURIComponent(json);
+	//encrypt data and send them to ifttt
+	//i'm assuming google and ifttt guys are not reading this code to find the password
+	//add debug reason to reported info
+	//todo: change debug_reason to reason and add to production for now
+	download.resDetails.debug_reason = download.debug_reason;
+	let json = JSON.stringify(download.resDetails);
+	let encJson = CryptoJS.AES.encrypt(json, "1xr9@URmfF").toString();
+	let data = "value1=" + encodeURIComponent(encJson);
 	data = data + "&value2=" + source;
-	let iftttURL = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";
-	_sendPOSTRequest(iftttURL, data);
+	let url = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";
+	_sendPOSTRequest(url, data);
 
 	function _sendPOSTRequest(url, data){
 		var xhr = new XMLHttpRequest();
