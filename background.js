@@ -143,11 +143,11 @@ function doOnHeadersReceived(details) {
 			 && !filter.isMedia()
 			// && !filter.isAJAX()
 		){
-			app.showDlDialog(download);
-			console.log("download override: ", download);
-			return {
-				cancel: true
-			}
+			return new Promise(function(resolve){
+				download.resolve = resolve;
+				app.showDlDialog(download);
+				console.log("download override: ", download);
+			});
 		}
 	}
 
@@ -191,6 +191,18 @@ function doOnMessage(message, sender, sendResponse) {
 				browser.tabs.remove(tabInfo.id);
 			}
 		});
+	}
+	else if(message.type === "continue_with_browser"){
+		let download = app.allDownloads.get(message.downloadHash);
+		if(download.resolve){
+			download.resolve({cancel: false});
+		}
+	}
+	else if(message.type === "intercept_download"){
+		let download = app.allDownloads.get(message.downloadHash);
+		if(download.resolve){
+			download.resolve({cancel: true});
+		}
 	}
 
 	return Promise.resolve();

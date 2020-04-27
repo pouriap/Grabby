@@ -2,7 +2,6 @@
  * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
  */
 async function getBackgroundData(){
-	
 	let message = {type: "get_bg_data"};
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.downloads.limit;
@@ -16,6 +15,7 @@ async function getBackgroundData(){
 		resDetails = downloadJSON.resDetails;
 		let download = new Download(reqDetails, resDetails);
 		download.grabReason = downloadJSON.grabReason;
+		download.hash = downloadJSON.hash;
 		allDownloads.put(downloadHash, download);
 	});
 
@@ -107,17 +107,22 @@ function downloadWithIDM(download){
 	let port = browser.runtime.connectNative("com.tonec.idm");
 	port.postMessage(IDMMessage);
 	port.disconnect();
+
+	let message = {type: 'intercept_download', downloadHash: download.hash};
+	browser.runtime.sendMessage(message);
 }
 
 /**
  * @param {Download} download 
  */
 function downloadWithFirefox(download) {
-	browser.downloads.download({
-		filename: download.getFilename(),
-		saveAs: true,
-		url: download.url
-	});
+	// browser.downloads.download({
+	// 	filename: download.getFilename(),
+	// 	saveAs: true,
+	// 	url: download.url
+	// });
+	let message = {type: 'continue_with_browser', downloadHash: download.hash};
+	browser.runtime.sendMessage(message);
 }
 
 /**
@@ -146,6 +151,9 @@ function copyCurlCommand(download){
 	}
 
 	copyToClipBoard(cmd);
+
+	let message = {type: 'intercept_download', downloadHash: download.hash};
+	browser.runtime.sendMessage(message);
 }
 
 /**
@@ -174,6 +182,9 @@ function copyWgetCommand(download){
 	}
 
 	copyToClipBoard(cmd);
+
+	let message = {type: 'intercept_download', downloadHash: download.hash};
+	browser.runtime.sendMessage(message);
 }
 
 /**

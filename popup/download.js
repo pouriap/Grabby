@@ -36,9 +36,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 });
 
+//note that closing tab also cancels the download
 window.addEventListener("beforeunload", async function() {
 	let downloadPageTabId = selectedDl.reqDetails.tabId;
-	let message = {type: 'dl_dialog_closing', windowId: windowId, downloadPageTabId: downloadPageTabId};
+	let message = {
+		type: 'dl_dialog_closing', 
+		windowId: windowId, 
+		downloadPageTabId: downloadPageTabId,
+	};
 	browser.runtime.sendMessage(message);
 });
 

@@ -159,7 +159,10 @@ class Download {
 	}
 
 	getHash(){
-		return md5(this.url);
+		if(typeof this.hash === 'undefined'){
+			this.hash = md5(this.url);
+		}
+		return this.hash;
 	}
 
 	/**
@@ -469,10 +472,23 @@ class ReqFilter {
 	isStatusOK(){
 		if(typeof this._isStatusOK === 'undefined'){
 			this._isStatusOK = 
-				(this.download.statusCode == 200) || 
-				(this.download.statusCode == 206);
+				//todo: some request get two responses, one with 206 and then a 200
+				//example: the bookmarked download of firefox
+				//as a result the download dialog will be shown twice 
+				//for now we're only allowing 200 requests until further investigation
+				(this.download.statusCode == 200)
+				//|| (this.download.statusCode == 206);
 		}
 		return this._isStatusOK;
+	}
+
+	//todo: some of these don't really neeed lazy loading
+	isFromCache(){
+		if(typeof this._isFromCache === 'undefined'){
+			this._isFromCache = 
+				this.download.resDetails.fromCache;
+		}
+		return this._isFromCache;
 	}
 
 }
