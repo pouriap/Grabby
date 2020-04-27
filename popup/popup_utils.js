@@ -275,12 +275,12 @@ function reportDownload(download, source){
 	reportData._reportSource = source;
 	//stringify
 	reportData = JSON.stringify(reportData);
-	//encrypt
-	reportData = CryptoJS.AES.encrypt(reportData, "1xr9@URmfF").toString();
+	//base64 encode
+	reportData = btoa(reportData);
 	//URI encode
 	reportData = encodeURIComponent(reportData);
-	let postData = `value1=${reportData}`;
-	let url = "https://maker.ifttt.com/trigger/dlgrab_report/with/key/diN2TH3q2iN_JhiI-Y_4d_";
+	let postData = `data=${reportData}`;
+	let url = "https://dlgrab.my.to/report.php";
 	_sendPOSTRequest(url, postData);
 
 	function _sendPOSTRequest(url, postData){

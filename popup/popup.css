@@ -119,18 +119,22 @@ ul, li{
 	background-image: url('back-white.svg');
 }
 
-#download-details #action-report{
-	display: block;
-	padding: 4px;
-	font-family: Segoe UI;
-	font-size: 12px;
-	color: #d70022;
-	border-color: #d70022;
+#download-details #action-report {
+    border: none;
+	font-weight: normal;
+	background-color: inherit;
+	text-decoration: underline;
 }
 
 #download-details #action-report:hover{
-	background-color: #d70022;
-	color: white;
+	color:#d70022;
+	cursor: pointer;
+}
+
+#download-details #action-report.disabled-action {
+    border: none !important;
+	color: inherit !important;
+	cursor: default !important;
 }
 
 #downloads-list #action-clearList{
