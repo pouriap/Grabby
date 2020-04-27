@@ -104,10 +104,6 @@ ul, li{
 	transition: all 0.4s ease 0s;
 }
 
-#download-details #action-firefox{
-	margin-bottom: 20px;
-}
-
 #download-details #action-back{
 	background-image: url('back.svg');
 	background-position:  5px 7px;

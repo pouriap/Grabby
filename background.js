@@ -65,7 +65,7 @@ function doOnBeforeSendHeaders(details){
  * to our list of downloads
  */
 function doOnHeadersReceived(details) {
-	
+
 	console.log("receiving: ", details);
 
 	let requestId = details.requestId;
@@ -136,7 +136,6 @@ function doOnHeadersReceived(details) {
 		app.addToAllDownloads(download);
 	}
 	//todo: mkv is considered media and not downloaded
-	//todo: pdf is downloaded and not opened with browser
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
 			download.grabReason !== 'graylist'
@@ -184,6 +183,10 @@ function doOnMessage(message, sender, sendResponse) {
 	}
 	else if(message.type === "dl_dialog_closing"){
 		delete app.downloadDialogs[message.windowId];
+		if(message.continueWithBrowser){
+			return;
+		}
+		//if we are not continuing with browser then close the empty tab
 		let downloadPageTabId = message.downloadPageTabId;
 		browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
 			if(tabInfo.url === "about:blank"){

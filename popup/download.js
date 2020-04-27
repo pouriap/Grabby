@@ -1,36 +1,23 @@
 var DEBUG = true;
 
 /**
- * the Download object for the clicked link
- * @type {Download}
- */
-var selectedDl = {};
-
-/**
  * id of this download dialog
  * used for closing blank tabs after a download dialog is closed
  */
 var windowId;
 
-/**
- * a JSON serialized instance of global 'app' we got through messaging
- */
-var appJSON;
-
 document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.querySelectorAll(".action").forEach(function(action){
 		action.addEventListener('click', (evt)=>{
-			actionClicked(selectedDl, action);
+			actionClicked(popupContext.selectedDl, action);
 		});
 	});
 
-	getBackgroundData().then(async function(data){
-		appJSON = data.appJSON;
-		let allDownloads = data.allDownloads;
+	getBackgroundData().then(async function(){
 		windowId = (await browser.windows.getCurrent()).id;
-		let hash = appJSON.downloadDialogs[windowId];
-		selectedDl = allDownloads.get(hash);
+		let hash = popupContext.appJSON.downloadDialogs[windowId];
+		popupContext.selectedDl = popupContext.allDownloads.get(hash);
 		onGot();
 	});
 
@@ -38,11 +25,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 //note that closing tab also cancels the download
 window.addEventListener("beforeunload", async function() {
-	let downloadPageTabId = selectedDl.reqDetails.tabId;
+	let downloadPageTabId = popupContext.selectedDl.reqDetails.tabId;
 	let message = {
 		type: 'dl_dialog_closing', 
 		windowId: windowId, 
 		downloadPageTabId: downloadPageTabId,
+		continueWithBrowser: popupContext.continueWithBrowser
 	};
 	browser.runtime.sendMessage(message);
 });
@@ -50,16 +38,16 @@ window.addEventListener("beforeunload", async function() {
 function onGot() { 
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), appJSON.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), popupContext.appJSON.runtime.idmAvailable);
 
-	document.getElementById("filename").innerHTML = selectedDl.getFilename();
-	document.getElementById("filename").setAttribute("title", selectedDl.getFilename());
+	document.getElementById("filename").innerHTML = popupContext.selectedDl.getFilename();
+	document.getElementById("filename").setAttribute("title", popupContext.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 
-		(selectedDl.getSize() !== "unknown")? filesize(selectedDl.getSize()) : selectedDl.getSize();
-	document.getElementById("url").innerHTML = selectedDl.url;
-	document.getElementById("url").setAttribute("title", selectedDl.url);
-	document.getElementById("origin").innerHTML = selectedDl.origin;
-	document.getElementById("origin").setAttribute("title", selectedDl.origin);
+		(popupContext.selectedDl.getSize() !== "unknown")? filesize(popupContext.selectedDl.getSize()) : popupContext.selectedDl.getSize();
+	document.getElementById("url").innerHTML = popupContext.selectedDl.url;
+	document.getElementById("url").setAttribute("title", popupContext.selectedDl.url);
+	document.getElementById("origin").innerHTML = popupContext.selectedDl.origin;
+	document.getElementById("origin").setAttribute("title", popupContext.selectedDl.origin);
 	document.getElementById("output").style.display = 'none';
 
 }

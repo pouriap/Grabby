@@ -1,7 +1,28 @@
+var popupContext = {};
+/**
+ * @type {FixedSizeMap}
+ */
+popupContext.allDownloads = null;
+/**
+ * the Download object for the clicked link
+ * @type {Download}
+ */
+popupContext.selectedDl = null;
+/**
+ * a JSON serialized instance of global 'app' we got through messaging
+ */
+popupContext.appJSON = null;
+/**
+ * wheter this download was intercepted by Download Grab
+ * @type {boolean}
+ */
+popupContext.continueWithBrowser = false;
+
 /**
  * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
  */
 async function getBackgroundData(){
+
 	let message = {type: "get_bg_data"};
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.downloads.limit;
@@ -19,9 +40,9 @@ async function getBackgroundData(){
 		allDownloads.put(downloadHash, download);
 	});
 
-	let appJSON = response.appJSON;
-	let data = {allDownloads: allDownloads, appJSON: appJSON};
-	return Promise.resolve(data);
+	popupContext.appJSON = response.appJSON;
+	popupContext.allDownloads = allDownloads;
+	return Promise.resolve();
 }
 
 /**
@@ -85,7 +106,7 @@ function downloadWithIDM(download){
 
 	console.log("dling with IDM: ", download);
 
-	if(!appJSON.runtime.idmAvailable){
+	if(!popupContext.appJSON.runtime.idmAvailable){
 		console.log("IDM is not available");
 		return;
 	}
@@ -110,19 +131,17 @@ function downloadWithIDM(download){
 
 	let message = {type: 'intercept_download', downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
+	window.close();
 }
 
 /**
  * @param {Download} download 
  */
 function downloadWithFirefox(download) {
-	// browser.downloads.download({
-	// 	filename: download.getFilename(),
-	// 	saveAs: true,
-	// 	url: download.url
-	// });
 	let message = {type: 'continue_with_browser', downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
+	popupContext.continueWithBrowser = true;
+	window.close();
 }
 
 /**
@@ -152,8 +171,6 @@ function copyCurlCommand(download){
 
 	copyToClipBoard(cmd);
 
-	let message = {type: 'intercept_download', downloadHash: download.hash};
-	browser.runtime.sendMessage(message);
 }
 
 /**
@@ -183,8 +200,6 @@ function copyWgetCommand(download){
 
 	copyToClipBoard(cmd);
 
-	let message = {type: 'intercept_download', downloadHash: download.hash};
-	browser.runtime.sendMessage(message);
 }
 
 /**

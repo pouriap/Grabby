@@ -1,21 +1,10 @@
 var DEBUG = true;
 
-/**
- * the Download object for the clicked link
- * @type {Download}
- */
-var selectedDl = {};
-
-/**
- * a JSON serialized instance of global 'app' we got through messaging
- */
-var appJSON;
-
 document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.querySelectorAll(".action").forEach(function(action){
 		action.addEventListener('click', (evt)=>{
-			actionClicked(selectedDl, action);
+			actionClicked(popupContext.selectedDl, action);
 		});
 	});
 
@@ -31,19 +20,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 });
 
-function onGot(data) { 
-
-	appJSON = data.appJSON;
-	let allDownloads = data.allDownloads;
+function onGot() { 
 
 	//populate list of downloads
-	let keys = allDownloads.getKeys();
+	let keys = popupContext.allDownloads.getKeys();
 	//reverse to show latest downloads on top
 	keys.reverse();
 
 	for (const key of keys) {
 
-		let download = allDownloads.get(key);
+		let download = popupContext.allDownloads.get(key);
 
 		let listItem = document.createElement("li");
 		listItem.setAttribute("id", "req_" + download.requestId);
@@ -55,9 +41,9 @@ function onGot(data) {
 
 		listItem.addEventListener("click", function(evt){
 			let hash = this.getAttribute("data-hash");
-			selectedDl = allDownloads.get(hash);
-			console.log('item clicked: ', selectedDl);
-			showDownloadDetails(selectedDl);
+			popupContext.selectedDl = popupContext.allDownloads.get(hash);
+			console.log('item clicked: ', popupContext.selectedDl);
+			showDownloadDetails(popupContext.selectedDl);
 		});
 
 		document.getElementById("downloads-list").appendChild(listItem);
@@ -65,7 +51,7 @@ function onGot(data) {
 	}
 
 	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), appJSON.runtime.idmAvailable);
+	setActionEnabled(document.getElementById('action-idm'), popupContext.appJSON.runtime.idmAvailable);
 
 }
 
