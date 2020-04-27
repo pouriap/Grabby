@@ -50,7 +50,7 @@ function onGot(data) {
 		listItem.setAttribute("class", "dl-item " + download.debug_gray);
 		listItem.setAttribute("title", download.url);
 		listItem.setAttribute("data-hash", key);
-		let reason = (DEBUG)? " (" + download.debug_reason + ")" : "";
+		let reason = (DEBUG)? " (" + download.grabReason + ")" : "";
 		listItem.innerHTML = download.getFilename() + reason;
 
 		listItem.addEventListener("click", function(evt){

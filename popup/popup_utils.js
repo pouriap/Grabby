@@ -15,7 +15,7 @@ async function getBackgroundData(){
 		reqDetails = downloadJSON.reqDetails;
 		resDetails = downloadJSON.resDetails;
 		let download = new Download(reqDetails, resDetails);
-		download.debug_reason = downloadJSON.debug_reason;
+		download.grabReason = downloadJSON.grabReason;
 		allDownloads.put(downloadHash, download);
 	});
 
@@ -270,17 +270,20 @@ function reportDownload(download, source){
 
 	//encrypt data and send them to ifttt
 	//i'm assuming google and ifttt guys are not reading this code to find the password
-	//add debug reason to reported info
-	//todo: change debug_reason to reason and add to production for now
-	download.resDetails.debug_reason = download.debug_reason;
-	let json = JSON.stringify(download.resDetails);
-	let encJson = CryptoJS.AES.encrypt(json, "1xr9@URmfF").toString();
-	let data = "value1=" + encodeURIComponent(encJson);
-	data = data + "&value2=" + source;
-	let url = "https://maker.ifttt.com/trigger/log_posted/with/key/bui_BfKHyiHPPCMAb7Ea_b";
-	_sendPOSTRequest(url, data);
+	let reportData = JSON.parse(JSON.stringify(download.resDetails));
+	reportData._grabReason = download.grabReason;
+	reportData._reportSource = source;
+	//stringify
+	reportData = JSON.stringify(reportData);
+	//encrypt
+	reportData = CryptoJS.AES.encrypt(reportData, "1xr9@URmfF").toString();
+	//URI encode
+	reportData = encodeURIComponent(reportData);
+	let postData = `value1=${reportData}`;
+	let url = "https://maker.ifttt.com/trigger/dlgrab_report/with/key/diN2TH3q2iN_JhiI-Y_4d_";
+	_sendPOSTRequest(url, postData);
 
-	function _sendPOSTRequest(url, data){
+	function _sendPOSTRequest(url, postData){
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", url, true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -300,7 +303,7 @@ function reportDownload(download, source){
 			setActionEnabled(document.getElementById("action-report"), false);
 		}
 
-		xhr.send(data);
+		xhr.send(postData);
 	}
 
 }

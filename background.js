@@ -108,30 +108,30 @@ function doOnHeadersReceived(details) {
 	//todo: private browsing downloads are added to all downloads, maybe add a separate list for them
 	//whitelists
 	if(filter.hasAttachment()){
-		if(DEBUG) download.debug_reason = "attachment";
+		download.grabReason = "attachment";
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isCompressed()){
-		if(DEBUG) download.debug_reason = "compressed"
+		download.grabReason = "compressed"
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isDocument()){
-		if(DEBUG) download.debug_reason = "document"
+		download.grabReason = "document"
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isOtherBinary()){
-		if(DEBUG) download.debug_reason = "binary"
+		download.grabReason = "binary"
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isMedia()){
-		if(DEBUG) download.debug_reason = "media"
+		download.grabReason = "media"
 		app.addToAllDownloads(download);
 	}
 
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
 	else if(DEBUG){
-		download.debug_reason = 'graylist';
+		download.grabReason = 'graylist';
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
@@ -139,7 +139,7 @@ function doOnHeadersReceived(details) {
 	//todo: pdf is downloaded and not opened with browser
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
-			download.debug_reason !== 'graylist'
+			download.grabReason !== 'graylist'
 			 && !filter.isMedia()
 			// && !filter.isAJAX()
 		){
