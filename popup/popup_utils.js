@@ -60,6 +60,11 @@ function actionClicked(selectedDl, clickedAction){
 	}
 
 	switch(id){
+		
+		case "action-continue":
+			continueWithBrowser(selectedDl);
+			break;
+
 		case "action-copy":
 			copyLinkToClipboard(selectedDl);
 			break;
@@ -137,11 +142,22 @@ function downloadWithIDM(download){
 /**
  * @param {Download} download 
  */
-function downloadWithFirefox(download) {
+function continueWithBrowser(download){
 	let message = {type: 'continue_with_browser', downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
 	popupContext.continueWithBrowser = true;
 	window.close();
+}
+
+/**
+ * @param {Download} download 
+ */
+function downloadWithFirefox(download) {
+	browser.downloads.download({
+		filename: download.getFilename(),
+		saveAs: true,
+		url: download.url
+	});
 }
 
 /**
@@ -178,7 +194,7 @@ function copyCurlCommand(download){
  */
 function copyWgetCommand(download){
 
-	let cmd = `wget "${download.url}" -o "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
+	let cmd = `wget "${download.url}" -O "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
 
 	let cookie = download.getHeader('cookie', 'request');
 	let referer = download.getHeader('referer', 'request');
@@ -294,8 +310,6 @@ function reportDownload(download, source){
 		return;
 	}
 
-	//encrypt data and send them to ifttt
-	//i'm assuming google and ifttt guys are not reading this code to find the password
 	let reportData = JSON.parse(JSON.stringify(download.resDetails));
 	reportData._grabReason = download.grabReason;
 	reportData._reportSource = source;
@@ -306,6 +320,8 @@ function reportDownload(download, source){
 	//URI encode
 	reportData = encodeURIComponent(reportData);
 	let postData = `data=${reportData}`;
+	//this is my own website
+	//the only things that are stored are the base64 encoded reportData and time of report
 	let url = "https://dlgrab.my.to/report.php";
 	_sendPOSTRequest(url, postData);
 
