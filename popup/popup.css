@@ -105,7 +105,7 @@ ul, li{
 }
 
 #download-details #action-back{
-	background-image: url('back.svg');
+	background-image: url('../icons/back.svg');
 	background-position:  5px 7px;
 	background-repeat:  no-repeat;
 	background-size: 12px;
@@ -116,7 +116,7 @@ ul, li{
 }
 
 #download-details #action-back:hover{
-	background-image: url('back-white.svg');
+	background-image: url('../icons/back-white.svg');
 }
 
 #download-details #action-report {
