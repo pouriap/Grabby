@@ -104,6 +104,7 @@ function copyLinkToClipboard(download){
 	copyToClipBoard(download.url);
 }
 
+//todo: replicate accept-ranges request headers
 /**
  * @param {Download} download 
  */

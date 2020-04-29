@@ -19,7 +19,11 @@ native application must be in accordance with our No Surprises policy.
 */
 //todo: how firefox determines mime types:
 //https://developer.mozilla.org/en-US/docs/Mozilla/How_Mozilla_determines_MIME_Types
-
+//todo: support "download selection"
+//todo: add determine request type is POST or GET
+//todo: I18N
+//todo: do this automatically for files like this from now on
+//todo: add our own native client
 
 
 /**
@@ -223,12 +227,17 @@ class Download {
 					this.filename = matches[1];
 				}
 			}
-			//todo: create a mime<->extension mapping and give extension to files that don't have it
-			//if the file has no extension give it a serial number
+			//if the url has no file extension give it a serial number
 			//useful for urls like 'media.tenor.com/videos/9dd6603af0ac712c6a38dde9255746cd/mp4'
 			//where lots of resources have the same path and hence the same filename
 			if(this.filename !== "unknown" && this.filename.indexOf(".") === -1){
 				this.filename = this.filename + "_" + this.requestId;
+				//try to guess the file extension based on mime type
+				let mimeType = this.getHeader('content-type', 'response');
+				let extension = constants.mimesToExts[mimeType];
+				if(extension){
+					this.filename = `${this.filename}.${extension}`;
+				}
 			}
 
 		}
@@ -291,7 +300,7 @@ class Download {
 
 }
 
-
+//todo: add list of file extensions to grab in options
 class ReqFilter {
 
 	/**
@@ -472,7 +481,7 @@ class ReqFilter {
 	isStatusOK(){
 		if(typeof this._isStatusOK === 'undefined'){
 			this._isStatusOK = 
-				//todo: some request get two responses, one with 206 and then a 200
+				//todo: some requests get two responses, one with 206 and then a 200
 				//example: the bookmarked download of firefox
 				//as a result the download dialog will be shown twice 
 				//for now we're only allowing 200 requests until further investigation
@@ -482,13 +491,8 @@ class ReqFilter {
 		return this._isStatusOK;
 	}
 
-	//todo: some of these don't really neeed lazy loading
 	isFromCache(){
-		if(typeof this._isFromCache === 'undefined'){
-			this._isFromCache = 
-				this.download.resDetails.fromCache;
-		}
-		return this._isFromCache;
+		return this.download.resDetails.fromCache;
 	}
 
 }
@@ -557,8 +561,8 @@ class FixedSizeMap {
 }
 
 var constants = {
-	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
+	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
@@ -654,5 +658,104 @@ var constants = {
 		'application/octet-stream', 'application/binary',
 	],
 
+	mimesToExts : {
+		"audio/aac" : "aac",
+		"audio/x-aac" : "aac",
+		"application/x-abiword" : "abw",
+		"application/x-freearc" : "arc",
+		"video/x-msvideo" : "avi",
+		"application/vnd.amazon.ebook" : "azw",
+		"application/octet-stream" : "bin",
+		"image/bmp" : "bmp",
+		"application/x-bzip" : "bz",
+		"application/x-bzip2" : "bz2",
+		"application/x-csh" : "csh",
+		"text/css" : "css",
+		"text/csv" : "csv",
+		"application/msword" : "doc",
+		"application/mspowerpoint" : "pptx",
+		"application/powerpoint" : "pptx",
+		"application/x-mspowerpoint" : "pptx",
+		"application/excel" : "xlsx",
+		"application/x-excel" : "xlsx",
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "docx",
+		"application/vnd.ms-fontobject" : "eot",
+		"application/epub+zip" : "epub",
+		"application/gzip" : "gz",
+		"image/gif" : "gif",
+		"text/html" : "html",
+		"image/vnd.microsoft.icon" : "ico",
+		"text/calendar" : "ics",
+		"application/java-archive" : "jar",
+		"image/jpeg" : "jpg",
+		"text/javascript" : "js",
+		"application/javascript" : "js",
+		"application/json" : "json",
+		"application/ld+json" : "jsonld",
+		"audio/midi audio/x-midi" : "midi",
+		"text/javascript" : "mjs",
+		"audio/mpeg" : "mp3",
+		"audio/mpeg3" : "mp3",
+		"audio/x-mpeg-3" : "mp3",
+		"audio/mp3" : "mp3",
+		"video/mpeg" : "mpeg",
+		"video/mp4" : "mp4",
+		"application/vnd.apple.installer+xml" : "mpkg",
+		"application/vnd.oasis.opendocument.presentation" : "odp",
+		"application/vnd.oasis.opendocument.spreadsheet" : "ods",
+		"application/vnd.oasis.opendocument.text" : "odt",
+		"audio/ogg" : "oga",
+		"video/ogg" : "ogv",
+		"application/ogg" : "ogx",
+		"audio/opus" : "opus",
+		"font/otf" : "otf",
+		"image/png" : "png",
+		"application/pdf" : "pdf",
+		"application/php" : "php",
+		"application/vnd.ms-powerpoint" : "ppt",
+		"application/vnd.openxmlformats-officedocument.presentationml.presentation" : "pptx",
+		"application/vnd.rar" : "rar",
+		"application/rtf" : "rtf",
+		"application/x-sh" : "sh",
+		"image/svg+xml" : "svg",
+		"application/x-shockwave-flash" : "swf",
+		"video/quicktime" : "mov",
+		"video/mp2t" : "ts",
+		"application/x-tar" : "tar",
+		"application/gnutar" : "tar",
+		"application/x-rar-compressed" : "rar",
+		"image/tiff" : "tiff",
+		"video/mp2t" : "ts",
+		"font/ttf" : "ttf",
+		"text/plain" : "txt",
+		"application/vnd.visio" : "vsd",
+		"audio/wav" : "wav",
+		"audio/aiff" : "aiff",
+		"audio/x-aiff" : "aiff",
+		"audio/webm" : "weba",
+		"video/webm" : "webm",
+		"application/x-troff-msvideo" : "avi",
+		"video/avi" : "avi",
+		"video/msvideo" : "avi",
+		"image/webp" : "webp",
+		"font/woff" : "woff",
+		"font/woff2" : "woff2",
+		"application/xhtml+xml" : "xhtml",
+		"application/vnd.ms-excel" : "xls",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "xlsx",
+		"application/xml" : "xml",
+		"text/xml" : "xml",
+		"application/vnd.mozilla.xul+xml" : "xul",
+		"application/zip" : "zip",
+		"application/x-compressed" : "zip",
+		"application/x-zip-compressed" : "zip",
+		"application/x-gzip" : "gz",
+		"video/3gpp" : "3gp",
+		"audio/3gpp" : "3gp",
+		"video/3gpp2" : "3g2",
+		"audio/3gpp2" : "3g2",
+		"application/x-7z" : "7z",
+		"application/x-7z-compressed" : "7z"
+	}
 
 }

@@ -1,4 +1,7 @@
 #first prompt so that we don't mess everything up like that time :/
+echo 'Are you sure you want to build for production?'
+echo 'This will overwrite files. Make sure to commit before this.'
+echo ''
 select yn in "No" "Yes"; do
     case $yn in
         No ) exit;;

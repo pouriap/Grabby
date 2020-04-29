@@ -157,12 +157,6 @@ ul, li{
 	border-radius: 2px;
 }
 
-#download-details .desc-name{
-	margin-top: 5px;
-	font-weight: bold;
-	-moz-user-select: none;
-}
-
 #download-details .desc{
 	/* text-align: left;
 	word-break: break-all;
@@ -174,6 +168,12 @@ ul, li{
 	white-space: nowrap;
 	overflow: hidden;
 	-moz-user-select: text !important;
+}
+
+#download-details .desc-name{
+	margin-top: 5px;
+	font-weight: bold;
+	-moz-user-select: none !important;
 }
 
 #download-details #filename{

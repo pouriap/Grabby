@@ -52,8 +52,7 @@ function onGot() {
 
 }
 
-//todo: replicate accept-ranges request headers
-
+//todo: get rid of these?
 function onError(error) {
 	console.log(`Error getting data from background: ${error}`);
 }
