@@ -23,7 +23,12 @@ function observe(message, push, done) {
 	};
 	process.addListener('uncaughtException', exception);
 
-	if (message.type === 'get_available_dms') {
+	if(message.type === 'native_client_available'){
+		let message = {type: 'native_client_available'};
+		push(message);
+		close();
+	}
+	else if(message.type === 'get_available_dms') {
 		//todo: sanitize user input if possible
 		let availableDMs = [];
 		execFileSync("FlashGot.exe", ['-o', 'availableDMs']);
@@ -38,7 +43,7 @@ function observe(message, push, done) {
 		let message = {type: 'available_dms', availableDMs: availableDMs};
 		push(message);
 		close();
-	} else {
+	}else{
 		push({type: 'unsupported'});
 		close();
 	}

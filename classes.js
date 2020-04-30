@@ -52,44 +52,54 @@ class DlGrabApp {
 	initialize() {
 
 		var instance = this;
-		return new Promise(async function (resolve) {
-			console.log('initializing idm...');
-			instance.runtime.idmAvailable = await initIDM();
-			console.log('idm init finished');
+		return new Promise(async function (resolve, reject) {
+			console.log("checking native client availability");
+			let nativeClientAvailable = await _isNativeClientAvailable();
+			if(!nativeClientAvailable){
+				reject('Native client unavailable');
+				return;
+			}
+			console.log('native client available');
+			console.log('getting available DMs');
+			instance.runtime.availableDMs = await _getAvailableDMs();
+			console.log('available DMs: ', instance.runtime.availableDMs);
 			//resolve after all inits are completed
 			resolve();
 		});
 
-		//this function returns a promise so that we can use 'await' on it
-		function initIDM() {
-			//todo: try without IDM addon being installed and see if it works
-			return new Promise(function (resolve) {
-				var initMessage = "MSG#2#6#2#2321:1:0:1294:704:-7:-7:1.25,117=37:Toolbox - Extension / Download Grab;";
-				var port = browser.runtime.connectNative("com.tonec.idm");
-				//this will only be called when IDM is available and reachable
-				port.onMessage.addListener(function (m) {
-					console.log('IDM is available');
-					port.disconnect();
-					resolve(true);
+		function _isNativeClientAvailable(){
+			return new Promise(function(resolve){
+				let port = browser.runtime.connectNative("download.grab.pouriap");
+				port.onMessage.addListener((response) => {
+					if(response.type === 'native_client_available'){
+						resolve(true);
+					}
 				});
-				//this will only be called when the other end disconnects the connection
-				//i.e. when IDM isn't available 
-				port.onDisconnect.addListener((p) => {
-					console.log("IDM is unavailable!");
+				port.onDisconnect.addListener(() => {
 					resolve(false);
 				});
-				console.log('sending idm init message...');
-				port.postMessage(initMessage);
-				//if IDM is available the onMessage() will disconnect port
-				//if IDM is unavailable it will automatically disconnect port
-				//but just for added safety we disconnect it in a timeout
-				//if the promise is already resolved this will have no effect
-				setTimeout(() => {
-					port.disconnect();
-					resolve(false);
-				}, 500);
+				let message = {type: 'native_client_available'};
+				port.postMessage(message);
 			});
 		}
+
+		function _getAvailableDMs(){
+			return new Promise(function(resolve){
+				//put id in some sort of config
+				let port = browser.runtime.connectNative("download.grab.pouriap");
+				port.onMessage.addListener((response) => {
+					if(response.type === 'available_dms'){
+						let availableDMs = response.availableDMs;
+						port.disconnect();
+						resolve(availableDMs);
+					}
+				});
+				let message = {type: 'get_available_dms'};
+				port.postMessage(message);
+			});
+		}
+
+		
 
 	}
 

@@ -13,9 +13,18 @@ var app;
 	let options = await loadOptions();
 	app = new DlGrabApp(options);
 	console.log('initializing app...');
-	await app.initialize();
-	console.log('app init finished');
+	try{
+		await app.initialize();
+		console.log('app init successful');
+		app.runtime.ready = true;
+	}catch(e){
+		console.log('app could not be initialized: ', e);
+		app.runtime.ready = false;
+		return;
+	}
 
+	//todo: add onBeforeRequest to save POST data
+	
 	browser.webRequest.onBeforeSendHeaders.addListener(
 		doOnBeforeSendHeaders, {
 			urls: ["*://*/*"]
