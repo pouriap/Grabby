@@ -31,14 +31,18 @@ function observe(message, push, done) {
 	else if(message.type === 'get_available_dms') {
 		//todo: sanitize user input if possible
 		let availableDMs = [];
-		execFileSync("FlashGot.exe", ['-o', 'availableDMs']);
-		let file = readFileSync('availableDMs', {encoding: 'utf8', flag: 'r'});
-		let lines = file.split('\n');
-		for(let line of lines){
-			if(line.indexOf('|OK') !== -1){
-				let DMName = line.split("|")[0].trim();
-				availableDMs.push(DMName);
+		try{
+			execFileSync("FlashGot.exe", ['-o', 'availableDMs'], {timeout: 5000});
+			let file = readFileSync('availableDMs', {encoding: 'utf8', flag: 'r'});
+			let lines = file.split('\n');
+			for(let line of lines){
+				if(line.indexOf('|OK') !== -1){
+					let DMName = line.split("|")[0].trim();
+					availableDMs.push(DMName);
+				}
 			}
+		}catch(e){
+			availableDMs = [];
 		}
 		let message = {type: 'available_dms', availableDMs: availableDMs};
 		push(message);
@@ -60,7 +64,8 @@ function observe(message, push, done) {
 					+ cookies + "\n"
 					+ postData + "\n";
 		writeFileSync("flashgot.fgt", job, {encoding: 'utf8'});
-		execFileSync("flashgot.exe", ['flashgot.fgt']);
+		execFileSync("flashgot.exe", ['flashgot.fgt'], {timeout: 5000});
+		close();
 	}
 	else{
 		push({type: 'unsupported'});

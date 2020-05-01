@@ -75,6 +75,9 @@ class DlGrabApp {
 					if(response.type === 'native_client_available'){
 						resolve(true);
 					}
+					else{
+						resolve(false);
+					}
 				});
 				port.onDisconnect.addListener(() => {
 					resolve(false);
@@ -94,6 +97,12 @@ class DlGrabApp {
 						port.disconnect();
 						resolve(availableDMs);
 					}
+					else{
+						resolve({});
+					}
+				});
+				port.onDisconnect.addListener(()=>{
+					resolve({});
 				});
 				let message = {type: 'get_available_dms'};
 				port.postMessage(message);

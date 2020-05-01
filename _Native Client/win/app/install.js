@@ -14,7 +14,7 @@ function exists(directory, callback) {
 	});
 }
 
-var id = require('./config.js');
+var {id} = require('./config.js');
 var dir = path.join(process.argv[2], id);
 
 var {exec} = require('child_process');
@@ -56,6 +56,7 @@ function application(callback) {
 		fs.createReadStream('host.js').pipe(fs.createWriteStream(path.join(dir, 'host.js')));
 		fs.createReadStream('config.js').pipe(fs.createWriteStream(path.join(dir, 'config.js')));
 		fs.createReadStream('messaging.js').pipe(fs.createWriteStream(path.join(dir, 'messaging.js')));
+		fs.createReadStream('FlashGot.exe').pipe(fs.createWriteStream(path.join(dir, 'FlashGot.exe')));
 		try {
 			fs.createReadStream(process.argv[0]).pipe(fs.createWriteStream(path.join(dir, 'node.exe')));
 		} catch (e) {}
