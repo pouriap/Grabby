@@ -24,7 +24,7 @@ var app;
 	}
 
 	//todo: add onBeforeRequest to save POST data
-	
+
 	browser.webRequest.onBeforeSendHeaders.addListener(
 		doOnBeforeSendHeaders, {
 			urls: ["*://*/*"]
@@ -148,7 +148,7 @@ function doOnHeadersReceived(details) {
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
 			download.grabReason !== 'graylist'
-			 && !filter.isMedia()
+			&& !filter.isMedia()
 			// && !filter.isAJAX()
 		){
 			return new Promise(function(resolve){
@@ -195,6 +195,11 @@ function doOnMessage(message, sender, sendResponse) {
 		if(message.continueWithBrowser){
 			return;
 		}
+		let download = app.allDownloads.get(message.downloadHash);
+		if(download.resolve){
+			download.resolve({cancel: true});
+		}
+		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
 		//if we are not continuing with browser then close the empty tab
 		let downloadPageTabId = message.downloadPageTabId;
 		browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
@@ -210,6 +215,7 @@ function doOnMessage(message, sender, sendResponse) {
 			download.resolve({cancel: false});
 		}
 	}
+	//todo: unused
 	else if(message.type === "intercept_download"){
 		let download = app.allDownloads.get(message.downloadHash);
 		if(download.resolve){

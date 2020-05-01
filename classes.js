@@ -39,10 +39,11 @@ class DlGrabApp {
 		this.allRequests = new FixedSizeMap(100);
 		// the last X downloadable items are stored here with their informations such as cookies,time,etc.
 		this.allDownloads = new FixedSizeMap(options.dlListSize);
-		// utility function
-		this.runtime = {};
-		this.runtime.idmAvailable = false;
+		// open download dialogs
 		this.downloadDialogs = {};
+		// runtime data
+		this.runtime = {};
+		this.runtime.ready = false;
 	}
 
 	/**
@@ -123,19 +124,21 @@ class DlGrabApp {
 	 * background script gives download dialogs the hash based on the windowId 
 	 * download dialog gets the Download object from the hash and populates the dialog
 	 * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
+	 * @param {Download} dl 
 	 */
 	showDlDialog(dl) {
 
 		var download = dl;
 		let screenW = window.screen.width;
 		let screenH = window.screen.height;
-		let windowW = 350;
-		let windowH = 450;
+		let windowW = 500;
+		let windowH = 400;
 		let leftMargin = (screenW/2) - (windowW/2);
 		let topMargin = (screenH/2) - (windowH/2);
 
 		let createData = {
 			type: "detached_panel",
+			titlePreface: download.getFilename(),
 			url: "popup/download.html",
 			allowScriptsToClose : true,
 			width: windowW,

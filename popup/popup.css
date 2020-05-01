@@ -2,9 +2,9 @@
 
 html, body {
 	overflow-y: auto;
-	min-width: 280px !important;
+	min-width: 280px;
 	font-size: 12px;
-	max-width: 350px !important;
+	max-width: 350px;
 }
 
 ul, li{
@@ -23,7 +23,6 @@ ul, li{
 
 #content{
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	padding: 0 5px;
 	margin: 0 auto;
 	width: 100%;
 	color: #202340;
@@ -75,16 +74,14 @@ ul, li{
 }
 
 #download-details{
-	width: 80%;
-	margin: 0 auto;
-	padding: 0 0 20px 0;
+	width: 95%;
+	margin: 10px auto;
+	border: 1px solid;
+	padding: 20px;
+	border-radius: 4px;
 }
 
-#download-details #info{
-	margin-bottom: 30px;
-}
-
-#download-details .action{
+#download-details li.action, #download-details div.action{
 	color: #0f1126;
 	text-decoration: none;
 	background: #ffffff;
@@ -97,11 +94,26 @@ ul, li{
 	font-weight: bold;
 }
 
-#download-details .action:hover{
+#download-details button.action{
+	padding: 3px;
+	width: 70px;
+}
+
+#download-details li.action:hover, #download-details div.action:hover{
 	color: #ffffff;
 	background: #363959;
 	border-color: #363959;
 	transition: all 0.4s ease 0s;
+}
+
+#downloader-choice{
+	border: 1px solid #abacb9;
+	border-radius: 4px;
+	padding: 3px 5px;
+}
+
+#actions{
+	margin-top: 20px;
 }
 
 #download-details #action-back{
@@ -221,4 +233,9 @@ li.spacer{
 
 .debug_gray{
 	background-color: rgb(216, 216, 216);
+}
+
+.disabled{
+	pointer-events: none !important;
+	opacity: 0.5 !important;
 }

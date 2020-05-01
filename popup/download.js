@@ -14,6 +14,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
+	document.getElementById("dl-with-dlgrab").addEventListener("click", function(evt){
+		document.getElementById("dm-list-container").classList.remove("disabled");
+	});
+
+	document.getElementById("continue-with-firefox").addEventListener("click", function(evt){
+		document.getElementById("dm-list-container").classList.add("disabled");
+	});
+
+	document.getElementById("dl-with-dlgrab").click();
+
 	getBackgroundData().then(async function(){
 		windowId = (await browser.windows.getCurrent()).id;
 		let hash = popupContext.appJSON.downloadDialogs[windowId];
@@ -30,16 +40,13 @@ window.addEventListener("beforeunload", async function() {
 		type: 'dl_dialog_closing', 
 		windowId: windowId, 
 		downloadPageTabId: downloadPageTabId,
+		downloadHash: popupContext.selectedDl.getHash(),
 		continueWithBrowser: popupContext.continueWithBrowser
 	};
 	browser.runtime.sendMessage(message);
 });
 
 function onGot() { 
-
-	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), popupContext.appJSON.runtime.idmAvailable);
-
 	document.getElementById("filename").innerHTML = popupContext.selectedDl.getFilename();
 	document.getElementById("filename").setAttribute("title", popupContext.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 
@@ -49,7 +56,7 @@ function onGot() {
 	document.getElementById("origin").innerHTML = popupContext.selectedDl.origin;
 	document.getElementById("origin").setAttribute("title", popupContext.selectedDl.origin);
 	document.getElementById("output").style.display = 'none';
-
+	populateDMs();
 }
 
 //todo: get rid of these?

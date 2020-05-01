@@ -42,6 +42,7 @@ async function getBackgroundData(){
 
 	popupContext.appJSON = response.appJSON;
 	popupContext.allDownloads = allDownloads;
+
 	return Promise.resolve();
 }
 
@@ -65,24 +66,12 @@ function actionClicked(selectedDl, clickedAction){
 			continueWithBrowser(selectedDl);
 			break;
 
-		case "action-copy":
-			copyLinkToClipboard(selectedDl);
-			break;
-
-		case "action-firefox":
-			downloadWithFirefox(selectedDl);
+		case "action-download":
+			download(selectedDl);
 			break;
 		
-		case "action-idm":
-			downloadWithIDM(selectedDl);
-			break;
-
-		case "action-curl":
-			copyCurlCommand(selectedDl);
-			break;
-
-		case "action-wget":
-			copyWgetCommand(selectedDl);
+		case "action-cancel":
+			window.close();
 			break;
 
 		case "action-report":
@@ -97,46 +86,54 @@ function actionClicked(selectedDl, clickedAction){
 
 }
 
-/**
- * @param {Download} download 
- */
-function copyLinkToClipboard(download){
-	copyToClipBoard(download.url);
+function populateDMs(){
+	let availableDMs = popupContext.appJSON.runtime.availableDMs;
+	let dmsDropDown = document.getElementById('available-dms');
+	for(let dmName of availableDMs){
+		let option = document.createElement('option');
+		option.value = dmName;
+		option.innerHTML = dmName;
+		dmsDropDown.appendChild(option);
+	}
 }
 
-//todo: replicate accept-ranges request headers
 /**
  * @param {Download} download 
  */
-function downloadWithIDM(download){
-
-	console.log("dling with IDM: ", download);
-
-	if(!popupContext.appJSON.runtime.idmAvailable){
-		console.log("IDM is not available");
-		return;
+function download(download){
+	if(document.getElementById("dl-with-dlgrab").checked){
+		downloadWithSelectedDM(download);
 	}
+	else if(document.getElementById("dl-with-firefox")
+		&& document.getElementById("dl-with-firefox").checked){
 
-	let msgBase = "MSG#1#14#1#0:1";
+		downloadWithFirefox(download);
+	}
+	else if(document.getElementById("continue-with-firefox")
+		&& document.getElementById("continue-with-firefox").checked){
 
-	let url = download.url;
-	let userAgent = navigator.userAgent;
-	let cookies = download.getHeader('cookie');
-	let referer = download.getHeader('referer');
+		continueWithBrowser(download);
+	}
+}
 
-	let urlCode = ",6=" + url.length + ":" + url;
-	let userAgentCode = ",54=" + userAgent.length + ":" + userAgent;
-	let cookiesCode = (cookies)? (",51=" + cookies.length + ":" + cookies) : "";
-	let refererCode = (referer)? (",50=" + referer.length + ":" + referer) : "";
-
-	let IDMMessage = msgBase + urlCode + userAgentCode + cookiesCode + refererCode + ";";
-
-	let port = browser.runtime.connectNative("com.tonec.idm");
-	port.postMessage(IDMMessage);
-	port.disconnect();
-
-	let message = {type: 'intercept_download', downloadHash: download.hash};
-	browser.runtime.sendMessage(message);
+/**
+ * @param {Download} download 
+ */
+function downloadWithSelectedDM(download){
+	let DMs = document.getElementById('available-dms');
+	let selectedDM = DMs.options[DMs.selectedIndex].value;
+	let port = browser.runtime.connectNative("download.grab.pouriap");
+	let message = {
+		type: 'download',
+		url : download.url,
+		referer : download.getHeader('referer', 'request'),
+		cookies : download.getHeader('cookie', 'request'),
+		dmName : selectedDM,
+		filename : download.getFilename(),
+		//todo: post data
+		postData : ''
+	};
+	port.postMessage(message);
 	window.close();
 }
 
@@ -159,137 +156,6 @@ function downloadWithFirefox(download) {
 		saveAs: true,
 		url: download.url
 	});
-}
-
-/**
- * @param {Download} download 
- */
-function copyCurlCommand(download){
-
-	let cmd = `curl -JL "${download.url}" -o "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
-
-	let cookie = download.getHeader('cookie', 'request');
-	let referer = download.getHeader('referer', 'request');
-	let accept = download.getHeader('accept', 'request');
-	let acceptEncoding = download.getHeader('accept-encoding', 'request');
-
-	if(cookie){
-		cmd = cmd + ` --header "Cookie: ${cookie}"`;
-	}
-	if(referer){
-		cmd = cmd + ` --header "Referer: ${referer}"`;
-	}
-	if(accept){
-		cmd = cmd + ` --header "Accept: ${accept}"`;
-	}
-	if(acceptEncoding){
-		cmd = cmd + ` --header "Accept-Encoding: ${acceptEncoding}"`;
-	}
-
-	copyToClipBoard(cmd);
-
-}
-
-/**
- * @param {Download} download 
- */
-function copyWgetCommand(download){
-
-	let cmd = `wget "${download.url}" -O "${download.getFilename()}" --header "User-Agent: ${navigator.userAgent}"`;
-
-	let cookie = download.getHeader('cookie', 'request');
-	let referer = download.getHeader('referer', 'request');
-	let accept = download.getHeader('accept', 'request');
-	let acceptEncoding = download.getHeader('accept-encoding', 'request');
-
-	if(cookie){
-		cmd = cmd + ` --header "Cookie: ${cookie}"`;
-	}
-	if(referer){
-		cmd = cmd + ` --header "Referer: ${referer}"`;
-	}
-	if(accept){
-		cmd = cmd + ` --header "Accept: ${accept}"`;
-	}
-	if(acceptEncoding){
-		cmd = cmd + ` --header "Accept-Encoding: ${acceptEncoding}"`;
-	}
-
-	copyToClipBoard(cmd);
-
-}
-
-/**
- * @param {string} content 
- */
-function copyToClipBoard(content){
-
-	try{
-
-		let copying = navigator.clipboard.writeText(content);
-
-		copying.then(function() {
-			//success
-			_copyCallBack(true);
-		}, function() {
-			//fail
-			_copyCallBack(false);
-		});
-
-		console.log("API copy performed");
-
-	}catch(error){
-
-		console.log("API copy failed: ", error);
-
-		try{
-
-			let hiddenText = document.createElement("textarea");
-			hiddenText.style.position = 'fixed';
-			hiddenText.style.top = 0;
-			hiddenText.style.left = 0;
-			hiddenText.style.width = '1px';
-			hiddenText.style.height = '1px';
-			hiddenText.style.padding = 0;
-
-			document.querySelector("body").appendChild(hiddenText);
-			hiddenText.value = content;
-			hiddenText.focus();
-			hiddenText.select();
-			hiddenText.setSelectionRange(0, 99999);	//for mobile devices
-			let success = document.execCommand('copy');
-			document.querySelector("body").removeChild(hiddenText);
-
-			console.log('legacy copy performed');
-
-			_copyCallBack(success);
-
-		}catch(error){
-			console.log("legacy copy failed: ", error);
-			_copyCallBack(false);
-		}
-	}
-
-	function _copyCallBack(success){
-
-		console.log('copy callback!');
-
-		if(success){
-			document.querySelector("#output").innerHTML = "copied successfully";
-			document.querySelector("#output").setAttribute("class", "success");
-		}
-		else{
-			document.querySelector("#output").innerHTML = "copy failed";
-			document.querySelector("#output").setAttribute("class", "fail");
-		}
-	
-		//flash the output text
-		document.querySelector("#output").style.display = 'block';
-		var oldItem = document.querySelector("#output");
-		var cloneItem = oldItem.cloneNode(true); 
-		document.querySelector("#info").replaceChild(cloneItem, oldItem);
-	}
-
 }
 
 /**
@@ -357,17 +223,4 @@ function hideElement(element){
 
 function showElement(element){
 	element.classList.remove("hidden");
-}
-
-/**
- * @param {Element} element 
- * @param {boolean} enabled 
- */
-function setActionEnabled(element, enabled){
-	if(enabled){
-		element.classList.remove("disabled-action");
-	}
-	else{
-		element.classList.add("disabled-action");
-	}
 }

@@ -28,16 +28,25 @@
 				<li class="desc" id="output"></li>
 			</ul>
 
-			<ul id="actions">
-				<li class="action" id="action-continue">Continue With Firefox</li>
-				<li class="spacer"></li>
-				<li class="action" id="action-idm">Download With IDM</li>
-				<li class="action" id="action-copy">Copy Link To Clipboard</li>
-				<li class="action" id="action-curl">Copy cURL Command</li>
-				<li class="action" id="action-wget">Copy Wget Command</li>
-				<li class="spacer"></li>
-				<a class="action" id="action-report" title="Click this if Download Grab has mistakenly detected this request as a download">Report this download as error</a>
-			</ul>
+			<div id="downloader-choice">
+				<div style="padding:6px;">Download With:</div>
+				<input type="radio" name="downloader" id="continue-with-firefox">
+				<label for="continue-with-firefox">Firefox</label>
+				<br>
+				<input type="radio" name="downloader" id="dl-with-dlgrab">
+				<label for="dl-with-dlgrab">Download Grab</label>
+				<div id="dm-list-container" style="padding:10px 6px; display: flex;">
+					<span style="padding-right: 15px;">Using: </span>
+					<select id="available-dms" style="width: 100%;"></select>
+				</div>
+			</div>
+
+			<div id="actions" style="text-align: right;">
+				<button class="action" id="action-download">Ok</button>
+				<button class="action" id="action-cancel">Cancel</button>
+				<br><br>
+				<a class="action" id="action-report" title="Click this if Download Grab has mistakenly detected this request as a download">Report falsely detected download</a>
+			</div>
 
 		</div>
 		

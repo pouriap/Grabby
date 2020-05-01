@@ -16,6 +16,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		clearDownloadsList();
 	});
 
+	document.getElementById("dl-with-dlgrab").addEventListener("click", function(evt){
+		document.getElementById("dm-list-container").classList.remove("disabled");
+	});
+
+	document.getElementById("dl-with-firefox").addEventListener("click", function(evt){
+		document.getElementById("dm-list-container").classList.add("disabled");
+	});
+
+	document.getElementById("dl-with-dlgrab").click();
+
 	getBackgroundData().then(onGot);
 
 });
@@ -26,6 +36,8 @@ function onGot() {
 	let keys = popupContext.allDownloads.getKeys();
 	//reverse to show latest downloads on top
 	keys.reverse();
+
+	populateDMs();
 
 	for (const key of keys) {
 
@@ -49,9 +61,6 @@ function onGot() {
 		document.getElementById("downloads-list").appendChild(listItem);
 
 	}
-
-	//enable/disable IDM download
-	setActionEnabled(document.getElementById('action-idm'), popupContext.appJSON.runtime.idmAvailable);
 
 }
 
