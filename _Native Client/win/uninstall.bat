@@ -11,12 +11,10 @@ IF "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
 
 echo sss%id%
 
-echo .. Deleting Chrome Registry
-REG DELETE "HKCU\Software\Google\Chrome\NativeMessagingHosts\%id%" /f
-
 echo .. Deleting Firefox Registry
 for %%f in ("%LocalAPPData%") do SET SHORT_PATH=%%~sf
 REG DELETE "HKCU\SOFTWARE\Mozilla\NativeMessagingHosts\%id%" /f
+REG DELETE "HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\%id%" /f
 
 echo .. Deleting %id%
 RMDIR /Q /S "%LocalAPPData%\%id%"
