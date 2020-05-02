@@ -32,6 +32,13 @@ var app;
 		["requestBody"]
 	);
 
+	browser.webRequest.onBeforeRequest.addListener(
+		doOnBeforeRequest, {
+			urls: ["*://*/*"]
+		},
+		["requestBody"]
+	);
+
 	browser.webRequest.onBeforeSendHeaders.addListener(
 		doOnBeforeSendHeaders, {
 			urls: ["*://*/*"]
@@ -63,8 +70,13 @@ var app;
  */
 function doOnBeforeRequest(details){
 
+<<<<<<< ours
+	let formDataArr = (details.requestBody && details.requestBody.formData)? 
+		details.requestBody.formData : '';
+=======
 	let formDataArr = (details.method === "POST" && details.requestBody 
 				&& details.requestBody.formData)? details.requestBody.formData : [];
+>>>>>>> theirs
 	
 	let postData = '';
 	for(let key in formDataArr){
@@ -245,7 +257,6 @@ function doOnMessage(message, sender, sendResponse) {
 			download.resolve({cancel: false});
 		}
 	}
-	//todo: unused
 	else if(message.type === "intercept_download"){
 		let download = app.allDownloads.get(message.downloadHash);
 		if(download.resolve){

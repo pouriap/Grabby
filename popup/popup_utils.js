@@ -130,8 +130,7 @@ function downloadWithSelectedDM(download){
 		cookies : download.getHeader('cookie', 'request'),
 		dmName : selectedDM,
 		filename : download.getFilename(),
-		//todo: post data
-		postData : ''
+		postData : download.reqDetails.postData
 	};
 	port.postMessage(message);
 	window.close();
