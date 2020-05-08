@@ -354,9 +354,8 @@ class ReqFilter {
 	 */
 	_isInExtensionList(list){
 		let extension = this.download.getFileExtension();
-		if (extension !== "unknown" 
-			&& list.includes(extension)) {
-				return true;
+		if (extension !== "unknown" && list.includes(extension)) {
+			return true;
 		}
 		return false;
 	}
@@ -448,11 +447,33 @@ class ReqFilter {
 	isMedia(){
 		if(typeof this._isMedia === 'undefined'){
 			this._isMedia = 
+				//media type is anything that is loaded from a <video> or <audio> tag
+				//the problem with them is that if they are cached, there is absolutely no way to re-create
+				//the request and trigger a grab
+				//i expected a request to be created with 'fromCache=true' but that is not the case
+				//i tried ctrl+f5 and disabling cache from network tool but they don't work
+				//the request doesn't even show up in the network tool
+				//proof: MDN or w3schools page on <video> and <audio> tag
+				//the only way is to open the page containing the resouce in a private window
 				this._isInTypeList(constants.mediaTypes) ||
 				this._isInExtensionList(constants.mediaExts) ||
 				this._isInMimeList(constants.mediaMimes);
 		}
 		return this._isMedia;
+	}
+
+	/**
+	 * media file that can be played inside Firefox
+	 * reference: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
+	 */
+	isPlayableMedia(){
+		if(typeof this._isPlayableMedia === 'undefined'){
+			this._isPlayableMedia = 
+				this._isInTypeList(constants.mediaTypes) ||
+				this._isInExtensionList(constants.playableExts) ||
+				this._isInMimeList(constants.playableMimes);
+		}
+		return this._isPlayableMedia;
 	}
 
 	isCompressed(){
@@ -501,15 +522,37 @@ class ReqFilter {
 	}
 
 	isStatusOK(){
+
 		if(typeof this._isStatusOK === 'undefined'){
-			this._isStatusOK = 
-				//todo: some requests get two responses, one with 206 and then a 200
+
+			//OK and Not-Modified are ok
+			if(this.download.statusCode == 200 || this.download.statusCode == 302){
+				this._isStatusOK = true;
+			}
+			else if(this.download.statusCode == 206){
+				//if server is sending a range while we haven't requested it then it's not OK
+				//because Firefox will send another request in this case and we will end up with 
+				//two responses for the same requestId
 				//example: the bookmarked download of firefox
-				//as a result the download dialog will be shown twice 
-				//for now we're only allowing 200 requests until further investigation
-				(this.download.statusCode == 200)
-				//|| (this.download.statusCode == 206);
+				let contentRange = this.download.getHeader('content-range', 'response');
+				if(contentRange){
+					//it's okay if server is responsing with a range starting from zero, even if we 
+					//have not requested a range
+					if(contentRange.indexOf('bytes 0-') !== -1){
+						this._isStatusOK = true;
+					}
+					//if server is sending a range which does not start from zero and we have
+					//not requested a range then this is not ok
+					else if(!this.download.getHeader('range', 'request')){
+						this._isStatusOK = false;
+					}
+				}
+				else{
+					this._isStatusOK = true;
+				}
+			}
 		}
+
 		return this._isStatusOK;
 	}
 
@@ -640,15 +683,15 @@ var constants = {
 
 	mediaExts: [
 		//audio 
-		'wav', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
+		'wav', 'wave', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
 		//video 
 		'avi', 'flv', 'swf', 'wmv', 'mov', 'qt', 'ts', 'mp4', 'm4p', 'm4v', 'mkv', 'mpg', 'mpeg',
 		'mp2', 'mpv', 'mpe', 'avchd', 'webm',
 	],
 	mediaMimes: [
 		//audio
-		'audio/wav', 'audio/aiff', 'audio/x-aiff', 'audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg-3', 
-		'audio/aac', 'audio/x-aac', 'audio/mp3', 'audio/webm',
+		'audio/wav', 'audio/aiff', 'audio/x-aiff', 'audio/flac', 'audio/mpeg', 'audio/mpeg3', 
+		'audio/x-mpeg-3', 'audio/mp3', 'audio/ogg', 'audio/aac', 'audio/x-aac', 'audio/webm',
 		//video
 		'application/x-troff-msvideo', 'video/avi', 'video/msvideo', 'video/x-msvideo', 
 		'application/x-shockwave-flash', 'video/quicktime', 'video/mp2t', 'video/mpeg', 
@@ -678,6 +721,16 @@ var constants = {
 	otherBinaryMimes : [
 		//other
 		'application/octet-stream', 'application/binary',
+	],
+
+
+	playableExts: [
+		'wav', 'wave', 'ogg', 'oga', 'ogv', 'ogx', 'spx', 'opus', 'webm', 'flac', 'mp3', 
+		'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 
+	],
+	playableMimes: [
+		'audio/wav', 'audio/ogg', 'video/ogg', 'audio/webm', 'video/webm', 'audio/flac', 
+		'audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg-3', 'audio/mp3', 'video/mp4', 
 	],
 
 	mimesToExts : {

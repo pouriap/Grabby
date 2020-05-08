@@ -158,14 +158,15 @@ function doOnHeadersReceived(details) {
 		download.grabReason = "document"
 		app.addToAllDownloads(download);
 	}
+	else if(filter.isMedia()){
+		download.grabReason = "media";
+		app.addToAllDownloads(download);
+	}
 	else if(filter.isOtherBinary()){
 		download.grabReason = "binary"
 		app.addToAllDownloads(download);
 	}
-	else if(filter.isMedia()){
-		download.grabReason = "media"
-		app.addToAllDownloads(download);
-	}
+
 
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
@@ -174,12 +175,10 @@ function doOnHeadersReceived(details) {
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
-	//todo: mkv is considered media and not downloaded
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
 			download.grabReason !== 'graylist'
-			&& !filter.isMedia()
-			// && !filter.isAJAX()
+			&& !filter.isPlayableMedia()
 		){
 			return new Promise(function(resolve){
 				download.resolve = resolve;
@@ -199,6 +198,7 @@ function doOnHeadersReceived(details) {
 function doOnCompleted(details){
 	//remove the original download from allRequests to save memory
 	//this isn't really necessary because allRequest is a fixed sized map
+	//todo: try adding this to onResponseStarted
 	app.allRequests.remove(details.requestId);
 }
 
