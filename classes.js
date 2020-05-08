@@ -140,8 +140,8 @@ class DlGrabApp {
 		var download = dl;
 		let screenW = window.screen.width;
 		let screenH = window.screen.height;
-		let windowW = 500;
-		let windowH = 400;
+		let windowW = 480;
+		let windowH = 350;
 		let leftMargin = (screenW/2) - (windowW/2);
 		let topMargin = (screenH/2) - (windowH/2);
 

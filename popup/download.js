@@ -51,10 +51,7 @@ function onGot() {
 	document.getElementById("filename").setAttribute("title", popupContext.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 
 		(popupContext.selectedDl.getSize() !== "unknown")? filesize(popupContext.selectedDl.getSize()) : popupContext.selectedDl.getSize();
-	document.getElementById("url").innerHTML = popupContext.selectedDl.url;
-	document.getElementById("url").setAttribute("title", popupContext.selectedDl.url);
-	document.getElementById("origin").innerHTML = popupContext.selectedDl.origin;
-	document.getElementById("origin").setAttribute("title", popupContext.selectedDl.origin);
+	document.getElementById("host").innerHTML = popupContext.selectedDl.getHost();
 	document.getElementById("output").style.display = 'none';
 	populateDMs();
 }

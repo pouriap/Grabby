@@ -12,8 +12,8 @@ html, body {
 }
 
 #download-details {
-	margin: 10px;
-	padding: 10px;
+	margin: 0 10px 10px;
+	padding: 0 10px 0;
 	width: auto;
 	padding-bottom: 0;
 	border: none;

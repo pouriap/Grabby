@@ -175,6 +175,7 @@ function doOnHeadersReceived(details) {
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
+	//todo: now if you download a fucking mp3 the download dialog doesn't show FUCK MOZILLA
 	if(app.options.overrideDlDialog || DEBUG){
 		if(
 			download.grabReason !== 'graylist'
