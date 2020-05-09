@@ -147,26 +147,37 @@ function doOnHeadersReceived(details) {
 	//todo: private browsing downloads are added to all downloads, maybe add a separate list for them
 	//whitelists
 	if(filter.hasAttachment()){
+		download.override = true;
 		download.grabReason = "attachment";
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isCompressed()){
+		download.override = true;
 		download.grabReason = "compressed"
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isDocument()){
+		download.override = true;
 		download.grabReason = "document"
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isMedia()){
+		//don't download playables that can be played inside browser
+		//if we're here it means the download did not have an attachment header
+		if(filter.isPlayableMedia()){
+			download.override = false;
+		}
+		else{
+			download.override = true;
+		}
 		download.grabReason = "media";
 		app.addToAllDownloads(download);
 	}
 	else if(filter.isOtherBinary()){
+		download.override = true;
 		download.grabReason = "binary"
 		app.addToAllDownloads(download);
 	}
-
 
 	//now we're left with gray items
 	//wtf do we do with gray items? :|
@@ -175,12 +186,10 @@ function doOnHeadersReceived(details) {
 		download.debug_gray = 'debug_gray';
 		app.addToAllDownloads(download);
 	}
-	//todo: now if you download a fucking mp3 the download dialog doesn't show FUCK MOZILLA
+
+	//show download dialog for downloads that should be overriden
 	if(app.options.overrideDlDialog || DEBUG){
-		if(
-			download.grabReason !== 'graylist'
-			&& !filter.isPlayableMedia()
-		){
+		if(download.override){
 			return new Promise(function(resolve){
 				download.resolve = resolve;
 				app.showDlDialog(download);
