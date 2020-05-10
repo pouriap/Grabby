@@ -12,6 +12,9 @@ var app;
 
 	let options = await loadOptions();
 	app = new DlGrabApp(options);
+
+	app.runtime.nativeCliId = 'download.grab.pouriap';
+
 	console.log('initializing app...');
 	try{
 		await app.initialize();
@@ -22,8 +25,6 @@ var app;
 		app.runtime.ready = false;
 		return;
 	}
-
-	//todo: add onBeforeRequest to save POST data
 
 	browser.webRequest.onBeforeRequest.addListener(
 		doOnBeforeRequest, {

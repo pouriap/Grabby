@@ -20,10 +20,8 @@ native application must be in accordance with our No Surprises policy.
 //todo: how firefox determines mime types:
 //https://developer.mozilla.org/en-US/docs/Mozilla/How_Mozilla_determines_MIME_Types
 //todo: support "download selection"
-//todo: add determine request type is POST or GET
 //todo: I18N
 //todo: do this automatically for files like this from now on
-//todo: add our own native client
 
 
 /**
@@ -70,7 +68,7 @@ class DlGrabApp {
 
 		function _isNativeClientAvailable(){
 			return new Promise(function(resolve){
-				let port = browser.runtime.connectNative("download.grab.pouriap");
+				let port = browser.runtime.connectNative(instance.runtime.nativeCliId);
 				port.onMessage.addListener((response) => {
 					if(response.type === 'native_client_available'){
 						resolve(true);
@@ -89,8 +87,7 @@ class DlGrabApp {
 
 		function _getAvailableDMs(){
 			return new Promise(function(resolve){
-				//put id in some sort of config
-				let port = browser.runtime.connectNative("download.grab.pouriap");
+				let port = browser.runtime.connectNative(instance.runtime.nativeCliId);
 				port.onMessage.addListener((response) => {
 					if(response.type === 'available_dms'){
 						let availableDMs = response.availableDMs;

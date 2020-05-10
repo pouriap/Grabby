@@ -122,7 +122,7 @@ function download(download){
 function downloadWithSelectedDM(download){
 	let DMs = document.getElementById('available-dms');
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
-	let port = browser.runtime.connectNative("download.grab.pouriap");
+	let port = browser.runtime.connectNative(popupContext.appJSON.runtime.nativeCliId);
 	let message = {
 		type: 'download',
 		url : download.url,
