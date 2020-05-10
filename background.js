@@ -93,27 +93,82 @@ var app;
  */
 async function doOnMenuClicked(info, tab){
 	if(info.menuItemId == app.runtime.menuGrabAllId){
-		//todo: get cookies of each domain in links
 		let code = `
-		let links = [];
-		for(let a of document.links){
-			links.push(a.href);
+		var linkNodes = document.links;
+		var links = [];
+		for(let linkNode of linkNodes){
+			let isAnchor = (linkNode instanceof HTMLAnchorElement);
+			let description = (isAnchor)? 
+				(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
+			let href = linkNode.href;
+			let link = {href: href, description: description};
+			links.push(link);
 		}
-		links;
+		var originPageUrl = window.location.href;
+		var originPageDomain = window.location.hostname;
+		var originPageReferer = document.referrer;
+		var result = {
+			links: links,
+			originPageUrl: originPageUrl,
+			originPageDomain: originPageDomain,
+			originPageReferer: originPageReferer,
+		};
+		result;
 		`;
 		let result = await browser.tabs.executeScript({code: code});
-		let links = result[0];
-		console.log('all links: ', links);
+		result = result[0];
+		console.log('all links result: ', result);
+		let links = result.links;
+		let originPageUrl = result.originPageUrl;
+		let originPageDomain = result.originPageDomain;
+		let originPageReferer = result.originPageReferer;
+		//todo: choose default download manager
+		NativeUtils.downloadMultiple(
+			"Internet Download Manager",
+			links,
+			originPageUrl,
+			originPageReferer,
+			originPageDomain
+		);
 	}
 	else if(info.menuItemId == app.runtime.menuGrabSelectionId){
 		let code = `
 		var selection = document.getSelection();
-		var links = Array.from(document.links).filter(e => selection.containsNode(e, true) && e.href.match(/^https?:/i)).map(e => e.href);
-		links;
+		var linkNodes = Array.from(document.links).filter(e => selection.containsNode(e, true) && e.href.match(/^https?:/i));
+		var links = [];
+		for(let linkNode of linkNodes){
+			let isAnchor = (linkNode instanceof HTMLAnchorElement);
+			let description = (isAnchor)? 
+				(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
+			let href = linkNode.href;
+			let link = {href: href, description: description};
+			links.push(link);
+		}
+		var originPageUrl = window.location.href;
+		var originPageDomain = window.location.hostname;
+		var originPageReferer = document.referrer;
+		var result = {
+			links: links,
+			originPageUrl: originPageUrl,
+			originPageDomain: originPageDomain,
+			originPageReferer: originPageReferer,
+		};
+		result;
 		`;
 		let result = await browser.tabs.executeScript({code: code});
-		let links = result[0];
-		console.log('selection links: ', links);
+		result = result[0];
+		console.log('selection result: ', result);
+		let links = result.links;
+		let originPageUrl = result.originPageUrl;
+		let originPageDomain = result.originPageDomain;
+		let originPageReferer = result.originPageReferer;
+		NativeUtils.downloadMultiple(
+			"Internet Download Manager",
+			links,
+			originPageUrl,
+			originPageReferer,
+			originPageDomain
+		);
 	}
 }
 

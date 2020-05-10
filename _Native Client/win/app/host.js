@@ -49,6 +49,7 @@ function observe(message, push, done) {
 		close();
 	}
 	else if (message.type === 'download'){
+
 		let url = message.url;
 		let referer = message.referer || '';
 		let cookies = message.cookies || '';
@@ -62,7 +63,34 @@ function observe(message, push, done) {
 					+ url + "\n"
 					+ filename + "\n"
 					+ cookies + "\n"
-					+ postData + "\n";
+					+ postData + "\n"
+					+ "\n"	//origin page referer
+					+ "\n"	//origin page cookies
+					+ "\n"	//extras
+					+ "\n";	//extras
+		writeFileSync("flashgot.fgt", job, {encoding: 'utf8'});
+		execFileSync("flashgot.exe", ['flashgot.fgt'], {timeout: 5000});
+		close();
+	}
+	else if(message.type === 'download_all'){
+
+		let downloadItems = message.downloadItems;
+		let dmName = message.dmName;
+		let header = `${downloadItems.length};${dmName};0;;`;
+		let job = header + "\n"
+					+ message.originPageUrl + "\n";
+		for(let downloadItem of downloadItems){
+			job = job + downloadItem.url + "\n" 
+						+ downloadItem.description + "\n"
+						+ downloadItem.cookies + "\n"
+						+ "\n" //post data
+		}
+
+		job = job + message.originPageReferer + "\n"
+					+ message.originPageCookies + "\n"
+					+ "\n" //extras
+					+ "\n" //estras
+
 		writeFileSync("flashgot.fgt", job, {encoding: 'utf8'});
 		execFileSync("flashgot.exe", ['flashgot.fgt'], {timeout: 5000});
 		close();
