@@ -15,6 +15,7 @@
 		"clipboardWrite",
 		"storage",
 		"tabs",
+		"menus",
 		"<all_urls>"
 	],
 

@@ -14,6 +14,9 @@ var app;
 	app = new DlGrabApp(options);
 
 	app.runtime.nativeCliId = 'download.grab.pouriap';
+	app.runtime.menuParentId = 'download.grab.menu.parent';
+	app.runtime.menuGrabAllId = 'download.grab.menu.graball';
+	app.runtime.menuGrabSelectionId = 'download.grab.menu.grabselection';
 
 	console.log('initializing app...');
 	try{
@@ -26,6 +29,31 @@ var app;
 		return;
 	}
 
+	//add parent menu item
+	browser.menus.create({
+		id: app.runtime.menuParentId,
+		title: "Download Grab", 
+		contexts: ["all"],
+	});
+
+	//add grab all menu
+	browser.menus.create({
+		id: app.runtime.menuGrabAllId,
+		title: "Grab All",
+		contexts: ["all"],
+		parentId: app.runtime.menuParentId
+	});
+
+	//add grab selection menu
+	browser.menus.create({
+		id: app.runtime.menuGrabSelectionId,
+		title: "Grab Selection",
+		contexts: ["selection"],
+		parentId: app.runtime.menuParentId
+	});
+
+	//menu click listener
+	browser.menus.onClicked.addListener(doOnMenuClicked);
 	browser.webRequest.onBeforeRequest.addListener(
 		doOnBeforeRequest, {
 			urls: ["*://*/*"]
@@ -57,6 +85,37 @@ var app;
 	browser.runtime.onMessage.addListener(doOnMessage);
 
 })();
+
+
+/**
+ * Runs every time a menu item is clicked
+ * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
+ */
+async function doOnMenuClicked(info, tab){
+	if(info.menuItemId == app.runtime.menuGrabAllId){
+		//todo: get cookies of each domain in links
+		let code = `
+		let links = [];
+		for(let a of document.links){
+			links.push(a.href);
+		}
+		links;
+		`;
+		let result = await browser.tabs.executeScript({code: code});
+		let links = result[0];
+		console.log('all links: ', links);
+	}
+	else if(info.menuItemId == app.runtime.menuGrabSelectionId){
+		let code = `
+		var selection = document.getSelection();
+		var links = Array.from(document.links).filter(e => selection.containsNode(e, true) && e.href.match(/^https?:/i)).map(e => e.href);
+		links;
+		`;
+		let result = await browser.tabs.executeScript({code: code});
+		let links = result[0];
+		console.log('selection links: ', links);
+	}
+}
 
 /**
  * Runs before a request is sent
