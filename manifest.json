@@ -53,9 +53,10 @@
 
 	"background": {
 		"scripts": [
-			"libs/md5.js", 
-			"options/default_options.js", 
-			"classes.js", 
+			"libs/md5.js",
+			"options/default_options.js",
+			"native_utils.js",
+			"classes.js",
 			"background.js"
 		]
 	}

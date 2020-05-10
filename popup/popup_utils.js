@@ -122,17 +122,14 @@ function download(download){
 function downloadWithSelectedDM(download){
 	let DMs = document.getElementById('available-dms');
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
-	let port = browser.runtime.connectNative(popupContext.appJSON.runtime.nativeCliId);
-	let message = {
-		type: 'download',
-		url : download.url,
-		referer : download.getHeader('referer', 'request'),
-		cookies : download.getHeader('cookie', 'request'),
-		dmName : selectedDM,
-		filename : download.getFilename(),
-		postData : download.reqDetails.postData
-	};
-	port.postMessage(message);
+	NativeUtils.downloadSingle(
+		selectedDM, 
+		download.url, 
+		download.getHeader('referer', 'request'),
+		download.getHeader('cookie', 'request'),
+		download.getFilename(),
+		download.reqDetails.postData
+	);
 	window.close();
 }
 

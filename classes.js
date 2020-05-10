@@ -53,60 +53,18 @@ class DlGrabApp {
 		var instance = this;
 		return new Promise(async function (resolve, reject) {
 			console.log("checking native client availability");
-			let nativeClientAvailable = await _isNativeClientAvailable();
+			let nativeClientAvailable = await NativeUtils.isNativeClientAvailable();
 			if(!nativeClientAvailable){
 				reject('Native client unavailable');
 				return;
 			}
 			console.log('native client available');
 			console.log('getting available DMs');
-			instance.runtime.availableDMs = await _getAvailableDMs();
+			instance.runtime.availableDMs = await NativeUtils.getAvailableDMs();
 			console.log('available DMs: ', instance.runtime.availableDMs);
 			//resolve after all inits are completed
 			resolve();
-		});
-
-		function _isNativeClientAvailable(){
-			return new Promise(function(resolve){
-				let port = browser.runtime.connectNative(instance.runtime.nativeCliId);
-				port.onMessage.addListener((response) => {
-					if(response.type === 'native_client_available'){
-						resolve(true);
-					}
-					else{
-						resolve(false);
-					}
-				});
-				port.onDisconnect.addListener(() => {
-					resolve(false);
-				});
-				let message = {type: 'native_client_available'};
-				port.postMessage(message);
-			});
-		}
-
-		function _getAvailableDMs(){
-			return new Promise(function(resolve){
-				let port = browser.runtime.connectNative(instance.runtime.nativeCliId);
-				port.onMessage.addListener((response) => {
-					if(response.type === 'available_dms'){
-						let availableDMs = response.availableDMs;
-						port.disconnect();
-						resolve(availableDMs);
-					}
-					else{
-						resolve({});
-					}
-				});
-				port.onDisconnect.addListener(()=>{
-					resolve({});
-				});
-				let message = {type: 'get_available_dms'};
-				port.postMessage(message);
-			});
-		}
-
-		
+		});	
 
 	}
 
