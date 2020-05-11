@@ -32,7 +32,7 @@ function saveOptions(e) {
 	browser.storage.local.set(options);
 
 	let message = {
-		type: Messaging.MSG_SAVE_OPTIONS,
+		type: DG.Messaging.MSG_SAVE_OPTIONS,
 		options: options
 	};
 
@@ -43,7 +43,7 @@ function saveOptions(e) {
 async function loadCurrentOptions() {
 
 	let savedOptions = await browser.storage.local.get(defaultOptions);
-	let bgData = await browser.runtime.sendMessage({type: Messaging.MSG_GET_BG_DATA});
+	let bgData = await browser.runtime.sendMessage({type: DG.Messaging.MSG_GET_BG_DATA});
 	let availableDMs = bgData.appJSON.runtime.availableDMs;
 
 	console.log("got the options: ", savedOptions);

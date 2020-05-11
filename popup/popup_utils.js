@@ -23,7 +23,7 @@ popupContext.continueWithBrowser = false;
  */
 async function getBackgroundData(){
 
-	let message = {type: Messaging.MSG_GET_BG_DATA};
+	let message = {type: DG.Messaging.MSG_GET_BG_DATA};
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.downloads.limit;
 	let allDlsJSON = response.downloads.list;
@@ -122,7 +122,7 @@ function download(download){
 function downloadWithSelectedDM(download){
 	let DMs = document.getElementById('available-dms');
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
-	NativeUtils.downloadSingle(
+	DG.NativeUtils.downloadSingle(
 		selectedDM, 
 		download.url, 
 		download.getHeader('referer', 'request'),
@@ -137,7 +137,7 @@ function downloadWithSelectedDM(download){
  * @param {Download} download 
  */
 function continueWithBrowser(download){
-	let message = {type: Messaging.MSG_CONT_WITH_BROWSER, downloadHash: download.hash};
+	let message = {type: DG.Messaging.MSG_CONT_WITH_BROWSER, downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
 	popupContext.continueWithBrowser = true;
 	window.close();

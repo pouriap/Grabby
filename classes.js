@@ -53,14 +53,14 @@ class DlGrabApp {
 		var instance = this;
 		return new Promise(async function (resolve, reject) {
 			console.log("checking native client availability");
-			let nativeClientAvailable = await NativeUtils.isNativeClientAvailable();
+			let nativeClientAvailable = await DG.NativeUtils.isNativeClientAvailable();
 			if(!nativeClientAvailable){
 				reject('Native client unavailable');
 				return;
 			}
 			console.log('native client available');
 			console.log('getting available DMs');
-			instance.runtime.availableDMs = await NativeUtils.getAvailableDMs();
+			instance.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
 			console.log('available DMs: ', instance.runtime.availableDMs);
 			//resolve after all inits are completed
 			resolve();

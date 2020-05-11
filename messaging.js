@@ -1,4 +1,6 @@
-var Messaging = {
+var DG = DG || {};
+
+DG.Messaging = {
 
 	MSG_SAVE_OPTIONS: 'save-options',
 	MSG_CLEAR_LIST: 'clear-list',
@@ -24,7 +26,7 @@ var Messaging = {
 
 		console.log('message received:' + JSON.stringify(message));
 
-		var _this = Messaging;
+		var _this = DG.Messaging;
 
 		if(message.type === _this.MSG_SAVE_OPTIONS){
 			//set optoins

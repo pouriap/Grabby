@@ -1,4 +1,6 @@
-var ContextMenu = {
+var DG = DG || {};
+
+DG.ContextMenu = {
 
 	menuParentId : 'download.grab.menu.parent',
 	menuGrabAllId : 'download.grab.menu.graball',
@@ -46,7 +48,7 @@ var ContextMenu = {
 	 */
 	doOnMenuClicked : async function(info, tab){
 
-		let _this = ContextMenu;
+		let _this = DG.ContextMenu;
 
 		let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
 
@@ -70,7 +72,7 @@ var ContextMenu = {
 			let originPageUrl = result.originPageUrl;
 			let originPageDomain = result.originPageDomain;
 			let originPageReferer = result.originPageReferer;
-			NativeUtils.downloadMultiple(
+			DG.NativeUtils.downloadMultiple(
 				defaultDM,
 				links,
 				originPageUrl,
