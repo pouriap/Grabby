@@ -57,6 +57,7 @@
 			"libs/md5.js",
 			"options/default_options.js",
 			"native_utils.js",
+			"context_menu.js",
 			"classes.js",
 			"background.js"
 		]

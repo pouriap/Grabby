@@ -13,11 +13,6 @@ var app;
 	let options = await loadOptions();
 	app = new DlGrabApp(options);
 
-	app.runtime.nativeCliId = 'download.grab.pouriap';
-	app.runtime.menuParentId = 'download.grab.menu.parent';
-	app.runtime.menuGrabAllId = 'download.grab.menu.graball';
-	app.runtime.menuGrabSelectionId = 'download.grab.menu.grabselection';
-
 	console.log('initializing app...');
 	try{
 		await app.initialize();
@@ -29,31 +24,8 @@ var app;
 		return;
 	}
 
-	//add parent menu item
-	browser.menus.create({
-		id: app.runtime.menuParentId,
-		title: "Download Grab", 
-		contexts: ["all"],
-	});
+	ContextMenu.createMenus(app);
 
-	//add grab all menu
-	browser.menus.create({
-		id: app.runtime.menuGrabAllId,
-		title: "Grab All",
-		contexts: ["all"],
-		parentId: app.runtime.menuParentId
-	});
-
-	//add grab selection menu
-	browser.menus.create({
-		id: app.runtime.menuGrabSelectionId,
-		title: "Grab Selection",
-		contexts: ["selection"],
-		parentId: app.runtime.menuParentId
-	});
-
-	//menu click listener
-	browser.menus.onClicked.addListener(doOnMenuClicked);
 	browser.webRequest.onBeforeRequest.addListener(
 		doOnBeforeRequest, {
 			urls: ["*://*/*"]
@@ -86,43 +58,6 @@ var app;
 
 })();
 
-
-/**
- * Runs every time a menu item is clicked
- * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
- */
-async function doOnMenuClicked(info, tab){
-
-	let defaultDM = app.options.defaultDM || app.runtime.availableDMs[0];
-	if(!defaultDM){
-		//todo: show notification?
-		console.log('no download managers are available');
-		return;
-	}
-
-	if(info.menuItemId == app.runtime.menuGrabAllId){
-		let result = await browser.tabs.executeScript({file: 'scripts/get_all_links.js'});
-		downloadLinks(result[0]);
-	}
-	else if(info.menuItemId == app.runtime.menuGrabSelectionId){
-		let result = await browser.tabs.executeScript({file: 'scripts/get_selection_links.js'});
-		downloadLinks(result[0]);
-	}
-
-	function downloadLinks(result){
-		let links = result.links;
-		let originPageUrl = result.originPageUrl;
-		let originPageDomain = result.originPageDomain;
-		let originPageReferer = result.originPageReferer;
-		NativeUtils.downloadMultiple(
-			defaultDM,
-			links,
-			originPageUrl,
-			originPageReferer,
-			originPageDomain
-		);
-	}
-}
 
 /**
  * Runs before a request is sent
