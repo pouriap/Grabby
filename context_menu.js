@@ -37,45 +37,47 @@ var ContextMenu = {
 		});
 
 		//menu click listener
-		browser.menus.onClicked.addListener(doOnMenuClicked);
+		browser.menus.onClicked.addListener(this.doOnMenuClicked);
+	},
 
-		/**
-		 * Runs every time a menu item is clicked
-		 * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
-		 */
-		async function doOnMenuClicked(info, tab){
+	/**
+	 * Runs every time a menu item is clicked
+	 * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
+	 */
+	doOnMenuClicked : async function(info, tab){
 
-			let defaultDM = ContextMenu.app.options.defaultDM || ContextMenu.app.runtime.availableDMs[0];
+		let _this = ContextMenu;
 
-			if(!defaultDM){
-				//todo: show notification?
-				console.log('no download managers are available');
-				return;
-			}
+		let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
 
-			if(info.menuItemId == ContextMenu.menuGrabAllId){
-				let result = await browser.tabs.executeScript({file: 'scripts/get_all_links.js'});
-				downloadLinks(result[0]);
-			}
-			else if(info.menuItemId == ContextMenu.menuGrabSelectionId){
-				let result = await browser.tabs.executeScript({file: 'scripts/get_selection_links.js'});
-				downloadLinks(result[0]);
-			}
-
-			function downloadLinks(result){
-				let links = result.links;
-				let originPageUrl = result.originPageUrl;
-				let originPageDomain = result.originPageDomain;
-				let originPageReferer = result.originPageReferer;
-				NativeUtils.downloadMultiple(
-					defaultDM,
-					links,
-					originPageUrl,
-					originPageReferer,
-					originPageDomain
-				);
-			}
+		if(!defaultDM){
+			//todo: show notification?
+			console.log('no download managers are available');
+			return;
 		}
 
+		if(info.menuItemId == _this.menuGrabAllId){
+			let result = await browser.tabs.executeScript({file: 'scripts/get_all_links.js'});
+			downloadLinks(result[0]);
+		}
+		else if(info.menuItemId == _this.menuGrabSelectionId){
+			let result = await browser.tabs.executeScript({file: 'scripts/get_selection_links.js'});
+			downloadLinks(result[0]);
+		}
+
+		function downloadLinks(result){
+			let links = result.links;
+			let originPageUrl = result.originPageUrl;
+			let originPageDomain = result.originPageDomain;
+			let originPageReferer = result.originPageReferer;
+			NativeUtils.downloadMultiple(
+				defaultDM,
+				links,
+				originPageUrl,
+				originPageReferer,
+				originPageDomain
+			);
+		}
 	}
+
 }

@@ -112,9 +112,10 @@ class DlGrabApp {
 		};
 		let creating = browser.windows.create(createData);
 
+		var appInstance = this;
 		creating.then((windowInfo) => {
 			let windowId = windowInfo.id;
-			app.downloadDialogs[windowId] = download.getHash();
+			appInstance.downloadDialogs[windowId] = download.getHash();
 		});
 	}
 
@@ -345,12 +346,12 @@ class ReqFilter {
 	
 	/* public functions */
 
-	isSizeBlocked(){
+	isSizeBlocked(sizeLimit){
 		let size = this.download.getSize();
 		if(size === 0){
 			return true;
 		}
-		return size !== 'unknown' && size < app.options.grabFilesLargerThanMB;
+		return size !== 'unknown' && size < sizeLimit;
 	}
 
 	isWebSocket(){

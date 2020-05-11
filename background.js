@@ -2,19 +2,13 @@
 
 var DEBUG = true;
 
-/**
- * a super duper global variable
- * @type {DlGrabApp}
- */
-var app;
-
 (async () => {
 
 	console.log('initializing app...');
 
 	try{
 		let options = await browser.storage.local.get(defaultOptions);
-		app = new DlGrabApp(options);
+		let app = new DlGrabApp(options);
 		await app.initialize();
 		Messaging.initialize(app);
 		RequestHandler.initialize(app);

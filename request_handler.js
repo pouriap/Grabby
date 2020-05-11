@@ -45,6 +45,8 @@ var RequestHandler = {
 	 */
 	doOnBeforeRequest: function(details){
 
+		let _this = RequestHandler;
+
 		let formDataArr = (details.method === "POST" && details.requestBody 
 					&& details.requestBody.formData)? details.requestBody.formData : [];
 		
@@ -64,7 +66,7 @@ var RequestHandler = {
 		let request = {};
 		request.postData = postData;
 
-		this.app.allRequests.put(details.requestId, request);
+		_this.app.allRequests.put(details.requestId, request);
 	},
 
 	/**
@@ -72,8 +74,9 @@ var RequestHandler = {
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
 	doOnBeforeSendHeaders: function(details){
+		let _this = RequestHandler;
 		//store request details
-		let request = this.app.allRequests.get(details.requestId);
+		let request = _this.app.allRequests.get(details.requestId);
 		request.details = details;
 		request.details.postData = request.postData;
 		delete request.postData;
@@ -86,10 +89,12 @@ var RequestHandler = {
 	 */
 	doOnHeadersReceived: function(details) {
 
+		let _this = RequestHandler;
+
 		console.log("receiving: ", details);
 
 		let requestId = details.requestId;
-		let requestOfThisResponse = this.app.allRequests.get(requestId);
+		let requestOfThisResponse = _this.app.allRequests.get(requestId);
 		
 		if(typeof requestOfThisResponse === 'undefined'){
 			return;
@@ -107,14 +112,14 @@ var RequestHandler = {
 
 		if(
 			filter.isWebSocket() ||
-			filter.isSizeBlocked() ||
+			filter.isSizeBlocked(_this.app.options.grabFilesLargerThanMB) ||
 			!filter.isStatusOK() ||
 			filter.isAJAX()
 		){
 			return;
 		}
 
-		if(this.app.options.excludeWebFiles){
+		if(_this.app.options.excludeWebFiles){
 			if(
 				filter.isImage() ||
 				filter.isFont() ||
@@ -130,17 +135,17 @@ var RequestHandler = {
 		if(filter.hasAttachment()){
 			download.override = true;
 			download.grabReason = "attachment";
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 		else if(filter.isCompressed()){
 			download.override = true;
 			download.grabReason = "compressed"
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 		else if(filter.isDocument()){
 			download.override = true;
 			download.grabReason = "document"
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 		else if(filter.isMedia()){
 			//don't download playables that can be played inside browser
@@ -152,12 +157,12 @@ var RequestHandler = {
 				download.override = true;
 			}
 			download.grabReason = "media";
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 		else if(filter.isOtherBinary()){
 			download.override = true;
 			download.grabReason = "binary"
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 
 		//now we're left with gray items
@@ -165,15 +170,15 @@ var RequestHandler = {
 		else if(DEBUG){
 			download.grabReason = 'graylist';
 			download.debug_gray = 'debug_gray';
-			this.app.addToAllDownloads(download);
+			_this.app.addToAllDownloads(download);
 		}
 
 		//show download dialog for downloads that should be overriden
-		if(this.app.options.overrideDlDialog || DEBUG){
+		if(_this.app.options.overrideDlDialog || DEBUG){
 			if(download.override){
 				return new Promise(function(resolve){
 					download.resolve = resolve;
-					this.app.showDlDialog(download);
+					_this.app.showDlDialog(download);
 					console.log("download override: ", download);
 				});
 			}
@@ -185,10 +190,11 @@ var RequestHandler = {
 	 * Runs once a request is completed
 	 */
 	doOnCompleted: function(details){
+		let _this = RequestHandler;
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
-		this.app.allRequests.remove(details.requestId);
+		_this.app.allRequests.remove(details.requestId);
 	}
 
 }
