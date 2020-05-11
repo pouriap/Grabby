@@ -40,37 +40,48 @@ function saveOptions(e) {
 
 }
 
-function loadCurrentOptions() {
+async function loadCurrentOptions() {
 
-	let getting = browser.storage.local.get(defaultOptions);
-	getting.then(setCurrentChoices, onError);
+	let savedOptions = await browser.storage.local.get(defaultOptions);
+	let bgData = await browser.runtime.sendMessage({type: 'get_bg_data'});
+	let availableDMs = bgData.appJSON.runtime.availableDMs;
 
-	function setCurrentChoices(savedOptions) {
+	console.log("got the options: ", savedOptions);
+	let optionNames = Object.keys(defaultOptions);
 
-		console.log("got the options: ", savedOptions);
-		let optionNames = Object.keys(defaultOptions);
+	for(let optionName of optionNames){
 
-		optionNames.forEach(function (optionName) {
+		let optionValue = savedOptions[optionName];
+		let defaultValue = defaultOptions[optionName];
+		let optionType = typeof defaultValue;
 
-			let optionValue = savedOptions[optionName];
-			let defaultValue = defaultOptions[optionName];
-			let optionType = typeof defaultValue;
-
-			switch (optionType) {
-				case "boolean":
-					setCheckBoxValue(optionName, optionValue, defaultValue);
-					break;
-				default:
-					setTextBoxValue(optionName, optionValue, defaultValue);
-					break;
-			}
-
-		});
-
+		switch (optionType) {
+			case "boolean":
+				setCheckBoxValue(optionName, optionValue, defaultValue);
+				break;
+			default:
+				setTextBoxValue(optionName, optionValue, defaultValue);
+				break;
+		}
 	}
-
-	function onError(error) {
-		console.log(`Error: ${error}`);
+	//populate available DMs
+	let dmsDropDown = document.getElementById('availableDMs');
+	for(let dmName of availableDMs){
+		let option = document.createElement('option');
+		option.value = dmName;
+		option.innerHTML = dmName;
+		option.id = dmName;
+		option.onclick = function(){
+			let selectedDM = dmsDropDown.options[dmsDropDown.selectedIndex].value;
+			document.getElementById('defaultDM').value = selectedDM;
+		};
+		dmsDropDown.appendChild(option);
+	}
+	//select defaultDM in the list
+	let defaultDMName = document.getElementById('defaultDM').value;
+	if(defaultDMName){
+		console.log('setting default dm: ', defaultDMName);
+		document.getElementById(defaultDMName).setAttribute('selected', 'selected');
 	}
 
 }

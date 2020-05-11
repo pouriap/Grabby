@@ -5,4 +5,5 @@ const defaultOptions = {
 	grabFilesLargerThanMB: 0,
 	excludeWebFiles : true,
 	overrideDlDialog : false,
+	defaultDM : '',
 }

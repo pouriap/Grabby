@@ -92,78 +92,30 @@ var app;
  * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
  */
 async function doOnMenuClicked(info, tab){
+
+	let defaultDM = app.options.defaultDM || app.runtime.availableDMs[0];
+	if(!defaultDM){
+		//todo: show notification?
+		console.log('no download managers are available');
+		return;
+	}
+
 	if(info.menuItemId == app.runtime.menuGrabAllId){
-		let code = `
-		var linkNodes = document.links;
-		var links = [];
-		for(let linkNode of linkNodes){
-			let isAnchor = (linkNode instanceof HTMLAnchorElement);
-			let description = (isAnchor)? 
-				(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
-			let href = linkNode.href;
-			let link = {href: href, description: description};
-			links.push(link);
-		}
-		var originPageUrl = window.location.href;
-		var originPageDomain = window.location.hostname;
-		var originPageReferer = document.referrer;
-		var result = {
-			links: links,
-			originPageUrl: originPageUrl,
-			originPageDomain: originPageDomain,
-			originPageReferer: originPageReferer,
-		};
-		result;
-		`;
-		let result = await browser.tabs.executeScript({code: code});
-		result = result[0];
-		console.log('all links result: ', result);
-		let links = result.links;
-		let originPageUrl = result.originPageUrl;
-		let originPageDomain = result.originPageDomain;
-		let originPageReferer = result.originPageReferer;
-		//todo: choose default download manager
-		NativeUtils.downloadMultiple(
-			"Internet Download Manager",
-			links,
-			originPageUrl,
-			originPageReferer,
-			originPageDomain
-		);
+		let result = await browser.tabs.executeScript({file: 'scripts/get_all_links.js'});
+		downloadLinks(result[0]);
 	}
 	else if(info.menuItemId == app.runtime.menuGrabSelectionId){
-		let code = `
-		var selection = document.getSelection();
-		var linkNodes = Array.from(document.links).filter(e => selection.containsNode(e, true) && e.href.match(/^https?:/i));
-		var links = [];
-		for(let linkNode of linkNodes){
-			let isAnchor = (linkNode instanceof HTMLAnchorElement);
-			let description = (isAnchor)? 
-				(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
-			let href = linkNode.href;
-			let link = {href: href, description: description};
-			links.push(link);
-		}
-		var originPageUrl = window.location.href;
-		var originPageDomain = window.location.hostname;
-		var originPageReferer = document.referrer;
-		var result = {
-			links: links,
-			originPageUrl: originPageUrl,
-			originPageDomain: originPageDomain,
-			originPageReferer: originPageReferer,
-		};
-		result;
-		`;
-		let result = await browser.tabs.executeScript({code: code});
-		result = result[0];
-		console.log('selection result: ', result);
+		let result = await browser.tabs.executeScript({file: 'scripts/get_selection_links.js'});
+		downloadLinks(result[0]);
+	}
+
+	function downloadLinks(result){
 		let links = result.links;
 		let originPageUrl = result.originPageUrl;
 		let originPageDomain = result.originPageDomain;
 		let originPageReferer = result.originPageReferer;
 		NativeUtils.downloadMultiple(
-			"Internet Download Manager",
+			defaultDM,
 			links,
 			originPageUrl,
 			originPageReferer,
@@ -331,6 +283,7 @@ function doOnCompleted(details){
 /**
  * Runs when a message is received from a script
  */
+//todo:add messaging.js like native_utils.js
 function doOnMessage(message, sender, sendResponse) {
 
 	console.log('message received:' + JSON.stringify(message));
