@@ -30,7 +30,7 @@ var Messaging = {
 			//set optoins
 			_this.app.options = message.options;
 			//create a new download list based on options
-			_this.app.allDownloads = new FixedSizeMap(options.dlListSize, _this.app.allDownloads.list);
+			_this.app.allDownloads = new FixedSizeMap(message.options.dlListSize, _this.app.allDownloads.list);
 			console.log('saved options: ', _this.app.options);
 		}
 		else if(message.type === _this.MSG_CLEAR_LIST){

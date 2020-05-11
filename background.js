@@ -10,48 +10,20 @@ var app;
 
 (async () => {
 
-	let options = await loadOptions();
-	app = new DlGrabApp(options);
-
 	console.log('initializing app...');
+
 	try{
+		let options = await browser.storage.local.get(defaultOptions);
+		app = new DlGrabApp(options);
 		await app.initialize();
+		Messaging.initialize(app);
+		RequestHandler.initialize(app);
+		ContextMenu.initialize(app);
 		console.log('app init successful');
-		app.runtime.ready = true;
 	}catch(e){
 		console.log('app could not be initialized: ', e);
 		//todo: show notification?
-		app.runtime.ready = false;
 		return;
 	}
 
-	ContextMenu.createMenus(app);
-
-	RequestHandler.initialize(app);
-
-	Messaging.initialize(app);
-
 })();
-
-
-function loadOptions(){
-
-	let promise = new Promise(function(resolve){
-
-		function doLoadOptions(loadedOptions) {
-			console.log("loaded options: ", loadedOptions);
-			resolve(loadedOptions);
-		}
-	
-		function onError(error) {
-			console.log(`Error getting options: ${error}`);
-			resolve(defaultOptions);
-		}
-	
-		let getting = browser.storage.local.get(defaultOptions);
-		getting.then(doLoadOptions, onError);
-
-	});
-
-	return promise;
-}

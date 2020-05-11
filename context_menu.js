@@ -9,7 +9,7 @@ var ContextMenu = {
 	 */
 	app: undefined,
 
-	createMenus: function(app){
+	initialize: function(app){
 
 		this.app = app;
 
