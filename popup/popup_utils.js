@@ -23,7 +23,7 @@ popupContext.continueWithBrowser = false;
  */
 async function getBackgroundData(){
 
-	let message = {type: "get_bg_data"};
+	let message = {type: Messaging.MSG_GET_BG_DATA};
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.downloads.limit;
 	let allDlsJSON = response.downloads.list;
@@ -137,7 +137,7 @@ function downloadWithSelectedDM(download){
  * @param {Download} download 
  */
 function continueWithBrowser(download){
-	let message = {type: 'continue_with_browser', downloadHash: download.hash};
+	let message = {type: Messaging.MSG_CONT_WITH_BROWSER, downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
 	popupContext.continueWithBrowser = true;
 	window.close();

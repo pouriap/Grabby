@@ -60,6 +60,7 @@
 			"native_utils.js",
 			"context_menu.js",
 			"request_handler.js",
+			"messaging.js",
 			"background.js"
 		]
 	}
