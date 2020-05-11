@@ -56,9 +56,10 @@
 		"scripts": [
 			"libs/md5.js",
 			"options/default_options.js",
+			"classes.js",
 			"native_utils.js",
 			"context_menu.js",
-			"classes.js",
+			"request_handler.js",
 			"background.js"
 		]
 	}
