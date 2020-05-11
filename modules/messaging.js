@@ -10,10 +10,9 @@ DG.Messaging = {
 	MSG_INTERCEPT_DL: 'intercept-dl',
 
 	/**
-	 * @type {DlGrabApp}
+	 * 	
+	 * @param {DlGrabApp} app 
 	 */
-	app: undefined,
-
 	initialize: function(app){
 		this.app = app;
 		browser.runtime.onMessage.addListener(this.doOnMessage);

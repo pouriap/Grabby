@@ -7,10 +7,9 @@ DG.ContextMenu = {
 	menuGrabSelectionId : 'download.grab.menu.grabselection',
 
 	/**
-	 * @type {DlGrabApp}
+	 * 	
+	 * @param {DlGrabApp} app 
 	 */
-	app: undefined,
-
 	initialize: function(app){
 
 		this.app = app;

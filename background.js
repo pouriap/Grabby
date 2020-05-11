@@ -11,7 +11,7 @@ var DEBUG = true;
 		let app = new DlGrabApp(options);
 		await app.initialize();
 		DG.Messaging.initialize(app);
-		DG.RequestHandler.initialize(app);
+		DG.RequestHandling.initialize(app);
 		DG.ContextMenu.initialize(app);
 		console.log('app init successful');
 	}catch(e){

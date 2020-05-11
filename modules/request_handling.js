@@ -1,12 +1,11 @@
 var DG = DG || {};
 
-DG.RequestHandler = {
+DG.RequestHandling = {
 
 	/**
-	 * @type {DlGrabApp}
+	 * 	
+	 * @param {DlGrabApp} app 
 	 */
-	app: undefined,
-
 	initialize: function(app){
 
 		this.app = app;
@@ -47,7 +46,7 @@ DG.RequestHandler = {
 	 */
 	doOnBeforeRequest: function(details){
 
-		let _this = DG.RequestHandler;
+		let _this = DG.RequestHandling;
 
 		let formDataArr = (details.method === "POST" && details.requestBody 
 					&& details.requestBody.formData)? details.requestBody.formData : [];
@@ -76,7 +75,7 @@ DG.RequestHandler = {
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
 	doOnBeforeSendHeaders: function(details){
-		let _this = DG.RequestHandler;
+		let _this = DG.RequestHandling;
 		//store request details
 		let request = _this.app.allRequests.get(details.requestId);
 		request.details = details;
@@ -91,7 +90,7 @@ DG.RequestHandler = {
 	 */
 	doOnHeadersReceived: function(details) {
 
-		let _this = DG.RequestHandler;
+		let _this = DG.RequestHandling;
 
 		console.log("receiving: ", details);
 
@@ -192,7 +191,7 @@ DG.RequestHandler = {
 	 * Runs once a request is completed
 	 */
 	doOnCompleted: function(details){
-		let _this = DG.RequestHandler;
+		let _this = DG.RequestHandling;
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
