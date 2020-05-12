@@ -2,11 +2,11 @@ var DG = DG || {};
 
 DG.NativeUtils = {
 
-	nativeClientId : 'download.grab.pouriap',
+	NATIVE_CLIENT_ID : 'download.grab.pouriap',
 
 	isNativeClientAvailable : function(){
 		return new Promise(function(resolve){
-			let port = browser.runtime.connectNative(DG.NativeUtils.nativeClientId);
+			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 			port.onMessage.addListener((response) => {
 				if(response.type === 'native_client_available'){
 					resolve(true);
@@ -25,7 +25,7 @@ DG.NativeUtils = {
 
 	getAvailableDMs : function(){
 		return new Promise(function(resolve){
-			let port = browser.runtime.connectNative(DG.NativeUtils.nativeClientId);
+			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 			port.onMessage.addListener((response) => {
 				if(response.type === 'available_dms'){
 					let availableDMs = response.availableDMs;
@@ -48,7 +48,7 @@ DG.NativeUtils = {
 	 * Downloads a single url with the specified download manager
 	 */
 	downloadSingle : function(dmName, url, referer, cookies, filename, postData){
-		let port = browser.runtime.connectNative(DG.NativeUtils.nativeClientId);
+		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 		let message = {
 			type: 'download',
 			url : url,
@@ -81,7 +81,7 @@ DG.NativeUtils = {
 			downloadItems.push(downloadItem);
 		}
 
-		let port = browser.runtime.connectNative(DG.NativeUtils.nativeClientId);
+		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 		let message = {
 			type: 'download_all',
 			downloadItems : downloadItems,

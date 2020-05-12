@@ -2,12 +2,12 @@ var DG = DG || {};
 
 DG.Messaging = {
 
-	MSG_SAVE_OPTIONS: 'save-options',
-	MSG_CLEAR_LIST: 'clear-list',
-	MSG_GET_BG_DATA: 'get-bg',
-	MSG_DL_DIALOG_CLOSING: 'dl-gialog-closing',
-	MSG_CONT_WITH_BROWSER: 'con-with-browser',
-	MSG_INTERCEPT_DL: 'intercept-dl',
+	TYP_SAVE_OPTIONS: 'save-options',
+	TYP_CLEAR_LIST: 'clear-list',
+	TYP_GET_BG_DATA: 'get-bg',
+	TYP_DL_DIALOG_CLOSING: 'dl-gialog-closing',
+	TYP_CONT_WITH_BROWSER: 'con-with-browser',
+	TYP_INTERCEPT_DL: 'intercept-dl',
 
 	/**
 	 * 	
@@ -27,21 +27,21 @@ DG.Messaging = {
 
 		var _this = DG.Messaging;
 
-		if(message.type === _this.MSG_SAVE_OPTIONS){
+		if(message.type === _this.TYP_SAVE_OPTIONS){
 			//set optoins
 			_this.app.options = message.options;
 			//create a new download list based on options
 			_this.app.allDownloads = new FixedSizeMap(message.options.dlListSize, _this.app.allDownloads.list);
 			console.log('saved options: ', _this.app.options);
 		}
-		else if(message.type === _this.MSG_CLEAR_LIST){
+		else if(message.type === _this.TYP_CLEAR_LIST){
 			_this.app.allDownloads = new FixedSizeMap(_this.app.options.dlListSize);
 		}
-		else if(message.type === _this.MSG_GET_BG_DATA){
+		else if(message.type === _this.TYP_GET_BG_DATA){
 			let data = {downloads: _this.app.allDownloads, appJSON: _this.app};
 			return Promise.resolve(data);
 		}
-		else if(message.type === _this.MSG_DL_DIALOG_CLOSING){
+		else if(message.type === _this.TYP_DL_DIALOG_CLOSING){
 			delete _this.app.downloadDialogs[message.windowId];
 			if(message.continueWithBrowser){
 				return;
@@ -60,14 +60,14 @@ DG.Messaging = {
 				}
 			});
 		}
-		else if(message.type === _this.MSG_CONT_WITH_BROWSER){
+		else if(message.type === _this.TYP_CONT_WITH_BROWSER){
 			let download = _this.app.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: false});
 			}
 		}
 		//todo: unused
-		else if(message.type === _this.MSG_INTERCEPT_DL){
+		else if(message.type === _this.TYP_INTERCEPT_DL){
 			let download = _this.app.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: true});

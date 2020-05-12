@@ -104,6 +104,6 @@ function clearDownloadsList(){
 	document.querySelectorAll(".dl-item").forEach((element)=>{
         element.parentElement.removeChild(element);
 	});
-	let message = {type: DG.Messaging.MSG_CLEAR_LIST};
+	let message = {type: DG.Messaging.TYP_CLEAR_LIST};
 	browser.runtime.sendMessage(message);
 }

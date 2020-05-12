@@ -2,9 +2,12 @@ var DG = DG || {};
 
 DG.ContextMenu = {
 
-	menuParentId : 'download.grab.menu.parent',
-	menuGrabAllId : 'download.grab.menu.graball',
-	menuGrabSelectionId : 'download.grab.menu.grabselection',
+	MENU_ID_PARENT : 'download.grab.menu.parent',
+	MENU_ID_GRAB_ALL : 'download.grab.menu.graball',
+	MENU_ID_GRAB_SELECTION : 'download.grab.menu.grabselection',
+
+	SCRIPT_GET_ALL: '../scripts/get_all_links.js',
+	SCRIPT_GET_SELECTION: '../scripts/get_selection_links.js',
 
 	/**
 	 * 	
@@ -16,25 +19,25 @@ DG.ContextMenu = {
 
 		//add parent menu item
 		browser.menus.create({
-			id: this.menuParentId,
+			id: this.MENU_ID_PARENT,
 			title: "Download Grab", 
 			contexts: ["all"],
 		});
 
 		//add grab all menu
 		browser.menus.create({
-			id: this.menuGrabAllId,
+			id: this.MENU_ID_GRAB_ALL,
 			title: "Grab All",
 			contexts: ["all"],
-			parentId: this.menuParentId
+			parentId: this.MENU_ID_PARENT
 		});
 
 		//add grab selection menu
 		browser.menus.create({
-			id: this.menuGrabSelectionId,
+			id: this.MENU_ID_GRAB_SELECTION,
 			title: "Grab Selection",
 			contexts: ["selection"],
-			parentId: this.menuParentId
+			parentId: this.MENU_ID_PARENT
 		});
 
 		//menu click listener
@@ -57,12 +60,12 @@ DG.ContextMenu = {
 			return;
 		}
 
-		if(info.menuItemId == _this.menuGrabAllId){
-			let result = await browser.tabs.executeScript({file: 'scripts/get_all_links.js'});
+		if(info.menuItemId == _this.MENU_ID_GRAB_ALL){
+			let result = await browser.tabs.executeScript({file: _this.SCRIPT_GET_ALL});
 			downloadLinks(result[0]);
 		}
-		else if(info.menuItemId == _this.menuGrabSelectionId){
-			let result = await browser.tabs.executeScript({file: 'scripts/get_selection_links.js'});
+		else if(info.menuItemId == _this.MENU_ID_GRAB_SELECTION){
+			let result = await browser.tabs.executeScript({file: _this.SCRIPT_GET_SELECTION});
 			downloadLinks(result[0]);
 		}
 
