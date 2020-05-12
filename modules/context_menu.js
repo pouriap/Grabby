@@ -55,8 +55,9 @@ DG.ContextMenu = {
 		let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
 
 		if(!defaultDM){
-			//todo: show notification?
 			console.log('no download managers are available');
+			let options = {type: "basic", title: "Download Grab", message: "ERROR: ERROR: No download managers found on the system"};
+			browser.notifications.create(options);
 			return;
 		}
 

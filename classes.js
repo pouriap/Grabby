@@ -62,6 +62,10 @@ class DlGrabApp {
 			console.log('getting available DMs');
 			instance.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
 			console.log('available DMs: ', instance.runtime.availableDMs);
+			if(!instance.runtime.availableDMs.length){
+				let options = {type: "basic", title: "Download Grab", message: "ERROR: No download managers found on the system"};
+				browser.notifications.create(options);
+			}
 			//resolve after all inits are completed
 			resolve();
 		});	
