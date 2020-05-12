@@ -93,7 +93,13 @@ function populateDMs(){
 		let option = document.createElement('option');
 		option.value = dmName;
 		option.innerHTML = dmName;
+		option.id = dmName;
 		dmsDropDown.appendChild(option);
+	}
+	let defaultDM = popupContext.appJSON.options.defaultDM || availableDMs[0];
+	if(defaultDM){
+		console.log('setting default dm: ', defaultDM);
+		document.getElementById(defaultDM).setAttribute('selected', 'selected');
 	}
 }
 
