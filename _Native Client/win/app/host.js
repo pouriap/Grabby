@@ -13,6 +13,8 @@ var jobFile = tempDir + "\\" + "job.fgt";
 
 // closing node when parent process is killed
 process.stdin.resume();
+//todo: this doesn't work and process never exits
+//i have worked around it by explicitly exitting in close() but needs further investigation
 process.stdin.on('end', () => process.exit());
 
 function observe(message, push, done) {
@@ -28,6 +30,7 @@ function observe(message, push, done) {
 		process.removeListener('uncaughtException', exception);
 		done();
 		close = () => {};
+		process.exit();
 	};
 	process.addListener('uncaughtException', exception);
 
@@ -37,7 +40,6 @@ function observe(message, push, done) {
 		close();
 	}
 	else if(message.type === 'get_available_dms') {
-		//todo: sanitize user input if possible
 		let availableDMs = [];
 		try{
 			execFileSync("FlashGot.exe", ['-o', availableDMsFile], {timeout: 5000});

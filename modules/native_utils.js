@@ -10,6 +10,7 @@ DG.NativeUtils = {
 		return new Promise(function(resolve){
 			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 			port.onMessage.addListener((response) => {
+				port.disconnect();
 				if(response.type === 'native_client_available'){
 					resolve(true);
 				}
@@ -29,9 +30,9 @@ DG.NativeUtils = {
 		return new Promise(function(resolve){
 			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 			port.onMessage.addListener((response) => {
+				port.disconnect();
 				if(response.type === 'available_dms'){
 					let availableDMs = response.availableDMs;
-					port.disconnect();
 					resolve(availableDMs);
 				}
 				else{
@@ -50,14 +51,6 @@ DG.NativeUtils = {
 	 * Downloads a single url with the specified download manager
 	 */
 	downloadSingle : function(dmName, url, referer, cookies, filename, postData){
-		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
-		port.onMessage.addListener((response) => {
-			console.log('error downloading: ', response);
-			port.disconnect();
-		});
-		port.onDisconnect.addListener(()=>{
-			console.log('client disconnected: ', response);
-		});
 		let message = {
 			type: 'download',
 			url : url,
@@ -67,7 +60,7 @@ DG.NativeUtils = {
 			filename : filename,
 			postData : postData
 		};
-		port.postMessage(message);
+		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
 	},
 
 	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
@@ -89,7 +82,6 @@ DG.NativeUtils = {
 			downloadItems.push(downloadItem);
 		}
 
-		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
 		let message = {
 			type: 'download_all',
 			downloadItems : downloadItems,
@@ -98,7 +90,7 @@ DG.NativeUtils = {
 			originPageCookies : originPageCookies,
 			dmName : dmName,
 		};
-		port.postMessage(message);
+		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
 
 		function getDomain(url){
 			let a = document.createElement('a');
