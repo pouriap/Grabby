@@ -14,8 +14,14 @@ DG.NativeUtils = {
 				if(response.type === 'native_client_available'){
 					resolve(true);
 				}
+				else if(response.type === 'exception'){
+					resolve(response.error);
+				}
+				else if(response.type === 'object'){
+					resolve(JSON.stringify(response));
+				}
 				else{
-					resolve(false);
+					resolve(response);
 				}
 			});
 			port.onDisconnect.addListener(() => {

@@ -17,7 +17,11 @@ var DEBUG = true;
 	}catch(e){
 		console.log('app could not be initialized: ', e);
 		//todo: remove notifications or make them look good
-		let options = {type: "basic", title: "Download Grab", message: "ERROR: Download Grab could not be initialized"};
+		let options = {
+			type: "basic", 
+			title: "Download Grab", 
+			message: "ERROR: initialization failed\nReason: " + e.toString(),
+		};
 		browser.notifications.create(options);		
 		return;
 	}

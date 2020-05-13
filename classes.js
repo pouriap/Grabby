@@ -53,9 +53,13 @@ class DlGrabApp {
 		var instance = this;
 		return new Promise(async function (resolve, reject) {
 			console.log("checking native client availability");
-			let nativeClientAvailable = await DG.NativeUtils.isNativeClientAvailable();
-			if(!nativeClientAvailable){
+			let response = await DG.NativeUtils.isNativeClientAvailable();
+			if(response === false){
 				reject('Native client unavailable');
+				return;
+			}
+			else if(response !== true){
+				reject(response);
 				return;
 			}
 			console.log('native client available');
@@ -63,7 +67,11 @@ class DlGrabApp {
 			instance.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
 			console.log('available DMs: ', instance.runtime.availableDMs);
 			if(!instance.runtime.availableDMs.length){
-				let options = {type: "basic", title: "Download Grab", message: "ERROR: No download managers found on the system"};
+				let options = {
+					type: "basic", 
+					title: "Download Grab", 
+					message: "ERROR: No download managers found on the system"
+				};
 				browser.notifications.create(options);
 			}
 			//resolve after all inits are completed

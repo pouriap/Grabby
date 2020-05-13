@@ -65,7 +65,11 @@ DG.ContextMenu = {
 
 		if(!defaultDM){
 			console.log('no download managers are available');
-			let options = {type: "basic", title: "Download Grab", message: "ERROR: ERROR: No download managers found on the system"};
+			let options = {
+				type: "basic", 
+				title: "Download Grab", 
+				message: "ERROR: ERROR: No download managers found on the system"
+			};
 			browser.notifications.create(options);
 			return;
 		}
