@@ -9,7 +9,6 @@ DG.ContextMenu = {
 
 	SCRIPT_GET_ALL: '../scripts/get_all_links.js',
 	SCRIPT_GET_SELECTION: '../scripts/get_selection_links.js',
-	SCRIPT_GET_LINK: '../scripts/get_single_link.js',
 
 	/**
 	 * 	
@@ -80,26 +79,22 @@ DG.ContextMenu = {
 			downloadLinks(result[0]);
 		}
 		else if(info.menuItemId == _this.MENU_ID_GRAB_LINK){
-			//inject the clicked node
-			await browser.tabs.executeScript({
-				code: `var linkNode = browser.menus.getTargetElement(${info.targetElementId});`
-			});
-			//now get clicked node info
-			let result = await browser.tabs.executeScript({file: _this.SCRIPT_GET_LINK});
-			downloadLinks(result[0]);
+			let result = {};
+			result.links = [{href: info.linkUrl, description: info.linkText}];
+			result.originPageUrl = info.pageUrl;
+			result.originPageReferer = await browser.tabs.executeScript({code: 'document.referrer'});
+			downloadLinks(result);
 		}
 
 		function downloadLinks(result){
 			let links = result.links;
 			let originPageUrl = result.originPageUrl;
-			let originPageDomain = result.originPageDomain;
 			let originPageReferer = result.originPageReferer;
 			DG.NativeUtils.downloadMultiple(
 				defaultDM,
 				links,
 				originPageUrl,
 				originPageReferer,
-				originPageDomain
 			);
 		}
 	}

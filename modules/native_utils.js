@@ -61,17 +61,16 @@ DG.NativeUtils = {
 		port.postMessage(message);
 	},
 
-	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer, originPageDomain){
+	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
 
 		let downloadItems = [];
+		let originPageDomain = getDomain(originPageUrl);
 		let originPageCookies = await getCookies(originPageDomain);
 		//get the cookies for each link and add it to all download items
 		for(let link of links){
 			let href = link.href;
-			let description = link.description;
-			let a = document.createElement('a');
-			a.href = href;
-			let linkDomain = a.hostname;
+			let description = (link.description)? link.description : '';
+			let linkDomain = getDomain(href);
 			let linkCookies = await getCookies(linkDomain);
 			let downloadItem = {
 				url: href,
@@ -91,6 +90,12 @@ DG.NativeUtils = {
 			dmName : dmName,
 		};
 		port.postMessage(message);
+
+		function getDomain(url){
+			let a = document.createElement('a');
+			a.href = url;
+			return a.hostname;
+		}
 
 		function getCookies(domain){
 			return new Promise(async function(resolve){

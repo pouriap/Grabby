@@ -13,12 +13,10 @@ for(let linkNode of linkNodes){
 	links.push(link);
 }
 var originPageUrl = window.location.href;
-var originPageDomain = window.location.hostname;
 var originPageReferer = document.referrer;
 var result = {
 	links: links,
 	originPageUrl: originPageUrl,
-	originPageDomain: originPageDomain,
 	originPageReferer: originPageReferer,
 };
 result;
