@@ -1,5 +1,7 @@
 var DG = DG || {};
 
+//todo: node.js process keeps open unless we do "port.disconnect()" or page is closed
+
 DG.NativeUtils = {
 
 	NATIVE_CLIENT_ID : 'download.grab.pouriap',
@@ -49,6 +51,13 @@ DG.NativeUtils = {
 	 */
 	downloadSingle : function(dmName, url, referer, cookies, filename, postData){
 		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+		port.onMessage.addListener((response) => {
+			console.log('error downloading: ', response);
+			port.disconnect();
+		});
+		port.onDisconnect.addListener(()=>{
+			console.log('client disconnected: ', response);
+		});
 		let message = {
 			type: 'download',
 			url : url,

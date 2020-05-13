@@ -1,7 +1,15 @@
 'use strict';
 
 var {execFileSync} = require('child_process');
-var {readFileSync, writeFileSync} = require('fs');
+var {existsSync, mkdirSync, readFileSync, writeFileSync} = require('fs');
+var {tmpdir} = require('os');
+var {id} = require('./config.js');
+
+//create a directory in temp to store stuff in
+var tempDir = tmpdir() + "\\" + id;
+if(!existsSync(tempDir)){mkdirSync(tempDir, {recursive: true});}
+var availableDMsFile = tempDir + "\\" + "availableDMs.txt";
+var jobFile = tempDir + "\\" + "job.fgt";
 
 // closing node when parent process is killed
 process.stdin.resume();
@@ -32,8 +40,8 @@ function observe(message, push, done) {
 		//todo: sanitize user input if possible
 		let availableDMs = [];
 		try{
-			execFileSync("FlashGot.exe", ['-o', 'availableDMs'], {timeout: 5000});
-			let file = readFileSync('availableDMs', {encoding: 'utf8', flag: 'r'});
+			execFileSync("FlashGot.exe", ['-o', availableDMsFile], {timeout: 5000});
+			let file = readFileSync(availableDMsFile, {encoding: 'utf8', flag: 'r'});
 			let lines = file.split('\n');
 			for(let line of lines){
 				if(line.indexOf('|OK') !== -1){
@@ -49,7 +57,7 @@ function observe(message, push, done) {
 		close();
 	}
 	else if (message.type === 'download'){
-
+			
 		let url = message.url;
 		let referer = message.referer || '';
 		let cookies = message.cookies || '';
@@ -68,12 +76,12 @@ function observe(message, push, done) {
 					+ "\n"	//origin page cookies
 					+ "\n"	//extras
 					+ "\n";	//extras
-		writeFileSync("flashgot.fgt", job, {encoding: 'utf8'});
-		execFileSync("flashgot.exe", ['flashgot.fgt'], {timeout: 5000});
+		writeFileSync(jobFile, job, {encoding: 'utf8'});
+		execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
 		close();
 	}
 	else if(message.type === 'download_all'){
-
+		
 		let downloadItems = message.downloadItems;
 		let dmName = message.dmName;
 		let header = `${downloadItems.length};${dmName};0;;`;
@@ -91,8 +99,8 @@ function observe(message, push, done) {
 					+ "\n" //extras
 					+ "\n" //estras
 
-		writeFileSync("flashgot.fgt", job, {encoding: 'utf8'});
-		execFileSync("flashgot.exe", ['flashgot.fgt'], {timeout: 5000});
+		writeFileSync(jobFile, job, {encoding: 'utf8'});
+		execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
 		close();
 	}
 	else{
