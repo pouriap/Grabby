@@ -1,6 +1,6 @@
 'use strict';
 
-var {execFileSync} = require('child_process');
+var {execFileSync, spawnSync} = require('child_process');
 var {existsSync, mkdirSync, readFileSync, writeFileSync} = require('fs');
 var {tmpdir} = require('os');
 var {id} = require('./config.js');
@@ -13,8 +13,6 @@ var jobFile = tempDir + "\\" + "job.fgt";
 
 // closing node when parent process is killed
 process.stdin.resume();
-//todo: this doesn't work and process never exits
-//i have worked around it by explicitly exitting in close() but needs further investigation
 process.stdin.on('end', () => process.exit());
 
 function observe(message, push, done) {
@@ -30,14 +28,13 @@ function observe(message, push, done) {
 		process.removeListener('uncaughtException', exception);
 		done();
 		close = () => {};
-		process.exit();
 	};
 	process.addListener('uncaughtException', exception);
 
 	if(message.type === 'native_client_available'){
 		let message = {type: 'native_client_available'};
 		push(message);
-		close();
+		done();
 	}
 	else if(message.type === 'get_available_dms') {
 		let availableDMs = [];
@@ -56,7 +53,7 @@ function observe(message, push, done) {
 		}
 		let message = {type: 'available_dms', availableDMs: availableDMs};
 		push(message);
-		close();
+		done();
 	}
 	else if (message.type === 'download'){
 			
@@ -80,7 +77,7 @@ function observe(message, push, done) {
 					+ "\n";	//extras
 		writeFileSync(jobFile, job, {encoding: 'utf8'});
 		execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
-		close();
+		done();
 	}
 	else if(message.type === 'download_all'){
 		
@@ -102,12 +99,18 @@ function observe(message, push, done) {
 					+ "\n" //estras
 
 		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
-		close();
+		//execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
+		execFileSync("flashgot.exe", [jobFile]);
+		//spawnSync("flashgot.exe", [jobFile], {
+		//	timeout: 5000, 
+		//	detached: true, 
+		//	stdio: ['ignore', 'ignore', 'ignore']
+		//});
+		done();
 	}
 	else{
 		push({type: 'unsupported'});
-		close();
+		done();
 	}
 }
 /* message passing */

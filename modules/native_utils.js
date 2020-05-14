@@ -5,51 +5,85 @@ var DG = DG || {};
 DG.NativeUtils = {
 
 	NATIVE_CLIENT_ID : 'download.grab.pouriap',
+	port: null,
+	
+	initialize: function(){
+		return new Promise(async function(resolve, reject){
+			let available = await DG.NativeUtils._isNativeClientAvailable();
+			if(available === false){
+				reject('Native client unavailable');
+				return;
+			}
+			//todo: remove in production
+			else if(available !== true){
+				reject(available);
+				return;
+			}
+			DG.NativeUtils.port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+			resolve(true);
+		});
+	},
 
-	isNativeClientAvailable : function(){
+	//todo: move this inside initialize()?
+	_isNativeClientAvailable : function(){
 		return new Promise(function(resolve){
-			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
-			port.onMessage.addListener((response) => {
-				port.disconnect();
-				if(response.type === 'native_client_available'){
-					resolve(true);
-				}
-				else if(response.type === 'exception'){
-					resolve(response.error);
-				}
-				else if(response.type === 'object'){
-					resolve(JSON.stringify(response));
-				}
-				else{
-					resolve(response);
-				}
-			});
-			port.onDisconnect.addListener(() => {
-				resolve(false);
-			});
-			let message = {type: 'native_client_available'};
-			port.postMessage(message);
+			try{
+				let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+				port.onMessage.addListener((response) => {
+					port.disconnect();
+					if(response.type === 'native_client_available'){
+						resolve(true);
+					}
+					else if(response.type === 'exception'){
+						resolve(response.error);
+					}
+					else if(response.type === 'object'){
+						resolve(JSON.stringify(response));
+					}
+					else{
+						resolve(response);
+					}
+				});
+				port.onDisconnect.addListener(() => {
+					resolve(false);
+				});
+				let message = {type: 'native_client_available'};
+				port.postMessage(message);
+			}catch(e){
+				resolve(e);
+			}
 		});
 	},
 
 	getAvailableDMs : function(){
-		return new Promise(function(resolve){
-			let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
-			port.onMessage.addListener((response) => {
-				port.disconnect();
+		return new Promise(async function(resolve){
+
+			try{
+
+				let message = {type: 'get_available_dms'};
+				let response = await browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+	
 				if(response.type === 'available_dms'){
 					let availableDMs = response.availableDMs;
+					console.log('available DMs: ', availableDMs);
+					if(!availableDMs.length){
+						let options = {
+							type: "basic", 
+							title: "Download Grab", 
+							message: "ERROR: No download managers found on the system"
+						};
+						browser.notifications.create(options);
+					}
 					resolve(availableDMs);
 				}
 				else{
 					resolve({});
 				}
-			});
-			port.onDisconnect.addListener(()=>{
+
+			}catch(e){
 				resolve({});
-			});
-			let message = {type: 'get_available_dms'};
-			port.postMessage(message);
+			}
+
 		});
 	},
 
@@ -66,7 +100,8 @@ DG.NativeUtils = {
 			filename : filename,
 			postData : postData
 		};
-		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+		//browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+		this.port.postMessage(message);
 	},
 
 	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
@@ -96,7 +131,8 @@ DG.NativeUtils = {
 			originPageCookies : originPageCookies,
 			dmName : dmName,
 		};
-		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+		//browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+		this.port.postMessage(message);
 
 		function getDomain(url){
 			let a = document.createElement('a');

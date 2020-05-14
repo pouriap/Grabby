@@ -45,42 +45,6 @@ class DlGrabApp {
 	}
 
 	/**
-	 * this function returns a promise so that we can use 'await' on it
-	 * it itself 'awaits' on sub-init functions and then resolves
-	 */
-	initialize() {
-
-		var instance = this;
-		return new Promise(async function (resolve, reject) {
-			console.log("checking native client availability");
-			let response = await DG.NativeUtils.isNativeClientAvailable();
-			if(response === false){
-				reject('Native client unavailable');
-				return;
-			}
-			else if(response !== true){
-				reject(response);
-				return;
-			}
-			console.log('native client available');
-			console.log('getting available DMs');
-			instance.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
-			console.log('available DMs: ', instance.runtime.availableDMs);
-			if(!instance.runtime.availableDMs.length){
-				let options = {
-					type: "basic", 
-					title: "Download Grab", 
-					message: "ERROR: No download managers found on the system"
-				};
-				browser.notifications.create(options);
-			}
-			//resolve after all inits are completed
-			resolve();
-		});	
-
-	}
-
-	/**
 	 * Adds a download to our main list of downloads
 	 * @param {Download} download 
 	 */

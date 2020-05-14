@@ -9,7 +9,8 @@ var DEBUG = true;
 	try{
 		let options = await browser.storage.local.get(defaultOptions);
 		let app = new DlGrabApp(options);
-		await app.initialize();
+		await DG.NativeUtils.initialize();
+		app.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
 		DG.Messaging.initialize(app);
 		DG.RequestHandling.initialize(app);
 		DG.ContextMenu.initialize(app);
