@@ -44,8 +44,10 @@ DG.NativeUtils = {
 						resolve(response);
 					}
 				});
-				port.onDisconnect.addListener(() => {
-					resolve(false);
+				port.onDisconnect.addListener((p) => {
+					if(p.error){
+						resolve(p.error.message);
+					}
 				});
 				let message = {type: 'native_client_available'};
 				port.postMessage(message);
