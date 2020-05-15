@@ -100,8 +100,11 @@ DG.NativeUtils = {
 			filename : filename,
 			postData : postData
 		};
-		//browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
-		this.port.postMessage(message);
+		//we cannot use port.postMessage() here because this function is called from popup context
+		//and port is not initialized there and Big Brother Mozilla thinks it's best for us
+		//to not have access to our own goddamn addon's background context
+		//fuck you Mozilla
+		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
 	},
 
 	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
@@ -131,8 +134,7 @@ DG.NativeUtils = {
 			originPageCookies : originPageCookies,
 			dmName : dmName,
 		};
-		//browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
-		this.port.postMessage(message);
+		DG.NativeUtils.port.postMessage(message);
 
 		function getDomain(url){
 			let a = document.createElement('a');

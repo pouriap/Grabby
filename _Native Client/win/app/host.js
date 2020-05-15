@@ -76,7 +76,13 @@ function observe(message, push, done) {
 					+ "\n"	//extras
 					+ "\n";	//extras
 		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
+		//this is necessary because this function is called from the popup context and
+		//Firefox will close the process as soon as the popup is closed, i.e. download dialog is
+		//closed, so we use 'DLGrabSpawner.exe' with --spawn flag that launches the process in a separate
+		//'job' which prevents it from being closed when node.exe is closed
+		//the 'detached: true' flag is just for safety, main work is done in DLGrabSpawner.exe
+		//fuck you Mozilla
+		spawnSync("DLGrabSpawner.exe", ["--spawn", "flashgot.exe", jobFile], {detached: true});
 		done();
 	}
 	else if(message.type === 'download_all'){
@@ -99,13 +105,8 @@ function observe(message, push, done) {
 					+ "\n" //estras
 
 		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		//execFileSync("flashgot.exe", [jobFile], {timeout: 5000});
+		//this is called from background and node.exe is not closed until addon is removed
 		execFileSync("flashgot.exe", [jobFile]);
-		//spawnSync("flashgot.exe", [jobFile], {
-		//	timeout: 5000, 
-		//	detached: true, 
-		//	stdio: ['ignore', 'ignore', 'ignore']
-		//});
 		done();
 	}
 	else{

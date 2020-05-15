@@ -14,4 +14,4 @@ find . -name "*.js" -exec sed -E -i 's/console\.log\(.*\);?$//g' {} \; -exec sed
 
 name=addon.xpi
 rm $name
-zip -r $name . -x "*.xpi" "*.bat" "*.sh" "*.psd" "*.md" "*.code-workspace" "*.gitignore" ".git/" ".git/*" "_extras/" "_extras/*" "_Native Client/" "_Native Client/*"
+zip -r $name . -x "*.xpi" "*.bat" "*.sh" "*.psd" "*.md" "*.code-workspace" "*.gitignore" ".git/" ".git/*" "_extras/" "_extras/*" "_Native Client/" "_Native Client/*" "icons/icon.png" "icons/icon.ico"
