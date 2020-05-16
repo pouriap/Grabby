@@ -1,4 +1,4 @@
 *.xpi
 *.code-workspace
 _extras/
-/_Native Client/win/_installer/Setup.exe
+/_Native Client/win/_installer/*.exe
