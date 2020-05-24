@@ -8,6 +8,7 @@ DG.Messaging = {
 	TYP_DL_DIALOG_CLOSING: 'dl-gialog-closing',
 	TYP_CONT_WITH_BROWSER: 'con-with-browser',
 	TYP_INTERCEPT_DL: 'intercept-dl',
+	TYP_DOWNLOAD: 'download',
 
 	/**
 	 * 	
@@ -70,6 +71,10 @@ DG.Messaging = {
 			if(download.resolve){
 				download.resolve({cancel: true});
 			}
+		}
+		else if(message.type === _this.TYP_DOWNLOAD){
+			let download = _this.app.allDownloads.get(message.downloadHash);
+			DG.NativeUtils.downloadSingle(message.dmName, download);
 		}
 
 		return Promise.resolve();

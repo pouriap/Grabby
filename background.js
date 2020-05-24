@@ -1,17 +1,15 @@
 'use strict';
 
-//todo: add option for downloading media files or showing them in the browser (can we read 'media.play-stand-alone' config?)
 //todo: unicode in headers (content-disposition) is not supported by firefox
 //todo: report:  If you send a file to FDM[3] then the filename will be empty, but it'll appear in comments, but that just how FlashGot worked, so I don't know if consider it as a bug or not.
 //todo: add context menu for image/audio/video elements
 //todo: Grab selection shouldn't appear in context menu when only a simple text is selected
 //todo: option to only keep download history of current tab
-//todo: instead of calling senNativeMessage() send a message to bg script and tell it to start a download
 //todo: add private browsing downloads to a separate list
 //todo: optimize filters order
 //todo: show grab reason only in debug
 //todo: remove unnecessary DEBUG conditions
-//todo: download everything with bg using a message that sends the downloads' hash
+//todo: add option to download everything with DM if forcedownload is '*'
 
 var DEBUG = true;
 

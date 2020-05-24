@@ -90,38 +90,62 @@ DG.NativeUtils = {
 	},
 
 	/**
-	 * Downloads a single url with the specified download manager
+	 * Downloads a single Download with the specified download manager
+	 * @param {string} dmName name of dm to use
+	 * @param {Download} download 
 	 */
-	//todo: pass a Download object as parameter
-	//todo: check if parameters are all ok
-	downloadSingle : function(dmName, url, referer, cookies, filename, postData){
+	downloadSingle : async function(dmName, download){
+
+		if(!dmName){
+			return;
+		}
+
+		let originPageCookies = (download.getHost())? await this._getCookies(download.getHost()) : '';
+		let originPageReferer = '';
+		let originTabId = -1;
+		try{
+			let tabs = await browser.tabs.query({url: download.origin});
+			originTabId = (tabs[0])? tabs[0].id : -1;
+			originPageReferer = await browser.tabs.executeScript(
+				originTabId, {code: 'document.referrer'}
+			);
+		}catch(e){
+			console.log('exec failed: ', e, ' \n in tab: ', originTabId);
+		}
+
 		let message = {
 			type: 'download',
-			url : url,
-			referer : referer,
-			cookies : cookies,
+			url : download.url,
+			referer : download.getHeader('referer', 'request') || '',
+			cookies : download.getHeader('cookie', 'request') || '',
+			originPageCookies: originPageCookies || '',
+			originPageReferer: originPageReferer || '',
 			dmName : dmName,
-			filename : filename,
-			postData : postData
+			filename : download.getFilename(),
+			postData : download.reqDetails.postData
 		};
-		//we cannot use port.postMessage() here because this function is called from popup context
-		//and port is not initialized there and Big Brother Mozilla thinks it's best for us
-		//to not have access to our own goddamn addon's background context
-		//fuck you Mozilla
-		browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+		DG.NativeUtils.port.postMessage(message);
+
 	},
 
 	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
 
+		if(!dmName){
+			return;
+		}
+
 		let downloadItems = [];
-		let originPageDomain = getDomain(originPageUrl);
-		let originPageCookies = await getCookies(originPageDomain);
+		let originPageDomain = (originPageUrl)? this._getDomain(originPageUrl) : '';
+		let originPageCookies = (originPageDomain)? await this._getCookies(originPageDomain) : '';
 		//get the cookies for each link and add it to all download items
 		for(let link of links){
+			if(!link.href){
+				continue
+			}
 			let href = link.href;
-			let description = (link.description)? link.description : '';
-			let linkDomain = getDomain(href);
-			let linkCookies = await getCookies(linkDomain);
+			let description = link.description || '';
+			let linkDomain = this._getDomain(href) || '';
+			let linkCookies = await this._getCookies(linkDomain) || '';
 			let downloadItem = {
 				url: href,
 				description: description,
@@ -134,46 +158,46 @@ DG.NativeUtils = {
 			type: 'download_all',
 			downloadItems : downloadItems,
 			originPageUrl : originPageUrl,
-			originPageReferer : originPageReferer,
-			originPageCookies : originPageCookies,
+			originPageReferer : originPageReferer || '',
+			originPageCookies : originPageCookies || '',
 			dmName : dmName,
 		};
 		DG.NativeUtils.port.postMessage(message);
 
-		function getDomain(url){
-			let a = document.createElement('a');
-			a.href = url;
-			return a.hostname;
-		}
+	},
 
-		function getCookies(domain){
-			return new Promise(async function(resolve){
-				let cookies = '';
-				//subdomain cookies, for example dl2.website.com
-				let domainCookies = await browser.cookies.getAll({domain: domain});
-				for(let cookie of domainCookies){
-					if(cookie.domain === domain){
-						cookies += `${cookie.name}=${cookie.value}; `;
-					}
+	_getDomain: function(url){
+		let a = document.createElement('a');
+		a.href = url;
+		return a.hostname;
+	},
+
+	_getCookies: function(domain){
+		return new Promise(async function(resolve){
+			let cookies = '';
+			//subdomain cookies, for example dl2.website.com
+			let domainCookies = await browser.cookies.getAll({domain: domain});
+			for(let cookie of domainCookies){
+				if(cookie.domain === domain){
+					cookies += `${cookie.name}=${cookie.value}; `;
 				}
-				//wildcard cookies, for example .website.com
-				let domainParts = domain.split('.').reverse();
-				let rootDomain = domainParts[1] + '.' + domainParts[0];
-				//return if we are not in a subdomain
-				if(rootDomain === domain){
-					resolve(cookies);
-					return;
-				}
-				let wildcardCookies = await browser.cookies.getAll({domain: `.${rootDomain}`});
-				for(let cookie of wildcardCookies){
-					if(cookie.domain === `.${rootDomain}`){
-						cookies += `${cookie.name}=${cookie.value}; `;
-					}
-				}
+			}
+			//wildcard cookies, for example .website.com
+			let domainParts = domain.split('.').reverse();
+			let rootDomain = domainParts[1] + '.' + domainParts[0];
+			//return if we are not in a subdomain
+			if(rootDomain === domain){
 				resolve(cookies);
-			});
-		}
-
+				return;
+			}
+			let wildcardCookies = await browser.cookies.getAll({domain: `.${rootDomain}`});
+			for(let cookie of wildcardCookies){
+				if(cookie.domain === `.${rootDomain}`){
+					cookies += `${cookie.name}=${cookie.value}; `;
+				}
+			}
+			resolve(cookies);
+		});
 	}
 
 }

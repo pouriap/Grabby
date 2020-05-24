@@ -117,15 +117,8 @@ DG.RequestHandling = {
 		_this.app.addToAllDownloads(download);
 
 		if(category === ReqFilter.CAT_FORCE_DL){
-			let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
-			DG.NativeUtils.downloadSingle(
-				defaultDM, 
-				download.url, 
-				download.getHeader('referer', 'request'),
-				download.getHeader('cookie', 'request'),
-				download.getFilename(),
-				download.reqDetails.postData
-			);
+			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
+			DG.NativeUtils.downloadSingle(dmName, download);
 			return {cancel: true};
 		}
 

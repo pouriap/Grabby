@@ -128,14 +128,12 @@ function download(download){
 function downloadWithSelectedDM(download){
 	let DMs = document.getElementById('available-dms');
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
-	DG.NativeUtils.downloadSingle(
-		selectedDM, 
-		download.url, 
-		download.getHeader('referer', 'request'),
-		download.getHeader('cookie', 'request'),
-		download.getFilename(),
-		download.reqDetails.postData
-	);
+	let message = {
+		type: DG.Messaging.TYP_DOWNLOAD, 
+		downloadHash: download.getHash(), 
+		dmName: selectedDM
+	};
+	browser.runtime.sendMessage(message);
 	window.close();
 }
 

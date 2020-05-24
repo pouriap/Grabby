@@ -63,6 +63,8 @@ function observe(message, push, done) {
 		let dmName = message.dmName;
 		let filename = message.filename;
 		let postData = message.postData || '';
+		let originPageReferer = message.originPageReferer || '';
+		let originPageCookies = message.originPageCookies || '';
 
 		let header = `1;${dmName};0;;`;
 		let job = header + "\n"
@@ -71,18 +73,13 @@ function observe(message, push, done) {
 					+ filename + "\n"
 					+ cookies + "\n"
 					+ postData + "\n"
-					+ "\n"	//origin page referer
-					+ "\n"	//origin page cookies
+					+ originPageReferer + "\n"
+					+ originPageCookies + "\n"
 					+ "\n"	//extras
 					+ "\n";	//extras
 		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		//this is necessary because this function is called from the popup context and
-		//Firefox will close the process as soon as the popup is closed, i.e. download dialog is
-		//closed, so we use 'DLGrabSpawner.exe' with --spawn flag that launches the process in a separate
-		//'job' which prevents it from being closed when node.exe is closed
-		//the 'detached: true' flag is just for safety, main work is done in DLGrabSpawner.exe
-		//fuck you Mozilla
-		spawnSync("DLGrabSpawner.exe", ["--spawn", "flashgot.exe", jobFile], {detached: true});
+		//this is called from background and node.exe is not closed until addon is removed
+		execFileSync("flashgot.exe", [jobFile]);
 		done();
 	}
 	else if(message.type === 'download_all'){
