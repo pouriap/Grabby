@@ -28,8 +28,28 @@
 			</div>
 
 			<div class="panel-formElements-item">
-				<label for="overrideDlDialog">Override Firefox's download dialog (experimental)</label>
+				<label for="excludedExts">Ignore files with these extensions:</label>
+				<input type="text" id="excludedExts" placeholder="ext1,ext2,ext3,..." >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="includedExts">Detect files with these extensions as downloads:</label>
+				<input type="text" id="includedExts" placeholder="ext1,ext2,ext3,..." >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="forcedExts">Download files with these extensions with my default download manager:</label>
+				<input type="text" id="forcedExts" placeholder="ext1,ext2,ext3,..." >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="overrideDlDialog">Override Firefox's download dialog</label>
 				<input type="checkbox" id="overrideDlDialog" >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="playMediaInBrowser">Do not grab media that can be played inside browser</label>
+				<input type="checkbox" id="playMediaInBrowser" >
 			</div>
 
 			<div class="panel-formElements-item">

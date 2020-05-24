@@ -28,10 +28,8 @@ DG.Messaging = {
 		var _this = DG.Messaging;
 
 		if(message.type === _this.TYP_SAVE_OPTIONS){
-			//set optoins
-			_this.app.options = message.options;
-			//create a new download list based on options
-			_this.app.allDownloads = new FixedSizeMap(message.options.dlListSize, _this.app.allDownloads.list);
+			//set options
+			_this.app.applyOptions(message.options);
 			console.log('saved options: ', _this.app.options);
 		}
 		else if(message.type === _this.TYP_CLEAR_LIST){

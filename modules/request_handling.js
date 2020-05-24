@@ -46,7 +46,7 @@ DG.RequestHandling = {
 	 */
 	doOnBeforeRequest: function(details){
 
-		let _this = DG.RequestHandling;
+		var _this = DG.RequestHandling;
 
 		let formDataArr = (details.method === "POST" && details.requestBody 
 					&& details.requestBody.formData)? details.requestBody.formData : [];
@@ -75,7 +75,7 @@ DG.RequestHandling = {
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
 	doOnBeforeSendHeaders: function(details){
-		let _this = DG.RequestHandling;
+		var _this = DG.RequestHandling;
 		//store request details
 		let request = _this.app.allRequests.get(details.requestId);
 		request.details = details;
@@ -90,7 +90,7 @@ DG.RequestHandling = {
 	 */
 	doOnHeadersReceived: function(details) {
 
-		let _this = DG.RequestHandling;
+		var _this = DG.RequestHandling;
 
 		console.log("receiving: ", details);
 
@@ -105,84 +105,128 @@ DG.RequestHandling = {
 		//in doOnCompleted() after the request is completed
 		let download = new Download(requestOfThisResponse.details, details);
 
-		let filter = new ReqFilter(download);
+		let filter = new ReqFilter(download, _this.app.options);
 
-		//the lists should be sorted from the least computationally intensive to the most
+		let category = _getReqCategory(filter);
 
-		//blacklists
-
-		if(
-			filter.isWebSocket() ||
-			filter.isSizeBlocked(_this.app.options.grabFilesLargerThanMB) ||
-			!filter.isStatusOK() ||
-			filter.isAJAX()
-		){
+		if(category === ReqFilter.CAT_IGNORE){
 			return;
 		}
 
-		if(_this.app.options.excludeWebFiles){
+		//if it's not an IGNORE categoryo then we should add it to downloads list
+		_this.app.addToAllDownloads(download);
+
+		if(category === ReqFilter.CAT_FORCE_DL){
+			let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
+			DG.NativeUtils.downloadSingle(
+				defaultDM, 
+				download.url, 
+				download.getHeader('referer', 'request'),
+				download.getHeader('cookie', 'request'),
+				download.getFilename(),
+				download.reqDetails.postData
+			);
+			return {cancel: true};
+		}
+
+		if(_this.app.options.overrideDlDialog){
+			return new Promise(function(resolve){
+				download.resolve = resolve;
+				_this.app.showDlDialog(download);
+				console.log("download override: ", download);
+			});
+		}
+
+
+		/**
+		 * Decides what to do with a certain request
+		 * @param {ReqFilter} filter 
+		 */
+		function _getReqCategory(filter){
+
+			//the lists should be sorted from the least computationally intensive to the most
+
+			/****
+			first we exclude things that are definitely not download even if they match some rules
+			****/
 			if(
-				filter.isImage() ||
-				filter.isFont() ||
-				filter.isTextual() ||
-				filter.isOtherWebResource()
+				filter.isWebSocket() ||
+				!filter.isStatusOK() ||
+				filter.isAJAX()
 			){
-				return;
+				return ReqFilter.CAT_IGNORE;
 			}
-		}
 
-		//todo: private browsing downloads are added to all downloads, maybe add a separate list for them
-		//whitelists
-		if(filter.hasAttachment()){
-			download.override = true;
-			download.grabReason = "attachment";
-			_this.app.addToAllDownloads(download);
-		}
-		else if(filter.isCompressed()){
-			download.override = true;
-			download.grabReason = "compressed"
-			_this.app.addToAllDownloads(download);
-		}
-		else if(filter.isDocument()){
-			download.override = true;
-			download.grabReason = "document"
-			_this.app.addToAllDownloads(download);
-		}
-		else if(filter.isMedia()){
-			//don't download playables that can be played inside browser
-			//if we're here it means the download did not have an attachment header
-			if(filter.isPlayableMedia()){
-				download.override = false;
+			/****
+			then we do things that user has explicitly specified in options
+			****/
+			//todo: we have options in ReqFilter now
+			if(filter.isSizeBlocked(_this.app.options.grabFilesLargerThanMB)){
+				return ReqFilter.CAT_IGNORE;
 			}
-			else{
-				download.override = true;
-			}
-			download.grabReason = "media";
-			_this.app.addToAllDownloads(download);
-		}
-		else if(filter.isOtherBinary()){
-			download.override = true;
-			download.grabReason = "binary"
-			_this.app.addToAllDownloads(download);
-		}
 
-		//now we're left with gray items
-		//wtf do we do with gray items? :|
-		else if(DEBUG){
-			download.grabReason = 'graylist';
-			download.debug_gray = 'debug_gray';
-			_this.app.addToAllDownloads(download);
-		}
-
-		//show download dialog for downloads that should be overriden
-		if(_this.app.options.overrideDlDialog || DEBUG){
-			if(download.override){
-				return new Promise(function(resolve){
-					download.resolve = resolve;
-					_this.app.showDlDialog(download);
-					console.log("download override: ", download);
-				});
+			if(filter.isIncludedInOpts()){
+				return ReqFilter.CAT_GRAB;
 			}
+
+			if(filter.isExcludedInOpts()){
+				return ReqFilter.CAT_IGNORE;
+			}
+
+			if(filter.isForcedInOpts()){
+				return ReqFilter.CAT_FORCE_DL;
+			}
+
+			if(_this.app.options.excludeWebFiles){
+				if(
+					filter.isImage() ||
+					filter.isFont() ||
+					filter.isTextual() ||
+					filter.isOtherWebResource()
+				){
+					return ReqFilter.CAT_IGNORE;
+				}
+			}
+
+			/****
+			now we do things that the user has not specified but we think are downloads
+			****/
+			if(filter.hasAttachment()){
+				download.grabReason = "attachment";
+				return ReqFilter.CAT_GRAB;
+			}
+			if(filter.isCompressed()){
+				download.grabReason = "compressed"
+				return ReqFilter.CAT_GRAB;
+			}
+			if(filter.isDocument()){
+				download.grabReason = "document"
+				return ReqFilter.CAT_GRAB;
+			}
+			if(filter.isMedia()){
+				download.grabReason = "media";
+				//don't download playables that can be played inside browser
+				//if we're here it means the download did not have an attachment header
+				if(filter.isPlayedInBrowser()){
+					return ReqFilter.CAT_IGNORE;
+				}
+				else{
+					return ReqFilter.CAT_GRAB;
+				}
+			}
+			if(filter.isOtherBinary()){
+				download.grabReason = "binary";
+				return ReqFilter.CAT_GRAB;
+			}
+
+			//now we're left with gray items
+			//todo: what do we do with gray items?
+			if(DEBUG){
+				download.grabReason = 'graylist';
+				download.debug_gray = 'debug_gray';
+				return ReqFilter.CAT_GRAB;
+			}
+
 		}
 		
 	},

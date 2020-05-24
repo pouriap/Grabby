@@ -92,6 +92,8 @@ DG.NativeUtils = {
 	/**
 	 * Downloads a single url with the specified download manager
 	 */
+	//todo: pass a Download object as parameter
+	//todo: check if parameters are all ok
 	downloadSingle : function(dmName, url, referer, cookies, filename, postData){
 		let message = {
 			type: 'download',

@@ -32,16 +32,59 @@ native application must be in accordance with our No Surprises policy.
 class DlGrabApp {
 
 	constructor(options) {
-		this.options = options;
 		// all requests made by Firefox are stored here temporarily until we get their response
 		this.allRequests = new FixedSizeMap(100);
-		// the last X downloadable items are stored here with their informations such as cookies,time,etc.
-		this.allDownloads = new FixedSizeMap(options.dlListSize);
+		// this will be set in applyOptions()
+		this.allDownloads = {}
 		// open download dialogs
 		this.downloadDialogs = {};
 		// runtime data
 		this.runtime = {};
+		//todo: do we need this anymore?
 		this.runtime.ready = false;
+		this.applyOptions(options);
+	}
+
+	applyOptions(options){
+		this.options = options;
+		//create a new list of downloads in case the downloas history size is changed in options
+		this.allDownloads = new FixedSizeMap(options.dlListSize, this.allDownloads.list);
+		//exclusion,inclusion,download lists
+		this.options.excludedExts = _getExtsFromList(options.excludedExts);
+		this.options.excludedMimes = _getMimesForExts(this.options.excludedExts);
+		this.options.includedExts = _getExtsFromList(options.includedExts);
+		this.options.includedMimes = _getMimesForExts(this.options.includedExts);
+		this.options.forcedExts = _getExtsFromList(options.forcedExts);
+		this.options.forcedMimes = _getMimesForExts(this.options.forcedExts);		
+		function _getExtsFromList(extList){
+			if(!extList){
+				return [];
+			}
+			let extsArr = [];
+			//remove spaces
+			extList = extList.replace(/\s/g, '');
+			for(let ext of extList.split(',')){
+				//remove dot in case people have put dots in ext list
+				if(ext.startsWith('.')){
+					ext = ext.substr(1);
+				}
+				extsArr.push(ext);
+			}
+			return extsArr;
+		}
+		function _getMimesForExts(extsArr){
+			if(!extsArr){
+				return [];
+			}
+			let mimesArr = [];
+			for(let ext of extsArr){
+				let mimesOfExt = constants.extsToMimes[ext];
+				if(mimesOfExt){
+					mimesArr = mimesArr.concat(mimesOfExt);
+				}
+			}
+			return mimesArr;
+		}
 	}
 
 	/**
@@ -161,14 +204,21 @@ class Download {
 
 			this.filename = "unknown";
 
-			//todo: add support for filename*=
-
 			let disposition = this.getHeader('content-disposition', 'response');
 			if(disposition){
-				const regex = /filename=["']?(.*?)["']?(;|$)/im;
-				let matches = disposition.match(regex);
-				if(matches && matches[1]){
-					this.filename = matches[1];
+				const regex1 = /filename\*=["']?(.*?\'\')?(.*?)["']?(;|$)/im;
+				const regex2 = /filename=["']?(.*?)["']?(;|$)/im;
+				//first try filename*= because it takes precedence according to docs
+				let matches = disposition.match(regex1);
+				if(matches && matches[2]){
+					this.filename = matches[2];
+				}
+				//then look for filename=
+				else{
+					matches = disposition.match(regex2);
+					if(matches && matches[1]){
+						this.filename = matches[1];
+					}
 				}
 
 			}
@@ -254,15 +304,16 @@ class Download {
 
 }
 
-//todo: add list of file extensions to grab in options
+//todo: i'm not loving how this is now coupled with options
 class ReqFilter {
 
 	/**
 	 * 
 	 * @param {Download} download 
 	 */
-	constructor(download){
+	constructor(download, options){
 		this.download = download;
+		this.options = options;
 	}
 
 	/* private funcitons */
@@ -398,14 +449,19 @@ class ReqFilter {
 	 * media file that can be played inside Firefox
 	 * reference: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
 	 */
-	isPlayableMedia(){
-		if(typeof this._isPlayableMedia === 'undefined'){
-			this._isPlayableMedia = 
-				this._isInTypeList(constants.mediaTypes) ||
-				this._isInExtensionList(constants.playableExts) ||
-				this._isInMimeList(constants.playableMimes);
+	isPlayedInBrowser(){
+		if(typeof this._isPlayedInBrowser === 'undefined'){
+			if(!this.options.playMediaInBrowser){
+				this._isPlayedInBrowser = false;
+			}
+			else{
+				this._isPlayedInBrowser = 
+					this._isInTypeList(constants.mediaTypes) ||
+					this._isInExtensionList(constants.playableExts) ||
+					this._isInMimeList(constants.playableMimes);
+			}
 		}
-		return this._isPlayableMedia;
+		return this._isPlayedInBrowser;
 	}
 
 	isCompressed(){
@@ -457,6 +513,8 @@ class ReqFilter {
 
 		if(typeof this._isStatusOK === 'undefined'){
 
+			this._isStatusOK = false;
+
 			//OK and Not-Modified are ok
 			if(this.download.statusCode == 200 || this.download.statusCode == 302){
 				this._isStatusOK = true;
@@ -492,7 +550,59 @@ class ReqFilter {
 		return this.download.resDetails.fromCache;
 	}
 
+	isExcludedInOpts(){
+		if(typeof this._isExcludedInOpts === 'undefined'){
+			if(this._isInExtensionList(this.options.excludedExts)){
+				this._isExcludedInOpts = true; 
+			}
+			else if(this._isInMimeList(this.options.excludedMimes)){
+				this._isExcludedInOpts = true;
+			}
+			else{
+				this._isExcludedInOpts = false;
+			}
+		}
+
+		return this._isExcludedInOpts;
+	}
+
+	isIncludedInOpts(){
+		if(typeof this._isIncludedInOpts === 'undefined'){
+			if(this._isInExtensionList(this.options.includedExts)){
+				this._isIncludedInOpts = true; 
+			}
+			else if(this._isInMimeList(this.options.includedMimes)){
+				this._isIncludedInOpts = true;
+			}
+			else{
+				this._isIncludedInOpts = false;
+			}
+		}
+
+		return this._isIncludedInOpts;
+	}
+
+	isForcedInOpts(){
+		if(typeof this._isForcedInOpts === 'undefined'){
+			if(this._isInExtensionList(this.options.forcedExts)){
+				this._isForcedInOpts = true; 
+			}
+			else if(this._isInMimeList(this.options.forcedMimes)){
+				this._isForcedInOpts = true;
+			}
+			else{
+				this._isForcedInOpts = false;
+			}
+		}
+
+		return this._isForcedInOpts;
+	}
+	
 }
+//categories of requests
+ReqFilter.CAT_GRAB = 1;
+ReqFilter.CAT_IGNORE = 2;
+ReqFilter.CAT_FORCE_DL = 3;
 
 
 /**
@@ -685,10 +795,12 @@ var constants = {
 		"application/x-mspowerpoint" : "pptx",
 		"application/excel" : "xlsx",
 		"application/x-excel" : "xlsx",
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "xlsx",
 		"application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "docx",
 		"application/vnd.ms-fontobject" : "eot",
 		"application/epub+zip" : "epub",
 		"application/gzip" : "gz",
+		"application/x-gzip" : "gz",
 		"image/gif" : "gif",
 		"text/html" : "html",
 		"image/vnd.microsoft.icon" : "ico",
@@ -722,6 +834,7 @@ var constants = {
 		"application/vnd.ms-powerpoint" : "ppt",
 		"application/vnd.openxmlformats-officedocument.presentationml.presentation" : "pptx",
 		"application/vnd.rar" : "rar",
+		"application/x-rar-compressed" : "rar",
 		"application/rtf" : "rtf",
 		"application/x-sh" : "sh",
 		"image/svg+xml" : "svg",
@@ -730,9 +843,7 @@ var constants = {
 		"video/mp2t" : "ts",
 		"application/x-tar" : "tar",
 		"application/gnutar" : "tar",
-		"application/x-rar-compressed" : "rar",
 		"image/tiff" : "tiff",
-		"video/mp2t" : "ts",
 		"font/ttf" : "ttf",
 		"text/plain" : "txt",
 		"application/vnd.visio" : "vsd",
@@ -749,20 +860,96 @@ var constants = {
 		"font/woff2" : "woff2",
 		"application/xhtml+xml" : "xhtml",
 		"application/vnd.ms-excel" : "xls",
-		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "xlsx",
 		"application/xml" : "xml",
 		"text/xml" : "xml",
 		"application/vnd.mozilla.xul+xml" : "xul",
 		"application/zip" : "zip",
 		"application/x-compressed" : "zip",
 		"application/x-zip-compressed" : "zip",
-		"application/x-gzip" : "gz",
 		"video/3gpp" : "3gp",
 		"audio/3gpp" : "3gp",
 		"video/3gpp2" : "3g2",
 		"audio/3gpp2" : "3g2",
 		"application/x-7z" : "7z",
 		"application/x-7z-compressed" : "7z"
+	},
+
+	extsToMimes: {
+		"aac" : ["audio/aac", "audio/x-aac"],
+		"abw" : ["application/x-abiword"],
+		"arc" : ["application/x-freearc"],
+		"avi" : ["video/x-msvideo"],
+		"azw" : ["application/vnd.amazon.ebook"],
+		"bin" : ["application/octet-stream"],
+		"bmp" : ["image/bmp"],
+		"bz" : ["application/x-bzip"],
+		"bz2" : ["application/x-bzip2"],
+		"csh" : ["application/x-csh"],
+		"css" : ["text/css"],
+		"csv" : ["text/csv"],
+		"doc" : ["application/msword"],
+		"pptx" : ["application/mspowerpoint", "application/powerpoint", "application/x-mspowerpoint"],
+		"xlsx" : ["application/excel", "application/x-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+		"docx" : ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+		"eot" : ["application/vnd.ms-fontobject"],
+		"epub" : ["application/epub+zip"],
+		"gz" : ["application/gzip", "application/x-gzip"],
+		"gif" : ["image/gif"],
+		"html" : ["text/html"],
+		"ico" : ["image/vnd.microsoft.icon"],
+		"ics" : ["text/calendar"],
+		"jar" : ["application/java-archive"],
+		"jpg" : ["image/jpeg"],
+		"js" : ["text/javascript", "application/javascript"],
+		"json" : ["application/json"],
+		"jsonld" : ["application/ld+json"],
+		"midi" : ["audio/midi audio/x-midi"],
+		"mjs" : ["text/javascript"],
+		"mp3" : ["audio/mpeg", "audio/mpeg3", "audio/x-mpeg-3", "audio/mp3"],
+		"mpeg" : ["video/mpeg"],
+		"mp4" : ["video/mp4"],
+		"mpkg" : ["application/vnd.apple.installer+xml"],
+		"odp" : ["application/vnd.oasis.opendocument.presentation"],
+		"ods" : ["application/vnd.oasis.opendocument.spreadsheet"],
+		"odt" : ["application/vnd.oasis.opendocument.text"],
+		"oga" : ["audio/ogg"],
+		"ogv" : ["video/ogg"],
+		"ogx" : ["application/ogg"],
+		"opus" : ["audio/opus"],
+		"otf" : ["font/otf"],
+		"png" : ["image/png"],
+		"pdf" : ["application/pdf"],
+		"php" : ["application/php"],
+		"ppt" : ["application/vnd.ms-powerpoint"],
+		"pptx" : ["application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+		"rar" : ["application/vnd.rar", "application/x-rar-compressed"],
+		"rtf" : ["application/rtf"],
+		"sh" : ["application/x-sh"],
+		"svg" : ["image/svg+xml"],
+		"swf" : ["application/x-shockwave-flash"],
+		"mov" : ["video/quicktime"],
+		"ts" : ["video/mp2t"],
+		"tar" : ["application/x-tar", "application/gnutar"],
+		"tiff" : ["image/tiff"],
+		"ttf" : ["font/ttf"],
+		"txt" : ["text/plain"],
+		"vsd" : ["application/vnd.visio"],
+		"wav" : ["audio/wav"],
+		"aiff" : ["audio/aiff",  "audio/x-aiff"],
+		"weba" : ["audio/webm"],
+		"webm" : ["video/webm"],
+		"avi" : ["application/x-troff-msvideo", "video/avi", "video/msvideo"],
+		"webp" : ["image/webp"],
+		"woff" : ["font/woff"],
+		"woff2" : ["font/woff2"],
+		"xhtml" : ["application/xhtml+xml"],
+		"xls" : ["application/vnd.ms-excel"],
+		"xml" : ["application/xml", "text/xml"],
+		"xul" : ["application/vnd.mozilla.xul+xml"],
+		"zip" : ["application/zip", "application/x-compressed", "application/x-zip-compressed"],
+		"3gp" : ["video/3gpp", "audio/3gpp"],
+		"3g2" : ["video/3gpp2", "audio/3gpp2"],
+		"7z" : ["application/x-7z", "application/x-7z-compressed"]
 	}
 
 }

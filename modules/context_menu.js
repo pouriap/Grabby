@@ -75,18 +75,18 @@ DG.ContextMenu = {
 		}
 
 		if(info.menuItemId == _this.MENU_ID_GRAB_ALL){
-			let result = await browser.tabs.executeScript({file: _this.SCRIPT_GET_ALL});
+			let result = await browser.tabs.executeScript(tab.id, {file: _this.SCRIPT_GET_ALL});
 			downloadLinks(result[0]);
 		}
 		else if(info.menuItemId == _this.MENU_ID_GRAB_SELECTION){
-			let result = await browser.tabs.executeScript({file: _this.SCRIPT_GET_SELECTION});
+			let result = await browser.tabs.executeScript(tab.id, {file: _this.SCRIPT_GET_SELECTION});
 			downloadLinks(result[0]);
 		}
 		else if(info.menuItemId == _this.MENU_ID_GRAB_LINK){
 			let result = {};
 			result.links = [{href: info.linkUrl, description: info.linkText}];
 			result.originPageUrl = info.pageUrl;
-			result.originPageReferer = await browser.tabs.executeScript({code: 'document.referrer'});
+			result.originPageReferer = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'});
 			downloadLinks(result);
 		}
 

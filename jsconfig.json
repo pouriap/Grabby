@@ -1,0 +1,4 @@
+{
+	"include": ["**/*"],
+	"exclude": ["_extras", "_Native Client"]
+}

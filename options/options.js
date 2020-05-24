@@ -22,6 +22,7 @@ function saveOptions(e) {
 				optionValue = optionElement.checked;
 				break;
 			default:
+				//for dropdowns we have a hidden textbox so they're also text
 				optionValue = optionElement.value;
 				break;
 		}
