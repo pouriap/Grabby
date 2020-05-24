@@ -122,7 +122,7 @@ DG.RequestHandling = {
 			return {cancel: true};
 		}
 
-		if(_this.app.options.overrideDlDialog){
+		if(category === ReqFilter.CAT_GRAB && _this.app.options.overrideDlDialog){
 			return new Promise(function(resolve){
 				download.resolve = resolve;
 				_this.app.showDlDialog(download);
@@ -154,11 +154,12 @@ DG.RequestHandling = {
 			then we do things that user has explicitly specified in options
 			****/
 			//todo: we have options in ReqFilter now
-			if(filter.isSizeBlocked(_this.app.options.grabFilesLargerThanMB)){
+			if(filter.isSizeBlocked()){
 				return ReqFilter.CAT_IGNORE;
 			}
 
 			if(filter.isIncludedInOpts()){
+				download.grabReason = 'opts-include';
 				return ReqFilter.CAT_GRAB;
 			}
 
@@ -167,6 +168,7 @@ DG.RequestHandling = {
 			}
 
 			if(filter.isForcedInOpts()){
+				download.grabReason = 'opts-force';
 				return ReqFilter.CAT_FORCE_DL;
 			}
 
@@ -184,6 +186,7 @@ DG.RequestHandling = {
 			/****
 			now we do things that the user has not specified but we think are downloads
 			****/
+			//has attachment should be first always
 			if(filter.hasAttachment()){
 				download.grabReason = "attachment";
 				return ReqFilter.CAT_GRAB;
@@ -201,7 +204,7 @@ DG.RequestHandling = {
 				//don't download playables that can be played inside browser
 				//if we're here it means the download did not have an attachment header
 				if(filter.isPlayedInBrowser()){
-					return ReqFilter.CAT_IGNORE;
+					return ReqFilter.CAT_GRAB_NODIALOG;
 				}
 				else{
 					return ReqFilter.CAT_GRAB;

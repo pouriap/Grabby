@@ -373,7 +373,8 @@ class ReqFilter {
 	
 	/* public functions */
 
-	isSizeBlocked(sizeLimit){
+	isSizeBlocked(){
+		let sizeLimit = this.options.grabFilesLargerThanMB * 1000000;
 		let size = this.download.getSize();
 		if(size === 0){
 			return true;
@@ -603,7 +604,7 @@ class ReqFilter {
 ReqFilter.CAT_GRAB = 1;
 ReqFilter.CAT_IGNORE = 2;
 ReqFilter.CAT_FORCE_DL = 3;
-
+ReqFilter.CAT_GRAB_NODIALOG = 4;
 
 /**
  * A fixed sized map with key->value pairs

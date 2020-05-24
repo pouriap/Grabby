@@ -8,8 +8,8 @@
 //todo: add private browsing downloads to a separate list
 //todo: optimize filters order
 //todo: show grab reason only in debug
-//todo: remove unnecessary DEBUG conditions
 //todo: add option to download everything with DM if forcedownload is '*'
+//todo: add try/catch to all awaits
 
 var DEBUG = true;
 
