@@ -37,6 +37,8 @@ async function getBackgroundData(){
 		let download = new Download(reqDetails, resDetails);
 		download.grabReason = downloadJSON.grabReason;
 		download.reported = downloadJSON.reported;
+		download.action = downloadJSON.act;
+		download.category = downloadJSON.cat;
 		download.hash = downloadJSON.hash;
 		allDownloads.put(downloadHash, download);
 	});
@@ -103,6 +105,7 @@ function populateDMs(){
 		document.getElementById(defaultDM).setAttribute('selected', 'selected');
 	}
 }
+
 
 /**
  * @param {Download} download 
@@ -179,9 +182,18 @@ function reportDownload(download, source){
 	}
 
 	let reportData = JSON.parse(JSON.stringify(download.resDetails));
+
+	//remove stuff we don't need
+	delete reportData.cookieStoreId;
+	delete reportData.ip;
+	delete reportData.proxyInfo;
+
+	//add stuff we need
+	//we add these so they'll show in the beggining when I'm vewing them hehe
 	reportData._grabReason = download.grabReason;
+	reportData._options = popupContext.appJSON.options;
 	reportData._reportSource = source;
-	reportData.activeOpts = popupContext.appJSON.options;
+
 	//stringify
 	reportData = JSON.stringify(reportData);
 	//base64 encode
@@ -195,6 +207,9 @@ function reportDownload(download, source){
 	_sendPOSTRequest(url, postData);
 
 	function _sendPOSTRequest(url, postData){
+
+		document.getElementById('spinner').style.display = 'inline-block';
+
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", url, true);
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -204,9 +219,13 @@ function reportDownload(download, source){
 			if(xhr.readyState != XMLHttpRequest.DONE){
 				return;
 			}
+			document.getElementById('spinner').style.display = 'none';
 			if(xhr.status == 200) {
 				document.getElementById("action-report").innerHTML = "Report submitted. Thank you.";
 				document.getElementById("action-report").classList.add("success");
+				//for popup context downloads
+				download.reported = true;
+				//for bg context downloads
 				let message = {type: DG.Messaging.TYP_DL_REPORTED, downloadHash: download.getHash()};
 				browser.runtime.sendMessage(message);
 			}

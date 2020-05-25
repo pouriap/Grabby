@@ -101,136 +101,22 @@ DG.RequestHandling = {
 			return;
 		}
 
-		//creating a new download object because will delete the original from allRequests
-		//in doOnCompleted() after the request is completed
+		//creating a new download object because the original will be deleted from allRequests
+		//in doOnCompleted() after the request is completed or when app.allDownloads is full
 		let download = new Download(requestOfThisResponse.details, details);
 
 		let filter = new ReqFilter(download, _this.app.options);
 
-		let category = _getReqCategory(filter);
-
-		if(category === ReqFilter.CAT_IGNORE){
-			return;
+		//if this request does not have an explicit action
+		if(!_this.getExplicitAction(download, filter)){
+			//first determine its category
+			_this.determineCategory(download, filter);
+			//then determine the action based on what category it is
+			_this.determineAction(download, filter);
 		}
 
-		//if it's not an IGNORE categoryo then we should add it to downloads list
-		_this.app.addToAllDownloads(download);
-
-		if(category === ReqFilter.CAT_GRAB_NODIALOG){
-			return;
-		}
-
-		if(category === ReqFilter.CAT_FORCE_DL){
-			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
-			DG.NativeUtils.downloadSingle(dmName, download);
-			return {cancel: true};
-		}
-
-		if(category === ReqFilter.CAT_GRAB && !filter.hasAttachment() && filter.isDisplayedInBrowser()){
-			return;
-		}
-
-		if(category === ReqFilter.CAT_GRAB && _this.app.options.overrideDlDialog){
-			return new Promise(function(resolve){
-				download.resolve = resolve;
-				_this.app.showDlDialog(download);
-				console.log("download override: ", download);
-			});
-		}
-
-
-		/**
-		 * Decides what to do with a certain request
-		 * @param {ReqFilter} filter 
-		 */
-		function _getReqCategory(filter){
-
-			//the lists should be sorted from the least computationally intensive to the most
-
-			/****
-			first we exclude things that are definitely not download even if they match some rules
-			****/
-			if(
-				filter.isWebSocket() ||
-				!filter.isStatusOK() ||
-				filter.isAJAX()
-			){
-				return ReqFilter.CAT_IGNORE;
-			}
-
-			/****
-			then we do things that user has explicitly specified in options
-			****/
-			//todo: we have options in ReqFilter now
-			if(filter.isSizeBlocked()){
-				return ReqFilter.CAT_IGNORE;
-			}
-
-			if(filter.isIncludedInOpts()){
-				download.grabReason = 'opts-include';
-				return ReqFilter.CAT_GRAB;
-			}
-
-			if(filter.isExcludedInOpts()){
-				return ReqFilter.CAT_IGNORE;
-			}
-
-			if(filter.isForcedInOpts()){
-				download.grabReason = 'opts-force';
-				return ReqFilter.CAT_FORCE_DL;
-			}
-
-			if(_this.app.options.excludeWebFiles){
-				if(
-					filter.isWebImage() ||
-					filter.isWebFont() ||
-					filter.isWebTextual() ||
-					filter.isOtherWebResource()
-				){
-					return ReqFilter.CAT_IGNORE;
-				}
-			}
-
-			//todo: avval ba type ii ke khode browser peyda karde filter konim
-			//baad age chizi az oon rad shod biaim ba ravesh haye khodemoon filter konim
-
-			/****
-			now we do things that the user has not specified but we think are downloads
-			****/
-			if(filter.isBrowserMedia()){
-				download.grabReason = "inline media";
-				return ReqFilter.CAT_GRAB_NODIALOG;
-			}
-			if(filter.hasAttachment()){
-				download.grabReason = "attachment";
-				return ReqFilter.CAT_GRAB;
-			}
-			if(filter.isCompressed()){
-				download.grabReason = "compressed"
-				return ReqFilter.CAT_GRAB;
-			}
-			if(filter.isDocument()){
-				download.grabReason = "document"
-				return ReqFilter.CAT_GRAB;
-			}
-			if(filter.isMedia()){
-				download.grabReason = "media file";
-				return ReqFilter.CAT_GRAB;
-			}
-			if(filter.isOtherBinary()){
-				download.grabReason = "binary";
-				return ReqFilter.CAT_GRAB;
-			}
-
-			//now we're left with gray items
-			//todo: what do we do with gray items?
-			if(DEBUG){
-				download.grabReason = 'graylist';
-				download.debug_gray = 'debug_gray';
-				return ReqFilter.CAT_GRAB;
-			}
-
-		}
+		//perform said action
+		return _this.performAction(download);
 		
 	},
 
@@ -243,6 +129,259 @@ DG.RequestHandling = {
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
 		_this.app.allRequests.remove(details.requestId);
+	},
+
+
+	/**
+	 * If the filter has an explicit action associated with it that ignores all rules
+	 * then this function sets it
+	 * @param {Download} download 
+	 * @param {ReqFilter} filter 
+	 */
+	getExplicitAction: function(download, filter){
+
+		if(
+			filter.isWebSocket() ||
+			!filter.isStatusOK() ||
+			filter.isAJAX()
+		){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;
+		}
+
+		if(filter.isSizeBlocked()){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;		
+		}
+
+		if(filter.isIncludedInOpts()){
+			download.grabReason = 'opts-include';
+			download.act = ReqFilter.ACT_GRAB;
+			return true;
+		}
+
+		if(filter.isExcludedInOpts()){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;
+		}
+
+		if(filter.isForcedInOpts()){
+			download.grabReason = 'opts-force';
+			download.act = ReqFilter.ACT_FORCE_DL;
+			return true;
+		}
+
+		return false;
+	},
+
+
+	/**
+	 * Determines the category of a request
+	 * Category is one of those defined in ReqFilter
+	 * @param {Download} download 
+	 * @param {ReqFilter} filter 
+	 */
+	determineCategory: function(download, filter){
+
+		/**
+		 * use types to determine category first, because they are the most certain
+		 */
+		if(filter.isTypeWebRes()){
+			download.cat = ReqFilter.CAT_WEBRES_API;
+			return;
+		}
+		if(filter.isTypeMedia()){
+			download.cat = ReqFilter.CAT_MEDIA_API;
+			return;
+		}
+		if(filter.isTypeWebOther()){
+			download.cat = ReqFilter.CAT_OTHERWEB_API;
+			return;
+		}
+
+		/**
+		 * then use mimes because mime is more certain than extension
+		 */
+		if(filter.isMimeWebRes()){
+			download.cat = ReqFilter.CAT_WEB_RES;
+			return;
+		}
+		if(filter.isMimeWebOther()){
+			download.cat = ReqFilter.CAT_OTHER_WEB;
+			return;
+		}
+		if(filter.isMimeMedia()){
+			download.cat = ReqFilter.CAT_FILE_MEDIA;
+			return;
+		}
+		if(filter.isMimeCompressed()){
+			download.cat = ReqFilter.CAT_FILE_COMP;
+			return;
+		}
+		if(filter.isMimeDocument()){
+			download.cat = ReqFilter.CAT_FILE_DOC;
+			return;
+		}
+
+		/**
+		 * use extension to determine what category this request is
+		 */
+		if(filter.isExtWebRes()){
+			download.cat = ReqFilter.CAT_WEB_RES;
+			return;
+		}
+		if(filter.isExtWebOther()){
+			download.cat = ReqFilter.CAT_OTHER_WEB;
+			return;
+		}
+		if(filter.isExtMedia()){
+			download.cat = ReqFilter.CAT_FILE_MEDIA;
+			return;
+		}
+		if(filter.isExtCompressed()){
+			download.cat = ReqFilter.CAT_FILE_COMP;
+			return;
+		}
+		if(filter.isExtDocument()){
+			download.cat = ReqFilter.CAT_FILE_DOC;
+			return;
+		}
+		if(filter.isExtBinary()){
+			download.cat = ReqFilter.CAT_FILE_BIN;
+			return;
+		}
+
+		//this is 'application/octet-steam' and 'application/binary'
+		//this is vague and the extension takes precedence to it so we put it at the end
+		if(filter.isMimeGeneralBinary()){
+			download.cat = ReqFilter.CAT_FILE_BIN;
+			return;
+		}
+
+		download.cat = ReqFilter.CAT_UKNOWN;
+		return;
+
+	},
+
+	
+	/**
+	 * Determines what action should be done about a request 
+	 * @param {Download} download 
+	 * @param {ReqFilter} filter 
+	 */
+	determineAction: function(download, filter){
+
+		var _this = DG.RequestHandling;
+
+		if(download.cat === ReqFilter.CAT_WEBRES_API){
+			if(_this.app.options.excludeWebFiles){
+				download.act = ReqFilter.ACT_IGNORE;
+			}
+			else{
+				download.grabReason = 'api web res not excluded';
+				download.act = ReqFilter.ACT_GRAB_SILENT;
+			}		
+			return;
+		}
+		if(download.cat === ReqFilter.CAT_OTHERWEB_API){
+			download.act = ReqFilter.ACT_IGNORE;
+			return;
+		}
+		if(download.cat === ReqFilter.CAT_MEDIA_API){
+			//should we show download dialog for these?
+			download.grabReason = 'media type';
+			download.act = ReqFilter.ACT_GRAB_SILENT;
+			return;
+		}
+
+		//these aren't from API so we aren't so sure about them
+		if(download.cat === ReqFilter.CAT_OTHER_WEB){
+			download.act = ReqFilter.ACT_IGNORE;
+			return;
+		}
+		if(filter.hasAttachment()){
+			download.grabReason = 'attachment';
+			download.act = ReqFilter.ACT_GRAB;
+			return;
+		}
+		if(filter.isDisplayedInBrowser()){
+			download.act = ReqFilter.ACT_IGNORE;
+			return;
+		}
+		if(download.cat === ReqFilter.CAT_WEB_RES){
+			if(_this.app.options.excludeWebFiles){
+				download.act = ReqFilter.ACT_IGNORE;
+			}
+			else{
+				download.grabReason = 'web res not excluded'
+				download.act = ReqFilter.ACT_GRAB_SILENT;
+			}		
+			return;
+		}
+		if(
+			download.cat === ReqFilter.CAT_FILE_MEDIA ||
+			download.cat === ReqFilter.CAT_FILE_COMP ||
+			download.cat === ReqFilter.CAT_FILE_DOC ||
+			download.cat === ReqFilter.CAT_FILE_BIN
+		){
+			download.grabReason = 'known file type';
+			download.act = ReqFilter.ACT_GRAB;
+			return;
+		}
+
+		//as a last resort if the request does not have documentUrl or originUrl then
+		//consider it a download
+		//this should cover evrything
+		if(
+			!download.resDetails.documentUrl ||
+			!download.resDetails.originUrl
+		){
+			download.grabReason = 'no document/origin';
+			download.act = ReqFilter.ACT_GRAB;
+		}
+
+		return;
+
+	},
+
+
+	/**
+	 * Performs the action that is assigned to a request in determineAction()
+	 * @param {Download} download 
+	 */
+	performAction: function(download){
+
+		var _this = DG.RequestHandling;
+
+		if(download.act === ReqFilter.ACT_IGNORE){
+			return;
+		}
+
+		_this.app.addToAllDownloads(download);
+
+		if(download.act === ReqFilter.ACT_GRAB_SILENT){
+			browser.tabs.query({url: download.origin}).then((tabs)=>{
+				let tabId = (tabs[0])? tabs[0].id : -1;
+				if(tabId>1){
+					browser.pageAction.show(tabId);
+				}
+			})
+			return;
+		}
+
+		if(download.act === ReqFilter.ACT_FORCE_DL){
+			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
+			DG.NativeUtils.downloadSingle(dmName, download);
+			return {cancel: true};
+		}
+
+		if(download.act === ReqFilter.ACT_GRAB && _this.app.options.overrideDlDialog){
+			return new Promise(function(resolve){
+				download.resolve = resolve;
+				_this.app.showDlDialog(download);
+			});
+		}
+		
 	}
 
 }

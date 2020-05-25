@@ -527,8 +527,8 @@ class ReqFilter {
 	isOtherBinary(){
 		if(typeof this._isOtherBinary === 'undefined'){
 			this._isOtherBinary = 
-				this._isInExtensionList(constants.otherBinaryExts) ||
-				this._isInMimeList(constants.otherBinaryMimes);
+				this._isInExtensionList(constants.binaryExts) ||
+				this._isInMimeList(constants.generalBinaryMimes);
 		}
 		return this._isOtherBinary;
 	}
@@ -643,13 +643,85 @@ class ReqFilter {
 
 		return this._isForcedInOpts;
 	}
+
+	isTypeWebRes(){
+		if(typeof this._isTypWebRes === 'undefined'){
+			this._isTypWebRes = this._isInTypeList(constants.webResTypes);
+		}
+		return this._isTypWebRes;
+	}
+
+	isTypeWebOther(){
+		if(typeof this._isTypWebOther === 'undefined'){
+			this._isTypWebOther = this._isInTypeList(constants.webOtherTypes);
+		}
+		return this._isTypWebOther;
+	}
+
+	isTypeMedia(){
+		if(typeof this._isTypMedia === 'undefined'){
+			this._isTypMedia = this._isInTypeList(constants.mediaTypes);
+		}
+		return this._isTypMedia;
+	}
+
+	isMimeWebRes(){
+		return this._isInMimeList(constants.webResMimes);
+	}
+	isMimeWebOther(){
+		return this._isInMimeList(constants.webOtherMimes);
+	}
+	isMimeMedia(){
+		return this._isInMimeList(constants.mediaMimes);
+	}
+	isMimeCompressed(){
+		return this._isInMimeList(constants.compressedMimes);
+	}
+	isMimeDocument(){
+		return this._isInMimeList(constants.documentMimes);
+	}
+	isMimeGeneralBinary(){
+		return this._isInMimeList(constants.generalBinaryMimes);
+	}
+
+	isExtWebRes(){
+		return this._isInExtensionList(constants.webResExts);
+	}
+	isExtWebOther(){
+		return this._isInExtensionList(constants.webOtherExts);
+	}
+	isExtMedia(){
+		return this._isInExtensionList(constants.mediaExts);
+	}
+	isExtCompressed(){
+		return this._isInExtensionList(constants.compressedExts);
+	}
+	isExtDocument(){
+		return this._isInExtensionList(constants.documentExts);
+	}
+	isExtBinary(){
+		return this._isInExtensionList(constants.binaryExts);
+	}
+
 	
 }
-//categories of requests
-ReqFilter.CAT_GRAB = 1;
-ReqFilter.CAT_IGNORE = 2;
-ReqFilter.CAT_FORCE_DL = 3;
-ReqFilter.CAT_GRAB_NODIALOG = 4;
+//categories of file types
+ReqFilter.CAT_WEB_RES = 1;
+ReqFilter.CAT_WEBRES_API = 2;
+ReqFilter.CAT_OTHER_WEB = 3;
+ReqFilter.CAT_OTHERWEB_API = 4;
+ReqFilter.CAT_MEDIA_API = 5;
+ReqFilter.CAT_FILE_MEDIA = 6;
+ReqFilter.CAT_FILE_COMP = 7;
+ReqFilter.CAT_FILE_DOC = 8;
+ReqFilter.CAT_FILE_BIN = 9;
+ReqFilter.CAT_UKNOWN = 10;
+
+//types of action
+ReqFilter.ACT_GRAB = 1;
+ReqFilter.ACT_IGNORE = 2;
+ReqFilter.ACT_FORCE_DL = 3;
+ReqFilter.ACT_GRAB_SILENT = 4;
 
 /**
  * A fixed sized map with key->value pairs
@@ -719,6 +791,36 @@ var constants = {
 
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
+
+
+
+
+	webResTypes: ['stylesheet', 'script', 'font', 'image', 'imageset'],
+	webOtherTypes: [
+		'xbl', 'xml_dtd', 'xslt', 'web_manifest', 
+		'object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative'
+	],
+	webResMimes: [
+		'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/vnd.microsoft.icon', 
+		'image/bmp', 'image/webp', 'image/tiff',
+		'font/ttf', 'font/otf', 'application/vnd.ms-fontobject', 'font/woff', 'font/woff2', 
+		'text/css', 'text/javascript', 'application/javascript',
+	],
+	webOtherMimes: [
+		'text/html', 'application/xhtml+xml', 'application/json', 'application/ld+json', 
+		'application/xml', 'text/xml', 'application/php', 
+	],
+	webResExts: [
+		'jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff',
+		'ttf', 'otf', 'eot', 'woff2', 'woff',
+		'css', 'js',
+	],
+	webOtherExts: [
+		'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss',
+		'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
+	],
+
+
 
 	imageExts: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff'],
 	imageMimes: [
@@ -800,13 +902,13 @@ var constants = {
 	],
 
 
-	otherBinaryExts: [
+	binaryExts: [
 		//platform-specific
 		'exe', 'msi', 'deb', 'rpm', 'pkg', 'dmg', 'app', 
 		//other
 		'bin', 'iso',
 	],
-	otherBinaryMimes : [
+	generalBinaryMimes : [
 		//other
 		'application/octet-stream', 'application/binary',
 	],

@@ -11,11 +11,23 @@
 	<div id="content" class="browser-style">
 
 		<form>
+
+			<div class="panel-formElements-item">
+				<label for="overrideDlDialog">Override Firefox's download dialog</label>
+				<input type="checkbox" id="overrideDlDialog" >
+			</div>
+
+			<div class="panel-formElements-item">
+				<label for="playMediaInBrowser">Do not offer to download files that can be displayed inside browser (text, media and pdf)</label>
+				<input type="checkbox" id="playMediaInBrowser" >
+			</div>
 			
 			<div class="panel-formElements-item">
-				<label for="dlListSize">Number of items to keep in downloads History:</label>
+				<label for="dlListSize">Number of items to keep in downloads history:</label>
 				<input type="text" id="dlListSize" >
 			</div>
+
+			<hr>
 
 			<div class="panel-formElements-item">
 				<label for="grabFilesLargerThanMB">Ignore files smaller than (MB):</label>
@@ -42,21 +54,15 @@
 				<input type="text" id="forcedExts" placeholder="ext1,ext2,ext3,..." >
 			</div>
 
-			<div class="panel-formElements-item">
-				<label for="overrideDlDialog">Override Firefox's download dialog</label>
-				<input type="checkbox" id="overrideDlDialog" >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="playMediaInBrowser">Do not offer to download files that can be displayed inside browser (text, media and pdf)</label>
-				<input type="checkbox" id="playMediaInBrowser" >
-			</div>
+			<hr>
 
 			<div class="panel-formElements-item">
 				<label for="availableDMs">Default download manager</label>
 				<select id="availableDMs"></select>
 				<input type="hidden" id="defaultDM">
 			</div>
+
+			<br>
 
 			<button class="browser-style" type="submit">Save</button>
 			

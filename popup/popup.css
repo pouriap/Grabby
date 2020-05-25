@@ -240,3 +240,7 @@ li.spacer{
 	pointer-events: none !important;
 	opacity: 0.5 !important;
 }
+
+#spinner{
+	display: none;
+}

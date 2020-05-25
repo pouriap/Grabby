@@ -52,6 +52,12 @@ function onGot() {
 		listItem.innerHTML = download.getFilename() + reason;
 
 		listItem.addEventListener("click", function(evt){
+
+			//todo: when you click a download and make some changes and then click another download 
+			// the same changes are still there because it's the same page
+			document.getElementById('action-report').setAttribute('class', 'action');
+			document.getElementById('action-report').innerHTML = 'Report falsely detected download';
+
 			let hash = this.getAttribute("data-hash");
 			popupContext.selectedDl = popupContext.allDownloads.get(hash);
 			console.log('item clicked: ', popupContext.selectedDl);

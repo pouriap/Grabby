@@ -1,8 +1,12 @@
 #content {
-    padding: 20px;
-    width: 70%;
+    padding: 40px;
 }
-
 input{
 	padding: 0 2px;
+	max-width: 40%;
+}
+hr {
+    margin: 15px 0;
+    color: 
+    #ededf0;
 }
