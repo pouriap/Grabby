@@ -116,10 +116,18 @@ DG.RequestHandling = {
 		//if it's not an IGNORE categoryo then we should add it to downloads list
 		_this.app.addToAllDownloads(download);
 
+		if(category === ReqFilter.CAT_GRAB_NODIALOG){
+			return;
+		}
+
 		if(category === ReqFilter.CAT_FORCE_DL){
 			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
 			DG.NativeUtils.downloadSingle(dmName, download);
 			return {cancel: true};
+		}
+
+		if(category === ReqFilter.CAT_GRAB && !filter.hasAttachment() && filter.isDisplayedInBrowser()){
+			return;
 		}
 
 		if(category === ReqFilter.CAT_GRAB && _this.app.options.overrideDlDialog){
@@ -174,19 +182,25 @@ DG.RequestHandling = {
 
 			if(_this.app.options.excludeWebFiles){
 				if(
-					filter.isImage() ||
-					filter.isFont() ||
-					filter.isTextual() ||
+					filter.isWebImage() ||
+					filter.isWebFont() ||
+					filter.isWebTextual() ||
 					filter.isOtherWebResource()
 				){
 					return ReqFilter.CAT_IGNORE;
 				}
 			}
 
+			//todo: avval ba type ii ke khode browser peyda karde filter konim
+			//baad age chizi az oon rad shod biaim ba ravesh haye khodemoon filter konim
+
 			/****
 			now we do things that the user has not specified but we think are downloads
 			****/
-			//has attachment should be first always
+			if(filter.isBrowserMedia()){
+				download.grabReason = "inline media";
+				return ReqFilter.CAT_GRAB_NODIALOG;
+			}
 			if(filter.hasAttachment()){
 				download.grabReason = "attachment";
 				return ReqFilter.CAT_GRAB;
@@ -200,15 +214,8 @@ DG.RequestHandling = {
 				return ReqFilter.CAT_GRAB;
 			}
 			if(filter.isMedia()){
-				download.grabReason = "media";
-				//don't download playables that can be played inside browser
-				//if we're here it means the download did not have an attachment header
-				if(filter.isPlayedInBrowser()){
-					return ReqFilter.CAT_GRAB_NODIALOG;
-				}
-				else{
-					return ReqFilter.CAT_GRAB;
-				}
+				download.grabReason = "media file";
+				return ReqFilter.CAT_GRAB;
 			}
 			if(filter.isOtherBinary()){
 				download.grabReason = "binary";

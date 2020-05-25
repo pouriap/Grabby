@@ -36,6 +36,7 @@ async function getBackgroundData(){
 		resDetails = downloadJSON.resDetails;
 		let download = new Download(reqDetails, resDetails);
 		download.grabReason = downloadJSON.grabReason;
+		download.reported = downloadJSON.reported;
 		download.hash = downloadJSON.hash;
 		allDownloads.put(downloadHash, download);
 	});
@@ -163,23 +164,24 @@ function downloadWithFirefox(download) {
  */
 function reportDownload(download, source){
 
+	setActionEnabled(document.getElementById("action-report"), false);
+
 	//don't allow report if already reported
 	if(download.reported){
 		document.getElementById("action-report").innerHTML = "Already reported";
-		setActionEnabled(document.getElementById("action-report"), false);
 		return;
 	}
 
 	//don't allow reports from private windows because privacy
 	if(download.reqDetails.incognito){
 		document.getElementById("action-report").innerHTML = "Report not enabled in private browsing";
-		setActionEnabled(document.getElementById("action-report"), false);
 		return;
 	}
 
 	let reportData = JSON.parse(JSON.stringify(download.resDetails));
 	reportData._grabReason = download.grabReason;
 	reportData._reportSource = source;
+	reportData.activeOpts = popupContext.appJSON.options;
 	//stringify
 	reportData = JSON.stringify(reportData);
 	//base64 encode
@@ -198,18 +200,22 @@ function reportDownload(download, source){
 		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 		xhr.onreadystatechange = function() {
-			console.log("state changed");
-			if(xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+			//we only want the DONE state
+			if(xhr.readyState != XMLHttpRequest.DONE){
+				return;
+			}
+			if(xhr.status == 200) {
 				document.getElementById("action-report").innerHTML = "Report submitted. Thank you.";
-				document.getElementById("action-report").setAttribute("class", "success");
-				//todo: this doesn't work anymore because we have a JSON copy of downloads now
-				download.reported = true;
+				document.getElementById("action-report").classList.add("success");
+				let message = {type: DG.Messaging.TYP_DL_REPORTED, downloadHash: download.getHash()};
+				browser.runtime.sendMessage(message);
 			}
 			else{
+				console.log("READ STATE CHANGED TO: ", xhr.readyState);
 				document.getElementById("action-report").innerHTML = "Failed to submit error.";
-				document.getElementById("action-report").setAttribute("class", "fail");
+				document.getElementById("action-report").classList.add("fail");
+				setActionEnabled(document.getElementById("action-report"), true);
 			}
-			setActionEnabled(document.getElementById("action-report"), false);
 		}
 
 		xhr.send(postData);
@@ -223,4 +229,17 @@ function hideElement(element){
 
 function showElement(element){
 	element.classList.remove("hidden");
+}
+
+/**
+ * @param {Element} element 
+ * @param {boolean} enabled 
+ */
+function setActionEnabled(element, enabled){
+	if(enabled){
+		element.classList.remove("disabled-action");
+	}
+	else{
+		element.classList.add("disabled-action");
+	}
 }

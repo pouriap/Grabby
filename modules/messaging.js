@@ -9,6 +9,7 @@ DG.Messaging = {
 	TYP_CONT_WITH_BROWSER: 'con-with-browser',
 	TYP_INTERCEPT_DL: 'intercept-dl',
 	TYP_DOWNLOAD: 'download',
+	TYP_DL_REPORTED: 'dl-reported',
 
 	/**
 	 * 	
@@ -75,6 +76,10 @@ DG.Messaging = {
 		else if(message.type === _this.TYP_DOWNLOAD){
 			let download = _this.app.allDownloads.get(message.downloadHash);
 			DG.NativeUtils.downloadSingle(message.dmName, download);
+		}
+		else if(message.type === _this.TYP_DL_REPORTED){
+			let download = _this.app.allDownloads.get(message.downloadHash);
+			download.reported = true;
 		}
 
 		return Promise.resolve();

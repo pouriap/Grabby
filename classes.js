@@ -401,6 +401,13 @@ class ReqFilter {
 		return this._isImage;
 	}
 
+	isWebImage(){
+		if(typeof this._isWebImage === 'undefined'){
+			this._isWebImage = this._isInTypeList(constants.imageTypes);
+		}
+		return this._isWebImage;
+	}
+
 	isFont(){
 		if(typeof this._isFont === 'undefined'){
 			this._isFont = 
@@ -411,6 +418,13 @@ class ReqFilter {
 		return this._isFont;
 	}
 
+	isWebFont(){
+		if(typeof this._isWebFont === 'undefined'){
+			this._isWebFont = this._isInTypeList(constants.fontTypes);
+		}
+		return this._isWebFont;
+	}
+
 	isTextual(){
 		if(typeof this._isTextual === 'undefined'){
 			this._isTextual = 
@@ -419,6 +433,27 @@ class ReqFilter {
 				this._isInMimeList(constants.textualMimes);
 		}
 		return this._isTextual;
+	}
+
+	isWebTextual(){
+		if(typeof this._isWebTextual === 'undefined'){
+			this._isWebTextual = false;
+			if(this._isInTypeList(constants.textualTypes)){
+				this._isWebTextual = true;
+			}
+			//if its content-type is text/plain then it'll be shown in browser
+			//for example seeing a .js file in github raw
+			else if(this._isInMimeList(['text/plain'])){
+				this._isWebTextual = false;
+			}
+			else if(
+				this._isInExtensionList(constants.textualExts) ||
+				this._isInMimeList(constants.textualMimes)
+			){
+				this._isWebTextual = true;
+			}
+		}
+		return this._isWebTextual;
 	}
 
 	isOtherWebResource(){
@@ -439,30 +474,36 @@ class ReqFilter {
 				//the request doesn't even show up in the network tool
 				//proof: MDN or w3schools page on <video> and <audio> tag
 				//the only way is to open the page containing the resouce in a private window
-				this._isInTypeList(constants.mediaTypes) ||
 				this._isInExtensionList(constants.mediaExts) ||
 				this._isInMimeList(constants.mediaMimes);
 		}
 		return this._isMedia;
 	}
 
+	isBrowserMedia(){
+		if(typeof this._isBrowserMedia === 'undefined'){
+			this._isBrowserMedia = this._isInTypeList(constants.mediaTypes);
+		}
+		return this._isBrowserMedia;
+	}
+
 	/**
 	 * media file that can be played inside Firefox
 	 * reference: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
 	 */
-	isPlayedInBrowser(){
-		if(typeof this._isPlayedInBrowser === 'undefined'){
+	isDisplayedInBrowser(){
+		if(typeof this._isDisplayedInBrowser === 'undefined'){
 			if(!this.options.playMediaInBrowser){
-				this._isPlayedInBrowser = false;
+				this._isDisplayedInBrowser = false;
 			}
 			else{
-				this._isPlayedInBrowser = 
+				this._isDisplayedInBrowser = 
 					this._isInTypeList(constants.mediaTypes) ||
-					this._isInExtensionList(constants.playableExts) ||
-					this._isInMimeList(constants.playableMimes);
+					this._isInExtensionList(constants.disPlayableExts) ||
+					this._isInMimeList(constants.disPlayableMimes);
 			}
 		}
-		return this._isPlayedInBrowser;
+		return this._isDisplayedInBrowser;
 	}
 
 	isCompressed(){
@@ -498,7 +539,11 @@ class ReqFilter {
 	hasAttachment(){
 		if(typeof this._hasAttachment === 'undefined'){
 			let disposition = this.download.getHeader('content-disposition', 'response');
-			this._hasAttachment = ( disposition && disposition.toLowerCase().indexOf("attachment") !== -1 );
+			//apparently firefox considers requests as download even if attachment is not set
+			//and only content-disposition is set
+			//example: https://www.st.com/resource/en/datasheet/lm317.pdf even if we tamper
+			//content-disposition into something like "blablabla" firefox still shows download dialog
+			this._hasAttachment = ( disposition && disposition.toLowerCase().indexOf("inline") === -1 );
 		}
 		return this._hasAttachment;
 	}
@@ -694,14 +739,14 @@ var constants = {
 
 	textualExts : [
 		//static content
-		'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss', 'txt',
+		'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss',
 		//dynamic pages
 		'php', 'php3', 'php5', 'asp', 'aspx', 'jsp', 'jspx',
 	],
 	textualMimes : [
 		//static content
 		'text/css', 'text/javascript', 'application/javascript', 'text/html', 'application/xhtml+xml', 
-		'application/json', 'application/ld+json', 'application/xml', 'text/xml', 'text/plain',
+		'application/json', 'application/ld+json', 'application/xml', 'text/xml',
 		//dynamic pages
 		'application/php', 
 	],
@@ -767,13 +812,14 @@ var constants = {
 	],
 
 
-	playableExts: [
+	disPlayableExts: [
 		'wav', 'wave', 'ogg', 'oga', 'ogv', 'ogx', 'spx', 'opus', 'webm', 'flac', 'mp3', 
-		'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 
+		'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'txt', 'pdf'
 	],
-	playableMimes: [
+	disPlayableMimes: [
 		'audio/wav', 'audio/ogg', 'video/ogg', 'audio/webm', 'video/webm', 'audio/flac', 
 		'audio/mpeg', 'audio/mpeg3', 'audio/x-mpeg-3', 'audio/mp3', 'video/mp4', 
+		'text/plain', 'application/pdf'
 	],
 
 	mimesToExts : {
