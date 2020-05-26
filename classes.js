@@ -562,7 +562,7 @@ class ReqFilter {
 			this._isStatusOK = false;
 
 			//OK and Not-Modified are ok
-			if(this.download.statusCode == 200 || this.download.statusCode == 302){
+			if(this.download.statusCode == 200 || this.download.statusCode == 304){
 				this._isStatusOK = true;
 			}
 			else if(this.download.statusCode == 206){

@@ -107,7 +107,7 @@ DG.RequestHandling = {
 
 		let filter = new ReqFilter(download, _this.app.options);
 
-		//if this request does not have an explicit action
+		//if this request does not have an explicit action (user-specified in options)
 		if(!_this.getExplicitAction(download, filter)){
 			//first determine its category
 			_this.determineCategory(download, filter);
@@ -140,6 +140,7 @@ DG.RequestHandling = {
 	 */
 	getExplicitAction: function(download, filter){
 
+		//ain't no downloads in these (hopefully)
 		if(
 			filter.isWebSocket() ||
 			!filter.isStatusOK() ||
@@ -149,26 +150,33 @@ DG.RequestHandling = {
 			return true;
 		}
 
-		if(filter.isSizeBlocked()){
-			download.act = ReqFilter.ACT_IGNORE;
-			return true;		
+		//todo: when we include a file, for example .js, then even web resource files of that
+		//type are grabbed even if we have the option checked for not downloading web resources
+
+		//most important is forced
+		if(filter.isForcedInOpts()){
+			download.grabReason = 'opts-force';
+			download.act = ReqFilter.ACT_FORCE_DL;
+			return true;
 		}
 
+		//then inclusions
 		if(filter.isIncludedInOpts()){
 			download.grabReason = 'opts-include';
 			download.act = ReqFilter.ACT_GRAB;
 			return true;
 		}
 
+		//then exclusions
 		if(filter.isExcludedInOpts()){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
 
-		if(filter.isForcedInOpts()){
-			download.grabReason = 'opts-force';
-			download.act = ReqFilter.ACT_FORCE_DL;
-			return true;
+		//then size
+		if(filter.isSizeBlocked()){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;		
 		}
 
 		return false;
@@ -281,34 +289,25 @@ DG.RequestHandling = {
 				download.grabReason = 'api web res not excluded';
 				download.act = ReqFilter.ACT_GRAB_SILENT;
 			}		
-			return;
 		}
-		if(download.cat === ReqFilter.CAT_OTHERWEB_API){
+		else if(download.cat === ReqFilter.CAT_OTHERWEB_API){
 			download.act = ReqFilter.ACT_IGNORE;
-			return;
 		}
-		if(download.cat === ReqFilter.CAT_MEDIA_API){
+		else if(download.cat === ReqFilter.CAT_MEDIA_API){
 			//should we show download dialog for these?
 			download.grabReason = 'media type';
 			download.act = ReqFilter.ACT_GRAB_SILENT;
-			return;
 		}
 
 		//these aren't from API so we aren't so sure about them
-		if(download.cat === ReqFilter.CAT_OTHER_WEB){
+		else if(download.cat === ReqFilter.CAT_OTHER_WEB){
 			download.act = ReqFilter.ACT_IGNORE;
-			return;
 		}
-		if(filter.hasAttachment()){
+		else if(filter.hasAttachment()){
 			download.grabReason = 'attachment';
 			download.act = ReqFilter.ACT_GRAB;
-			return;
 		}
-		if(filter.isDisplayedInBrowser()){
-			download.act = ReqFilter.ACT_IGNORE;
-			return;
-		}
-		if(download.cat === ReqFilter.CAT_WEB_RES){
+		else if(download.cat === ReqFilter.CAT_WEB_RES){
 			if(_this.app.options.excludeWebFiles){
 				download.act = ReqFilter.ACT_IGNORE;
 			}
@@ -316,9 +315,8 @@ DG.RequestHandling = {
 				download.grabReason = 'web res not excluded'
 				download.act = ReqFilter.ACT_GRAB_SILENT;
 			}		
-			return;
 		}
-		if(
+		else if(
 			download.cat === ReqFilter.CAT_FILE_MEDIA ||
 			download.cat === ReqFilter.CAT_FILE_COMP ||
 			download.cat === ReqFilter.CAT_FILE_DOC ||
@@ -326,13 +324,12 @@ DG.RequestHandling = {
 		){
 			download.grabReason = 'known file type';
 			download.act = ReqFilter.ACT_GRAB;
-			return;
 		}
 
 		//as a last resort if the request does not have documentUrl or originUrl then
 		//consider it a download
 		//this should cover evrything
-		if(
+		else if(
 			!download.resDetails.documentUrl ||
 			!download.resDetails.originUrl
 		){
@@ -340,7 +337,13 @@ DG.RequestHandling = {
 			download.act = ReqFilter.ACT_GRAB;
 		}
 
-		return;
+		if(
+			!filter.hasAttachment() &&
+			filter.isDisplayedInBrowser() && 
+			download.act === ReqFilter.ACT_GRAB
+		){
+			download.act = ReqFilter.ACT_GRAB_SILENT;
+		}
 
 	},
 
