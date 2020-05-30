@@ -145,7 +145,8 @@ DG.RequestHandling = {
 			filter.isWebSocket() ||
 			!filter.isStatusOK() ||
 			filter.isAJAX() ||
-			filter.isBlackListed()
+			//todo: fix this madness
+			filter.isBlackListed(DG.RequestHandling.app.runtime.blacklist)
 		){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;

@@ -110,6 +110,7 @@ function populateDMs(){
 /**
  * @param {Download} download 
  */
+//todo: what's this?
 function download(download){
 	if(document.getElementById("dl-with-dlgrab").checked){
 		downloadWithSelectedDM(download);
@@ -190,17 +191,15 @@ function reportDownload(download, source){
 	delete reportData.resDetails.proxyInfo;
 
 	//add stuff we need
-	//we add these so they'll show in the beggining when I'm vewing them hehe
-	reportData._grabReason = download.grabReason;
 	reportData._options = popupContext.appJSON.options;
 	reportData._reportSource = source;
 
 	//stringify
 	reportData = JSON.stringify(reportData);
-	//base64 encode
-	reportData = btoa(reportData);
 	//URI encode
 	reportData = encodeURIComponent(reportData);
+	//base64 encode
+	reportData = btoa(reportData);
 	let postData = `data=${reportData}`;
 	//this is my own website
 	//the only things that are stored are the base64 encoded reportData and time of report
@@ -229,6 +228,7 @@ function reportDownload(download, source){
 				//for bg context downloads
 				let message = {type: DG.Messaging.TYP_DL_REPORTED, downloadHash: download.getHash()};
 				browser.runtime.sendMessage(message);
+				continueWithBrowser(download);
 			}
 			else{
 				console.log("READ STATE CHANGED TO: ", xhr.readyState);

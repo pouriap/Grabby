@@ -80,6 +80,8 @@ DG.Messaging = {
 		else if(message.type === _this.TYP_DL_REPORTED){
 			let download = _this.app.allDownloads.get(message.downloadHash);
 			download.reported = true;
+			_this.app.runtime.blacklist.push(download.url);
+			browser.storage.local.set({blacklist: _this.app.runtime.blacklist});
 		}
 
 		return Promise.resolve();

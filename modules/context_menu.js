@@ -7,8 +7,8 @@ DG.ContextMenu = {
 	MENU_ID_GRAB_SELECTION : 'download.grab.menu.grabselection',
 	MENU_ID_GRAB_LINK: 'download.grab.menu.grablink',
 
-	SCRIPT_GET_ALL: '../scripts/get_all_links.js',
-	SCRIPT_GET_SELECTION: '../scripts/get_selection_links.js',
+	SCRIPT_GET_ALL: '../content_scripts/get_all_links.js',
+	SCRIPT_GET_SELECTION: '../content_scripts/get_selection_links.js',
 
 	/**
 	 * 	

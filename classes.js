@@ -232,8 +232,8 @@ class Download {
 			}
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
-				let url = decodeURI(this.url);
-				let path = DG.Utils.getPath(url);
+				let path = DG.Utils.getPath(this.url);
+				path = decodeURI(path);
 				if(path.slice(-1) === '/'){
 					path = path.slice(0, -1);
 				}
@@ -655,7 +655,10 @@ class ReqFilter {
 		return this._isForcedInOpts;
 	}
 
-	isBlackListed(){
+	isBlackListed(blacklist){
+		if(blacklist.includes(this.download.url)){
+			return true;
+		}
 		if(
 			this.options.blacklistDomains.includes(this.download.getHost()) ||
 			this.options.blacklistDomains.includes(DG.Utils.getDomain(this.download.origin))

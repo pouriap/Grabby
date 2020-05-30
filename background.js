@@ -11,6 +11,7 @@
 //todo: add try/catch to all awaits
 //todo: show location bar icon when media is grabbed in page
 //todo: script injection needed for grab selection/all doens't work on addon pages (Video Downloader Prime)
+//todo: add option to automatically download with default DM is size is bigger than X
 
 var DEBUG = true;
 
@@ -21,6 +22,11 @@ var DEBUG = true;
 	try{
 		let options = await browser.storage.local.get(defaultOptions);
 		let app = new DlGrabApp(options);
+
+		//todo: fix this
+		let res = await browser.storage.local.get({blacklist: []});
+		app.runtime.blacklist = res.blacklist;		
+
 		await DG.NativeUtils.initialize();
 		app.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
 		DG.Messaging.initialize(app);
