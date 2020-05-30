@@ -224,11 +224,16 @@ class Download {
 			}
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
-				const regex = /\/([^\/\n\?\=]*)(\?|$)/;
 				let url = decodeURI(this.url);
-				let matches = url.match(regex);
-				if(matches && matches[1]){
-					this.filename = matches[1];
+				var a = document.createElement('a');
+				a.href = url;
+				let path = a.pathname;
+				if(path.slice(-1) === '/'){
+					path = path.slice(0, -1);
+				}
+				var filename = path.split('/').pop();
+				if(filename){
+					this.filename = filename;
 				}
 			}
 			//if the url has no file extension give it a serial number

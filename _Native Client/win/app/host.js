@@ -1,15 +1,29 @@
 'use strict';
 
-var {execFileSync, spawnSync} = require('child_process');
-var {existsSync, mkdirSync, readFileSync, writeFileSync} = require('fs');
+var {spawn, execFileSync} = require('child_process');
+var {constants, accessSync, existsSync, mkdirSync, readFileSync, writeFileSync} = require('fs');
 var {tmpdir} = require('os');
 var {id} = require('./config.js');
 
-//create a directory in temp to store stuff in
-var tempDir = tmpdir() + "\\" + id;
-if(!existsSync(tempDir)){mkdirSync(tempDir, {recursive: true});}
-var availableDMsFile = tempDir + "\\" + "availableDMs.txt";
-var jobFile = tempDir + "\\" + "job.fgt";
+var availableDMsFile = getTempDir() + "\\" + "availableDMs.txt";
+
+function getTempDir(){
+	let tempDir = tmpdir() + "\\" + id;
+	if(!existsSync(tempDir)){mkdirSync(tempDir, {recursive: true});}
+	return tempDir;
+}
+function getNewTempFile(){
+	let name = Math.floor(Math.random()*10000);
+	let tempDir = getTempDir();
+	let tempFile = tempDir + "\\" + `job_${name}.fgt`;
+	try {
+		writeFileSync(tempFile, '', {encoding: 'utf8'});
+		accessSync(tempFile, constants.W_OK);
+		return tempFile;
+	} catch (err) {
+		return false;
+	}
+}
 
 // closing node when parent process is killed
 process.stdin.resume();
@@ -77,13 +91,13 @@ function observe(message, push, done) {
 					+ originPageCookies + "\n"
 					+ "\n"	//extras
 					+ "\n";	//extras
-		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		//this is called from background and node.exe is not closed until addon is removed
-		execFileSync("flashgot.exe", [jobFile]);
+
+		doFlashGot(job, push);
 		done();
+
 	}
 	else if(message.type === 'download_all'){
-		
+
 		let downloadItems = message.downloadItems;
 		let dmName = message.dmName;
 		let header = `${downloadItems.length};${dmName};0;;`;
@@ -101,14 +115,31 @@ function observe(message, push, done) {
 					+ "\n" //extras
 					+ "\n" //estras
 
-		writeFileSync(jobFile, job, {encoding: 'utf8'});
-		//this is called from background and node.exe is not closed until addon is removed
-		execFileSync("flashgot.exe", [jobFile]);
+		doFlashGot(job, push);
 		done();
 	}
 	else{
 		push({type: 'unsupported'});
 		done();
+	}
+}
+function doFlashGot(job, push){
+	let jobFile = getNewTempFile();
+	if(jobFile === false){
+		push({type: 'download_failed', reason: 'could not create temp file'});
+	}
+	else{
+		writeFileSync(jobFile, job, {encoding: 'utf8'});
+		//todo: node waits for child processes of flashgot to also close (i.e. DMs) so we
+		//have to launch it like this. Why does it do this?
+		let subprocess = spawn('FlashGot.exe', [jobFile], {detached: true});
+		subprocess.on('exit', (code) => {
+			push({type: 'download_complete', job: job});
+		});
+		subprocess.stdout.on('data', (data)=>{
+			push({type: 'flashgot_output', output: data.toString()});
+		});
+		subprocess.unref();
 	}
 }
 /* message passing */

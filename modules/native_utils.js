@@ -1,6 +1,6 @@
 var DG = DG || {};
 
-//todo: node.js process keeps open unless we do "port.disconnect()" or page is closed
+//todo: check if port is connected when we want to send a message
 
 DG.NativeUtils = {
 
@@ -19,7 +19,7 @@ DG.NativeUtils = {
 				reject(available);
 				return;
 			}
-			DG.NativeUtils.port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+			DG.NativeUtils._getNewPort();
 			resolve(true);
 		});
 	},
@@ -55,6 +55,17 @@ DG.NativeUtils = {
 				resolve(e);
 			}
 		});
+	},
+
+	_getNewPort: function(){
+		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+		port.onMessage.addListener(DG.NativeUtils.doOnNativeMessage);
+		port.onDisconnect.addListener(function(d){
+			console.error("port disconnected");
+			console.error("disconnect data: ", JSON.stringify(d));
+			DG.NativeUtils._getNewPort();
+		});
+		DG.NativeUtils.port = port;
 	},
 
 	getAvailableDMs : function(){
@@ -198,6 +209,27 @@ DG.NativeUtils = {
 			}
 			resolve(cookies);
 		});
+	},
+
+	doOnNativeMessage: function(message){
+		//black addon stdout
+		//green node.js stdout
+		//blue flashgot.exe stdout
+		if(message.type === 'download_complete'){
+			console.log(`%cdownload complete: ${message.job}`, "color:green;font-weight:bold;");
+		}
+		else if(message.type === 'download_failed'){
+			console.log(`%cdownload FAILED: ${message.reason}`, "color:green;font-weight:bold;");
+		}
+		else if(message.type === 'flashgot_output'){
+			console.log(`%c${message.output}`, "color:blue;font-weight:bold;");
+		}
+		else if(message.type === 'exception'){
+			console.log(`%cexception in host.js: ${message.error}`, "color:green;font-weight:bold;");
+		}
+		else{
+			console.log(`%cexception in host.js: ${JSON.stringify(message)}`, "color:green;font-weight:bold;");
+		}
 	}
 
 }
