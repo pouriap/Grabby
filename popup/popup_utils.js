@@ -181,12 +181,13 @@ function reportDownload(download, source){
 		return;
 	}
 
-	let reportData = JSON.parse(JSON.stringify(download.resDetails));
+	let reportData = JSON.parse(JSON.stringify(download));
 
 	//remove stuff we don't need
-	delete reportData.cookieStoreId;
-	delete reportData.ip;
-	delete reportData.proxyInfo;
+	delete reportData.reqDetails;
+	delete reportData.resDetails.cookieStoreId;
+	delete reportData.resDetails.ip;
+	delete reportData.resDetails.proxyInfo;
 
 	//add stuff we need
 	//we add these so they'll show in the beggining when I'm vewing them hehe

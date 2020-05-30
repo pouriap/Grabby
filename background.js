@@ -10,6 +10,7 @@
 //todo: add option to download everything with DM if forcedownload is '*'
 //todo: add try/catch to all awaits
 //todo: show location bar icon when media is grabbed in page
+//todo: script injection needed for grab selection/all doens't work on addon pages (Video Downloader Prime)
 
 var DEBUG = true;
 

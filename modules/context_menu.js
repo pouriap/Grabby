@@ -59,6 +59,8 @@ DG.ContextMenu = {
 	 */
 	doOnMenuClicked : async function(info, tab){
 
+		console.log('menu clicked: ', info, '\ntab: ', tab);
+
 		let _this = DG.ContextMenu;
 
 		let defaultDM = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
@@ -75,18 +77,28 @@ DG.ContextMenu = {
 		}
 
 		if(info.menuItemId == _this.MENU_ID_GRAB_ALL){
+			//if tab is undefined it means we are in forbidden urls where we can't inject scripts
+			if(!tab){
+				return;
+			}
 			let result = await browser.tabs.executeScript(tab.id, {file: _this.SCRIPT_GET_ALL});
 			downloadLinks(result[0]);
 		}
 		else if(info.menuItemId == _this.MENU_ID_GRAB_SELECTION){
+			//if tab is undefined it means we are in forbidden urls where we can't inject scripts
+			if(!tab){
+				return;
+			}
 			let result = await browser.tabs.executeScript(tab.id, {file: _this.SCRIPT_GET_SELECTION});
 			downloadLinks(result[0]);
 		}
 		else if(info.menuItemId == _this.MENU_ID_GRAB_LINK){
 			let result = {};
 			result.links = [{href: info.linkUrl, description: info.linkText}];
-			result.originPageUrl = info.pageUrl;
-			result.originPageReferer = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'});
+			if(tab){
+				result.originPageUrl = info.pageUrl;
+				result.originPageReferer = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'});
+			}
 			downloadLinks(result);
 		}
 

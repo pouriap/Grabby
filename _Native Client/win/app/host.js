@@ -12,6 +12,7 @@ function getTempDir(){
 	if(!existsSync(tempDir)){mkdirSync(tempDir, {recursive: true});}
 	return tempDir;
 }
+//todo: what to do with files in temp?
 function getNewTempFile(){
 	let name = Math.floor(Math.random()*10000);
 	let tempDir = getTempDir();

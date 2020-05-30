@@ -326,14 +326,15 @@ DG.RequestHandling = {
 			download.act = ReqFilter.ACT_GRAB;
 		}
 
-		//as a last resort if the request does not have documentUrl or originUrl then
-		//consider it a download
-		//this should cover evrything
-		else if(
-			!download.resDetails.documentUrl ||
-			!download.resDetails.originUrl
+		//as a last resort if the request does not have documentUrl or originUrl and 
+		//has an extension then consider it a download
+		//this should cover unknown file type downloads too
+		else if
+		(
+			(!download.resDetails.documentUrl || !download.resDetails.originUrl) &&
+			download.getFileExtension() !== 'unknown'
 		){
-			download.grabReason = 'no document/origin';
+			download.grabReason = 'has extension with no document/origin';
 			download.act = ReqFilter.ACT_GRAB;
 		}
 

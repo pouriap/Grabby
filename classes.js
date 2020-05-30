@@ -710,23 +710,24 @@ class ReqFilter {
 
 	
 }
+//todo: change these to numbers
 //categories of file types
-ReqFilter.CAT_WEB_RES = 1;
-ReqFilter.CAT_WEBRES_API = 2;
-ReqFilter.CAT_OTHER_WEB = 3;
-ReqFilter.CAT_OTHERWEB_API = 4;
-ReqFilter.CAT_MEDIA_API = 5;
-ReqFilter.CAT_FILE_MEDIA = 6;
-ReqFilter.CAT_FILE_COMP = 7;
-ReqFilter.CAT_FILE_DOC = 8;
-ReqFilter.CAT_FILE_BIN = 9;
-ReqFilter.CAT_UKNOWN = 10;
+ReqFilter.CAT_WEB_RES = 'web res';
+ReqFilter.CAT_WEBRES_API = 'web res api';
+ReqFilter.CAT_OTHER_WEB = 'other web';
+ReqFilter.CAT_OTHERWEB_API = 'other web api';
+ReqFilter.CAT_MEDIA_API = 'media api';
+ReqFilter.CAT_FILE_MEDIA = 'media file';
+ReqFilter.CAT_FILE_COMP = 'compressed file';
+ReqFilter.CAT_FILE_DOC = 'document file';
+ReqFilter.CAT_FILE_BIN = 'binary file';
+ReqFilter.CAT_UKNOWN = 'unknown';
 
 //types of action
-ReqFilter.ACT_GRAB = 1;
-ReqFilter.ACT_IGNORE = 2;
-ReqFilter.ACT_FORCE_DL = 3;
-ReqFilter.ACT_GRAB_SILENT = 4;
+ReqFilter.ACT_GRAB = 'grab';
+ReqFilter.ACT_IGNORE = 'ignore';
+ReqFilter.ACT_FORCE_DL = 'force dl';
+ReqFilter.ACT_GRAB_SILENT = 'grab silent';
 
 /**
  * A fixed sized map with key->value pairs
