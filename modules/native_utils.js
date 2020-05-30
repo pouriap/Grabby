@@ -146,7 +146,7 @@ DG.NativeUtils = {
 		}
 
 		let downloadItems = [];
-		let originPageDomain = (originPageUrl)? this._getDomain(originPageUrl) : '';
+		let originPageDomain = (originPageUrl)? DG.Utils.getDomain(originPageUrl) : '';
 		let originPageCookies = (originPageDomain)? await this._getCookies(originPageDomain) : '';
 		//get the cookies for each link and add it to all download items
 		for(let link of links){
@@ -155,7 +155,7 @@ DG.NativeUtils = {
 			}
 			let href = link.href;
 			let description = link.description || '';
-			let linkDomain = this._getDomain(href) || '';
+			let linkDomain = DG.Utils.getDomain(href) || '';
 			let linkCookies = await this._getCookies(linkDomain) || '';
 			let downloadItem = {
 				url: href,
@@ -175,12 +175,6 @@ DG.NativeUtils = {
 		};
 		DG.NativeUtils.port.postMessage(message);
 
-	},
-
-	_getDomain: function(url){
-		let a = document.createElement('a');
-		a.href = url;
-		return a.hostname;
 	},
 
 	_getCookies: function(domain){

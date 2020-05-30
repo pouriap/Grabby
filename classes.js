@@ -55,7 +55,9 @@ class DlGrabApp {
 		this.options.includedExts = _getExtsFromList(options.includedExts);
 		this.options.includedMimes = _getMimesForExts(this.options.includedExts);
 		this.options.forcedExts = _getExtsFromList(options.forcedExts);
-		this.options.forcedMimes = _getMimesForExts(this.options.forcedExts);		
+		this.options.forcedMimes = _getMimesForExts(this.options.forcedExts);
+		this.options.blacklistDomains = _getValuesFromList(this.options.blacklistDomains);
+
 		function _getExtsFromList(extList){
 			if(!extList){
 				return [];
@@ -84,6 +86,12 @@ class DlGrabApp {
 				}
 			}
 			return mimesArr;
+		}
+		function _getValuesFromList(list){
+			if(!list){return [];}
+			//remove spaces
+			list = list.replace(/\s/g, '');
+			return list.split(',');
 		}
 	}
 
@@ -225,9 +233,7 @@ class Download {
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
 				let url = decodeURI(this.url);
-				var a = document.createElement('a');
-				a.href = url;
-				let path = a.pathname;
+				let path = DG.Utils.getPath(url);
 				if(path.slice(-1) === '/'){
 					path = path.slice(0, -1);
 				}
@@ -647,6 +653,16 @@ class ReqFilter {
 		}
 
 		return this._isForcedInOpts;
+	}
+
+	isBlackListed(){
+		if(
+			this.options.blacklistDomains.includes(this.download.getHost()) ||
+			this.options.blacklistDomains.includes(DG.Utils.getDomain(this.download.origin))
+		){
+			return true;
+		}
+		return false;
 	}
 
 	isTypeWebRes(){

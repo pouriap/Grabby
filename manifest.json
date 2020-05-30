@@ -57,6 +57,7 @@
 		"scripts": [
 			"libs/md5.js",
 			"classes.js",
+			"modules/utils.js",
 			"modules/native_utils.js",
 			"modules/context_menu.js",
 			"modules/request_handling.js",

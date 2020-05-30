@@ -7,6 +7,7 @@ const defaultOptions = {
 	excludedExts: '',
 	includedExts: '',
 	forcedExts: '',
+	blacklistDomains: '',
 	overrideDlDialog : true,
 	playMediaInBrowser: true,
 	defaultDM : '',

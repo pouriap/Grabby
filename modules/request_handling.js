@@ -144,11 +144,13 @@ DG.RequestHandling = {
 		if(
 			filter.isWebSocket() ||
 			!filter.isStatusOK() ||
-			filter.isAJAX()
+			filter.isAJAX() ||
+			filter.isBlackListed()
 		){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
+
 
 		//todo: when we include a file, for example .js, then even web resource files of that
 		//type are grabbed even if we have the option checked for not downloading web resources
