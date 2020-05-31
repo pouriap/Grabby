@@ -1,15 +1,10 @@
-var DG = DG || {};
-
 //todo: check if port is connected when we want to send a message
 
-DG.NativeUtils = {
+class NativeUtils  {
 
-	NATIVE_CLIENT_ID : 'download.grab.pouriap',
-	port: null,
-	
-	initialize: function(){
-		return new Promise(async function(resolve, reject){
-			let available = await DG.NativeUtils._isNativeClientAvailable();
+	init(){
+		return new Promise(async (resolve, reject) => {
+			let available = await this._isNativeClientAvailable();
 			if(available === false){
 				reject('Native client unavailable');
 				return;
@@ -19,16 +14,16 @@ DG.NativeUtils = {
 				reject(available);
 				return;
 			}
-			DG.NativeUtils._getNewPort();
+			this._getNewPort();
 			resolve(true);
 		});
-	},
+	}
 
 	//todo: move this inside initialize()?
-	_isNativeClientAvailable : function(){
-		return new Promise(function(resolve){
+	_isNativeClientAvailable(){
+		return new Promise((resolve) => {
 			try{
-				let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
+				let port = browser.runtime.connectNative(NativeUtils.NATIVE_CLIENT_ID);
 				port.onMessage.addListener((response) => {
 					port.disconnect();
 					if(response.type === 'native_client_available'){
@@ -55,26 +50,25 @@ DG.NativeUtils = {
 				resolve(e);
 			}
 		});
-	},
+	}
 
-	_getNewPort: function(){
-		let port = browser.runtime.connectNative(DG.NativeUtils.NATIVE_CLIENT_ID);
-		port.onMessage.addListener(DG.NativeUtils.doOnNativeMessage);
-		port.onDisconnect.addListener(function(d){
+	_getNewPort(){
+		let port = browser.runtime.connectNative(NativeUtils.NATIVE_CLIENT_ID);
+		port.onMessage.addListener(this.doOnNativeMessage);
+		port.onDisconnect.addListener((d) => {
 			console.error("port disconnected");
 			console.error("disconnect data: ", JSON.stringify(d));
-			DG.NativeUtils._getNewPort();
+			this._getNewPort();
 		});
-		DG.NativeUtils.port = port;
-	},
+		NativeUtils.port = port;
+	}
 
-	getAvailableDMs : function(){
-		return new Promise(async function(resolve){
-
+	getAvailableDMs(){
+		return new Promise(async (resolve) => {
 			try{
 
 				let message = {type: 'get_available_dms'};
-				let response = await browser.runtime.sendNativeMessage(DG.NativeUtils.NATIVE_CLIENT_ID, message);
+				let response = await browser.runtime.sendNativeMessage(NativeUtils.NATIVE_CLIENT_ID, message);
 	
 				if(response.type === 'available_dms'){
 					let availableDMs = response.availableDMs;
@@ -90,28 +84,27 @@ DG.NativeUtils = {
 					resolve(availableDMs);
 				}
 				else{
-					resolve({});
+					resolve([]);
 				}
 
 			}catch(e){
-				resolve({});
+				resolve([]);
 			}
-
 		});
-	},
+	}
 
 	/**
 	 * Downloads a single Download with the specified download manager
 	 * @param {string} dmName name of dm to use
 	 * @param {Download} download 
 	 */
-	downloadSingle : async function(dmName, download){
+	static async downloadSingle(dmName, download){
 
 		if(!dmName){
 			return;
 		}
 
-		let originPageCookies = (download.getHost())? await this._getCookies(download.getHost()) : '';
+		let originPageCookies = (download.getHost())? await NativeUtils.getCookies(download.getHost()) : '';
 		let originPageReferer = '';
 		let originTabId = -1;
 		try{
@@ -135,19 +128,20 @@ DG.NativeUtils = {
 			filename : download.getFilename(),
 			postData : download.reqDetails.postData
 		};
-		DG.NativeUtils.port.postMessage(message);
 
-	},
+		NativeUtils.port.postMessage(message);
 
-	downloadMultiple: async function(dmName, links, originPageUrl, originPageReferer){
+	}
+
+	static async downloadMultiple(dmName, links, originPageUrl, originPageReferer){
 
 		if(!dmName){
 			return;
 		}
 
 		let downloadItems = [];
-		let originPageDomain = (originPageUrl)? DG.Utils.getDomain(originPageUrl) : '';
-		let originPageCookies = (originPageDomain)? await this._getCookies(originPageDomain) : '';
+		let originPageDomain = (originPageUrl)? Utils.getDomain(originPageUrl) : '';
+		let originPageCookies = (originPageDomain)? await NativeUtils.getCookies(originPageDomain) : '';
 		//get the cookies for each link and add it to all download items
 		for(let link of links){
 			if(!link.href){
@@ -155,8 +149,8 @@ DG.NativeUtils = {
 			}
 			let href = link.href;
 			let description = link.description || '';
-			let linkDomain = DG.Utils.getDomain(href) || '';
-			let linkCookies = await this._getCookies(linkDomain) || '';
+			let linkDomain = Utils.getDomain(href) || '';
+			let linkCookies = await NativeUtils.getCookies(linkDomain) || '';
 			let downloadItem = {
 				url: href,
 				description: description,
@@ -173,11 +167,12 @@ DG.NativeUtils = {
 			originPageCookies : originPageCookies || '',
 			dmName : dmName,
 		};
-		DG.NativeUtils.port.postMessage(message);
 
-	},
+		NativeUtils.port.postMessage(message);
 
-	_getCookies: function(domain){
+	}
+
+	static getCookies(domain){
 		return new Promise(async function(resolve){
 			let cookies = '';
 			//subdomain cookies, for example dl2.website.com
@@ -203,9 +198,9 @@ DG.NativeUtils = {
 			}
 			resolve(cookies);
 		});
-	},
+	}
 
-	doOnNativeMessage: function(message){
+	doOnNativeMessage(message){
 		//black addon stdout
 		//green node.js stdout
 		//blue flashgot.exe stdout
@@ -227,3 +222,6 @@ DG.NativeUtils = {
 	}
 
 }
+
+NativeUtils.NATIVE_CLIENT_ID = 'download.grab.pouriap';
+NativeUtils.port = null;

@@ -1,52 +1,46 @@
-var DG = DG || {};
-
-DG.RequestHandling = {
+class RequestHandling {
 
 	/**
 	 * 	
 	 * @param {DlGrabApp} app 
 	 */
-	initialize: function(app){
-
+	constructor(app){
 		this.app = app;
+	}
+
+	init(){
 
 		browser.webRequest.onBeforeRequest.addListener(
-			this.doOnBeforeRequest, {
-				urls: ["*://*/*"]
-			},
+			(details) => { return this.doOnBeforeRequest(details, this.app) }, 
+			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			this.doOnBeforeSendHeaders, {
-				urls: ["*://*/*"]
-			},
+			(details) => { return this.doOnBeforeSendHeaders(details, this.app) }, 
+			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			this.doOnHeadersReceived, {
-				urls: ["*://*/*"]
-			},
+			(details) => { return this.doOnHeadersReceived(details, this.app, this) }, 
+			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			this.doOnCompleted, {
-				urls: ["*://*/*"]
-			},
+			(details) => { return this.doOnCompleted(details, this.app) }, 
+			{urls: ["*://*/*"]},
 			[]
 		);
 
-	},
+	}
 
 	/**
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	doOnBeforeRequest: function(details){
-
-		var _this = DG.RequestHandling;
+	doOnBeforeRequest(details, app){
 
 		let formDataArr = (details.method === "POST" && details.requestBody 
 					&& details.requestBody.formData)? details.requestBody.formData : [];
@@ -67,35 +61,35 @@ DG.RequestHandling = {
 		let request = {};
 		request.postData = postData;
 
-		_this.app.allRequests.put(details.requestId, request);
-	},
+		app.allRequests.put(details.requestId, request);
+	}
 
 	/**
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	doOnBeforeSendHeaders: function(details){
-		var _this = DG.RequestHandling;
+	doOnBeforeSendHeaders(details, app){
 		//store request details
-		let request = _this.app.allRequests.get(details.requestId);
+		let request = app.allRequests.get(details.requestId);
 		request.details = details;
 		request.details.postData = request.postData;
 		delete request.postData;
-	},
+	}
 
 	/**
 	 * Runs once response headers are received 
 	 * We create a download here if the response matches our criteria and add it 
 	 * to our list of downloads
+	 * @param {object} details 
+	 * @param {DlGrabApp} app 
+	 * @param {RequestHandling} _this 
 	 */
-	doOnHeadersReceived: function(details) {
-
-		var _this = DG.RequestHandling;
+	doOnHeadersReceived(details, app, _this) {
 
 		console.log("receiving: ", details);
 
 		let requestId = details.requestId;
-		let requestOfThisResponse = _this.app.allRequests.get(requestId);
+		let requestOfThisResponse = app.allRequests.get(requestId);
 		
 		if(typeof requestOfThisResponse === 'undefined'){
 			return;
@@ -105,31 +99,30 @@ DG.RequestHandling = {
 		//in doOnCompleted() after the request is completed or when app.allDownloads is full
 		let download = new Download(requestOfThisResponse.details, details);
 
-		let filter = new ReqFilter(download, _this.app.options);
+		let filter = new ReqFilter(download, app.options);
 
 		//if this request does not have an explicit action (user-specified in options)
-		if(!_this.getExplicitAction(download, filter)){
+		if(!_this.getExplicitAction(download, filter, app)){
 			//first determine its category
 			_this.determineCategory(download, filter);
 			//then determine the action based on what category it is
-			_this.determineAction(download, filter);
+			_this.determineAction(download, filter, app);
 		}
 
 		//perform said action
-		return _this.performAction(download);
+		return _this.performAction(download, app);
 		
-	},
+	}
 
 	/**
 	 * Runs once a request is completed
 	 */
-	doOnCompleted: function(details){
-		let _this = DG.RequestHandling;
+	doOnCompleted(details, app){
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
-		_this.app.allRequests.remove(details.requestId);
-	},
+		app.allRequests.remove(details.requestId);
+	}
 
 
 	/**
@@ -138,7 +131,7 @@ DG.RequestHandling = {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	getExplicitAction: function(download, filter){
+	getExplicitAction(download, filter, app){
 
 		//ain't no downloads in these (hopefully)
 		if(
@@ -146,7 +139,7 @@ DG.RequestHandling = {
 			!filter.isStatusOK() ||
 			filter.isAJAX() ||
 			//todo: fix this madness
-			filter.isBlackListed(DG.RequestHandling.app.runtime.blacklist)
+			filter.isBlackListed(app.runtime.blacklist)
 		){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
@@ -183,7 +176,7 @@ DG.RequestHandling = {
 		}
 
 		return false;
-	},
+	}
 
 
 	/**
@@ -192,7 +185,7 @@ DG.RequestHandling = {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	determineCategory: function(download, filter){
+	determineCategory(download, filter){
 
 		/**
 		 * use types to determine category first, because they are the most certain
@@ -272,20 +265,18 @@ DG.RequestHandling = {
 		download.cat = ReqFilter.CAT_UKNOWN;
 		return;
 
-	},
+	}
 
-	
 	/**
 	 * Determines what action should be done about a request 
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
+	 * @param {DlGrabApp} app 
 	 */
-	determineAction: function(download, filter){
-
-		var _this = DG.RequestHandling;
+	determineAction(download, filter, app){
 
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
-			if(_this.app.options.excludeWebFiles){
+			if(app.options.excludeWebFiles){
 				download.act = ReqFilter.ACT_IGNORE;
 			}
 			else{
@@ -311,7 +302,7 @@ DG.RequestHandling = {
 			download.act = ReqFilter.ACT_GRAB;
 		}
 		else if(download.cat === ReqFilter.CAT_WEB_RES){
-			if(_this.app.options.excludeWebFiles){
+			if(app.options.excludeWebFiles){
 				download.act = ReqFilter.ACT_IGNORE;
 			}
 			else{
@@ -349,33 +340,32 @@ DG.RequestHandling = {
 			download.act = ReqFilter.ACT_GRAB_SILENT;
 		}
 
-	},
+	}
 
 
 	/**
 	 * Performs the action that is assigned to a request in determineAction()
 	 * @param {Download} download 
+	 * @param {DlGrabApp} app 
 	 */
-	performAction: function(download){
-
-		var _this = DG.RequestHandling;
+	performAction(download, app){
 
 		if(download.act === ReqFilter.ACT_IGNORE){
 			return;
 		}
 
-		_this.app.addToAllDownloads(download);
+		app.addToAllDownloads(download);
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){
-			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
-			DG.NativeUtils.downloadSingle(dmName, download);
+			let dmName = app.options.defaultDM || app.runtime.availableDMs[0];
+			NativeUtils.downloadSingle(dmName, download);
 			return {cancel: true};
 		}
 
-		if(download.act === ReqFilter.ACT_GRAB && _this.app.options.overrideDlDialog){
+		if(download.act === ReqFilter.ACT_GRAB && app.options.overrideDlDialog){
 			return new Promise(function(resolve){
 				download.resolve = resolve;
-				_this.app.showDlDialog(download);
+				app.showDlDialog(download);
 			});
 		}
 		

@@ -16,29 +16,41 @@
 
 var DEBUG = true;
 
+//constructor faghat variable va init dashte bashim
+//this haye dakhele promise ha va callback ha check shavad 
+//chizhaii ke bayad static bashad check shavad mesle port dr NativeUtils
+
 (async () => {
 
 	console.log('initializing app...');
 
 	try{
 
-		await DG.NativeUtils.initialize();
-		let availableDMs = await DG.NativeUtils.getAvailableDMs();
-		DG.Options.initialize(availableDMs);
-		let options = await DG.Options.loadProcessed();
-		let app = new DlGrabApp(options);
-		app.runtime.availableDMs = availableDMs;
+		let nativeUtils = new NativeUtils();
+		await nativeUtils.init();
+
+		let availableDMs = await nativeUtils.getAvailableDMs();
+
+		let opMan = new Options(availableDMs);
+
+		let app = new DlGrabApp(availableDMs);
+		await app.init();
+
 
 		//todo: fix this
 		let res = await browser.storage.local.get({blacklist: []});
 		app.runtime.blacklist = res.blacklist;
 
-		//todo: bejaye inke hame ina global bashan har kodoom ye class bashan va tooye contructor
-		//har kodoom az oonaye dige ro ke ina behesh dipendent hastan bedim
-		//injoori mifahmim kodoom be kodoom dependent hast va tartib kharab nemishe
-		DG.Messaging.initialize(app);
-		DG.RequestHandling.initialize(app);
-		DG.ContextMenu.initialize(app);
+
+		let messaging = new Messaging(app, opMan);
+		messaging.init();
+
+		let rHandling = new RequestHandling(app);
+		rHandling.init();
+
+		let cMenu = new ContextMenu(app);
+		cMenu.init();
+
 		console.log('app init successful');
 	}catch(e){
 		console.log('app could not be initialized: ', e);

@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 window.addEventListener("beforeunload", async function() {
 	let downloadPageTabId = popupContext.selectedDl.reqDetails.tabId;
 	let message = {
-		type: DG.Messaging.TYP_DL_DIALOG_CLOSING, 
+		type: Messaging.TYP_DL_DIALOG_CLOSING, 
 		windowId: windowId, 
 		downloadPageTabId: downloadPageTabId,
 		downloadHash: popupContext.selectedDl.getHash(),

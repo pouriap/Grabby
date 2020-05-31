@@ -9,7 +9,7 @@ async function saveOptions(e) {
 
 	e.preventDefault();
 
-	let optionsData = await browser.runtime.sendMessage({type: DG.Messaging.TYP_GET_OPTS_DATA});
+	let optionsData = Options.optionsData;
 
 	let optionsToSave = {};
 
@@ -34,7 +34,7 @@ async function saveOptions(e) {
 
 	//options are save in local storage but we need to update app.options too
 	let message = {
-		type: DG.Messaging.TYP_SAVE_OPTIONS,
+		type: Messaging.TYP_SAVE_OPTIONS,
 		options: optionsToSave
 	};
 
@@ -44,7 +44,7 @@ async function saveOptions(e) {
 
 async function loadOptions() {
 
-	let currOptions = await browser.runtime.sendMessage({type: DG.Messaging.TYP_LOAD_OPTIONS});
+	let currOptions = await browser.runtime.sendMessage({type: Messaging.TYP_LOAD_OPTIONS});
 
 	console.log("got the options: ", currOptions);
 

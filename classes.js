@@ -31,7 +31,11 @@ native application must be in accordance with our No Surprises policy.
  */
 class DlGrabApp {
 
-	constructor(options) {
+	/**
+	 * 	
+	 * @param {Options} opMan 
+	 */
+	constructor(availableDMs) {
 		// all requests made by Firefox are stored here temporarily until we get their response
 		this.allRequests = new FixedSizeMap(100);
 		// this will be set in applyOptions()
@@ -40,20 +44,46 @@ class DlGrabApp {
 		this.downloadDialogs = {};
 		// runtime data
 		this.runtime = {};
+		this.runtime.availableDMs = availableDMs;
+	}
 
-		this.applyOptions(options);
+	init(){
+		return new Promise(async (resolve)=>{
+			let options = await Options.load();
+			this.applyOptions(options);
+			resolve();
+		});
 	}
 
 	applyOptions(options){
-
 		this.options = options;
 		//create a new list of downloads in case the downloas history size is changed in options
 		this.allDownloads = new FixedSizeMap(options.dlListSize, this.allDownloads.list);
 		//exclusion,inclusion,download lists
+		this.options.excludedExts = _getExtsFromList(options.excludedExts);
 		this.options.excludedMimes = _getMimesForExts(this.options.excludedExts);
+		this.options.includedExts = _getExtsFromList(options.includedExts);
 		this.options.includedMimes = _getMimesForExts(this.options.includedExts);
+		this.options.forcedExts = _getExtsFromList(options.forcedExts);
 		this.options.forcedMimes = _getMimesForExts(this.options.forcedExts);
+		this.options.blacklistDomains = _getValuesFromList(this.options.blacklistDomains);
 
+		function _getExtsFromList(extList){
+			if(!extList){
+				return [];
+			}
+			let extsArr = [];
+			//remove spaces
+			extList = extList.replace(/\s/g, '');
+			for(let ext of extList.split(',')){
+				//remove dot in case people have put dots in ext list
+				if(ext.startsWith('.')){
+					ext = ext.substr(1);
+				}
+				extsArr.push(ext);
+			}
+			return extsArr;
+		}
 		function _getMimesForExts(extsArr){
 			if(!extsArr){
 				return [];
@@ -67,7 +97,12 @@ class DlGrabApp {
 			}
 			return mimesArr;
 		}
-
+		function _getValuesFromList(list){
+			if(!list){return [];}
+			//remove spaces
+			list = list.replace(/\s/g, '');
+			return list.split(',');
+		}
 	}
 
 	/**
@@ -119,6 +154,10 @@ class DlGrabApp {
 			let windowId = windowInfo.id;
 			appInstance.downloadDialogs[windowId] = download.getHash();
 		});
+	}
+
+	getDefaultDM(){
+		return this.options.defaultDM || this.runtime.availableDMs[0];
 	}
 
 }
@@ -207,7 +246,7 @@ class Download {
 			}
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
-				let path = DG.Utils.getPath(this.url);
+				let path = Utils.getPath(this.url);
 				path = decodeURI(path);
 				if(path.slice(-1) === '/'){
 					path = path.slice(0, -1);
@@ -636,7 +675,7 @@ class ReqFilter {
 		}
 		if(
 			this.options.blacklistDomains.includes(this.download.getHost()) ||
-			this.options.blacklistDomains.includes(DG.Utils.getDomain(this.download.origin))
+			this.options.blacklistDomains.includes(Utils.getDomain(this.download.origin))
 		){
 			return true;
 		}
