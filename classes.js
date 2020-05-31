@@ -40,40 +40,20 @@ class DlGrabApp {
 		this.downloadDialogs = {};
 		// runtime data
 		this.runtime = {};
-		//todo: do we need this anymore?
-		this.runtime.ready = false;
+
 		this.applyOptions(options);
 	}
 
 	applyOptions(options){
+
 		this.options = options;
 		//create a new list of downloads in case the downloas history size is changed in options
 		this.allDownloads = new FixedSizeMap(options.dlListSize, this.allDownloads.list);
 		//exclusion,inclusion,download lists
-		this.options.excludedExts = _getExtsFromList(options.excludedExts);
 		this.options.excludedMimes = _getMimesForExts(this.options.excludedExts);
-		this.options.includedExts = _getExtsFromList(options.includedExts);
 		this.options.includedMimes = _getMimesForExts(this.options.includedExts);
-		this.options.forcedExts = _getExtsFromList(options.forcedExts);
 		this.options.forcedMimes = _getMimesForExts(this.options.forcedExts);
-		this.options.blacklistDomains = _getValuesFromList(this.options.blacklistDomains);
 
-		function _getExtsFromList(extList){
-			if(!extList){
-				return [];
-			}
-			let extsArr = [];
-			//remove spaces
-			extList = extList.replace(/\s/g, '');
-			for(let ext of extList.split(',')){
-				//remove dot in case people have put dots in ext list
-				if(ext.startsWith('.')){
-					ext = ext.substr(1);
-				}
-				extsArr.push(ext);
-			}
-			return extsArr;
-		}
 		function _getMimesForExts(extsArr){
 			if(!extsArr){
 				return [];
@@ -87,12 +67,7 @@ class DlGrabApp {
 			}
 			return mimesArr;
 		}
-		function _getValuesFromList(list){
-			if(!list){return [];}
-			//remove spaces
-			list = list.replace(/\s/g, '');
-			return list.split(',');
-		}
+
 	}
 
 	/**
@@ -800,7 +775,7 @@ class FixedSizeMap {
 		let size = keys.length;
 		if (targetSize < size) {
 			let diff = size - targetSize;
-			for (i = 0; i < diff; i++) {
+			for (let i = 0; i < diff; i++) {
 				let k = keys[i];
 				delete listData[k];
 			}

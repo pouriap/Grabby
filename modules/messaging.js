@@ -10,6 +10,8 @@ DG.Messaging = {
 	TYP_INTERCEPT_DL: 'intercept-dl',
 	TYP_DOWNLOAD: 'download',
 	TYP_DL_REPORTED: 'dl-reported',
+	TYP_LOAD_OPTIONS: 'load-options',
+	TYP_GET_OPTS_DATA: 'get-options-data',
 
 	/**
 	 * 	
@@ -30,9 +32,16 @@ DG.Messaging = {
 		var _this = DG.Messaging;
 
 		if(message.type === _this.TYP_SAVE_OPTIONS){
+			DG.Options.save(message.options);
 			//set options
 			_this.app.applyOptions(message.options);
 			console.log('saved options: ', _this.app.options);
+		}
+		else if(message.type === _this.TYP_LOAD_OPTIONS){
+			return DG.Options.loadWithData();
+		}
+		else if(message.type === _this.TYP_GET_OPTS_DATA){
+			return Promise.resolve(DG.Options.optionsData);
 		}
 		else if(message.type === _this.TYP_CLEAR_LIST){
 			_this.app.allDownloads = new FixedSizeMap(_this.app.options.dlListSize);

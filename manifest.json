@@ -61,6 +61,7 @@
 			"modules/native_utils.js",
 			"modules/context_menu.js",
 			"modules/request_handling.js",
+			"modules/options.js",
 			"modules/messaging.js",
 			"options/default_options.js",
 			"background.js"

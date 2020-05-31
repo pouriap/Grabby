@@ -10,64 +10,7 @@
 
 	<div id="content" class="browser-style">
 
-		<form>
-
-			<div class="panel-formElements-item">
-				<label for="overrideDlDialog">Override Firefox's download dialog</label>
-				<input type="checkbox" id="overrideDlDialog" >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="playMediaInBrowser">Do not offer to download files that can be displayed inside browser (text, media and pdf)</label>
-				<input type="checkbox" id="playMediaInBrowser" >
-			</div>
-			
-			<div class="panel-formElements-item">
-				<label for="dlListSize">Number of items to keep in downloads history:</label>
-				<input type="text" id="dlListSize" >
-			</div>
-
-			<hr>
-
-			<div class="panel-formElements-item">
-				<label for="grabFilesLargerThanMB">Ignore files smaller than (MB):</label>
-				<input type="text" id="grabFilesLargerThanMB" >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="excludeWebFiles">Ignore common web files (images, fonts, etc.)</label>
-				<input type="checkbox" id="excludeWebFiles" >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="excludedExts">Ignore files with these extensions:</label>
-				<input type="text" id="excludedExts" placeholder="ext1,ext2,ext3,..." >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="includedExts">Detect files with these extensions as downloads:</label>
-				<input type="text" id="includedExts" placeholder="ext1,ext2,ext3,..." >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="forcedExts">Directly download files with these extensions with my default manager:</label>
-				<input type="text" id="forcedExts" placeholder="ext1,ext2,ext3,..." >
-			</div>
-
-			<div class="panel-formElements-item">
-				<label for="blacklistDomains">Do not grab from these domains:</label>
-				<input type="text" id="blacklistDomains" placeholder="example.com,example.org,..." >
-			</div>
-
-			<hr>
-
-			<div class="panel-formElements-item">
-				<label for="availableDMs">Default download manager</label>
-				<select id="availableDMs"></select>
-				<input type="hidden" id="defaultDM">
-			</div>
-
-			<br>
+		<form id="options-form">
 
 			<button class="browser-style" type="submit">Save</button>
 			

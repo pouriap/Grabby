@@ -12,6 +12,7 @@
 //todo: show location bar icon when media is grabbed in page
 //todo: script injection needed for grab selection/all doens't work on addon pages (Video Downloader Prime)
 //todo: add option to automatically download with default DM is size is bigger than X
+//todo: reduce duplicates in download list (find out if it's the same file using size? etc.)
 
 var DEBUG = true;
 
@@ -20,15 +21,21 @@ var DEBUG = true;
 	console.log('initializing app...');
 
 	try{
-		let options = await browser.storage.local.get(defaultOptions);
+
+		await DG.NativeUtils.initialize();
+		let availableDMs = await DG.NativeUtils.getAvailableDMs();
+		DG.Options.initialize(availableDMs);
+		let options = await DG.Options.loadProcessed();
 		let app = new DlGrabApp(options);
+		app.runtime.availableDMs = availableDMs;
 
 		//todo: fix this
 		let res = await browser.storage.local.get({blacklist: []});
-		app.runtime.blacklist = res.blacklist;		
+		app.runtime.blacklist = res.blacklist;
 
-		await DG.NativeUtils.initialize();
-		app.runtime.availableDMs = await DG.NativeUtils.getAvailableDMs();
+		//todo: bejaye inke hame ina global bashan har kodoom ye class bashan va tooye contructor
+		//har kodoom az oonaye dige ro ke ina behesh dipendent hastan bedim
+		//injoori mifahmim kodoom be kodoom dependent hast va tartib kharab nemishe
 		DG.Messaging.initialize(app);
 		DG.RequestHandling.initialize(app);
 		DG.ContextMenu.initialize(app);

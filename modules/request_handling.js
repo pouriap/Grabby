@@ -366,16 +366,6 @@ DG.RequestHandling = {
 
 		_this.app.addToAllDownloads(download);
 
-		if(download.act === ReqFilter.ACT_GRAB_SILENT){
-			browser.tabs.query({url: download.origin}).then((tabs)=>{
-				let tabId = (tabs[0])? tabs[0].id : -1;
-				if(tabId>1){
-					browser.pageAction.show(tabId);
-				}
-			})
-			return;
-		}
-
 		if(download.act === ReqFilter.ACT_FORCE_DL){
 			let dmName = _this.app.options.defaultDM || _this.app.runtime.availableDMs[0];
 			DG.NativeUtils.downloadSingle(dmName, download);
