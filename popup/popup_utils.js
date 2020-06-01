@@ -35,7 +35,7 @@ async function getBackgroundData(){
 		reqDetails = downloadJSON.reqDetails;
 		resDetails = downloadJSON.resDetails;
 		let download = new Download(reqDetails, resDetails);
-		download.grabReason = downloadJSON.grabReason;
+		download.classReason = downloadJSON.classReason;
 		download.reported = downloadJSON.reported;
 		download.action = downloadJSON.act;
 		download.category = downloadJSON.cat;

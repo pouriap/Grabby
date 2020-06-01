@@ -46,8 +46,8 @@ window.addEventListener("beforeunload", function() {
 });
 
 function onGot() { 
-	let grabReason = (DEBUG)? ' ('+popupContext.selectedDl.grabReason+')' : '';
-	document.getElementById("filename").innerHTML = popupContext.selectedDl.getFilename() + grabReason;
+	let classReason = (DEBUG)? ' ('+popupContext.selectedDl.classReason+')' : '';
+	document.getElementById("filename").innerHTML = popupContext.selectedDl.getFilename() + classReason;
 	document.getElementById("filename").setAttribute("title", popupContext.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 
 		(popupContext.selectedDl.getSize() !== "unknown")? filesize(popupContext.selectedDl.getSize()) : popupContext.selectedDl.getSize();

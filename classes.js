@@ -753,6 +753,12 @@ ReqFilter.CAT_FILE_DOC = 'document file';
 ReqFilter.CAT_FILE_BIN = 'binary file';
 ReqFilter.CAT_UKNOWN = 'unknown';
 
+//classes of requests
+ReqFilter.CLS_INLINE_WEB_RES = 'web res';
+ReqFilter.CLS_INLINE_MEDIA = 'web media';
+ReqFilter.CLS_WEB_OTHER = 'web page';
+ReqFilter.CLS_DOWNLOAD = 'download';
+
 //types of action
 ReqFilter.ACT_GRAB = 'grab';
 ReqFilter.ACT_IGNORE = 'ignore';

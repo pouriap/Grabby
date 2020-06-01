@@ -101,11 +101,12 @@ class RequestHandling {
 
 		let filter = new ReqFilter(download, app.options);
 
-		//if this request does not have an explicit action (user-specified in options)
-		if(!_this.getExplicitAction(download, filter, app)){
+		if(!_this.isIgnored(download, filter, app)){
 			//first determine its category
 			_this.determineCategory(download, filter);
-			//then determine the action based on what category it is
+			//then group similar categories together into a class
+			_this.determineClass(download, filter);
+			//then determine the action based on what class the request is
 			_this.determineAction(download, filter, app);
 		}
 
@@ -131,7 +132,7 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	getExplicitAction(download, filter, app){
+	isIgnored(download, filter, app){
 
 		//ain't no downloads in these (hopefully)
 		if(
@@ -145,31 +146,11 @@ class RequestHandling {
 			return true;
 		}
 
-
-		//todo: when we include a file, for example .js, then even web resource files of that
-		//type are grabbed even if we have the option checked for not downloading web resources
-
-		//most important is forced
-		if(filter.isForcedInOpts()){
-			download.grabReason = 'opts-force';
-			download.act = ReqFilter.ACT_FORCE_DL;
-			return true;
-		}
-
-		//then inclusions
-		if(filter.isIncludedInOpts()){
-			download.grabReason = 'opts-include';
-			download.act = ReqFilter.ACT_GRAB;
-			return true;
-		}
-
-		//then exclusions
 		if(filter.isExcludedInOpts()){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
 
-		//then size
 		if(filter.isSizeBlocked()){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;		
@@ -271,44 +252,34 @@ class RequestHandling {
 	 * Determines what action should be done about a request 
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
-	 * @param {DlGrabApp} app 
 	 */
-	determineAction(download, filter, app){
+	determineClass(download, filter){
 
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
-			if(app.options.excludeWebFiles){
-				download.act = ReqFilter.ACT_IGNORE;
-			}
-			else{
-				download.grabReason = 'api web res not excluded';
-				download.act = ReqFilter.ACT_GRAB_SILENT;
-			}		
+			download.classReason = 'web res api';
+			download.class = ReqFilter.CLS_INLINE_WEB_RES;
 		}
 		else if(download.cat === ReqFilter.CAT_OTHERWEB_API){
-			download.act = ReqFilter.ACT_IGNORE;
+			download.classReason = 'other web api';
+			download.class = ReqFilter.CLS_WEB_OTHER;
 		}
 		else if(download.cat === ReqFilter.CAT_MEDIA_API){
-			//should we show download dialog for these?
-			download.grabReason = 'media type';
-			download.act = ReqFilter.ACT_GRAB_SILENT;
+			download.classReason = 'media api';
+			download.class = ReqFilter.CLS_INLINE_MEDIA;
 		}
 
 		//these aren't from API so we aren't so sure about them
 		else if(download.cat === ReqFilter.CAT_OTHER_WEB){
-			download.act = ReqFilter.ACT_IGNORE;
+			download.classReason = 'other web';
+			download.class = ReqFilter.CLS_WEB_OTHER;
 		}
 		else if(filter.hasAttachment()){
-			download.grabReason = 'attachment';
-			download.act = ReqFilter.ACT_GRAB;
+			download.classReason = 'attachment';
+			download.class = ReqFilter.CLS_DOWNLOAD;
 		}
 		else if(download.cat === ReqFilter.CAT_WEB_RES){
-			if(app.options.excludeWebFiles){
-				download.act = ReqFilter.ACT_IGNORE;
-			}
-			else{
-				download.grabReason = 'web res not excluded'
-				download.act = ReqFilter.ACT_GRAB_SILENT;
-			}		
+			download.classReason = 'web res';
+			download.class = ReqFilter.CLS_INLINE_WEB_RES;
 		}
 		else if(
 			download.cat === ReqFilter.CAT_FILE_MEDIA ||
@@ -316,8 +287,8 @@ class RequestHandling {
 			download.cat === ReqFilter.CAT_FILE_DOC ||
 			download.cat === ReqFilter.CAT_FILE_BIN
 		){
-			download.grabReason = 'known file type';
-			download.act = ReqFilter.ACT_GRAB;
+			download.classReason = 'known file type';
+			download.class = ReqFilter.CLS_DOWNLOAD;
 		}
 
 		//as a last resort if the request does not have documentUrl or originUrl and 
@@ -328,16 +299,57 @@ class RequestHandling {
 			(!download.resDetails.documentUrl || !download.resDetails.originUrl) &&
 			download.getFileExtension() !== 'unknown'
 		){
-			download.grabReason = 'has extension with no document/origin';
-			download.act = ReqFilter.ACT_GRAB;
+			download.classReason = 'extension with no document/origin'
+			download.class = ReqFilter.CLS_DOWNLOAD;
 		}
 
-		if(
-			!filter.hasAttachment() &&
-			filter.isDisplayedInBrowser() && 
-			download.act === ReqFilter.ACT_GRAB
-		){
+	}
+
+	/**
+	 * Determines what action should be done about a request 
+	 * @param {Download} download 
+	 * @param {ReqFilter} filter 
+	 * @param {DlGrabApp} app 
+	 */
+	determineAction(download, filter, app){
+
+		if(download.class === ReqFilter.CLS_WEB_OTHER){
+			download.act = ReqFilter.ACT_IGNORE;
+		}
+
+		if(download.class === ReqFilter.CLS_INLINE_WEB_RES){
+			if(app.options.excludeWebFiles){
+				download.act = ReqFilter.ACT_IGNORE;
+			}
+			else{
+				download.act = ReqFilter.ACT_GRAB_SILENT;
+			}
+		}
+
+		else if(download.class === ReqFilter.CLS_INLINE_MEDIA){
 			download.act = ReqFilter.ACT_GRAB_SILENT;
+		}
+
+		else if(download.class === ReqFilter.CLS_DOWNLOAD){
+			if( !filter.hasAttachment() && filter.isDisplayedInBrowser() ){
+				download.act = ReqFilter.ACT_GRAB_SILENT;
+			}
+			else{
+				download.act = ReqFilter.ACT_GRAB;
+			}
+		}
+
+		//overrides
+		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isForcedInOpts()){
+			download.classReason = 'opts-force';
+			download.act = ReqFilter.ACT_FORCE_DL;
+			return true;
+		}
+
+		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isIncludedInOpts()){
+			download.classReason = 'opts-include';
+			download.act = ReqFilter.ACT_GRAB;
+			return true;
 		}
 
 	}
