@@ -30,7 +30,7 @@ class Messaging {
 			console.log('saved options: ', app.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
-			return opMan.loadWithData();
+			return opMan.loadForUI();
 		}
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
 			app.allDownloads = new FixedSizeMap(app.options.dlListSize);

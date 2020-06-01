@@ -4,22 +4,32 @@ class Options {
 		this.availableDMs = availableDMs;
 	}
 
-	loadWithData(){
+	loadForUI(){
 		return new Promise(async (resolve) => {
 			let options = await browser.storage.local.get(Options.getDefaults());
 			for(let optName of Object.keys(options)){
 				let optionVal = options[optName];
 				let optionData = Options.optionsData[optName];
 				options[optName] = {};
+				Object.assign(options[optName], optionData);
 				options[optName].name = optName;
-				options[optName].type = optionData.type;
-				options[optName].desc = optionData.desc;
 				options[optName].value = optionVal;
 				options[optName].extra = (optionData.extra)?
-					await this.getExtra(optionVal, optionData.extra) : '';
+					await this._getExtra(optionVal, optionData.extra) : '';
 			}
 			resolve(options);
 		});
+	}
+
+	_getExtra(optionVal, extra){
+		switch(extra){
+			case 'get-available-dms':
+				return this.availableDMs;
+		}
+	}
+
+	getDefaultDM(){
+
 	}
 
 	static load(){
@@ -30,14 +40,6 @@ class Options {
 		browser.storage.local.set(options);
 	}
 
-	getExtra(optionVal, extra){
-		switch(extra){
-			case 'get-available-dms':
-				return this.availableDMs;
-		}
-	}
-
-
 	static getDefaults(){
 		let defaultOptions = {};
 		for(let optionName of Object.keys(Options.optionsData)){
@@ -45,18 +47,28 @@ class Options {
 		}
 		return defaultOptions;
 	}
-	
-
 
 }
 
 Options.optionsData= {
 
+	overrideDlDialog: {
+		type: 'checkbox',
+		default: true,
+		desc: "Override Firefox's download dialog",
+	},
+	playMediaInBrowser: {
+		type: 'checkbox',
+		default: true,
+		desc: "Do not offer to download files that can be displayed inside browser (text, media and pdf)",
+	},
 	dlListSize: {
 		type: 'textbox',
 		default: '20',
 		desc: 'Number of items to keep in downloads history:',
+		endsection: true,
 	},
+
 	grabFilesLargerThanMB: {
 		type: 'textbox',
 		default: '0',
@@ -72,35 +84,31 @@ Options.optionsData= {
 		default: '',
 		desc: "Ignore files with these extensions:",
 		process: 'get-exts-from-list',
+		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	includedExts: {
 		type: 'textbox',
 		default: '',
 		desc: "Detect files with these extensions as downloads:",
 		process: 'get-exts-from-list',
+		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	forcedExts: {
 		type: 'textbox',
 		default: '',
 		desc: "Directly download files with these extensions with my default manager:",
 		process: 'get-exts-from-list',
+		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	blacklistDomains: {
 		type: 'textbox',
 		default: '',
 		desc: "Do not grab from these domains:",
 		process: 'get-vals-from-list',
+		attrs: [{name: 'placeholder', value: 'example.com,example.org,...'}],
+		endsection: true,
 	},
-	overrideDlDialog: {
-		type: 'checkbox',
-		default: true,
-		desc: "Override Firefox's download dialog",
-	},
-	playMediaInBrowser: {
-		type: 'checkbox',
-		default: true,
-		desc: "Do not offer to download files that can be displayed inside browser (text, media and pdf)",
-	},
+
 	defaultDM: {
 		type: 'dropdown',
 		default: '',

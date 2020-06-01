@@ -53,20 +53,20 @@ async function loadOptions() {
 		let optionDiv = document.createElement('div');
 		optionDiv.setAttribute('class', 'panel-formElements-item');
 		optionDiv.appendChild(createLabel(option));
-		switch (option.type) {
-			case 'textbox':
-				optionDiv.appendChild(createTextBox(option));
-				break;
-			case 'checkbox':
-				optionDiv.appendChild(createCheckBox(option));
-				break;
-			case 'dropdown':
-				optionDiv.appendChild(createDropDown(option));
-				break;
-		}
+		optionDiv.appendChild(createElement(option));
 		document.getElementById('options-form').appendChild(optionDiv);
+		if(option.endsection){
+			let hr = document.createElement('hr');
+			document.getElementById('options-form').appendChild(hr);
+		}
 	}
 
+	let btn = document.createElement('button');
+	btn.setAttribute('class', 'browser-style');
+	btn.setAttribute('type', 'submit');
+	btn.innerHTML = "Save";
+	document.getElementById('options-form').appendChild(btn);
+	
 }
 
 function createLabel(option){
@@ -74,6 +74,28 @@ function createLabel(option){
 	label.setAttribute("for", option.name);
 	label.innerHTML = option.desc;
 	return label;
+}
+
+function createElement(option){
+	var e;
+	switch (option.type) {
+		case 'textbox':
+			e = createTextBox(option);
+			break;
+		case 'checkbox':
+			e = createCheckBox(option);
+			break;
+		case 'dropdown':
+			e = createDropDown(option);
+			break;
+	}
+	e.setAttribute("id", option.name);
+	if(option.attrs){
+		for(let attr of option.attrs){
+			e.setAttribute(attr.name, attr.value);
+		}
+	}
+	return e;
 }
 
 function createCheckBox(option){
