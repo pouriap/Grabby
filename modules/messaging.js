@@ -10,7 +10,9 @@ class Messaging {
 	}
 
 	init(){
-		browser.runtime.onMessage.addListener((msg)=>{return this.doOnMessage(msg, this.app, this.opMan)});
+		browser.runtime.onMessage.addListener(
+			(msg) => {return this.doOnMessage(msg, this.app, this.opMan)
+		});
 	}
 
 	 /**

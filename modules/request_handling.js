@@ -363,6 +363,7 @@ class RequestHandling {
 		}
 
 		if(download.act === ReqFilter.ACT_GRAB && app.options.overrideDlDialog){
+			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve){
 				download.resolve = resolve;
 				app.showDlDialog(download);

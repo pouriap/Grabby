@@ -4,21 +4,20 @@ class Options {
 		this.availableDMs = availableDMs;
 	}
 
-	loadForUI(){
-		return new Promise(async (resolve) => {
-			let options = await browser.storage.local.get(Options.getDefaults());
-			for(let optName of Object.keys(options)){
-				let optionVal = options[optName];
-				let optionData = Options.optionsData[optName];
-				options[optName] = {};
-				Object.assign(options[optName], optionData);
-				options[optName].name = optName;
-				options[optName].value = optionVal;
-				options[optName].extra = (optionData.extra)?
-					await this._getExtra(optionVal, optionData.extra) : '';
-			}
-			resolve(options);
-		});
+	async loadForUI(){
+		let options = await browser.storage.local.get(Options.getDefaults());
+		let uiOpts = {};
+		for(let optName in options){
+			let optionVal = options[optName];
+			let optionData = Options.optionsData[optName];
+			uiOpts[optName] = {};
+			Object.assign(uiOpts[optName], optionData);
+			uiOpts[optName].name = optName;
+			uiOpts[optName].value = optionVal;
+			uiOpts[optName].extra = (optionData.extra)?
+				await this._getExtra(optionVal, optionData.extra) : '';
+		}
+		return uiOpts;
 	}
 
 	_getExtra(optionVal, extra){
@@ -42,7 +41,7 @@ class Options {
 
 	static getDefaults(){
 		let defaultOptions = {};
-		for(let optionName of Object.keys(Options.optionsData)){
+		for(let optionName in Options.optionsData){
 			defaultOptions[optionName] = Options.optionsData[optionName].default;
 		}
 		return defaultOptions;

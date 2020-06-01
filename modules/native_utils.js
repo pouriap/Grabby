@@ -2,21 +2,17 @@
 
 class NativeUtils  {
 
-	init(){
-		return new Promise(async (resolve, reject) => {
-			let available = await this._isNativeClientAvailable();
-			if(available === false){
-				reject('Native client unavailable');
-				return;
-			}
-			//todo: remove in production
-			else if(available !== true){
-				reject(available);
-				return;
-			}
-			this._getNewPort();
-			resolve(true);
-		});
+	async init(){
+		let available = await this._isNativeClientAvailable();
+		if(available === false){
+			throw 'Native client unavailable';
+		}
+		//todo: remove in production
+		else if(available !== true){
+			throw available;
+		}
+		this._getNewPort();
+		return true;
 	}
 
 	//todo: move this inside initialize()?
@@ -63,34 +59,31 @@ class NativeUtils  {
 		NativeUtils.port = port;
 	}
 
-	getAvailableDMs(){
-		return new Promise(async (resolve) => {
-			try{
-
-				let message = {type: 'get_available_dms'};
-				let response = await browser.runtime.sendNativeMessage(NativeUtils.NATIVE_CLIENT_ID, message);
-	
-				if(response.type === 'available_dms'){
-					let availableDMs = response.availableDMs;
-					console.log('available DMs: ', availableDMs);
-					if(!availableDMs.length){
-						let options = {
-							type: "basic", 
-							title: "Download Grab", 
-							message: "ERROR: No download managers found on the system"
-						};
-						browser.notifications.create(options);
-					}
-					resolve(availableDMs);
+	async getAvailableDMs(){
+		try{
+			
+			let message = {type: 'get_available_dms'};
+			let response = await browser.runtime.sendNativeMessage(NativeUtils.NATIVE_CLIENT_ID, message);
+			if(response.type === 'available_dms'){
+				let availableDMs = response.availableDMs;
+				console.log('available DMs: ', availableDMs);
+				if(!availableDMs.length){
+					let options = {
+						type: "basic", 
+						title: "Download Grab", 
+						message: "ERROR: No download managers found on the system"
+					};
+					browser.notifications.create(options);
 				}
-				else{
-					resolve([]);
-				}
-
-			}catch(e){
-				resolve([]);
+				return availableDMs;
 			}
-		});
+			else{
+				return [];
+			}
+
+		}catch(e){
+			return [];
+		}
 	}
 
 	/**

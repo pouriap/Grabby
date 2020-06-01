@@ -13,7 +13,7 @@ async function saveOptions(e) {
 
 	let optionsToSave = {};
 
-	for(optionName of Object.keys(optionsData)){
+	for(optionName in optionsData){
 		let optionType = optionsData[optionName].type;
 		let e = document.getElementById(optionName);
 		if(!e){
@@ -48,7 +48,7 @@ async function loadOptions() {
 
 	console.log("got the options: ", currOptions);
 
-	for(let key of Object.keys(currOptions)){
+	for(let key in currOptions){
 		let option = currOptions[key];
 		let optionDiv = document.createElement('div');
 		optionDiv.setAttribute('class', 'panel-formElements-item');

@@ -47,12 +47,9 @@ class DlGrabApp {
 		this.runtime.availableDMs = availableDMs;
 	}
 
-	init(){
-		return new Promise(async (resolve)=>{
-			let options = await Options.load();
-			this.applyOptions(options);
-			resolve();
-		});
+	async init(){
+		let options = await Options.load();
+		this.applyOptions(options);
 	}
 
 	applyOptions(options){
@@ -233,13 +230,13 @@ class Download {
 				//first try filename*= because it takes precedence according to docs
 				let matches = disposition.match(regex1);
 				if(matches && matches[2]){
-					this.filename = matches[2];
+					this.filename = decodeURI(matches[2]);
 				}
 				//then look for filename=
 				else{
 					matches = disposition.match(regex2);
 					if(matches && matches[1]){
-						this.filename = matches[1];
+						this.filename = decodeURI(matches[1]);
 					}
 				}
 

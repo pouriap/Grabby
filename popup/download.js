@@ -33,8 +33,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 });
 
-//note that closing tab also cancels the download
-window.addEventListener("beforeunload", async function() {
+window.addEventListener("beforeunload", function() {
 	let downloadPageTabId = popupContext.selectedDl.reqDetails.tabId;
 	let message = {
 		type: Messaging.TYP_DL_DIALOG_CLOSING, 
@@ -56,9 +55,3 @@ function onGot() {
 	document.getElementById("output").style.display = 'none';
 	populateDMs();
 }
-
-//todo: get rid of these?
-function onError(error) {
-	console.log(`Error getting data from background: ${error}`);
-}
-
