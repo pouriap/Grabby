@@ -3,7 +3,7 @@
 	"manifest_version": 2,
 	"name": "Download Grab",
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.6.2a",
+	"version": "0.6.3a",
 	"author": "Pouria Pirhadi",
 
 	"permissions": [

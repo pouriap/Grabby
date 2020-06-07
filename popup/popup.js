@@ -52,7 +52,6 @@ function onGot() {
 		listItem.innerHTML = download.getFilename() + reason;
 
 		listItem.addEventListener("click", function(evt){
-
 			//todo: when you click a download and make some changes and then click another download 
 			// the same changes are still there because it's the same page
 			document.getElementById('action-report').setAttribute('class', 'action');
@@ -63,6 +62,19 @@ function onGot() {
 			console.log('item clicked: ', popupContext.selectedDl);
 			showDownloadDetails(popupContext.selectedDl);
 		});
+
+		//this is for getting the info we put in tests
+		if(DEBUG){
+			listItem.addEventListener("contextmenu", function(evt){
+				evt.preventDefault();
+				let hash = this.getAttribute("data-hash");
+				let dl = popupContext.allDownloads.get(hash);
+				let info = {};
+				info.reqDetails = dl.reqDetails;
+				info.resDetails = dl.resDetails;
+				console.log(JSON.stringify(info).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+			});
+		}
 
 		document.getElementById("downloads-list").appendChild(listItem);
 

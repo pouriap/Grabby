@@ -155,7 +155,7 @@ class NativeUtils  {
 		let message = {
 			type: 'download_all',
 			downloadItems : downloadItems,
-			originPageUrl : originPageUrl,
+			originPageUrl : originPageUrl || '',
 			originPageReferer : originPageReferer || '',
 			originPageCookies : originPageCookies || '',
 			dmName : dmName,
