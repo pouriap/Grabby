@@ -70,53 +70,29 @@ function observe(message, push, done) {
 		push(message);
 		done();
 	}
-	else if (message.type === 'download'){
-			
-		let url = message.url;
-		let referer = message.referer || '';
-		let cookies = message.cookies || '';
-		let dmName = message.dmName;
-		let filename = message.filename;
-		let postData = message.postData || '';
-		let originPageReferer = message.originPageReferer || '';
-		let originPageCookies = message.originPageCookies || '';
+	else if(message.type === 'download'){
+		
+		let job = message.job;
 
-		let header = `1;${dmName};0;;`;
-		let job = header + "\n"
-					+ referer + "\n"
-					+ url + "\n"
-					+ filename + "\n"
-					+ cookies + "\n"
-					+ postData + "\n"
-					+ originPageReferer + "\n"
-					+ originPageCookies + "\n"
-					+ "\n"	//extras
-					+ "\n";	//extras
-
-		doFlashGot(job, push);
-		done();
-
-	}
-	else if(message.type === 'download_all'){
-
-		let downloadItems = message.downloadItems;
-		let dmName = message.dmName;
-		let header = `${downloadItems.length};${dmName};0;;`;
-		let job = header + "\n"
-					+ message.originPageUrl + "\n";
-		for(let downloadItem of downloadItems){
-			job = job + downloadItem.url + "\n" 
-						+ downloadItem.description + "\n"
-						+ downloadItem.cookies + "\n"
-						+ "\n" //post data
+		let downloadsInfo = job.downloadsInfo;
+		let dmName = job.dmName;
+		let header = `${downloadsInfo.length};${dmName};0;;`;
+		
+		let jobText = header + "\n"
+					+ job.referer + "\n";
+		for(let downloadInfo of downloadsInfo){
+			jobText = jobText + downloadInfo.url + "\n" 
+						+ downloadInfo.desc + "\n"
+						+ downloadInfo.cookies + "\n"
+						+ downloadInfo.postData + "\n"
 		}
 
-		job = job + message.originPageReferer + "\n"
-					+ message.originPageCookies + "\n"
+		jobText = jobText + job.originPageReferer + "\n"
+					+ job.originPageCookies + "\n"
 					+ "\n" //extras
 					+ "\n" //estras
 
-		doFlashGot(job, push);
+		doFlashGot(jobText, push);
 		done();
 	}
 	else{

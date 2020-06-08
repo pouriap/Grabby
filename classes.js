@@ -1144,3 +1144,86 @@ var constants = {
 	}
 
 }
+
+class DownloadInfo{
+	constructor(url, desc, cookies, postData){
+		this.url = url || '';
+		this.desc = desc || '';
+		this.cookies = cookies || '';
+		this.postData = postData || '';
+	}
+}
+
+class DownloadJob{
+	
+	/**
+	 * 
+	 * @param {array} downloadsInfo 
+	 * @param {string} referer 
+	 * @param {string} originPageReferer 
+	 * @param {string} originPageCookies 
+	 * @param {string} dmName 
+	 */
+	constructor(downloadsInfo, referer, originPageReferer, originPageCookies, dmName){
+		this.downloadsInfo = downloadsInfo || '';
+		this.referer = referer || '';
+		this.originPageReferer = originPageReferer || '';
+		this.originPageCookies = originPageCookies || '';
+		this.dmName = dmName || '';
+	}
+
+	/**
+	 * 
+	 * @param {string} dmName 
+	 * @param {Download} download 
+	 */
+	static async getFromDownload(dmName, download){
+
+		let originPageCookies = await NativeUtils.getCookies(download.url);
+		let originPageReferer = '';
+		let originTabId = -1;
+
+		let tabs = await browser.tabs.query({url: download.origin});
+		originTabId = (tabs[0])? tabs[0].id : -1;
+		originPageReferer = await browser.tabs.executeScript(
+			originTabId, {code: 'document.referrer'}
+		);
+
+		let downloadInfo = new DownloadInfo(
+			download.url, 
+			download.getFilename(),
+			download.getHeader('cookie', 'request') || '',
+			download.reqDetails.postData
+		);
+
+		return new DownloadJob(
+			[downloadInfo],
+			download.getHeader('referer', 'request') || '',
+			originPageReferer || '',
+			originPageCookies || '',
+			dmName
+		);
+
+	}
+
+	static async getFromLinks(dmName, links, originPageUrl, originPageReferer){
+
+		let downloadsInfo = [];
+		let originPageCookies = (originPageUrl)? await NativeUtils.getCookies(originPageUrl) : '';
+		//get the cookies for each link and add it to all download items
+		for(let link of links){
+			if(!link.href){
+				continue
+			}
+			let href = link.href;
+			let description = link.description || '';
+			let linkCookies = await NativeUtils.getCookies(href) || '';
+			let downloadInfo = new DownloadInfo(href, description, linkCookies, '');
+			downloadsInfo.push(downloadInfo);
+		}
+
+		return new DownloadJob(downloadsInfo, originPageUrl, originPageReferer, originPageCookies, dmName);
+
+	}
+
+}

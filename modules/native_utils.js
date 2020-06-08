@@ -87,110 +87,26 @@ class NativeUtils  {
 	}
 
 	/**
-	 * Downloads a single Download with the specified download manager
-	 * @param {string} dmName name of dm to use
-	 * @param {Download} download 
+	 * 
+	 * @param {DownloadJob} job 
 	 */
-	static async downloadSingle(dmName, download){
-
-		if(!dmName){
-			return;
-		}
-
-		let originPageCookies = (download.getHost())? await NativeUtils.getCookies(download.getHost()) : '';
-		let originPageReferer = '';
-		let originTabId = -1;
-		try{
-			let tabs = await browser.tabs.query({url: download.origin});
-			originTabId = (tabs[0])? tabs[0].id : -1;
-			originPageReferer = await browser.tabs.executeScript(
-				originTabId, {code: 'document.referrer'}
-			);
-		}catch(e){
-			console.log('exec failed: ', e, ' \n in tab: ', originTabId);
-		}
+	static async download(job){
 
 		let message = {
 			type: 'download',
-			url : download.url,
-			referer : download.getHeader('referer', 'request') || '',
-			cookies : download.getHeader('cookie', 'request') || '',
-			originPageCookies: originPageCookies || '',
-			originPageReferer: originPageReferer || '',
-			dmName : dmName,
-			filename : download.getFilename(),
-			postData : download.reqDetails.postData
+			job: job
 		};
 
 		NativeUtils.port.postMessage(message);
-
 	}
 
-	static async downloadMultiple(dmName, links, originPageUrl, originPageReferer){
-
-		if(!dmName){
-			return;
+	static async getCookies(url){
+		let cookies = '';
+		let cookiesArr = await browser.cookies.getAll({url: url});
+		for(let cookie of cookiesArr){
+			cookies += `${cookie.name}=${cookie.value}; `;
 		}
-
-		let downloadItems = [];
-		let originPageDomain = (originPageUrl)? Utils.getDomain(originPageUrl) : '';
-		let originPageCookies = (originPageDomain)? await NativeUtils.getCookies(originPageDomain) : '';
-		//get the cookies for each link and add it to all download items
-		for(let link of links){
-			if(!link.href){
-				continue
-			}
-			let href = link.href;
-			let description = link.description || '';
-			let linkDomain = Utils.getDomain(href) || '';
-			let linkCookies = await NativeUtils.getCookies(linkDomain) || '';
-			let downloadItem = {
-				url: href,
-				description: description,
-				cookies: linkCookies
-			};
-			downloadItems.push(downloadItem);
-		}
-
-		let message = {
-			type: 'download_all',
-			downloadItems : downloadItems,
-			originPageUrl : originPageUrl || '',
-			originPageReferer : originPageReferer || '',
-			originPageCookies : originPageCookies || '',
-			dmName : dmName,
-		};
-
-		NativeUtils.port.postMessage(message);
-
-	}
-
-	static getCookies(domain){
-		return new Promise(async function(resolve){
-			let cookies = '';
-			//subdomain cookies, for example dl2.website.com
-			let domainCookies = await browser.cookies.getAll({domain: domain});
-			for(let cookie of domainCookies){
-				if(cookie.domain === domain){
-					cookies += `${cookie.name}=${cookie.value}; `;
-				}
-			}
-			//wildcard cookies, for example .website.com
-			let domainParts = domain.split('.').reverse();
-			let rootDomain = domainParts[1] + '.' + domainParts[0];
-			//return if we are not in a subdomain
-			if(rootDomain === domain){
-				resolve(cookies);
-				return;
-			}
-			let wildcardCookies = await browser.cookies.getAll({domain: `.${rootDomain}`});
-			for(let cookie of wildcardCookies){
-				if(cookie.domain === `.${rootDomain}`){
-					cookies += `${cookie.name}=${cookie.value}; `;
-				}
-			}
-			resolve(cookies);
-		});
+		return cookies;
 	}
 
 	doOnNativeMessage(message){

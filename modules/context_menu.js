@@ -83,16 +83,16 @@ class ContextMenu {
 		}
 
 		function downloadLinks(result){
-			let links = result.links;
-			let originPageUrl = result.originPageUrl;
-			let originPageReferer = result.originPageReferer;
-			NativeUtils.downloadMultiple(
-				defaultDM,
-				links,
-				originPageUrl,
-				originPageReferer,
-			);
+			DownloadJob.getFromLinks(
+				defaultDM, 
+				result.links, 
+				result.originPageUrl, 
+				result.originPageReferer
+			).then((job)=>{
+				NativeUtils.download(job);
+			});
 		}
+
 	}
 
 }

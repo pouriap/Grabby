@@ -371,7 +371,9 @@ class RequestHandling {
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){
 			let dmName = app.options.defaultDM || app.runtime.availableDMs[0];
-			NativeUtils.downloadSingle(dmName, download);
+			DownloadJob.getFromDownload(dmName, download).then((job)=>{
+				NativeUtils.download(job);
+			});
 			return {cancel: true};
 		}
 

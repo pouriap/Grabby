@@ -75,7 +75,9 @@ class Messaging {
 		}
 		else if(message.type === Messaging.TYP_DOWNLOAD){
 			let download = app.allDownloads.get(message.downloadHash);
-			NativeUtils.downloadSingle(message.dmName, download);
+			DownloadJob.getFromDownload(message.dmName, download).then((job)=>{
+				NativeUtils.download(job);
+			});
 		}
 		else if(message.type === Messaging.TYP_DL_REPORTED){
 			let download = app.allDownloads.get(message.downloadHash);
