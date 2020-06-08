@@ -20,4 +20,18 @@ class Utils {
 		return a.pathname;
 	}
 
+	/**
+	 * 		
+	 * @param {DownloadJob} job 
+	 */
+	static async performJob(job){
+		let browserDMs = await DMHelper.getAvailableDMs();
+		if(browserDMs.includes(job.dmName)){
+			DMHelper.dms[job.dmName].download(job);
+		}
+		else{
+			NativeUtils.download(job);
+		}
+	}
+
 }

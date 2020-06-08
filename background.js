@@ -30,6 +30,10 @@ var DEBUG = true;
 		await nativeUtils.init();
 
 		let availableDMs = await nativeUtils.getAvailableDMs();
+		let browserDms = await DMHelper.getAvailableDMs();
+		if(browserDms.length){
+			availableDMs.push(browserDms);
+		}
 
 		let opMan = new Options(availableDMs);
 

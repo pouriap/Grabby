@@ -90,7 +90,7 @@ class NativeUtils  {
 	 * 
 	 * @param {DownloadJob} job 
 	 */
-	static async download(job){
+	static download(job){
 
 		let message = {
 			type: 'download',

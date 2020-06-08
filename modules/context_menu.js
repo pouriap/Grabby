@@ -89,7 +89,7 @@ class ContextMenu {
 				result.originPageUrl, 
 				result.originPageReferer
 			).then((job)=>{
-				NativeUtils.download(job);
+				Utils.performJob(job);
 			});
 		}
 

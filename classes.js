@@ -1158,7 +1158,7 @@ class DownloadJob{
 	
 	/**
 	 * 
-	 * @param {array} downloadsInfo 
+	 * @param {DownloadInfo[]} downloadsInfo 
 	 * @param {string} referer 
 	 * @param {string} originPageReferer 
 	 * @param {string} originPageCookies 
