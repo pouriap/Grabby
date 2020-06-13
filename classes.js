@@ -1184,10 +1184,16 @@ class DownloadJob{
 		let originTabId = -1;
 
 		let tabs = await browser.tabs.query({url: download.origin});
-		originTabId = (tabs[0])? tabs[0].id : -1;
-		originPageReferer = await browser.tabs.executeScript(
-			originTabId, {code: 'document.referrer'}
-		);
+		//todo: store originpage referer and originpage cookies in download object
+		//todo: in popup context clone the download object properly so we won't have to add code for 
+		//every single property 
+		//if we have closed that tab(specially the case when downoading from side bar later)
+		if(tabs[0]){
+			originTabId = tabs[0].id;
+			originPageReferer = await browser.tabs.executeScript(
+				originTabId, {code: 'document.referrer'}
+			);
+		}
 
 		let downloadInfo = new DownloadInfo(
 			download.url, 
