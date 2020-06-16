@@ -1,10 +1,10 @@
 {
-
 	"manifest_version": 2,
 	"name": "Download Grab",
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.7.1a",
+	"version": "0.11.0a",
 	"author": "Pouria Pirhadi",
+	"homepage_url": "https://github.com/pouriap/Firefox-DownloadGrab",
 
 	"permissions": [
 		"webRequest",
@@ -20,10 +20,11 @@
 		"<all_urls>"
 	],
 
-	"applications": {
+	"browser_specific_settings": {
 		"gecko": {
 			"id": "download_grab@pouria.p",
-			"strict_min_version": "56.0"
+			"strict_min_version": "56.0",
+			"update_url": "https://dlgrab.my.to/updates.json"
 		}
 	},
 

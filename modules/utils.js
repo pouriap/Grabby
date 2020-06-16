@@ -20,6 +20,25 @@ class Utils {
 		return a.pathname;
 	}
 
+	static getFileName(url){
+		let path = Utils.getPath(url);
+		path = decodeURI(path);
+		if(path.slice(-1) === '/'){
+			path = path.slice(0, -1);
+		}
+		let filename = path.split('/').pop();
+		return (filename)? filename : '';
+	}
+
+	static getExtFromFileName(filename){
+		let chuncks = filename.split('.');
+		let ext = '';
+		if(chuncks.length > 1){
+			ext = chuncks[chuncks.length-1].toLowerCase();
+		}
+		return ext;
+	}
+
 	/**
 	 * 		
 	 * @param {DownloadJob} job 

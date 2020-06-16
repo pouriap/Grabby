@@ -3,5 +3,5 @@
 	"description": "Download Grab Native Host",
 	"type": "stdio",
 	"allowed_extensions": ["download_grab@pouria.p"],
-	"path": "DLGrabSpawner.exe"
+	"path": "run.bat"
 }

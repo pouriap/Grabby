@@ -243,12 +243,7 @@ class Download {
 			}
 			//use URL if content-disposition didn't provide a file name
 			if(this.filename === "unknown"){
-				let path = Utils.getPath(this.url);
-				path = decodeURI(path);
-				if(path.slice(-1) === '/'){
-					path = path.slice(0, -1);
-				}
-				var filename = path.split('/').pop();
+				let filename = Utils.getFileName(this.url);
 				if(filename){
 					this.filename = filename;
 				}
@@ -314,10 +309,9 @@ class Download {
 
 			this.fileExtension = "unknown";
 
-			let filename = this.getFilename();
-			let chuncks = filename.split('.');
-			if(chuncks.length > 1){
-				this.fileExtension = chuncks[chuncks.length-1].toLowerCase();
+			let ext = Utils.getExtFromFileName(this.getFilename());
+			if(ext){
+				this.fileExtension = ext;
 			}
 		}
 
@@ -1146,11 +1140,13 @@ var constants = {
 }
 
 class DownloadInfo{
-	constructor(url, desc, cookies, postData){
+	constructor(url, desc, cookies, postData, filename, extension){
 		this.url = url || '';
 		this.desc = desc || '';
 		this.cookies = cookies || '';
 		this.postData = postData || '';
+		this.filename = filename || '';
+		this.extension = extension || '';
 	}
 }
 
@@ -1169,6 +1165,7 @@ class DownloadJob{
 		this.referer = referer || '';
 		this.originPageReferer = originPageReferer || '';
 		this.originPageCookies = originPageCookies || '';
+		this.useragent = navigator.userAgent;
 		this.dmName = dmName || '';
 	}
 
@@ -1199,7 +1196,9 @@ class DownloadJob{
 			download.url, 
 			download.getFilename(),
 			download.getHeader('cookie', 'request') || '',
-			download.reqDetails.postData
+			download.reqDetails.postData,
+			download.getFilename(),
+			download.getFileExtension()
 		);
 
 		return new DownloadJob(
@@ -1224,7 +1223,9 @@ class DownloadJob{
 			let href = link.href;
 			let description = link.description || '';
 			let linkCookies = await NativeMessaging.getCookies(href) || '';
-			let downloadInfo = new DownloadInfo(href, description, linkCookies, '');
+			let filename = Utils.getFileName(href);
+			let extension = Utils.getExtFromFileName(filename);
+			let downloadInfo = new DownloadInfo(href, description, linkCookies, '', filename, extension);
 			downloadsInfo.push(downloadInfo);
 		}
 

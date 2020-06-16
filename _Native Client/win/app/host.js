@@ -85,12 +85,15 @@ function observe(message, push, done) {
 						+ downloadInfo.desc + "\n"
 						+ downloadInfo.cookies + "\n"
 						+ downloadInfo.postData + "\n"
+						+ downloadInfo.filename + "\n"
+						+ downloadInfo.extension + "\n"
 		}
 
 		jobText = jobText + job.originPageReferer + "\n"
 					+ job.originPageCookies + "\n"
 					+ "\n" //extras
 					+ "\n" //estras
+					+ job.useragent + "\n"
 
 		doFlashGot(jobText, push);
 		done();
@@ -119,6 +122,7 @@ function doFlashGot(job, push){
 		subprocess.unref();
 	}
 }
+
 /* message passing */
 var nativeMessage = require('./messaging');
 process.stdin
@@ -126,3 +130,8 @@ process.stdin
 	.pipe(new nativeMessage.Transform(observe))
 	.pipe(new nativeMessage.Output())
 	.pipe(process.stdout);
+
+
+function log(msg){
+	writeFileSync('log.txt', msg + "\n", {flag:'a'});
+}
