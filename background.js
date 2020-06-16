@@ -18,7 +18,7 @@ var DEBUG = true;
 
 //constructor faghat variable va init dashte bashim
 //this haye dakhele promise ha va callback ha check shavad 
-//chizhaii ke bayad static bashad check shavad mesle port dr NativeUtils
+//chizhaii ke bayad static bashad check shavad mesle port dr NativeMessaging
 
 (async () => {
 
@@ -26,10 +26,10 @@ var DEBUG = true;
 
 	try{
 
-		let nativeUtils = new NativeUtils();
-		await nativeUtils.init();
+		let nativeMsging = new NativeMessaging();
+		await nativeMsging.init();
 
-		let availableDMs = await nativeUtils.getAvailableDMs();
+		let availableDMs = await nativeMsging.getAvailableDMs();
 		let browserDms = await DMHelper.getAvailableDMs();
 		if(browserDms.length){
 			availableDMs.push(browserDms);

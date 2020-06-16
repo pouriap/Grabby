@@ -1179,7 +1179,7 @@ class DownloadJob{
 	 */
 	static async getFromDownload(dmName, download){
 
-		let originPageCookies = await NativeUtils.getCookies(download.url);
+		let originPageCookies = await NativeMessaging.getCookies(download.url);
 		let originPageReferer = '';
 		let originTabId = -1;
 
@@ -1215,7 +1215,7 @@ class DownloadJob{
 	static async getFromLinks(dmName, links, originPageUrl, originPageReferer){
 
 		let downloadsInfo = [];
-		let originPageCookies = (originPageUrl)? await NativeUtils.getCookies(originPageUrl) : '';
+		let originPageCookies = (originPageUrl)? await NativeMessaging.getCookies(originPageUrl) : '';
 		//get the cookies for each link and add it to all download items
 		for(let link of links){
 			if(!link.href){
@@ -1223,7 +1223,7 @@ class DownloadJob{
 			}
 			let href = link.href;
 			let description = link.description || '';
-			let linkCookies = await NativeUtils.getCookies(href) || '';
+			let linkCookies = await NativeMessaging.getCookies(href) || '';
 			let downloadInfo = new DownloadInfo(href, description, linkCookies, '');
 			downloadsInfo.push(downloadInfo);
 		}

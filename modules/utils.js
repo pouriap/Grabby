@@ -30,7 +30,7 @@ class Utils {
 			DMHelper.dms[job.dmName].download(job);
 		}
 		else{
-			NativeUtils.download(job);
+			NativeMessaging.download(job);
 		}
 	}
 

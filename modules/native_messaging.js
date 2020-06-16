@@ -1,6 +1,6 @@
 //todo: check if port is connected when we want to send a message
 
-class NativeUtils  {
+class NativeMessaging  {
 
 	async init(){
 		let available = await this._isNativeClientAvailable();
@@ -19,7 +19,7 @@ class NativeUtils  {
 	_isNativeClientAvailable(){
 		return new Promise((resolve) => {
 			try{
-				let port = browser.runtime.connectNative(NativeUtils.NATIVE_CLIENT_ID);
+				let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
 				port.onMessage.addListener((response) => {
 					port.disconnect();
 					if(response.type === 'native_client_available'){
@@ -49,21 +49,21 @@ class NativeUtils  {
 	}
 
 	_getNewPort(){
-		let port = browser.runtime.connectNative(NativeUtils.NATIVE_CLIENT_ID);
+		let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
 		port.onMessage.addListener(this.doOnNativeMessage);
 		port.onDisconnect.addListener((d) => {
 			console.error("port disconnected");
 			console.error("disconnect data: ", JSON.stringify(d));
 			this._getNewPort();
 		});
-		NativeUtils.port = port;
+		NativeMessaging.port = port;
 	}
 
 	async getAvailableDMs(){
 		try{
 			
 			let message = {type: 'get_available_dms'};
-			let response = await browser.runtime.sendNativeMessage(NativeUtils.NATIVE_CLIENT_ID, message);
+			let response = await browser.runtime.sendNativeMessage(NativeMessaging.NATIVE_CLIENT_ID, message);
 			if(response.type === 'available_dms'){
 				let availableDMs = response.availableDMs;
 				console.log('available DMs: ', availableDMs);
@@ -97,7 +97,7 @@ class NativeUtils  {
 			job: job
 		};
 
-		NativeUtils.port.postMessage(message);
+		NativeMessaging.port.postMessage(message);
 	}
 
 	static async getCookies(url){
@@ -132,5 +132,5 @@ class NativeUtils  {
 
 }
 
-NativeUtils.NATIVE_CLIENT_ID = 'download.grab.pouriap';
-NativeUtils.port = null;
+NativeMessaging.NATIVE_CLIENT_ID = 'download.grab.pouriap';
+NativeMessaging.port = null;

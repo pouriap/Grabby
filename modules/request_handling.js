@@ -86,7 +86,7 @@ class RequestHandling {
 	 */
 	doOnHeadersReceived(details, app, _this) {
 
-		//console.log("receiving: ", details);
+		console.log("receiving: ", details);
 
 		let requestId = details.requestId;
 		let requestOfThisResponse = app.allRequests.get(requestId);

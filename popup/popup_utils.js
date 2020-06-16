@@ -166,7 +166,7 @@ function downloadWithFirefox(download) {
 /**
  * @param {Download} download 
  */
-function reportDownload(download, source){
+async function reportDownload(download, source){
 
 	setActionEnabled(document.getElementById("action-report"), false);
 
@@ -192,6 +192,7 @@ function reportDownload(download, source){
 
 	//add stuff we need
 	reportData._options = popupContext.appJSON.options;
+	reportData._version = (await browser.management.getSelf()).version;
 	reportData._reportSource = source;
 
 	//stringify
