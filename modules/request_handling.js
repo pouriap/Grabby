@@ -186,7 +186,7 @@ class RequestHandling {
 		}
 
 		/**
-		 * then use mimes because mime is more certain than extension
+		 * then use mimes because mime is more certain than extension except binary mimes
 		 */
 		if(filter.isMimeWebRes()){
 			download.cat = ReqFilter.CAT_WEB_RES;

@@ -11,8 +11,10 @@
 //todo: add try/catch to all awaits
 //todo: show location bar icon when media is grabbed in page
 //todo: script injection needed for grab selection/all doens't work on addon pages (Video Downloader Prime)
-//todo: add option to automatically download with default DM is size is bigger than X
-//todo: reduce duplicates in download list (find out if it's the same file using size? etc.)
+//todo: add option to automatically download with default DM if size is bigger than X
+//todo: reduce duplicates in downloads history (find out if it's the same file using size? etc.)
+//todo: is blob and/or encrypted downloads possible to detect? Telegram/Mega/FF Send
+//todo: support wildcard in blacklisted domains
 
 var DEBUG = true;
 
