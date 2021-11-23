@@ -70,6 +70,57 @@ DMHelper.dms = {
 		
 		}
 
+	},
+
+	'JDownloader': {
+		host: "http://127.0.0.1:9666",
+
+		isAvailable: function(){
+
+			return new Promise((resolve)=>{
+				let xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState == XMLHttpRequest.DONE) {
+						if (xhr.status == 404 && xhr.responseText.includes('API_COMMAND_NOT_FOUND')) {
+							resolve(true);
+						}
+						else {
+							resolve(false);
+						}
+					}
+				};
+				xhr.open('POST', this.host, true);
+				xhr.send(null);
+			});
+		},
+
+		download: function(job){
+
+			let data = new URLSearchParams();
+			let urls = '';
+			let cookies = '';
+			let descriptions = '';
+			for(let dlInfo of job.downloadsInfo){
+				urls += dlInfo.url + "\r\n";
+				cookies += dlInfo.cookies + "\r\n";
+				descriptions += dlInfo.desc + "\r\n";
+			}
+			data.append('autostart',0);
+			data.append('package','DownloadGrab');
+			data.append('referer',job.referer);
+			data.append('urls',urls);
+			data.append('descriptions',descriptions);
+			data.append('cookies',cookies);
+			let emptyLine=Array(job.downloadsInfo.length).fill('').join("\r\n")
+			data.append('fnames',emptyLine);
+			data.append('httpauth',emptyLine);
+			data.append('source',browser.runtime.getURL(''))
+
+			let xhr = new XMLHttpRequest();
+			xhr.open('POST',this.host + "/flashgot",true);
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			xhr.send(data);
+		}
 	}
 
 }
