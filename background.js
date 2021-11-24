@@ -15,6 +15,10 @@
 //todo: reduce duplicates in downloads history (find out if it's the same file using size? etc.)
 //todo: is blob and/or encrypted downloads possible to detect? Telegram/Mega/FF Send
 //todo: support wildcard in blacklisted domains
+//todo: add more info to dl history
+//todo: add shortcuts
+//todo: option to show only downloads of this page/all dls
+//todo:  Ability to grab a NoScript blocked media item? 'therube' post on forum
 
 var DEBUG = true;
 
