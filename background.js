@@ -19,6 +19,7 @@
 //todo: add shortcuts
 //todo: option to show only downloads of this page/all dls
 //todo:  Ability to grab a NoScript blocked media item? 'therube' post on forum
+//todo: grab selection doesn't work properly here -> https://dl1.filmiokgzr.site/Cartoon/3/Kobayashi-san%20Chi%20no%20Maid%20Dragon/S2/480/
 
 var DEBUG = true;
 

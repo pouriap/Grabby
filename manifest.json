@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Download Grab",
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.11.1a",
+	"version": "0.11.2a",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Firefox-DownloadGrab",
 
