@@ -1189,7 +1189,7 @@ class DownloadJob{
 			originTabId = tabs[0].id;
 			originPageReferer = await browser.tabs.executeScript(
 				originTabId, {code: 'document.referrer'}
-			);
+			)[0];
 		}
 
 		let downloadInfo = new DownloadInfo(

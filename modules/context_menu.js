@@ -77,7 +77,7 @@ class ContextMenu {
 			result.links = [{href: info.linkUrl, description: info.linkText}];
 			if(tab){
 				result.originPageUrl = info.pageUrl;
-				result.originPageReferer = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'});
+				result.originPageReferer = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'})[0];
 			}
 			downloadLinks(result);
 		}
