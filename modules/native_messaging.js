@@ -22,6 +22,7 @@ class NativeMessaging  {
 				let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
 				port.onMessage.addListener((response) => {
 					port.disconnect();
+					//TODO: match these with what native host returns
 					if(response.type === 'native_client_available'){
 						resolve(true);
 					}
