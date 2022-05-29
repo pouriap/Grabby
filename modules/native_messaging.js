@@ -1,50 +1,45 @@
 //todo: check if port is connected when we want to send a message
 
-class NativeMessaging  {
+class NativeMessaging {
 
-	async init(){
-		let available = await this._isNativeClientAvailable();
-		if(available === false){
-			throw 'Native client unavailable';
-		}
-		//todo: remove in production
-		else if(available !== true){
-			throw available;
-		}
-		this._getNewPort();
-		return true;
-	}
-
-	//todo: move this inside initialize()?
-	_isNativeClientAvailable(){
-		return new Promise((resolve) => {
-			try{
+	init(){
+		return new Promise((resolve, reject) => {
+			try
+			{
 				let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
+
+				let disconnectListener = (port) => {
+					if(port.error){
+						reject(port.error.message);
+					}
+					reject("Couldn't initialize connection with native host");
+				}
+				port.onDisconnect.addListener(disconnectListener);
+
 				port.onMessage.addListener((response) => {
+					//onDisconnect does not seem to be called when we call disconnect() ourself
+					//but just to be sure we remove the listener here so that it won't be called 
+					//when we diconnect()
+					port.onDisconnect.removeListener(disconnectListener);
 					port.disconnect();
-					//TODO: match these with what native host returns
 					if(response.type === 'native_client_available'){
+						//arrow functions don't have their own this
+						this._getNewPort();
 						resolve(true);
 					}
-					else if(response.type === 'exception'){
-						resolve(response.error);
-					}
-					else if(response.type === 'object'){
-						resolve(JSON.stringify(response));
+					else if(response.type === 'error'){
+						reject(response.content);
 					}
 					else{
-						resolve(response);
+						reject("Unknown error from native host");
 					}
 				});
-				port.onDisconnect.addListener((p) => {
-					if(p.error){
-						resolve(p.error.message);
-					}
-				});
+
 				let message = {type: 'native_client_available'};
 				port.postMessage(message);
-			}catch(e){
-				resolve(e);
+			}
+			catch(e){
+				reject(e);
 			}
 		});
 	}
@@ -60,31 +55,27 @@ class NativeMessaging  {
 		NativeMessaging.port = port;
 	}
 
-	async getAvailableDMs(){
-		try{
-			
+	getAvailableDMs(){
+		return new Promise((resolve, reject) => {
 			let message = {type: 'get_available_dms'};
-			let response = await browser.runtime.sendNativeMessage(NativeMessaging.NATIVE_CLIENT_ID, message);
-			if(response.type === 'available_dms'){
-				let availableDMs = response.availableDMs;
-				console.log('available DMs: ', availableDMs);
-				if(!availableDMs.length){
-					let options = {
-						type: "basic", 
-						title: "Download Grab", 
-						message: "ERROR: No download managers found on the system"
-					};
-					browser.notifications.create(options);
+			let sending = browser.runtime.sendNativeMessage(NativeMessaging.NATIVE_CLIENT_ID, message);
+			sending.then((response) => {
+				if(response.type === 'available_dms'){
+					let availableDMs = response.availableDMs;
+					console.log('available DMs: ', availableDMs);
+					if(availableDMs.length > 0){
+						resolve(availableDMs);
+					}
+					reject("No download managers found on the system");
 				}
-				return availableDMs;
-			}
-			else{
-				return [];
-			}
+				else{
+					reject("Could not query available download managers")
+				}
+			}).catch((e) => {
+				reject(e);
+			});
 
-		}catch(e){
-			return [];
-		}
+		});
 	}
 
 	/**
@@ -101,6 +92,7 @@ class NativeMessaging  {
 		NativeMessaging.port.postMessage(message);
 	}
 
+	//TODO why is this here?
 	static async getCookies(url){
 		let cookies = '';
 		let cookiesArr = await browser.cookies.getAll({url: url});
@@ -125,6 +117,9 @@ class NativeMessaging  {
 		}
 		else if(message.type === 'exception'){
 			console.log(`%cexception in host.js: ${message.error}`, "color:green;font-weight:bold;");
+		}
+		else if(message.type === 'error'){
+			console.log(`%cError in native host: ${message.content}`, "color:red;font-weight:bold;");
 		}
 		else{
 			console.log(`%cexception in host.js: ${JSON.stringify(message)}`, "color:green;font-weight:bold;");

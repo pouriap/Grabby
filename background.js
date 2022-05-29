@@ -31,8 +31,8 @@ var DEBUG = true;
 
 	console.log('initializing app...');
 
-	try{
-
+	try
+	{
 		let nativeMsging = new NativeMessaging();
 		await nativeMsging.init();
 
@@ -65,7 +65,9 @@ var DEBUG = true;
 		cMenu.init();
 
 		console.log('app init successful');
-	}catch(e){
+	}
+	catch(e)
+	{
 		console.log('app could not be initialized: ', e);
 		//todo: remove notifications or make them look good
 		let options = {
