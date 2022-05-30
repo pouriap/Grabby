@@ -1,32 +1,36 @@
-//todo: check if port is connected when we want to send a message
-
 class NativeMessaging {
 
 	init(){
 		return new Promise((resolve, reject) => {
 			try
 			{
-				let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
+				let port = new properPort();
+				port.connect();
 
-				let disconnectListener = (port) => {
+				//temporary onDisconnect handler for initialization
+				port.setOnDisconnect((port) => {
 					if(port.error){
 						reject(port.error.message);
 					}
 					reject("Couldn't initialize connection with native host");
-				}
-				port.onDisconnect.addListener(disconnectListener);
+				});
 
-				port.onMessage.addListener((response) => {
-					//onDisconnect does not seem to be called when we call disconnect() ourself
-					//but just to be sure we remove the listener here so that it won't be called 
-					//when we diconnect()
-					port.onDisconnect.removeListener(disconnectListener);
-					port.disconnect();
-					if(response.type === 'native_client_available'){
-						//arrow functions don't have their own this
-						this._getNewPort();
+				//temporary onMessage handler for initialization
+				port.setOnMessage((response) => {
+					if(response.type === 'native_client_available')
+					{
+						//set the final handlers if native client is available and finish init
+						port.setOnMessage(this.doOnNativeMessage);
+						port.setOnDisconnect((port) => {
+							console.error("port disconnected");
+							console.error("disconnect data: ");
+							console.error(port);
+							port.connect();
+						});
+						NativeMessaging.port = port;
 						resolve(true);
 					}
+					//error stuff if init fails
 					else if(response.type === 'error'){
 						reject(response.content);
 					}
@@ -37,6 +41,7 @@ class NativeMessaging {
 
 				let message = {type: 'native_client_available'};
 				port.postMessage(message);
+				
 			}
 			catch(e){
 				reject(e);
@@ -44,20 +49,10 @@ class NativeMessaging {
 		});
 	}
 
-	_getNewPort(){
-		let port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
-		port.onMessage.addListener(this.doOnNativeMessage);
-		port.onDisconnect.addListener((d) => {
-			console.error("port disconnected");
-			console.error("disconnect data: ", JSON.stringify(d));
-			this._getNewPort();
-		});
-		NativeMessaging.port = port;
-	}
-
 	getAvailableDMs(){
 		return new Promise((resolve, reject) => {
 			let message = {type: 'get_available_dms'};
+			//TODO why aren't we using tha port?!
 			let sending = browser.runtime.sendNativeMessage(NativeMessaging.NATIVE_CLIENT_ID, message);
 			sending.then((response) => {
 				if(response.type === 'available_dms'){
@@ -130,3 +125,58 @@ class NativeMessaging {
 
 NativeMessaging.NATIVE_CLIENT_ID = 'download.grab.pouriap';
 NativeMessaging.port = null;
+
+function properPort(){
+	this._connected = false;
+	this._onDisconnectHook = null;
+	this._onMessageHook = null;
+}
+
+properPort.prototype.connect = function(){
+	try
+	{
+		this._port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
+		this._port.onDisconnect.addListener((port) => {
+			this._onDisconnect(port);
+		});
+		this._port.onMessage.addListener((message) => {
+			this._onMessage(message);
+		});
+		this._connected = true;
+	}
+	catch(e){
+		throw 'Failed to connect to port: ' + e.toString();
+	}
+}
+
+properPort.prototype._onDisconnect = function(port){
+	this._connected = false;
+	if(this._onDisconnectHook != null){
+		this._onDisconnectHook(port);
+	}
+}
+
+properPort.prototype._onMessage = function(message){
+	if(this._onMessageHook != null){
+		this._onMessageHook(message);
+	}
+}
+
+properPort.prototype.setOnDisconnect = function(onDisconnect){
+	this._onDisconnectHook = onDisconnect;
+}
+
+properPort.prototype.setOnMessage = function(onMessage){
+	this._onMessageHook = onMessage;
+}
+
+properPort.prototype.isConnected = function(){
+	return this._connected;
+}
+
+properPort.prototype.postMessage = function(msg){
+	if(!this.isConnected()){
+		this.connect();
+	}
+	this._port.postMessage(msg);
+}
