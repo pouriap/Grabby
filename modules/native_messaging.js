@@ -1,71 +1,69 @@
 class NativeMessaging {
 
 	constructor(){
-		this.availableDMs = [];
 	}
 
 	init()
 	{
 		this.port = new ProperPort();
-		//todo test what happens if connect fails
 		this.port.connect();
 
 		return new Promise((resolve, reject) => {
-			this._sendMsgWait(
-				{type: NativeMessaging.MSGTYP_NATIVE_AVAIL}, 
-				NativeMessaging.MSGTYP_NATIVE_AVAIL,
-				"Native app not available"
-			)
-			.then((response) => {
-				return this._sendMsgWait(
-					{type: NativeMessaging.MSGTYP_GET_AVAIL_DMS},
-					NativeMessaging.MSGTYP_AVAIL_DMS,
-					"Could not get available download managers from system"
-				);
-			})
-			.then((response) => {
-				this.availableDMs = response.availableDMs;
+
+			let timer = setTimeout(() => {
+				reject("Native app took too long to respond");
+			}, 5000);
+
+			this._getAvailDMs().then((response) => {
+				if(typeof response.availableDMs != 'object'){
+					reject("bad DM list from native app");
+				}
 				this.startListening();
 				NativeMessaging.port = this.port;
-				resolve();
+				resolve(response.availableDMs);
 			})
 			.catch((reason) => {
 				reject(reason);
+			})
+			//this will always be called regardless of what happened
+			.then(() => {
+				clearTimeout(timer);
+				console.log('timeout cleared');
 			});
 		});
 	}
 
-	_sendMsgWait(message, expectedType, errorMsg)
+	_getAvailDMs()
 	{
 		return new Promise((resolve, reject) => {
 			try
 			{
 				this.port.setOnDisconnect((_port) => {
 					if(_port.error){
-						reject(errorMsg + ": " + _port.error.message);
+						reject("Native app port disconnected: " + _port.error.message);
 					}
-					reject(errorMsg + ": port disconnected");
+					reject("Native app port disconnected");
 				});
 
 				this.port.setOnMessage((response) => {
 					if(typeof response != 'object'){
-						reject(errorMsg + ": bad response from native app");
+						reject("bad response from native app");
 					}
 					else if (typeof response.type === 'undefined'){
-						reject(errorMsg + ": bad response type from native app");
+						reject("no response type from native app");
 					}
 					else if(response.type === NativeMessaging.MSGTYP_HERR){
-						reject(errorMsg + ": native app error: " + response.content);
+						reject("native app error: " + response.content);
 					}
-					else if(response.type != expectedType){
-						reject(errorMsg + ": bad response type from native app");
+					else if(response.type != NativeMessaging.MSGTYP_AVAIL_DMS){
+						reject("bad response type from native app");
 					}
 					else{
 						resolve(response);
 					}
 				});
 
-				this.port.postMessage(message);
+				this.port.postMessage({type: NativeMessaging.MSGTYP_GET_AVAIL_DMS});
 				
 			}
 			catch(e){
@@ -139,8 +137,6 @@ class NativeMessaging {
 /** @type {ProperPort} */
 NativeMessaging.port = null;
 NativeMessaging.NATIVE_APP_ID = 'download.grab.pouriap';
-NativeMessaging.DLG_ADDON_ID = "download.grab.pouriap"
-NativeMessaging.MSGTYP_NATIVE_AVAIL = "native_app_available"
 NativeMessaging.MSGTYP_GET_AVAIL_DMS = "get_available_dms"
 NativeMessaging.MSGTYP_AVAIL_DMS = "available_dms"
 NativeMessaging.MSGTYP_DOWNLOAD = "download"

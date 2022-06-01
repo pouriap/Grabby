@@ -34,14 +34,17 @@ var DEBUG = true;
 	try
 	{
 		let nativeMsging = new NativeMessaging();
-		await nativeMsging.init();
-
+		
 		//get available DMs from flashgot
-		let availableDMs =  nativeMsging.availableDMs;
+		let availableDMs = await nativeMsging.init();
 		//these are TCP server based DMs that we check using the browser itself
 		let browserDms = await DMHelper.getAvailableDMs();
 		if(browserDms.length){
 			availableDMs.push(browserDms);
+		}
+
+		if(availableDMs.length == 0){
+			throw "No download managers found on system";
 		}
 
 		let opMan = new Options(availableDMs);
