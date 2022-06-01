@@ -1,46 +1,71 @@
 class NativeMessaging {
 
-	init(){
+	constructor(){
+		this.availableDMs = [];
+	}
+
+	init()
+	{
+		this.port = new ProperPort();
+		//todo test what happens if connect fails
+		this.port.connect();
+
+		return new Promise((resolve, reject) => {
+			this._sendMsgWait(
+				{type: NativeMessaging.MSGTYP_NATIVE_AVAIL}, 
+				NativeMessaging.MSGTYP_NATIVE_AVAIL,
+				"Native app not available"
+			)
+			.then((response) => {
+				return this._sendMsgWait(
+					{type: NativeMessaging.MSGTYP_GET_AVAIL_DMS},
+					NativeMessaging.MSGTYP_AVAIL_DMS,
+					"Could not get available download managers from system"
+				);
+			})
+			.then((response) => {
+				this.availableDMs = response.availableDMs;
+				this.startListening();
+				NativeMessaging.port = this.port;
+				resolve();
+			})
+			.catch((reason) => {
+				reject(reason);
+			});
+		});
+	}
+
+	_sendMsgWait(message, expectedType, errorMsg)
+	{
 		return new Promise((resolve, reject) => {
 			try
 			{
-				let port = new properPort();
-				port.connect();
-
-				//temporary onDisconnect handler for initialization
-				port.setOnDisconnect((port) => {
-					if(port.error){
-						reject(port.error.message);
+				this.port.setOnDisconnect((_port) => {
+					if(_port.error){
+						reject(errorMsg + ": " + _port.error.message);
 					}
-					reject("Couldn't initialize connection with native host");
+					reject(errorMsg + ": port disconnected");
 				});
 
-				//temporary onMessage handler for initialization
-				port.setOnMessage((response) => {
-					if(response.type === 'native_client_available')
-					{
-						//set the final handlers if native client is available and finish init
-						port.setOnMessage(this.doOnNativeMessage);
-						port.setOnDisconnect((port) => {
-							console.error("port disconnected");
-							console.error("disconnect data: ");
-							console.error(port);
-							port.connect();
-						});
-						NativeMessaging.port = port;
-						resolve(true);
+				this.port.setOnMessage((response) => {
+					if(typeof response != 'object'){
+						reject(errorMsg + ": bad response from native app");
 					}
-					//error stuff if init fails
-					else if(response.type === 'error'){
-						reject(response.content);
+					else if (typeof response.type === 'undefined'){
+						reject(errorMsg + ": bad response type from native app");
+					}
+					else if(response.type === NativeMessaging.MSGTYP_HERR){
+						reject(errorMsg + ": native app error: " + response.content);
+					}
+					else if(response.type != expectedType){
+						reject(errorMsg + ": bad response type from native app");
 					}
 					else{
-						reject("Unknown error from native host");
+						resolve(response);
 					}
 				});
 
-				let message = {type: 'native_client_available'};
-				port.postMessage(message);
+				this.port.postMessage(message);
 				
 			}
 			catch(e){
@@ -49,30 +74,18 @@ class NativeMessaging {
 		});
 	}
 
-	getAvailableDMs(){
-		return new Promise((resolve, reject) => {
-			let message = {type: 'get_available_dms'};
-			//TODO why aren't we using tha port?!
-			let sending = browser.runtime.sendNativeMessage(NativeMessaging.NATIVE_CLIENT_ID, message);
-			sending.then((response) => {
-				if(response.type === 'available_dms'){
-					let availableDMs = response.availableDMs;
-					console.log('available DMs: ', availableDMs);
-					if(availableDMs.length > 0){
-						resolve(availableDMs);
-					}
-					reject("No download managers found on the system");
-				}
-				else{
-					reject("Could not query available download managers")
-				}
-			}).catch((e) => {
-				reject(e);
-			});
-
+	startListening(){
+		//set the final handlers
+		this.port.setOnMessage(this.doOnNativeMessage);
+		this.port.setOnDisconnect((_port) => {
+			console.error("port disconnected");
+			console.error("disconnect data: ");
+			console.error(_port);
+			this.port.connect();
 		});
 	}
 
+	//todo make it non-static
 	/**
 	 * 
 	 * @param {DownloadJob} job 
@@ -114,7 +127,7 @@ class NativeMessaging {
 			console.log(`%cexception in host.js: ${message.error}`, "color:green;font-weight:bold;");
 		}
 		else if(message.type === 'error'){
-			console.log(`%cError in native host: ${message.content}`, "color:red;font-weight:bold;");
+			console.log(`%cError in native app: ${message.content}`, "color:red;font-weight:bold;");
 		}
 		else{
 			console.log(`%cexception in host.js: ${JSON.stringify(message)}`, "color:green;font-weight:bold;");
@@ -123,19 +136,34 @@ class NativeMessaging {
 
 }
 
-NativeMessaging.NATIVE_CLIENT_ID = 'download.grab.pouriap';
+/** @type {ProperPort} */
 NativeMessaging.port = null;
+NativeMessaging.NATIVE_APP_ID = 'download.grab.pouriap';
+NativeMessaging.DLG_ADDON_ID = "download.grab.pouriap"
+NativeMessaging.MSGTYP_NATIVE_AVAIL = "native_app_available"
+NativeMessaging.MSGTYP_GET_AVAIL_DMS = "get_available_dms"
+NativeMessaging.MSGTYP_AVAIL_DMS = "available_dms"
+NativeMessaging.MSGTYP_DOWNLOAD = "download"
+NativeMessaging.MSGTYP_YTDL_INFO = "ytdl_getinfo"
+NativeMessaging.MSGTYP_YTDL_AUD = "ytdl_download_audio"
+NativeMessaging.MSGTYP_YTDL_VID = "ytdl_download_video"
+NativeMessaging.MSGTYP_HERR = "app_error"
+NativeMessaging.MSGTYP_HMSG = "app_message"
+NativeMessaging.MSGTYP_HYTDLINFO = "app_ytdl_info"
+NativeMessaging.MSGTYP_HDLPROG = "app_download_progress"
+NativeMessaging.MSGTYP_UNSUPP = "unsupported"
 
-function properPort(){
+function ProperPort(){
 	this._connected = false;
 	this._onDisconnectHook = null;
 	this._onMessageHook = null;
 }
 
-properPort.prototype.connect = function(){
+//tries to connect to a native app and throws error if it fails
+ProperPort.prototype.connect = function(){
 	try
 	{
-		this._port = browser.runtime.connectNative(NativeMessaging.NATIVE_CLIENT_ID);
+		this._port = browser.runtime.connectNative(NativeMessaging.NATIVE_APP_ID);
 		this._port.onDisconnect.addListener((port) => {
 			this._onDisconnect(port);
 		});
@@ -149,32 +177,32 @@ properPort.prototype.connect = function(){
 	}
 }
 
-properPort.prototype._onDisconnect = function(port){
+ProperPort.prototype._onDisconnect = function(port){
 	this._connected = false;
 	if(this._onDisconnectHook != null){
 		this._onDisconnectHook(port);
 	}
 }
 
-properPort.prototype._onMessage = function(message){
+ProperPort.prototype._onMessage = function(message){
 	if(this._onMessageHook != null){
 		this._onMessageHook(message);
 	}
 }
 
-properPort.prototype.setOnDisconnect = function(onDisconnect){
+ProperPort.prototype.setOnDisconnect = function(onDisconnect){
 	this._onDisconnectHook = onDisconnect;
 }
 
-properPort.prototype.setOnMessage = function(onMessage){
+ProperPort.prototype.setOnMessage = function(onMessage){
 	this._onMessageHook = onMessage;
 }
 
-properPort.prototype.isConnected = function(){
+ProperPort.prototype.isConnected = function(){
 	return this._connected;
 }
 
-properPort.prototype.postMessage = function(msg){
+ProperPort.prototype.postMessage = function(msg){
 	if(!this.isConnected()){
 		this.connect();
 	}

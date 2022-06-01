@@ -37,7 +37,7 @@ var DEBUG = true;
 		await nativeMsging.init();
 
 		//get available DMs from flashgot
-		let availableDMs = await nativeMsging.getAvailableDMs();
+		let availableDMs =  nativeMsging.availableDMs;
 		//these are TCP server based DMs that we check using the browser itself
 		let browserDms = await DMHelper.getAvailableDMs();
 		if(browserDms.length){
@@ -73,7 +73,7 @@ var DEBUG = true;
 		let options = {
 			type: "basic", 
 			title: "Download Grab", 
-			message: "ERROR: initialization failed\nReason: " + e.toString(),
+			message: "Error: initialization failed\nReason: " + e.toString(),
 		};
 		browser.notifications.create(options);		
 		return;
