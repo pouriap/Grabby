@@ -1,35 +1,27 @@
 class RequestHandling {
 
-	/**
-	 * 	
-	 * @param {DlGrabApp} app 
-	 */
-	constructor(app){
-		this.app = app;
-	}
-
-	init(){
+	static init(){
 
 		browser.webRequest.onBeforeRequest.addListener(
-			(details) => { return this.doOnBeforeRequest(details, this.app) }, 
+			(details) => { return RequestHandling.doOnBeforeRequest(details) }, 
 			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			(details) => { return this.doOnBeforeSendHeaders(details, this.app) }, 
+			(details) => { return RequestHandling.doOnBeforeSendHeaders(details) }, 
 			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			(details) => { return this.doOnHeadersReceived(details, this.app, this) }, 
+			(details) => { return RequestHandling.doOnHeadersReceived(details) }, 
 			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details) => { return this.doOnCompleted(details, this.app) }, 
+			(details) => { return RequestHandling.doOnCompleted(details) }, 
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -40,7 +32,7 @@ class RequestHandling {
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	doOnBeforeRequest(details, app){
+	static doOnBeforeRequest(details){
 
 		let formDataArr = (details.method === "POST" && details.requestBody 
 					&& details.requestBody.formData)? details.requestBody.formData : [];
@@ -61,16 +53,16 @@ class RequestHandling {
 		let request = {};
 		request.postData = postData;
 
-		app.allRequests.put(details.requestId, request);
+		DLG.allRequests.put(details.requestId, request);
 	}
 
 	/**
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	doOnBeforeSendHeaders(details, app){
+	static doOnBeforeSendHeaders(details){
 		//store request details
-		let request = app.allRequests.get(details.requestId);
+		let request = DLG.allRequests.get(details.requestId);
 		request.details = details;
 		request.details.postData = request.postData;
 		delete request.postData;
@@ -81,48 +73,46 @@ class RequestHandling {
 	 * We create a download here if the response matches our criteria and add it 
 	 * to our list of downloads
 	 * @param {object} details 
-	 * @param {DlGrabApp} app 
-	 * @param {RequestHandling} _this 
 	 */
-	doOnHeadersReceived(details, app, _this) {
+	static doOnHeadersReceived(details) {
 
 		console.log("receiving: ", details);
 
 		let requestId = details.requestId;
-		let requestOfThisResponse = app.allRequests.get(requestId);
+		let requestOfThisResponse = DLG.allRequests.get(requestId);
 		
 		if(typeof requestOfThisResponse === 'undefined'){
 			return;
 		}
 
 		//creating a new download object because the original will be deleted from allRequests
-		//in doOnCompleted() after the request is completed or when app.allDownloads is full
+		//in doOnCompleted() after the request is completed or when DLG.allDownloads is full
 		let download = new Download(requestOfThisResponse.details, details);
 
-		let filter = new ReqFilter(download, app.options);
+		let filter = new ReqFilter(download, DLG.options);
 
-		if(!_this.isIgnored(download, filter, app)){
+		if(!RequestHandling.isIgnored(download, filter)){
 			//first determine its category
-			_this.determineCategory(download, filter);
+			RequestHandling.determineCategory(download, filter);
 			//then group similar categories together into a class
-			_this.determineClass(download, filter);
+			RequestHandling.determineClass(download, filter);
 			//then determine the action based on what class the request is
-			_this.determineAction(download, filter, app);
+			RequestHandling.determineAction(download, filter);
 		}
 
 		//perform said action
-		return _this.performAction(download, app);
+		return RequestHandling.performAction(download);
 		
 	}
 
 	/**
 	 * Runs once a request is completed
 	 */
-	doOnCompleted(details, app){
+	static doOnCompleted(details){
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
-		app.allRequests.remove(details.requestId);
+		DLG.allRequests.remove(details.requestId);
 	}
 
 
@@ -131,9 +121,8 @@ class RequestHandling {
 	 * then this function sets it
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
-	 * @param {DlGrabApp} app
 	 */
-	isIgnored(download, filter, app){
+	static isIgnored(download, filter){
 
 		//ain't no downloads in these (hopefully)
 		if(
@@ -141,7 +130,7 @@ class RequestHandling {
 			!filter.isStatusOK() ||
 			filter.isAJAX() ||
 			//todo: fix this madness
-			filter.isBlackListed(app.runtime.blacklist)
+			filter.isBlackListed(DLG.runtime.blacklist)
 		){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
@@ -167,7 +156,7 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	determineCategory(download, filter){
+	static determineCategory(download, filter){
 
 		/**
 		 * use types to determine category first, because they are the most certain
@@ -254,7 +243,7 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	determineClass(download, filter){
+	static determineClass(download, filter){
 
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
@@ -310,16 +299,15 @@ class RequestHandling {
 	 * Determines what action should be done about a request 
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
-	 * @param {DlGrabApp} app 
 	 */
-	determineAction(download, filter, app){
+	static determineAction(download, filter){
 
 		if(download.class === ReqFilter.CLS_WEB_OTHER){
 			download.act = ReqFilter.ACT_IGNORE;
 		}
 
 		if(download.class === ReqFilter.CLS_INLINE_WEB_RES){
-			if(app.options.excludeWebFiles){
+			if(DLG.options.excludeWebFiles){
 				download.act = ReqFilter.ACT_IGNORE;
 			}
 			else{
@@ -359,9 +347,8 @@ class RequestHandling {
 	/**
 	 * Performs the action that is assigned to a request in determineAction()
 	 * @param {Download} download 
-	 * @param {DlGrabApp} app 
 	 */
-	performAction(download, app){
+	static performAction(download){
 
 		if(download.act === ReqFilter.ACT_IGNORE){
 			return;
@@ -370,14 +357,14 @@ class RequestHandling {
 		DLG.addToAllDownloads(download);
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){
-			let dmName = app.options.defaultDM || app.runtime.availableDMs[0];
+			let dmName = OptionUtils.getDefaultDM();
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
 				Utils.performJob(job);
 			});
 			return {cancel: true};
 		}
 
-		if(download.act === ReqFilter.ACT_GRAB && app.options.overrideDlDialog){
+		if(download.act === ReqFilter.ACT_GRAB && DLG.options.overrideDlDialog){
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve){
 				download.resolve = resolve;

@@ -1,14 +1,6 @@
 class ContextMenu {
 
-	/**
-	 * 			
-	 * @param {DlGrabApp} app 
-	 */
-	constructor(app){
-		this.app = app;
-	}
-
-	init(){
+	static init(){
 
 		//add grab all menu
 		browser.menus.create({
@@ -33,7 +25,7 @@ class ContextMenu {
 
 		//menu click listener
 		browser.menus.onClicked.addListener((info, tab) => {
-			return this.doOnMenuClicked(info, tab, OptionUtils.getDefaultDM());
+			return ContextMenu.doOnMenuClicked(info, tab, OptionUtils.getDefaultDM());
 		});
 	}
 
@@ -41,7 +33,7 @@ class ContextMenu {
 	 * Runs every time a menu item is clicked
 	 * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
 	 */
-	async doOnMenuClicked(info, tab, defaultDM){
+	static async doOnMenuClicked(info, tab, defaultDM){
 
 		console.log('menu clicked: ', info, '\ntab: ', tab);
 

@@ -81,8 +81,7 @@ var DLG = new DLGMain();
 
 		Messaging.init();
 
-		let rHandling = new RequestHandling(app);
-		rHandling.init();
+		RequestHandling.init();
 
 		let cMenu = new ContextMenu(app);
 		cMenu.init();
