@@ -28,7 +28,6 @@ class NativeMessaging {
 			//this will always be called regardless of what happened
 			.then(() => {
 				clearTimeout(timer);
-				console.log('timeout cleared');
 			});
 		});
 	}
@@ -38,9 +37,9 @@ class NativeMessaging {
 		return new Promise((resolve, reject) => {
 			try
 			{
-				this.port.setOnDisconnect((_port) => {
-					if(_port.error){
-						reject("Native app port disconnected: " + _port.error.message);
+				this.port.setOnDisconnect((p) => {
+					if(p.error){
+						reject("Native app port disconnected: ", p.error.message);
 					}
 					reject("Native app port disconnected");
 				});
@@ -75,10 +74,13 @@ class NativeMessaging {
 	startListening(){
 		//set the final handlers
 		this.port.setOnMessage(this.doOnNativeMessage);
-		this.port.setOnDisconnect((_port) => {
-			console.error("port disconnected");
-			console.error("disconnect data: ");
-			console.error(_port);
+		this.port.setOnDisconnect((p) => {
+			if(p.error){
+				console.error("Port disconnected: ", p.error.message);
+			}
+			else{
+				console.error("Port disconnected");
+			}
 			this.port.connect();
 		});
 	}

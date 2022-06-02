@@ -1,3 +1,4 @@
+//todo: rename to browserDMS
 class DMHelper{
 
 	static async getAvailableDMs(){
