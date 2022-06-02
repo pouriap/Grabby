@@ -23,6 +23,8 @@
 
 var DEBUG = true;
 
+var DLG = {};
+
 //constructor faghat variable va init dashte bashim
 //this haye dakhele promise ha va callback ha check shavad 
 //chizhaii ke bayad static bashad check shavad mesle port dr NativeMessaging
@@ -38,7 +40,7 @@ var DEBUG = true;
 		//get available DMs from flashgot
 		let availableDMs = await nativeMsging.init();
 		//these are TCP server based DMs that we check using the browser itself
-		let browserDms = await DMHelper.getAvailableDMs();
+		let browserDms = await BrowserDMs.getAvailableDMs();
 		if(browserDms.length){
 			availableDMs.push(browserDms);
 		}

@@ -1,25 +1,25 @@
 //todo: rename to browserDMS
-class DMHelper{
+class BrowserDMs{
 
 	static async getAvailableDMs(){
 
-		if(typeof DMHelper.availableDMs === 'undefined'){
+		if(typeof BrowserDMs.availableDMs === 'undefined'){
 			let availableDMs = [];
-			for(let dmName in DMHelper.dms){
-				let available = await DMHelper.dms[dmName].isAvailable();
+			for(let dmName in BrowserDMs.dms){
+				let available = await BrowserDMs.dms[dmName].isAvailable();
 				if(available){
 					availableDMs.push(dmName);
 				}
 			}
-			DMHelper.availableDMs = availableDMs;
+			BrowserDMs.availableDMs = availableDMs;
 		}
 
-		return DMHelper.availableDMs;
+		return BrowserDMs.availableDMs;
 	}
 
 }
 
-DMHelper.dms = {
+BrowserDMs.dms = {
 
 	'Xtreme Download Manager': {
 

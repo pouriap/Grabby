@@ -44,9 +44,9 @@ class Utils {
 	 * @param {DownloadJob} job 
 	 */
 	static async performJob(job){
-		let browserDMs = await DMHelper.getAvailableDMs();
+		let browserDMs = await BrowserDMs.getAvailableDMs();
 		if(browserDMs.includes(job.dmName)){
-			DMHelper.dms[job.dmName].download(job);
+			BrowserDMs.dms[job.dmName].download(job);
 		}
 		else{
 			NativeMessaging.download(job);
