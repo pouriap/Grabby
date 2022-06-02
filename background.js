@@ -77,11 +77,9 @@ var DLG = new DLGMain();
 
 		//todo: fix this
 		let res = await browser.storage.local.get({blacklist: []});
-		app.runtime.blacklist = res.blacklist;
+		DLG.runtime.blacklist = res.blacklist;
 
-
-		let messaging = new Messaging(app, opMan);
-		messaging.init();
+		Messaging.init();
 
 		let rHandling = new RequestHandling(app);
 		rHandling.init();

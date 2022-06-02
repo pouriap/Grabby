@@ -1,52 +1,41 @@
 class Messaging {
 
-	/**
-	 * @param {DlGrabApp} app 
-	 * @param {OptionUtils} opMan 
-	 */
-	constructor(app, opMan){
-		this.app = app;
-		this.opMan = opMan;
-	}
-
-	init(){
-		browser.runtime.onMessage.addListener(
-			(msg) => {return this.doOnMessage(msg, this.app, this.opMan)
+	static init(){
+		browser.runtime.onMessage.addListener( (msg) => { 
+			return Messaging.doOnMessage(msg); 
 		});
 	}
 
 	 /**
 	 * Runs when a message is received from a script
 	  * @param {object} message 
-	  * @param {DlGrabApp} app 
-	  * @param {OptionUtils} opMan 
 	  */
-	doOnMessage(message, app, opMan) {
+	  static doOnMessage(message) {
 
-		console.log('message received:' + JSON.stringify(message));
+		console.log('message received:', message);
 
 		if(message.type === Messaging.TYP_SAVE_OPTIONS){
 			OptionUtils.save(message.options);
 			//set options
 			OptionUtils.applyOptions(message.options);
-			console.log('saved options: ', app.options);
+			console.log('saved options: ', DLG.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
 			return OptionUtils.loadForUI();
 		}
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
-			app.allDownloads = new FixedSizeMap(app.options.dlListSize);
+			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 		}
 		else if(message.type === Messaging.TYP_GET_BG_DATA){
-			let data = {downloads: app.allDownloads, appJSON: app};
+			let data = {downloads: DLG.allDownloads, appJSON: DLG};
 			return Promise.resolve(data);
 		}
 		else if(message.type === Messaging.TYP_DL_DIALOG_CLOSING){
-			delete app.downloadDialogs[message.windowId];
+			delete DLG.downloadDialogs[message.windowId];
 			if(message.continueWithBrowser){
 				return;
 			}
-			let download = app.allDownloads.get(message.downloadHash);
+			let download = DLG.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: true});
 			}
@@ -61,29 +50,29 @@ class Messaging {
 			});
 		}
 		else if(message.type === Messaging.TYP_CONT_WITH_BROWSER){
-			let download = app.allDownloads.get(message.downloadHash);
+			let download = DLG.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: false});
 			}
 		}
 		//todo: unused
 		else if(message.type === Messaging.TYP_INTERCEPT_DL){
-			let download = app.allDownloads.get(message.downloadHash);
+			let download = DLG.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: true});
 			}
 		}
 		else if(message.type === Messaging.TYP_DOWNLOAD){
-			let download = app.allDownloads.get(message.downloadHash);
+			let download = DLG.allDownloads.get(message.downloadHash);
 			DownloadJob.getFromDownload(message.dmName, download).then((job)=>{
 				Utils.performJob(job);
 			});
 		}
 		else if(message.type === Messaging.TYP_DL_REPORTED){
-			let download = app.allDownloads.get(message.downloadHash);
+			let download = DLG.allDownloads.get(message.downloadHash);
 			download.reported = true;
-			app.runtime.blacklist.push(download.url);
-			browser.storage.local.set({blacklist: app.runtime.blacklist});
+			DLG.runtime.blacklist.push(download.url);
+			browser.storage.local.set({blacklist: DLG.runtime.blacklist});
 		}
 
 		return Promise.resolve();
