@@ -20,14 +20,92 @@
 //todo: option to show only downloads of this page/all dls
 //todo: ability to grab a NoScript blocked media item? 'therube' post on forum
 //todo: grab selection doesn't work properly here -> https://dl1.filmiokgzr.site/Cartoon/3/Kobayashi-san%20Chi%20no%20Maid%20Dragon/S2/480/
+//todo: store options in sync, what's wrong with me?
+//todo: save downloads list
+//todo: policies:
+/*
+- Add-ons must only request those permissions that are necessary for function
+- Add-ons should avoid including duplicate or unnecessary files
+- Add-on code must be written in a way that is reviewable and understandable. 
+Reviewers may ask you to refactor parts of the code if it is not reviewable.
+- You may include third-party libraries in your extension. In that case, when you upload 
+your extension to AMO, you will need to provide links to the library source code.
+- The add-on listing should have an easy-to-read description about everything it does, 
+and any information it collects. Please consult our best practices guide for creating
+ an appealing listing.
+ - If the add-on uses native messaging, the privacy policy must clearly disclose which 
+information is being exchanged with the native application. Data exchanged with the 
+native application must be in accordance with our No Surprises policy.
+*/
+//todo: how firefox determines mime types:
+//https://developer.mozilla.org/en-US/docs/Mozilla/How_Mozilla_determines_MIME_Types
+//todo: support "download selection"
+//todo: I18N
+//todo: option to do this automatically for files like this from now on
 
 var DEBUG = true;
 
 var DLG = {}
 DLG.sendNativeMsg = function(){};
-DLG.runtime = {
-	availableDMs: [],
-};
+// all requests made by Firefox are stored here temporarily until we get their response
+DLG.allRequests = new FixedSizeMap(100);
+// this will be set in applyOptions()
+DLG.allDownloads = {}
+// open download dialogs
+DLG.downloadDialogs = {};
+// available download managers on system
+DLG.availableDMs = [];
+// options
+DLG.options = {};
+/**
+ * Adds a download to our main list of downloads
+ * @param {Download} download 
+ */
+DLG.addToAllDownloads = function(download)
+{
+	//we do this here because we don't want to run hash on requests we will not use
+	let hash = download.getHash();
+	//we put hash of URL as key to prevent the same URL being added by different requests
+	DLG.allDownloads.put(hash, download);
+}
+/**
+ * opens the download dialog
+ * here's how things happen because WebExtensions suck ass:
+ * we open the download dialog window
+ * we store the windowId along with the associated download's hash in app.downloadDialogs
+ * after the dialog loads it sends a message to the background script requesting the download hash
+ * background script gives download dialogs the hash based on the windowId 
+ * download dialog gets the Download object from the hash and populates the dialog
+ * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
+ * @param {Download} dl 
+ */
+ DLG.showDlDialog = function(dl)
+ {
+	var download = dl;
+	let screenW = window.screen.width;
+	let screenH = window.screen.height;
+	let windowW = 480;
+	let windowH = 350;
+	let leftMargin = (screenW/2) - (windowW/2);
+	let topMargin = (screenH/2) - (windowH/2);
+
+	let createData = {
+		type: "detached_panel",
+		titlePreface: download.getFilename(),
+		url: "popup/download.html",
+		allowScriptsToClose : true,
+		width: windowW,
+		height: windowH,
+		left: leftMargin,
+		top: topMargin
+	};
+	let creating = browser.windows.create(createData);
+
+	creating.then((windowInfo) => {
+		let windowId = windowInfo.id;
+		DLG.downloadDialogs[windowId] = download.getHash();
+	});
+}
 
 //constructor faghat variable va init dashte bashim
 //this haye dakhele promise ha va callback ha check shavad 
@@ -52,9 +130,10 @@ DLG.runtime = {
 		if(availableDMs.length == 0){
 			throw "No download managers found on system";
 		}
-		DLG.runtime.availableDMs = availableDMs;
+		DLG.availableDMs = availableDMs;
 
-		let opMan = new OptionUtils(availableDMs);
+		let options = await OptionUtils.load();
+		OptionUtils.applyOptions(options);
 
 		let app = new DlGrabApp(availableDMs);
 		await app.init();

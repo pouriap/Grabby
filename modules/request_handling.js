@@ -367,7 +367,7 @@ class RequestHandling {
 			return;
 		}
 
-		app.addToAllDownloads(download);
+		DLG.addToAllDownloads(download);
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){
 			let dmName = app.options.defaultDM || app.runtime.availableDMs[0];
@@ -381,7 +381,7 @@ class RequestHandling {
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve){
 				download.resolve = resolve;
-				app.showDlDialog(download);
+				DLG.showDlDialog(download);
 			});
 		}
 		

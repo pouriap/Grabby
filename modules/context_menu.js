@@ -33,7 +33,7 @@ class ContextMenu {
 
 		//menu click listener
 		browser.menus.onClicked.addListener((info, tab) => {
-			return this.doOnMenuClicked(info, tab, this.app.getDefaultDM());
+			return this.doOnMenuClicked(info, tab, OptionUtils.getDefaultDM());
 		});
 	}
 

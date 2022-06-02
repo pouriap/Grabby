@@ -28,7 +28,7 @@ class Messaging {
 		if(message.type === Messaging.TYP_SAVE_OPTIONS){
 			OptionUtils.save(message.options);
 			//set options
-			app.applyOptions(message.options);
+			OptionUtils.applyOptions(message.options);
 			console.log('saved options: ', app.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
