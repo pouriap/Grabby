@@ -1,5 +1,76 @@
 'use strict';
 
+class DLGMain
+{
+	constructor()
+	{
+		this.sendNativeMsg = function(){};
+		// all requests made by Firefox are stored here temporarily until we get their response
+		this.allRequests = new FixedSizeMap(100);
+		// this will be set in applyOptions()
+		this.allDownloads = {}
+		// open download dialogs
+		this.downloadDialogs = {};
+		// available download managers on system
+		this.availableDMs = [];
+		// options
+		this.options = {};
+	}
+
+	/**
+	 * Adds a download to our main list of downloads
+	 * @param {Download} download 
+	 */
+	addToAllDownloads = function(download)
+	{
+		//we do this here because we don't want to run hash on requests we will not use
+		let hash = download.getHash();
+		//we put hash of URL as key to prevent the same URL being added by different requests
+		this.allDownloads.put(hash, download);
+	}
+
+	/**
+	 * opens the download dialog
+	 * here's how things happen because WebExtensions suck ass:
+	 * we open the download dialog window
+	 * we store the windowId along with the associated download's hash in app.downloadDialogs
+	 * after the dialog loads it sends a message to the background script requesting the download hash
+	 * background script gives download dialogs the hash based on the windowId 
+	 * download dialog gets the Download object from the hash and populates the dialog
+	 * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
+	 * @param {Download} dl 
+	 */
+	showDlDialog = function(dl)
+	{
+		var download = dl;
+		let screenW = window.screen.width;
+		let screenH = window.screen.height;
+		let windowW = 480;
+		let windowH = 350;
+		let leftMargin = (screenW/2) - (windowW/2);
+		let topMargin = (screenH/2) - (windowH/2);
+
+		let createData = {
+			type: "detached_panel",
+			titlePreface: download.getFilename(),
+			url: "popup/download.html",
+			allowScriptsToClose : true,
+			width: windowW,
+			height: windowH,
+			left: leftMargin,
+			top: topMargin
+		};
+		let creating = browser.windows.create(createData);
+
+		creating.then((windowInfo) => {
+			let windowId = windowInfo.id;
+			this.downloadDialogs[windowId] = download.getHash();
+		});
+	}
+}
+
+
+
 class Download {
 
 	/**

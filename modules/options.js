@@ -41,6 +41,7 @@ class OptionUtils {
 
 	static applyOptions(options)
 	{
+		DLG.options = options;
 		//create a new list of downloads in case the downloas history size is changed in options
 		DLG.allDownloads = new FixedSizeMap(options.dlListSize, this.allDownloads.list);
 		//exclusion,inclusion,download lists
