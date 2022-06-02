@@ -1,20 +1,66 @@
 'use strict';
 
-class DLGMain
+class DLGBase
 {
 	constructor()
 	{
-		this.sendNativeMsg = function(){};
-		// all requests made by Firefox are stored here temporarily until we get their response
-		this.allRequests = new FixedSizeMap(100);
-		// this will be set in applyOptions()
-		this.allDownloads = {}
-		// open download dialogs
-		this.downloadDialogs = {};
-		// available download managers on system
+		/**
+		 * all grabbed downloads
+		 * this will be set in applyOptions()
+		 * @type {FixedSizeMap}
+		 */
+		this.allDownloads = {};
+		/**
+		 * a map containing all currently open download dialogs
+		 * @type {object}
+		 */
+		 this.downloadDialogs = {};
+		/**
+		 * available download managers on system
+		 * @type {array}
+		 */
 		this.availableDMs = [];
-		// options
+		/**
+		 * addon options
+		 * @type {object}
+		 */
 		this.options = {};
+	}
+}
+
+class DownloadGrabPopup extends DLGBase
+{
+	constructor()
+	{
+		super();
+		/**
+		 * the Download object for the clicked link
+		 * @type {Download} 
+		 */
+		this.selectedDl = null;
+		/**
+		 * wheter this download was intercepted by Download Grab
+		 * @type {boolean}
+		 */
+		this.continueWithBrowser = false;
+	}
+}
+
+class DownloadGrab extends DLGBase
+{
+	constructor()
+	{
+		super();
+		/**
+		 * sends a message to the native app
+		 * will be set in background.js init code after a native messaging instance is created
+		 */
+		this.sendNativeMsg = function(){};
+		/**
+		 * all requests made by Firefox are stored here temporarily until we get their response
+		 * @type {FixedSizeMap}
+		 */
+		this.allRequests = new FixedSizeMap(100);
 	}
 
 	/**

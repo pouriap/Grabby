@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.querySelectorAll(".action").forEach(function(action){
 		action.addEventListener('click', (evt)=>{
-			actionClicked(popupContext.selectedDl, action);
+			actionClicked(DLGPop.selectedDl, action);
 		});
 	});
 
@@ -26,32 +26,32 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 	getBackgroundData().then(async function(){
 		windowId = (await browser.windows.getCurrent()).id;
-		let hash = popupContext.appJSON.downloadDialogs[windowId];
-		popupContext.selectedDl = popupContext.allDownloads.get(hash);
+		let hash = DLGPop.downloadDialogs[windowId];
+		DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
 		onGot();
 	});
 
 });
 
 window.addEventListener("beforeunload", function() {
-	let downloadPageTabId = popupContext.selectedDl.reqDetails.tabId;
+	let downloadPageTabId = DLGPop.selectedDl.reqDetails.tabId;
 	let message = {
 		type: Messaging.TYP_DL_DIALOG_CLOSING, 
 		windowId: windowId, 
 		downloadPageTabId: downloadPageTabId,
-		downloadHash: popupContext.selectedDl.getHash(),
-		continueWithBrowser: popupContext.continueWithBrowser
+		downloadHash: DLGPop.selectedDl.getHash(),
+		continueWithBrowser: DLGPop.continueWithBrowser
 	};
 	browser.runtime.sendMessage(message);
 });
 
 function onGot() { 
-	let classReason = (DEBUG)? ' ('+popupContext.selectedDl.classReason+')' : '';
-	document.getElementById("filename").innerHTML = popupContext.selectedDl.getFilename() + classReason;
-	document.getElementById("filename").setAttribute("title", popupContext.selectedDl.getFilename());
+	let classReason = (DEBUG)? ' ('+DLGPop.selectedDl.classReason+')' : '';
+	document.getElementById("filename").innerHTML = DLGPop.selectedDl.getFilename() + classReason;
+	document.getElementById("filename").setAttribute("title", DLGPop.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 
-		(popupContext.selectedDl.getSize() !== "unknown")? filesize(popupContext.selectedDl.getSize()) : popupContext.selectedDl.getSize();
-	document.getElementById("host").innerHTML = popupContext.selectedDl.getHost();
+		(DLGPop.selectedDl.getSize() !== "unknown")? filesize(DLGPop.selectedDl.getSize()) : DLGPop.selectedDl.getSize();
+	document.getElementById("host").innerHTML = DLGPop.selectedDl.getHost();
 	document.getElementById("output").style.display = 'none';
 	populateDMs();
 }

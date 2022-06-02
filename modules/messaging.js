@@ -26,8 +26,8 @@ class Messaging {
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
 			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 		}
-		else if(message.type === Messaging.TYP_GET_BG_DATA){
-			let data = {downloads: DLG.allDownloads, appJSON: DLG};
+		else if(message.type === Messaging.TYP_GET_DLG){
+			let data = {DLGJSON: DLG};
 			return Promise.resolve(data);
 		}
 		else if(message.type === Messaging.TYP_DL_DIALOG_CLOSING){
@@ -83,7 +83,7 @@ class Messaging {
 
 Messaging.TYP_SAVE_OPTIONS = 'save-options';
 Messaging.TYP_CLEAR_LIST = 'clear-list';
-Messaging.TYP_GET_BG_DATA = 'get-bg';
+Messaging.TYP_GET_DLG = 'get-bg';
 Messaging.TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 Messaging.TYP_CONT_WITH_BROWSER = 'con-with-browser';
 Messaging.TYP_INTERCEPT_DL = 'intercept-dl';

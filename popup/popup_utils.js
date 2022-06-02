@@ -1,32 +1,14 @@
-var popupContext = {};
-/**
- * @type {FixedSizeMap}
- */
-popupContext.allDownloads = null;
-/**
- * the Download object for the clicked link
- * @type {Download}
- */
-popupContext.selectedDl = null;
-/**
- * a JSON serialized instance of global 'app' we got through messaging
- */
-popupContext.appJSON = null;
-/**
- * wheter this download was intercepted by Download Grab
- * @type {boolean}
- */
-popupContext.continueWithBrowser = false;
+var DLGPop = new DownloadGrabPopup();
 
 /**
  * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
  */
 async function getBackgroundData(){
 
-	let message = {type: Messaging.TYP_GET_BG_DATA};
+	let message = {type: Messaging.TYP_GET_DLG};
 	let response = await browser.runtime.sendMessage(message);
-	let limit = response.downloads.limit;
-	let allDlsJSON = response.downloads.list;
+	let limit = response.DLGJSON.allDownloads.limit;
+	let allDlsJSON = response.DLGJSON.allDownloads.list;
 	let allDownloads = new FixedSizeMap(limit);
 
 	//populate our local version of allDownloads using the JSON data
@@ -43,8 +25,10 @@ async function getBackgroundData(){
 		allDownloads.put(downloadHash, download);
 	});
 
-	popupContext.appJSON = response.appJSON;
-	popupContext.allDownloads = allDownloads;
+	DLGPop.allDownloads = allDownloads;
+	DLGPop.availableDMs = response.DLGJSON.availableDMs;
+	DLGPop.options = response.DLGJSON.options;
+	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
 
 	return Promise.resolve();
 }
@@ -90,7 +74,7 @@ function actionClicked(selectedDl, clickedAction){
 }
 
 function populateDMs(){
-	let availableDMs = popupContext.appJSON.runtime.availableDMs;
+	let availableDMs = DLGPop.availableDMs;
 	let dmsDropDown = document.getElementById('available-dms');
 	for(let dmName of availableDMs){
 		let option = document.createElement('option');
@@ -99,7 +83,7 @@ function populateDMs(){
 		option.id = dmName;
 		dmsDropDown.appendChild(option);
 	}
-	let defaultDM = popupContext.appJSON.options.defaultDM || availableDMs[0];
+	let defaultDM = DLGPop.options.defaultDM || availableDMs[0];
 	if(defaultDM){
 		console.log('setting default dm: ', defaultDM);
 		document.getElementById(defaultDM).setAttribute('selected', 'selected');
@@ -148,7 +132,7 @@ function downloadWithSelectedDM(download){
 function continueWithBrowser(download){
 	let message = {type: Messaging.TYP_CONT_WITH_BROWSER, downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
-	popupContext.continueWithBrowser = true;
+	DLGPop.continueWithBrowser = true;
 	window.close();
 }
 
@@ -191,7 +175,7 @@ async function reportDownload(download, source){
 	delete reportData.resDetails.proxyInfo;
 
 	//add stuff we need
-	reportData._options = popupContext.appJSON.options;
+	reportData._options = DLGPop.options;
 	reportData._version = (await browser.management.getSelf()).version;
 	reportData._reportSource = source;
 

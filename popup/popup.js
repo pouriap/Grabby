@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.querySelectorAll(".action").forEach(function(action){
 		action.addEventListener('click', (evt)=>{
-			actionClicked(popupContext.selectedDl, action);
+			actionClicked(DLGPop.selectedDl, action);
 		});
 	});
 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 function onGot() { 
 
 	//populate list of downloads
-	let keys = popupContext.allDownloads.getKeys();
+	let keys = DLGPop.allDownloads.getKeys();
 	//reverse to show latest downloads on top
 	keys.reverse();
 
@@ -41,7 +41,7 @@ function onGot() {
 
 	for (const key of keys) {
 
-		let download = popupContext.allDownloads.get(key);
+		let download = DLGPop.allDownloads.get(key);
 
 		let listItem = document.createElement("li");
 		listItem.setAttribute("id", "req_" + download.requestId);
@@ -58,9 +58,9 @@ function onGot() {
 			document.getElementById('action-report').innerHTML = 'Report falsely detected download';
 
 			let hash = this.getAttribute("data-hash");
-			popupContext.selectedDl = popupContext.allDownloads.get(hash);
-			console.log('item clicked: ', popupContext.selectedDl);
-			showDownloadDetails(popupContext.selectedDl);
+			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
+			console.log('item clicked: ', DLGPop.selectedDl);
+			showDownloadDetails(DLGPop.selectedDl);
 		});
 
 		//this is for getting the info we put in tests
@@ -68,7 +68,7 @@ function onGot() {
 			listItem.addEventListener("contextmenu", function(evt){
 				evt.preventDefault();
 				let hash = this.getAttribute("data-hash");
-				let dl = popupContext.allDownloads.get(hash);
+				let dl = DLGPop.allDownloads.get(hash);
 				let info = {};
 				info.reqDetails = dl.reqDetails;
 				info.resDetails = dl.resDetails;

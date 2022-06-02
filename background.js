@@ -45,7 +45,7 @@ native application must be in accordance with our No Surprises policy.
 
 var DEBUG = true;
 
-var DLG = new DLGMain();
+var DLG = new DownloadGrab();
 
 //constructor faghat variable va init dashte bashim
 //this haye dakhele promise ha va callback ha check shavad 
