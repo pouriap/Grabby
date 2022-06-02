@@ -71,8 +71,8 @@ class Messaging {
 		else if(message.type === Messaging.TYP_DL_REPORTED){
 			let download = DLG.allDownloads.get(message.downloadHash);
 			download.reported = true;
-			DLG.runtime.blacklist.push(download.url);
-			browser.storage.local.set({blacklist: DLG.runtime.blacklist});
+			DLG.blacklist.push(download.url);
+			browser.storage.local.set({blacklist: DLG.blacklist});
 		}
 
 		return Promise.resolve();

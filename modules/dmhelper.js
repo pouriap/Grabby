@@ -74,6 +74,7 @@ BrowserDMs.dms = {
 	},
 
 	'JDownloader': {
+		
 		host: "http://127.0.0.1:9666",
 
 		isAvailable: function(){

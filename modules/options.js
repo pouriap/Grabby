@@ -43,15 +43,15 @@ class OptionUtils {
 	{
 		DLG.options = options;
 		//create a new list of downloads in case the downloas history size is changed in options
-		DLG.allDownloads = new FixedSizeMap(options.dlListSize, this.allDownloads.list);
+		DLG.allDownloads = new FixedSizeMap(options.dlListSize, DLG.allDownloads.list);
 		//exclusion,inclusion,download lists
 		DLG.options.excludedExts = _getExtsFromList(options.excludedExts);
-		DLG.options.excludedMimes = _getMimesForExts(this.options.excludedExts);
+		DLG.options.excludedMimes = _getMimesForExts(DLG.options.excludedExts);
 		DLG.options.includedExts = _getExtsFromList(options.includedExts);
-		DLG.options.includedMimes = _getMimesForExts(this.options.includedExts);
+		DLG.options.includedMimes = _getMimesForExts(DLG.options.includedExts);
 		DLG.options.forcedExts = _getExtsFromList(options.forcedExts);
-		DLG.options.forcedMimes = _getMimesForExts(this.options.forcedExts);
-		DLG.options.blacklistDomains = _getValuesFromList(this.options.blacklistDomains);
+		DLG.options.forcedMimes = _getMimesForExts(DLG.options.forcedExts);
+		DLG.options.blacklistDomains = _getValuesFromList(DLG.options.blacklistDomains);
 
 		function _getExtsFromList(extList){
 			if(!extList){

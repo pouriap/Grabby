@@ -57,8 +57,7 @@ var DLG = new DLGMain();
 
 	try
 	{
-		DLG._nativeMsging = new NativeMessaging();
-		DLG.sendNativeMsg = function(msg){DLG._nativeMsging.sendMessage(msg);}
+		let nativeMsging = new NativeMessaging();
 
 		//get available DMs from flashgot
 		let availableDMs = await nativeMsging.init();
@@ -71,20 +70,21 @@ var DLG = new DLGMain();
 			throw "No download managers found on system";
 		}
 		DLG.availableDMs = availableDMs;
+		DLG._nativeMsging = nativeMsging;
+		DLG.sendNativeMsg = function(msg){DLG._nativeMsging.sendMessage(msg);}
 
 		let options = await OptionUtils.load();
 		OptionUtils.applyOptions(options);
 
 		//todo: fix this
 		let res = await browser.storage.local.get({blacklist: []});
-		DLG.runtime.blacklist = res.blacklist;
+		DLG.blacklist = res.blacklist;
 
 		Messaging.init();
 
 		RequestHandling.init();
 
-		let cMenu = new ContextMenu(app);
-		cMenu.init();
+		ContextMenu.init();
 
 		console.log('app init successful');
 	}

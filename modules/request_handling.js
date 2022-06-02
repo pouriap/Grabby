@@ -130,7 +130,7 @@ class RequestHandling {
 			!filter.isStatusOK() ||
 			filter.isAJAX() ||
 			//todo: fix this madness
-			filter.isBlackListed(DLG.runtime.blacklist)
+			filter.isBlackListed(DLG.blacklist)
 		){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
