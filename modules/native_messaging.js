@@ -85,6 +85,10 @@ class NativeMessaging {
 		});
 	}
 
+	sendMessage(msg){
+		this.port.postMessage(msg);
+	}
+
 	//todo make it non-static
 	/**
 	 * 

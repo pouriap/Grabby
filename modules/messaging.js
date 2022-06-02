@@ -2,7 +2,7 @@ class Messaging {
 
 	/**
 	 * @param {DlGrabApp} app 
-	 * @param {Options} opMan 
+	 * @param {OptionUtils} opMan 
 	 */
 	constructor(app, opMan){
 		this.app = app;
@@ -19,20 +19,20 @@ class Messaging {
 	 * Runs when a message is received from a script
 	  * @param {object} message 
 	  * @param {DlGrabApp} app 
-	  * @param {Options} opMan 
+	  * @param {OptionUtils} opMan 
 	  */
 	doOnMessage(message, app, opMan) {
 
 		console.log('message received:' + JSON.stringify(message));
 
 		if(message.type === Messaging.TYP_SAVE_OPTIONS){
-			Options.save(message.options);
+			OptionUtils.save(message.options);
 			//set options
 			app.applyOptions(message.options);
 			console.log('saved options: ', app.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
-			return opMan.loadForUI();
+			return OptionUtils.loadForUI();
 		}
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
 			app.allDownloads = new FixedSizeMap(app.options.dlListSize);
@@ -92,13 +92,13 @@ class Messaging {
 
 }
 
-Messaging.TYP_SAVE_OPTIONS= 'save-options';
-Messaging.TYP_CLEAR_LIST= 'clear-list';
-Messaging.TYP_GET_BG_DATA= 'get-bg';
-Messaging.TYP_DL_DIALOG_CLOSING= 'dl-gialog-closing';
-Messaging.TYP_CONT_WITH_BROWSER= 'con-with-browser';
-Messaging.TYP_INTERCEPT_DL= 'intercept-dl';
-Messaging.TYP_DOWNLOAD= 'download';
-Messaging.TYP_DL_REPORTED= 'dl-reported';
-Messaging.TYP_LOAD_OPTIONS= 'load-options';
-Messaging.TYP_GET_OPTS_DATA= 'get-options-data';
+Messaging.TYP_SAVE_OPTIONS = 'save-options';
+Messaging.TYP_CLEAR_LIST = 'clear-list';
+Messaging.TYP_GET_BG_DATA = 'get-bg';
+Messaging.TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
+Messaging.TYP_CONT_WITH_BROWSER = 'con-with-browser';
+Messaging.TYP_INTERCEPT_DL = 'intercept-dl';
+Messaging.TYP_DOWNLOAD = 'download';
+Messaging.TYP_DL_REPORTED = 'dl-reported';
+Messaging.TYP_LOAD_OPTIONS = 'load-options';
+Messaging.TYP_GET_OPTS_DATA = 'get-options-data';

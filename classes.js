@@ -33,7 +33,7 @@ class DlGrabApp {
 
 	/**
 	 * 	
-	 * @param {Options} opMan 
+	 * @param {OptionUtils} opMan 
 	 */
 	constructor(availableDMs) {
 		// all requests made by Firefox are stored here temporarily until we get their response
@@ -48,7 +48,7 @@ class DlGrabApp {
 	}
 
 	async init(){
-		let options = await Options.load();
+		let options = await OptionUtils.load();
 		this.applyOptions(options);
 	}
 

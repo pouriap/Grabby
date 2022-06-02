@@ -1,38 +1,32 @@
-class Options {
+class OptionUtils {
 
-	constructor(availableDMs){
-		this.availableDMs = availableDMs;
-	}
 
-	async loadForUI(){
-		let options = await browser.storage.local.get(Options.getDefaults());
+
+	static async loadForUI(){
+		let options = await browser.storage.local.get(OptionUtils.getDefaults());
 		let uiOpts = {};
 		for(let optName in options){
 			let optionVal = options[optName];
-			let optionData = Options.optionsData[optName];
+			let optionData = OptionUtils.optionsData[optName];
 			uiOpts[optName] = {};
 			Object.assign(uiOpts[optName], optionData);
 			uiOpts[optName].name = optName;
 			uiOpts[optName].value = optionVal;
 			uiOpts[optName].extra = (optionData.extra)?
-				await this._getExtra(optionVal, optionData.extra) : '';
+				await OptionUtils._getExtra(optionVal, optionData.extra) : '';
 		}
 		return uiOpts;
 	}
 
-	_getExtra(optionVal, extra){
+	static _getExtra(optionVal, extra){
 		switch(extra){
 			case 'get-available-dms':
-				return this.availableDMs;
+				return DLG.runtime.availableDMs;
 		}
 	}
 
-	getDefaultDM(){
-
-	}
-
 	static load(){
-		return browser.storage.local.get(Options.getDefaults());
+		return browser.storage.local.get(OptionUtils.getDefaults());
 	}
 
 	static save(options){
@@ -41,15 +35,15 @@ class Options {
 
 	static getDefaults(){
 		let defaultOptions = {};
-		for(let optionName in Options.optionsData){
-			defaultOptions[optionName] = Options.optionsData[optionName].default;
+		for(let optionName in OptionUtils.optionsData){
+			defaultOptions[optionName] = OptionUtils.optionsData[optionName].default;
 		}
 		return defaultOptions;
 	}
 
 }
 
-Options.optionsData= {
+OptionUtils.optionsData= {
 
 	overrideDlDialog: {
 		type: 'checkbox',

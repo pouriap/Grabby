@@ -23,7 +23,11 @@
 
 var DEBUG = true;
 
-var DLG = {};
+var DLG = {}
+DLG.sendNativeMsg = function(){};
+DLG.runtime = {
+	availableDMs: [],
+};
 
 //constructor faghat variable va init dashte bashim
 //this haye dakhele promise ha va callback ha check shavad 
@@ -35,8 +39,9 @@ var DLG = {};
 
 	try
 	{
-		let nativeMsging = new NativeMessaging();
-		
+		DLG._nativeMsging = new NativeMessaging();
+		DLG.sendNativeMsg = function(msg){DLG._nativeMsging.sendMessage(msg);}
+
 		//get available DMs from flashgot
 		let availableDMs = await nativeMsging.init();
 		//these are TCP server based DMs that we check using the browser itself
@@ -44,12 +49,12 @@ var DLG = {};
 		if(browserDms.length){
 			availableDMs.push(browserDms);
 		}
-
 		if(availableDMs.length == 0){
 			throw "No download managers found on system";
 		}
+		DLG.runtime.availableDMs = availableDMs;
 
-		let opMan = new Options(availableDMs);
+		let opMan = new OptionUtils(availableDMs);
 
 		let app = new DlGrabApp(availableDMs);
 		await app.init();

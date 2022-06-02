@@ -9,7 +9,7 @@ async function saveOptions(e) {
 
 	e.preventDefault();
 
-	let optionsData = Options.optionsData;
+	let optionsData = OptionUtils.optionsData;
 
 	let optionsToSave = {};
 
