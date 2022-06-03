@@ -104,16 +104,6 @@ class NativeMessaging {
 		NativeMessaging.port.postMessage(message);
 	}
 
-	//TODO why is this here?
-	static async getCookies(url){
-		let cookies = '';
-		let cookiesArr = await browser.cookies.getAll({url: url});
-		for(let cookie of cookiesArr){
-			cookies += `${cookie.name}=${cookie.value}; `;
-		}
-		return cookies;
-	}
-
 	doOnNativeMessage(message){
 		//black addon stdout
 		//green node.js stdout

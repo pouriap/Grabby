@@ -53,4 +53,18 @@ class Utils {
 		}
 	}
 
+	/**
+	 * Gets cookies associated with the given URL
+	 * @param {string} url 
+	 * @returns 
+	 */
+	static async getCookies(url){
+		let cookies = '';
+		let cookiesArr = await browser.cookies.getAll({url: url});
+		for(let cookie of cookiesArr){
+			cookies += `${cookie.name}=${cookie.value}; `;
+		}
+		return cookies;
+	}
+
 }
