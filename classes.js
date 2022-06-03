@@ -1131,22 +1131,21 @@ class DownloadJob{
 	 * @param {string} dmName 
 	 * @param {Download} download 
 	 */
-	static async getFromDownload(dmName, download){
-
-		let originPageCookies = await Utils.getCookies(download.url);
+	static async getFromDownload(dmName, download)
+	{
+		let originPageCookies = '';
 		let originPageReferer = '';
-		let originTabId = -1;
 
-		let tabs = await browser.tabs.query({url: download.origin});
-		//todo: store originpage referer and originpage cookies in download object
-		//todo: in popup context clone the download object properly so we won't have to add code for 
-		//every single property 
-		//if we have closed that tab(specially the case when downoading from side bar later)
-		if(tabs[0]){
-			originTabId = tabs[0].id;
-			originPageReferer = await browser.tabs.executeScript(
-				originTabId, {code: 'document.referrer'}
-			)[0];
+		if(download.origin)
+		{
+			originPageCookies = await Utils.getCookies(download.origin);
+
+			let tabs = await browser.tabs.query({url: download.origin});
+			if(tabs[0]){
+				let originTabId = tabs[0].id;
+				let res = await browser.tabs.executeScript(originTabId, {code: 'document.referrer'});
+				originPageReferer = res[0];
+			}
 		}
 
 		let downloadInfo = new DownloadInfo(
