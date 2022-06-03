@@ -1,7 +1,7 @@
 var DLGPop = new DownloadGrabPopup();
 
 /**
- * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
+ * Gets the DLG instance from the background script and makes a copy of the needed data inside it
  */
 async function getBackgroundData()
 {
@@ -12,7 +12,8 @@ async function getBackgroundData()
 	let allDownloads = new FixedSizeMap(limit);
 
 	//populate our local version of allDownloads using the JSON data
-	Object.keys(allDlsJSON).forEach(function(downloadHash){
+	for(let downloadHash of Object.keys(allDlsJSON))
+	{
 		let downloadJSON = allDlsJSON[downloadHash];
 		reqDetails = downloadJSON.reqDetails;
 		resDetails = downloadJSON.resDetails;
@@ -23,14 +24,12 @@ async function getBackgroundData()
 		download.category = downloadJSON.cat;
 		download.hash = downloadJSON.hash;
 		allDownloads.put(downloadHash, download);
-	});
+	};
 
 	DLGPop.allDownloads = allDownloads;
 	DLGPop.availableDMs = response.DLGJSON.availableDMs;
 	DLGPop.options = response.DLGJSON.options;
 	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
-
-	return Promise.resolve();
 }
 
 /**
