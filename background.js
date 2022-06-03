@@ -47,7 +47,7 @@ var DLG = new DownloadGrab();
 
 (async () => {
 
-	log('initializing app...');
+	log('initializing addon...');
 
 	try
 	{
@@ -80,11 +80,11 @@ var DLG = new DownloadGrab();
 
 		ContextMenu.init();
 
-		log('app init successful');
+		log('addon init successful');
 	}
 	catch(e)
 	{
-		log.err('app could not be initialized: ', e);
+		log.err('addon could not be initialized: ', e);
 		//todo: remove notifications or make them look good
 		let options = {
 			type: "basic", 

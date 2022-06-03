@@ -51,11 +51,11 @@ class NativeMessaging {
 					else if (typeof response.type === 'undefined'){
 						reject("no response type from native app");
 					}
-					else if(response.type === NativeMessaging.MSGTYP_HERR){
+					else if(response.type === NativeMessaging.MSGTYP_ERR){
 						reject("native app error: " + response.content);
 					}
 					else if(response.type != NativeMessaging.MSGTYP_AVAIL_DMS){
-						reject("bad response type from native app");
+						reject("bad response type from native app: " + response.type);
 					}
 					else{
 						resolve(response);
@@ -132,15 +132,15 @@ class NativeMessaging {
 
 /** @type {ProperPort} */
 NativeMessaging.port = null;
-NativeMessaging.NATIVE_APP_ID = 'download.grab.pouriap';
+NativeMessaging.DLG_ADDON_ID = "download.grab.pouriap";
 NativeMessaging.MSGTYP_GET_AVAIL_DMS = "get_available_dms"
 NativeMessaging.MSGTYP_AVAIL_DMS = "available_dms"
 NativeMessaging.MSGTYP_DOWNLOAD = "download"
 NativeMessaging.MSGTYP_YTDL_INFO = "ytdl_getinfo"
 NativeMessaging.MSGTYP_YTDL_AUD = "ytdl_download_audio"
 NativeMessaging.MSGTYP_YTDL_VID = "ytdl_download_video"
-NativeMessaging.MSGTYP_HERR = "app_error"
-NativeMessaging.MSGTYP_HMSG = "app_message"
+NativeMessaging.MSGTYP_ERR = "app_error"
+NativeMessaging.MSGTYP_MSG = "app_message"
 NativeMessaging.MSGTYP_HYTDLINFO = "app_ytdl_info"
 NativeMessaging.MSGTYP_HDLPROG = "app_download_progress"
 NativeMessaging.MSGTYP_UNSUPP = "unsupported"
@@ -155,7 +155,7 @@ function ProperPort(){
 ProperPort.prototype.connect = function(){
 	try
 	{
-		this._port = browser.runtime.connectNative(NativeMessaging.NATIVE_APP_ID);
+		this._port = browser.runtime.connectNative(NativeMessaging.DLG_ADDON_ID);
 		this._port.onDisconnect.addListener((port) => {
 			this._onDisconnect(port);
 		});
