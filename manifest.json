@@ -64,7 +64,6 @@
 			"modules/options.js",
 			"modules/messaging.js",
 			"modules/browser_dms.js",
-			"options/default_options.js",
 			"background.js"
 		]
 	}
