@@ -14,16 +14,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
-	document.getElementById("dl-with-dlgrab").addEventListener("click", function(evt){
-		document.getElementById("dm-list-container").classList.remove("disabled");
-	});
-
-	document.getElementById("continue-with-firefox").addEventListener("click", function(evt){
-		document.getElementById("dm-list-container").classList.add("disabled");
-	});
-
-	document.getElementById("dl-with-dlgrab").click();
-
 	getBackgroundData().then(async function(){
 		windowId = (await browser.windows.getCurrent()).id;
 		let hash = DLGPop.downloadDialogs[windowId];

@@ -3,8 +3,8 @@ var DLGPop = new DownloadGrabPopup();
 /**
  * @returns {Promise} a promise resolved with a FixedSizeMap of all downloads
  */
-async function getBackgroundData(){
-
+async function getBackgroundData()
+{
 	let message = {type: Messaging.TYP_GET_DLG};
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.DLGJSON.allDownloads.limit;
@@ -34,12 +34,12 @@ async function getBackgroundData(){
 }
 
 /**
- * 
+ * This is called every time a button is clicked in a popup dialog
  * @param {Download} selectedDl 
  * @param {Element} clickedAction 
  */
-function actionClicked(selectedDl, clickedAction){
-
+function actionClicked(selectedDl, clickedAction)
+{
 	let id = clickedAction.id;
 	let disabled = clickedAction.getAttribute("class").indexOf("disabled-action") !== -1;
 
@@ -54,7 +54,14 @@ function actionClicked(selectedDl, clickedAction){
 			break;
 
 		case "action-download":
-			download(selectedDl);
+			if(document.getElementById("dl-with-dlgrab").checked)
+			{
+				downloadWithSelectedDM(selectedDl);
+			}
+			else if(document.getElementById("dl-with-firefox") && document.getElementById("dl-with-firefox").checked)
+			{
+				downloadWithFirefox(selectedDl);
+			}
 			break;
 		
 		case "action-cancel":
@@ -73,7 +80,8 @@ function actionClicked(selectedDl, clickedAction){
 
 }
 
-function populateDMs(){
+function populateDMs()
+{
 	let availableDMs = DLGPop.availableDMs;
 	let dmsDropDown = document.getElementById('available-dms');
 	for(let dmName of availableDMs){
@@ -90,31 +98,11 @@ function populateDMs(){
 	}
 }
 
-
 /**
  * @param {Download} download 
  */
-//todo: what's this?
-function download(download){
-	if(document.getElementById("dl-with-dlgrab").checked){
-		downloadWithSelectedDM(download);
-	}
-	else if(document.getElementById("dl-with-firefox")
-		&& document.getElementById("dl-with-firefox").checked){
-
-		downloadWithFirefox(download);
-	}
-	else if(document.getElementById("continue-with-firefox")
-		&& document.getElementById("continue-with-firefox").checked){
-
-		continueWithBrowser(download);
-	}
-}
-
-/**
- * @param {Download} download 
- */
-function downloadWithSelectedDM(download){
+function downloadWithSelectedDM(download)
+{
 	let DMs = document.getElementById('available-dms');
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
 	let message = {
@@ -129,7 +117,8 @@ function downloadWithSelectedDM(download){
 /**
  * @param {Download} download 
  */
-function continueWithBrowser(download){
+function continueWithBrowser(download)
+{
 	let message = {type: Messaging.TYP_CONT_WITH_BROWSER, downloadHash: download.hash};
 	browser.runtime.sendMessage(message);
 	DLGPop.continueWithBrowser = true;
@@ -139,7 +128,8 @@ function continueWithBrowser(download){
 /**
  * @param {Download} download 
  */
-function downloadWithFirefox(download) {
+function downloadWithFirefox(download)
+{
 	browser.downloads.download({
 		filename: download.getFilename(),
 		saveAs: true,
@@ -240,7 +230,8 @@ function showElement(element){
  * @param {Element} element 
  * @param {boolean} enabled 
  */
-function setActionEnabled(element, enabled){
+function setActionEnabled(element, enabled)
+{
 	if(enabled){
 		element.classList.remove("disabled-action");
 	}
