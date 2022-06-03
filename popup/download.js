@@ -1,5 +1,3 @@
-var DEBUG = true;
-
 /**
  * id of this download dialog
  * used for closing blank tabs after a download dialog is closed
@@ -85,7 +83,7 @@ window.addEventListener("beforeunload", function() {
  * This is called when background data (DLG) is received via messaging
  */
 function onBgDataRcvd() { 
-	let classReason = (DEBUG)? ' ('+DLGPop.selectedDl.classReason+')' : '';
+	let classReason = (log.DEBUG)? ' ('+DLGPop.selectedDl.classReason+')' : '';
 	document.getElementById("filename").innerHTML = DLGPop.selectedDl.getFilename() + classReason;
 	document.getElementById("filename").setAttribute("title", DLGPop.selectedDl.getFilename());
 	document.getElementById("size").innerHTML = 

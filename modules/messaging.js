@@ -20,9 +20,6 @@ class Messaging {
 			Options.apply(message.options);
 			log('saved options: ', DLG.options);
 		}
-		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
-			return Options.loadForUI();
-		}
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
 			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 		}
@@ -89,5 +86,4 @@ Messaging.TYP_CONT_WITH_BROWSER = 'con-with-browser';
 Messaging.TYP_INTERCEPT_DL = 'intercept-dl';
 Messaging.TYP_DOWNLOAD = 'download';
 Messaging.TYP_DL_REPORTED = 'dl-reported';
-Messaging.TYP_LOAD_OPTIONS = 'load-options';
 Messaging.TYP_GET_OPTS_DATA = 'get-options-data';

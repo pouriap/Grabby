@@ -1,29 +1,5 @@
 class Options 
 {
-	static async loadForUI()
-	{
-		let options = await browser.storage.local.get(Options.getDefaults());
-		let uiOpts = {};
-		for(let optName in options){
-			let optionVal = options[optName];
-			let optionData = Options.optionsData[optName];
-			uiOpts[optName] = {};
-			Object.assign(uiOpts[optName], optionData);
-			uiOpts[optName].name = optName;
-			uiOpts[optName].value = optionVal;
-			uiOpts[optName].extra = (optionData.extra)?
-				await Options._getExtra(optionVal, optionData.extra) : '';
-		}
-		return uiOpts;
-	}
-
-	static _getExtra(optionVal, extra){
-		switch(extra){
-			case 'get-available-dms':
-				return DLG.availableDMs;
-		}
-	}
-
 	static load(){
 		return browser.storage.local.get(Options.getDefaults());
 	}
@@ -158,7 +134,9 @@ Options.optionsData= {
 		type: 'dropdown',
 		default: '',
 		desc: "Default download manager: ",
-		extra: 'get-available-dms',
+		getListData: function(dlgInstance){
+			return dlgInstance.availableDMs;
+		},
 	},
 
 }

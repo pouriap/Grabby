@@ -1,5 +1,3 @@
-var DEBUG = true;
-
 document.addEventListener("DOMContentLoaded", (event) => {
 
 	document.querySelectorAll(".action").forEach(function(action){
@@ -86,7 +84,7 @@ function onBgDataRcvd() {
 		listItem.setAttribute("class", "dl-item " + download.debug_gray);
 		listItem.setAttribute("title", download.url);
 		listItem.setAttribute("data-hash", key);
-		let reason = (DEBUG)? " (" + download.classReason + ")" : "";
+		let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
 		listItem.innerHTML = download.getFilename() + reason;
 
 		listItem.addEventListener("click", function(evt){
@@ -102,7 +100,7 @@ function onBgDataRcvd() {
 		});
 
 		//this is for getting the info we put in tests
-		if(DEBUG){
+		if(log.DEBUG){
 			listItem.addEventListener("contextmenu", function(evt){
 				evt.preventDefault();
 				let hash = this.getAttribute("data-hash");

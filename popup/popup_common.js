@@ -6,6 +6,7 @@ var DLGPop = new DownloadGrabPopup();
 async function getBackgroundData()
 {
 	let message = {type: Messaging.TYP_GET_DLG};
+	//TODO: put browser.runtime.sendMessage into a static function
 	let response = await browser.runtime.sendMessage(message);
 	let limit = response.DLGJSON.allDownloads.limit;
 	let allDlsJSON = response.DLGJSON.allDownloads.list;

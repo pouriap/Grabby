@@ -43,8 +43,6 @@ native application must be in accordance with our No Surprises policy.
 //todo: I18N
 //todo: option to do this automatically for files like this from now on
 
-var DEBUG = true;
-
 var DLG = new DownloadGrab();
 
 (async () => {

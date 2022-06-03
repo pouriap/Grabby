@@ -1,10 +1,14 @@
+//TODO: chekc all included scripts in htmls and see if we still need them
+
+var DLGPop = new DownloadGrabPopup();
+
 // load current options when page is loaded
 document.addEventListener("DOMContentLoaded", loadOptions);
 
 // save options when save is clicked
 document.querySelector("form").addEventListener("submit", saveOptions);
 
-
+// saves the options in the HTML form into browser storage and then applies it in runtime too
 async function saveOptions(e) {
 
 	e.preventDefault();
@@ -13,13 +17,17 @@ async function saveOptions(e) {
 
 	let optionsToSave = {};
 
-	for(let optionName in optionsData){
+	for(let optionName in optionsData)
+	{
 		let optionType = optionsData[optionName].type;
 		let e = document.getElementById(optionName);
+
 		if(!e){
 			continue;
 		}
-		switch(optionType){
+
+		switch(optionType)
+		{
 			case 'textbox':
 				optionsToSave[optionName] = e.value;
 				break;
@@ -33,34 +41,51 @@ async function saveOptions(e) {
 	}
 
 	//options are saved in local storage but we need to update app.options too
-	let message = {
+	message = {
 		type: Messaging.TYP_SAVE_OPTIONS,
 		options: optionsToSave
 	};
-
 	browser.runtime.sendMessage(message);
 
 }
 
-async function loadOptions() {
+// loads options from browser storage and processes them to create a form
+async function loadOptions()
+{
+	let message = {type: Messaging.TYP_GET_DLG};
+	let res = await browser.runtime.sendMessage(message);
+	DLGPop.availableDMs = res.DLGJSON.availableDMs;
 
-	let currOptions = await browser.runtime.sendMessage({type: Messaging.TYP_LOAD_OPTIONS});
+	//get the currently saved options
+	let options = await browser.storage.local.get(Options.getDefaults());
 
-	log("got the options: ", currOptions);
+	let uiOptions = {};
 
-	for(let key in currOptions){
-		let option = currOptions[key];
-		let optionDiv = document.createElement('div');
-		optionDiv.setAttribute('class', 'panel-formElements-item');
-		optionDiv.appendChild(createLabel(option));
-		optionDiv.appendChild(createElement(option));
+	//process the raw options into an object with data for UI
+	for(let option in options)
+	{
+		let optionVal = options[option];
+		let optionData = Options.optionsData[option];
+		uiOptions[option] = {};
+		Object.assign(uiOptions[option], optionData);
+		uiOptions[option].value = optionVal;
+	}
+
+	//iterate through the UI options and create each option as a <div> then append it to the form
+	for(let option in uiOptions)
+	{
+		let optionData = uiOptions[option];
+		optionData.name = option;
+		let optionDiv = createOptionDiv(optionData);
 		document.getElementById('options-form').appendChild(optionDiv);
-		if(option.endsection){
+		//put a line after each section
+		if(optionData.endsection){
 			let hr = document.createElement('hr');
 			document.getElementById('options-form').appendChild(hr);
 		}
 	}
 
+	//finally create the submit button
 	let btn = document.createElement('button');
 	btn.setAttribute('class', 'browser-style');
 	btn.setAttribute('type', 'submit');
@@ -69,73 +94,93 @@ async function loadOptions() {
 	
 }
 
-function createLabel(option){
-	let label = document.createElement('label');
-	label.setAttribute("for", option.name);
-	label.innerHTML = option.desc;
-	return label;
+function createOptionDiv(optionData)
+{
+	let div = document.createElement('div');
+	div.setAttribute('class', 'panel-formElements-item');
+	div.appendChild(createLabel(optionData));
+	div.appendChild(createElement(optionData));
+	return div;
 }
 
-function createElement(option){
+function createElement(optionData)
+{
 	var e;
-	switch (option.type) {
+
+	switch (optionData.type)
+	{
 		case 'textbox':
-			e = createTextBox(option);
+			e = createTextBox(optionData);
 			break;
 		case 'checkbox':
-			e = createCheckBox(option);
+			e = createCheckBox(optionData);
 			break;
 		case 'dropdown':
-			e = createDropDown(option);
+			e = createDropDown(optionData);
 			break;
 	}
-	e.setAttribute("id", option.name);
-	if(option.attrs){
-		for(let attr of option.attrs){
+
+	e.setAttribute("id", optionData.name);
+
+	if(optionData.attrs)
+	{
+		for(let attr of optionData.attrs){
 			e.setAttribute(attr.name, attr.value);
 		}
 	}
+
 	return e;
 }
 
-function createCheckBox(option){
+function createLabel(optionData)
+{
+	let label = document.createElement('label');
+	label.setAttribute("for", optionData.name);
+	label.innerHTML = optionData.desc;
+	return label;
+}
+
+function createCheckBox(optionData)
+{
 	let checkBox = document.createElement("input");
 	checkBox.setAttribute("type", "checkbox");
-	checkBox.setAttribute("id", option.name);
-	checkBox.checked = option.value;
+	checkBox.setAttribute("id", optionData.name);
+	checkBox.checked = optionData.value;
 	return checkBox;
 }
 
-function createTextBox(option){
+function createTextBox(optionData)
+{
 	let txtBox = document.createElement("input");
 	txtBox.setAttribute("type", "text");
-	txtBox.setAttribute("id", option.name);
-	txtBox.value = option.value;
+	txtBox.setAttribute("id", optionData.name);
+	txtBox.value = optionData.value;
 	return txtBox;
 }
 
-function createDropDown(option){
-
-	//populate available DMs
-	let itemsList = option.extra;
+function createDropDown(optionData)
+{
+	//populate the list
+	let itemsList = optionData.getListData(DLGPop);
 
 	let dropDwn = document.createElement("select");
-	dropDwn.setAttribute("id", option.name);
+	dropDwn.setAttribute("id", optionData.name);
 
-	for(let itemName of itemsList){
+	for(let itemName of itemsList)
+	{
 		let item = document.createElement('option');
 		item.value = itemName;
 		item.innerHTML = itemName;
 		item.id = itemName;
 		item.onclick = function(){
 			let selectedItem = dropDwn.options[dropDwn.selectedIndex].value;
-			document.getElementById(option.name).value = selectedItem;
+			document.getElementById(optionData.name).value = selectedItem;
 		};
 		dropDwn.appendChild(item);
 		//is this the selected one?
-		if(option.value === item.value){
+		if(optionData.value === item.value){
 			item.setAttribute('selected', 'selected');
-			dropDwn.value = option.value;
+			dropDwn.value = optionData.value;
 		}
 	}
 

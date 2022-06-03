@@ -1229,13 +1229,15 @@ class DownloadJob{
 //special case for easier logging
 function log(...args)
 {
-	if(!DEBUG) return;
+	if(!log.DEBUG) return;
 
 	args.forEach((arg) => {
 		console.log(arg);
 	});
 
 }
+
+log.DEBUG = true;
 
 log.err = function(...args)
 {
@@ -1253,7 +1255,7 @@ log.warn = function(...args)
 
 log.color = function(color, ...args)
 {
-	if(!DEBUG) return;
+	if(!log.DEBUG) return;
 
 	args.forEach((arg) => {
 		console.log(`%c${arg}`, `color:${color};`);
