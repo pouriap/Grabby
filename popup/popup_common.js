@@ -32,53 +32,6 @@ async function getBackgroundData()
 	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
 }
 
-/**
- * This is called every time a button is clicked in a popup dialog
- * @param {Download} selectedDl 
- * @param {Element} clickedAction 
- */
-function actionClicked(selectedDl, clickedAction)
-{
-	let id = clickedAction.id;
-	let disabled = clickedAction.getAttribute("class").indexOf("disabled-action") !== -1;
-
-	if(disabled){
-		return;
-	}
-
-	switch(id){
-		
-		case "action-continue":
-			continueWithBrowser(selectedDl);
-			break;
-
-		case "action-download":
-			if(document.getElementById("dl-with-dlgrab").checked)
-			{
-				downloadWithSelectedDM(selectedDl);
-			}
-			else if(document.getElementById("dl-with-firefox") && document.getElementById("dl-with-firefox").checked)
-			{
-				downloadWithFirefox(selectedDl);
-			}
-			break;
-		
-		case "action-cancel":
-			window.close();
-			break;
-
-		case "action-report":
-			let source = (window.location.href.indexOf("popup.html") !== -1)? "popup dialog" : "download dialog";
-			reportDownload(selectedDl, source);
-			break;
-
-		default:
-			break;
-		
-	}
-
-}
-
 function populateDMs()
 {
 	let availableDMs = DLGPop.availableDMs;

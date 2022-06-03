@@ -18,10 +18,53 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		windowId = (await browser.windows.getCurrent()).id;
 		let hash = DLGPop.downloadDialogs[windowId];
 		DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
-		onGot();
+		onBgDataRcvd();
 	});
 
 });
+
+/**
+ * This is called every time a button is clicked in a popup dialog
+ * @param {Download} selectedDl 
+ * @param {Element} clickedAction 
+ */
+function actionClicked(selectedDl, clickedAction)
+{
+	let id = clickedAction.id;
+	let disabled = clickedAction.getAttribute("class").indexOf("disabled-action") !== -1;
+
+	if(disabled){
+		return;
+	}
+
+	switch(id){
+		
+		case "action-continue":
+			continueWithBrowser(selectedDl);
+			break;
+
+		case "action-download":
+			if(document.getElementById("dl-with-dlgrab").checked){
+				downloadWithSelectedDM(selectedDl);
+			}
+			else{
+				downloadWithFirefox(selectedDl);
+			}
+			break;
+		
+		case "action-cancel":
+			window.close();
+			break;
+
+		case "action-report":
+			let source = (window.location.href.indexOf("popup.html") !== -1)? "popup dialog" : "download dialog";
+			reportDownload(selectedDl, source);
+			break;
+
+		default:
+			break;
+	}
+}
 
 window.addEventListener("beforeunload", function() {
 	let downloadPageTabId = DLGPop.selectedDl.reqDetails.tabId;
@@ -35,7 +78,7 @@ window.addEventListener("beforeunload", function() {
 	browser.runtime.sendMessage(message);
 });
 
-function onGot() { 
+function onBgDataRcvd() { 
 	let classReason = (DEBUG)? ' ('+DLGPop.selectedDl.classReason+')' : '';
 	document.getElementById("filename").innerHTML = DLGPop.selectedDl.getFilename() + classReason;
 	document.getElementById("filename").setAttribute("title", DLGPop.selectedDl.getFilename());

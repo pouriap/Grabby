@@ -8,29 +8,64 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
-	document.getElementById("action-back").addEventListener("click", function(evt){
-		showDownloadsList();
-	});
-
-	document.getElementById("action-clearList").addEventListener("click", function(evt){
-		clearDownloadsList();
-	});
-
-	document.getElementById("dl-with-dlgrab").addEventListener("click", function(evt){
-		document.getElementById("dm-list-container").classList.remove("disabled");
-	});
-
-	document.getElementById("dl-with-firefox").addEventListener("click", function(evt){
-		document.getElementById("dm-list-container").classList.add("disabled");
-	});
-
 	document.getElementById("dl-with-dlgrab").click();
 
-	getBackgroundData().then(onGot);
+	getBackgroundData().then(onBgDataRcvd);
 
 });
 
-function onGot() { 
+/**
+ * This is called every time a button is clicked in a popup dialog
+ * @param {Download} selectedDl 
+ * @param {Element} clickedAction 
+ */
+function actionClicked(selectedDl, clickedAction)
+{
+	let id = clickedAction.id;
+	let disabled = clickedAction.getAttribute("class").indexOf("disabled-action") !== -1;
+
+	if(disabled){
+		return;
+	}
+
+	switch(id){
+		
+		case "action-download":
+			if(document.getElementById("dl-with-dlgrab").checked){
+				downloadWithSelectedDM(selectedDl);
+			}
+			else{
+				downloadWithFirefox(selectedDl);
+			}
+			break;
+
+		case "action-back":
+			showDownloadsList();
+			break;
+
+		case "action-clearList":
+			clearDownloadsList();
+			break;
+
+		case "dl-with-dlgrab":
+			document.getElementById("dm-list-container").classList.remove("disabled");
+			break;
+
+		case "dl-with-firefox":
+			document.getElementById("dm-list-container").classList.add("disabled");
+			break;
+
+		case "action-report":
+			let source = (window.location.href.indexOf("popup.html") !== -1)? "popup dialog" : "download dialog";
+			reportDownload(selectedDl, source);
+			break;
+
+		default:
+			break;
+	}
+}
+
+function onBgDataRcvd() { 
 
 	//populate list of downloads
 	let keys = DLGPop.allDownloads.getKeys();
