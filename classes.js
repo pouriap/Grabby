@@ -1225,3 +1225,37 @@ class DownloadJob{
 	}
 
 }
+
+//special case for easier logging
+function log(...args)
+{
+	if(!DEBUG) return;
+
+	args.forEach((arg) => {
+		console.log(arg);
+	});
+
+}
+
+log.err = function(...args)
+{
+	args.forEach((arg) => {
+		console.error(arg);
+	});
+}
+
+log.warn = function(...args)
+{
+	args.forEach((arg) => {
+		console.warn(arg);
+	});
+}
+
+log.color = function(color, ...args)
+{
+	if(!DEBUG) return;
+
+	args.forEach((arg) => {
+		console.log(`%c${arg}`, `color:${color};`);
+	});
+}

@@ -47,13 +47,9 @@ var DEBUG = true;
 
 var DLG = new DownloadGrab();
 
-//constructor faghat variable va init dashte bashim
-//this haye dakhele promise ha va callback ha check shavad 
-//chizhaii ke bayad static bashad check shavad mesle port dr NativeMessaging
-
 (async () => {
 
-	console.log('initializing app...');
+	log('initializing app...');
 
 	try
 	{
@@ -86,11 +82,11 @@ var DLG = new DownloadGrab();
 
 		ContextMenu.init();
 
-		console.log('app init successful');
+		log('app init successful');
 	}
 	catch(e)
 	{
-		console.log('app could not be initialized: ', e);
+		log.err('app could not be initialized: ', e);
 		//todo: remove notifications or make them look good
 		let options = {
 			type: "basic", 

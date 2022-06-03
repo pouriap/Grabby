@@ -48,7 +48,7 @@ function populateDMs()
 	}
 	let defaultDM = DLGPop.options.defaultDM || availableDMs[0];
 	if(defaultDM){
-		console.log('setting default dm: ', defaultDM);
+		log('setting default dm: ', defaultDM);
 		document.getElementById(defaultDM).setAttribute('selected', 'selected');
 	}
 }
@@ -161,7 +161,6 @@ async function reportDownload(download, source){
 				continueWithBrowser(download);
 			}
 			else{
-				console.log("READ STATE CHANGED TO: ", xhr.readyState);
 				document.getElementById("action-report").innerHTML = "Failed to submit error.";
 				document.getElementById("action-report").classList.add("fail");
 				setActionEnabled(document.getElementById("action-report"), true);

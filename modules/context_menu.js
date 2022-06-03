@@ -35,10 +35,10 @@ class ContextMenu {
 	 */
 	static async doOnMenuClicked(info, tab, defaultDM){
 
-		console.log('menu clicked: ', info, '\ntab: ', tab);
+		log('menu clicked: ', info, '\ntab: ', tab);
 
 		if(!defaultDM){
-			console.log('no download managers are available');
+			log.err('no download managers are available');
 			let options = {
 				type: "basic", 
 				title: "Download Grab", 

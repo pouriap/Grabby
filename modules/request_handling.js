@@ -76,7 +76,7 @@ class RequestHandling {
 	 */
 	static doOnHeadersReceived(details) {
 
-		console.log("receiving: ", details);
+		log("receiving: ", details);
 
 		let requestId = details.requestId;
 		let requestOfThisResponse = DLG.allRequests.get(requestId);

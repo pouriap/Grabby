@@ -76,10 +76,10 @@ class NativeMessaging {
 		this.port.setOnMessage(this.doOnNativeMessage);
 		this.port.setOnDisconnect((p) => {
 			if(p.error){
-				console.error("Port disconnected: ", p.error.message);
+				log.err("Port disconnected: ", p.error.message);
 			}
 			else{
-				console.error("Port disconnected");
+				log.err("Port disconnected");
 			}
 			this.port.connect();
 		});
@@ -109,22 +109,22 @@ class NativeMessaging {
 		//green node.js stdout
 		//blue flashgot.exe stdout
 		if(message.type === 'download_complete'){
-			console.log(`%cdownload complete: ${message.job}`, "color:green;font-weight:bold;");
+			log.color('green', `download complete: ${message.job}`);
 		}
 		else if(message.type === 'download_failed'){
-			console.log(`%cdownload FAILED: ${message.reason}`, "color:green;font-weight:bold;");
+			log.color('green', `download FAILED: ${message.job}`);
 		}
 		else if(message.type === 'flashgot_output'){
-			console.log(`%c${message.output}`, "color:blue;font-weight:bold;");
+			log.color('blue', `${message.output}`);
 		}
 		else if(message.type === 'exception'){
-			console.log(`%cexception in host.js: ${message.error}`, "color:green;font-weight:bold;");
+			log.color('green', `exception in host.js: ${message.error}`);
 		}
 		else if(message.type === 'error'){
-			console.log(`%cError in native app: ${message.content}`, "color:red;font-weight:bold;");
+			log.color('red', `Error in native app: ${message.content}`);
 		}
 		else{
-			console.log(`%cexception in host.js: ${JSON.stringify(message)}`, "color:green;font-weight:bold;");
+			log.color('red', `cexception in host.js: ${message}`);
 		}
 	}
 

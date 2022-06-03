@@ -46,7 +46,7 @@ async function loadOptions() {
 
 	let currOptions = await browser.runtime.sendMessage({type: Messaging.TYP_LOAD_OPTIONS});
 
-	console.log("got the options: ", currOptions);
+	log("got the options: ", currOptions);
 
 	for(let key in currOptions){
 		let option = currOptions[key];

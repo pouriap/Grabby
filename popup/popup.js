@@ -97,7 +97,7 @@ function onBgDataRcvd() {
 
 			let hash = this.getAttribute("data-hash");
 			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
-			console.log('item clicked: ', DLGPop.selectedDl);
+			log('item clicked: ', DLGPop.selectedDl);
 			showDownloadDetails(DLGPop.selectedDl);
 		});
 
@@ -110,7 +110,7 @@ function onBgDataRcvd() {
 				let info = {};
 				info.reqDetails = dl.reqDetails;
 				info.resDetails = dl.resDetails;
-				console.log(JSON.stringify(info).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
+				log(JSON.stringify(info).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 			});
 		}
 

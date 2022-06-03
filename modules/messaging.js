@@ -12,13 +12,13 @@ class Messaging {
 	  */
 	  static doOnMessage(message) {
 
-		console.log('message received:', message);
+		log('message received:', message);
 
 		if(message.type === Messaging.TYP_SAVE_OPTIONS){
 			OptionUtils.save(message.options);
 			//set options
 			OptionUtils.applyOptions(message.options);
-			console.log('saved options: ', DLG.options);
+			log('saved options: ', DLG.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
 			return OptionUtils.loadForUI();
@@ -44,7 +44,7 @@ class Messaging {
 			let downloadPageTabId = message.downloadPageTabId;
 			browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
 				if(tabInfo.url === "about:blank"){
-					console.log('closing tab: ', tabInfo);
+					log('closing tab: ', tabInfo);
 					browser.tabs.remove(tabInfo.id);
 				}
 			});

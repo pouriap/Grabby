@@ -84,7 +84,7 @@ class Utils {
 			return res;
 		}
 		catch(e){
-			console.error('error executing script: ', e);
+			log.err('error executing script: ', e);
 			return '';
 		}
 	}
