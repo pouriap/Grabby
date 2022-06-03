@@ -63,7 +63,7 @@
 			"modules/request_handling.js",
 			"modules/options.js",
 			"modules/messaging.js",
-			"modules/dmhelper.js",
+			"modules/browser_dms.js",
 			"options/default_options.js",
 			"background.js"
 		]

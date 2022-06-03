@@ -1,4 +1,3 @@
-//todo: rename to browserDMS
 class BrowserDMs{
 
 	static async getAvailableDMs(){
