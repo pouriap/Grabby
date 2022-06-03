@@ -53,24 +53,23 @@ class ContextMenu {
 			if(!tab){
 				return;
 			}
-			let result = await browser.tabs.executeScript(tab.id, {file: ContextMenu.SCRIPT_GET_ALL});
-			downloadLinks(result[0]);
+			let res = await Utils.executeScript(tab.id, {file: ContextMenu.SCRIPT_GET_ALL});
+			downloadLinks(res);
 		}
 		else if(info.menuItemId == ContextMenu.MENU_ID_GRAB_SELECTION){
 			//if tab is undefined it means we are in forbidden urls where we can't inject scripts
 			if(!tab){
 				return;
 			}
-			let result = await browser.tabs.executeScript(tab.id, {file: ContextMenu.SCRIPT_GET_SELECTION});
-			downloadLinks(result[0]);
+			let res = await Utils.executeScript(tab.id, {file: ContextMenu.SCRIPT_GET_SELECTION});
+			downloadLinks(res);
 		}
 		else if(info.menuItemId == ContextMenu.MENU_ID_GRAB_LINK){
 			let result = {};
 			result.links = [{href: info.linkUrl, description: info.linkText}];
 			if(tab){
 				result.originPageUrl = info.pageUrl;
-				let res = await browser.tabs.executeScript(tab.id, {code: 'document.referrer'});
-				result.originPageReferer = res[0];
+				result.originPageReferer = await Utils.executeScript(tab.id, {code: 'document.referrer'});
 			}
 			downloadLinks(result);
 		}

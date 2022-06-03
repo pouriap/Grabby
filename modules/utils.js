@@ -67,4 +67,26 @@ class Utils {
 		return cookies;
 	}
 
+	/**
+	 * Performs an executeScript on a tab
+	 * @param {number} tabId 
+	 * @param {object} data 
+	 * @returns 
+	 */
+	static async executeScript(tabId, data)
+	{
+		try
+		{
+			let res = await browser.tabs.executeScript(tabId, data);
+			if(res.length == 1){
+				return res[0];
+			}
+			return res;
+		}
+		catch(e){
+			console.error('error executing script: ', e);
+			return '';
+		}
+	}
+
 }

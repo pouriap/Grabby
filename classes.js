@@ -1169,8 +1169,7 @@ class DownloadJob{
 			let tabs = await browser.tabs.query({url: download.origin});
 			if(tabs[0]){
 				let originTabId = tabs[0].id;
-				let res = await browser.tabs.executeScript(originTabId, {code: 'document.referrer'});
-				originPageReferer = res[0];
+				originPageReferer = await Utils.executeScript(originTabId, {code: 'document.referrer'});
 			}
 		}
 
