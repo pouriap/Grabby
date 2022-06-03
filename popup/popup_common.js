@@ -6,8 +6,7 @@ var DLGPop = new DownloadGrabPopup();
 async function getBackgroundData()
 {
 	let message = {type: Messaging.TYP_GET_DLG};
-	//TODO: put browser.runtime.sendMessage into a static function
-	let response = await browser.runtime.sendMessage(message);
+	let response = await Messaging.sendMessage(message);
 	let limit = response.DLGJSON.allDownloads.limit;
 	let allDlsJSON = response.DLGJSON.allDownloads.list;
 	let allDownloads = new FixedSizeMap(limit);
@@ -66,7 +65,7 @@ function downloadWithSelectedDM(download)
 		downloadHash: download.getHash(), 
 		dmName: selectedDM
 	};
-	browser.runtime.sendMessage(message);
+	Messaging.sendMessage(message);
 	window.close();
 }
 
@@ -76,7 +75,7 @@ function downloadWithSelectedDM(download)
 function continueWithBrowser(download)
 {
 	let message = {type: Messaging.TYP_CONT_WITH_BROWSER, downloadHash: download.hash};
-	browser.runtime.sendMessage(message);
+	Messaging.sendMessage(message);
 	DLGPop.continueWithBrowser = true;
 	window.close();
 }
@@ -158,7 +157,7 @@ async function reportDownload(download, source){
 				download.reported = true;
 				//for bg context downloads
 				let message = {type: Messaging.TYP_DL_REPORTED, downloadHash: download.getHash()};
-				browser.runtime.sendMessage(message);
+				Messaging.sendMessage(message);
 				continueWithBrowser(download);
 			}
 			else{

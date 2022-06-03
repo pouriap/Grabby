@@ -76,7 +76,7 @@ window.addEventListener("beforeunload", function() {
 		downloadHash: DLGPop.selectedDl.getHash(),
 		continueWithBrowser: DLGPop.continueWithBrowser
 	};
-	browser.runtime.sendMessage(message);
+	Messaging.sendMessage(message);
 });
 
 /**

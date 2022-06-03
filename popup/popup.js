@@ -159,5 +159,5 @@ function clearDownloadsList(){
         element.parentElement.removeChild(element);
 	});
 	let message = {type: Messaging.TYP_CLEAR_LIST};
-	browser.runtime.sendMessage(message);
+	Messaging.sendMessage(message);
 }

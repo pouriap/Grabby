@@ -1,9 +1,17 @@
 class Options 
 {
+	/**
+	 * Loads options from browser storage
+	 * @returns {Promise}
+	 */
 	static load(){
 		return browser.storage.local.get(Options.getDefaults());
 	}
 
+	/**
+	 * Saves options to browser storage
+	 * @param {object} options 
+	 */
 	static save(options){
 		browser.storage.local.set(options);
 	}
@@ -75,8 +83,9 @@ class Options
 
 }
 
-Options.optionsData= {
-
+Options.optionsData = 
+{
+	
 	overrideDlDialog: {
 		type: 'checkbox',
 		default: true,

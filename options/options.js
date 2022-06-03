@@ -40,12 +40,12 @@ async function saveOptions(e) {
 		}
 	}
 
-	//options are saved in local storage but we need to update app.options too
+	//options are saved in local storage but we need to update runtime options too
 	message = {
 		type: Messaging.TYP_SAVE_OPTIONS,
 		options: optionsToSave
 	};
-	browser.runtime.sendMessage(message);
+	Messaging.sendMessage(message);
 
 }
 
@@ -53,11 +53,11 @@ async function saveOptions(e) {
 async function loadOptions()
 {
 	let message = {type: Messaging.TYP_GET_DLG};
-	let res = await browser.runtime.sendMessage(message);
+	let res = await Messaging.sendMessage(message);
 	DLGPop.availableDMs = res.DLGJSON.availableDMs;
 
 	//get the currently saved options
-	let options = await browser.storage.local.get(Options.getDefaults());
+	let options = await Options.load();
 
 	let uiOptions = {};
 

@@ -6,28 +6,43 @@ class Messaging {
 		});
 	}
 
-	 /**
+	/**
+	 * Sends a message
+	 * @param {object} msg 
+	 * @returns {Promise}
+	 */
+	static sendMessage(msg)
+	{
+		return browser.runtime.sendMessage(msg);
+	}
+
+	/**
 	 * Runs when a message is received from a script
-	  * @param {object} message 
-	  */
-	  static doOnMessage(message) {
-
-		log('message received:', message);
-
-		if(message.type === Messaging.TYP_SAVE_OPTIONS){
+	 * @param {object} message 
+	 */
+	static doOnMessage(message) 
+	{
+		if(message.type === Messaging.TYP_SAVE_OPTIONS)
+		{
 			Options.save(message.options);
 			//set options
 			Options.apply(message.options);
 			log('saved options: ', DLG.options);
 		}
-		else if(message.type === Messaging.TYP_CLEAR_LIST){
+
+		else if(message.type === Messaging.TYP_CLEAR_LIST)
+		{
 			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 		}
-		else if(message.type === Messaging.TYP_GET_DLG){
+
+		else if(message.type === Messaging.TYP_GET_DLG)
+		{
 			let data = {DLGJSON: DLG};
 			return Promise.resolve(data);
 		}
-		else if(message.type === Messaging.TYP_DL_DIALOG_CLOSING){
+
+		else if(message.type === Messaging.TYP_DL_DIALOG_CLOSING)
+		{
 			delete DLG.downloadDialogs[message.windowId];
 			if(message.continueWithBrowser){
 				return;
@@ -46,26 +61,34 @@ class Messaging {
 				}
 			});
 		}
-		else if(message.type === Messaging.TYP_CONT_WITH_BROWSER){
+
+		else if(message.type === Messaging.TYP_CONT_WITH_BROWSER)
+		{
 			let download = DLG.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: false});
 			}
 		}
+
 		//todo: unused
-		else if(message.type === Messaging.TYP_INTERCEPT_DL){
+		else if(message.type === Messaging.TYP_INTERCEPT_DL)
+		{
 			let download = DLG.allDownloads.get(message.downloadHash);
 			if(download.resolve){
 				download.resolve({cancel: true});
 			}
 		}
-		else if(message.type === Messaging.TYP_DOWNLOAD){
+
+		else if(message.type === Messaging.TYP_DOWNLOAD)
+		{
 			let download = DLG.allDownloads.get(message.downloadHash);
 			DownloadJob.getFromDownload(message.dmName, download).then((job)=>{
 				Utils.performJob(job);
 			});
 		}
-		else if(message.type === Messaging.TYP_DL_REPORTED){
+
+		else if(message.type === Messaging.TYP_DL_REPORTED)
+		{
 			let download = DLG.allDownloads.get(message.downloadHash);
 			download.reported = true;
 			DLG.blacklist.push(download.url);
