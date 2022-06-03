@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * Base class for the 'DLG' global variable
+ */
 class DLGBase
 {
 	constructor()
@@ -28,6 +31,9 @@ class DLGBase
 	}
 }
 
+/**
+ * Class for the popup DLG instance (DLGPopup)
+ */
 class DownloadGrabPopup extends DLGBase
 {
 	constructor()
@@ -46,6 +52,9 @@ class DownloadGrabPopup extends DLGBase
 	}
 }
 
+/**
+ * Class for the main DLG instance
+ */
 class DownloadGrab extends DLGBase
 {
 	constructor()
@@ -115,8 +124,10 @@ class DownloadGrab extends DLGBase
 	}
 }
 
-
-
+/**
+ * Class representing a download
+ * Basically any web request is a download
+ */
 class Download {
 
 	/**
@@ -278,6 +289,10 @@ class Download {
 }
 
 //todo: i'm not loving how this is now coupled with options
+/**
+ * A class containing all sorts of functions to determine if a request is an 
+ * actual download we are interested in
+ */
 class ReqFilter {
 
 	/**
@@ -1096,6 +1111,10 @@ var constants = {
 
 }
 
+/**
+ * A data structure represending information needed by FlashGot.exe to perform a download
+ * This information is needed for every single download if a list of links is provided
+ */
 class DownloadInfo{
 	constructor(url, desc, cookies, postData, filename, extension){
 		this.url = url || '';
@@ -1107,6 +1126,12 @@ class DownloadInfo{
 	}
 }
 
+/**
+ * A data structure represending information needed by FlashGot.exe to perform a download
+ * In case of a link list, the 'downloadsInfo' array holds the information for each link
+ * And the rest of the arguments are general and apply to all links
+ * This is based on how .fgt files are structured
+ */
 class DownloadJob{
 	
 	/**
@@ -1127,9 +1152,10 @@ class DownloadJob{
 	}
 
 	/**
-	 * 
+	 * Creates a job from a Download object
 	 * @param {string} dmName 
 	 * @param {Download} download 
+	 * @returns A DownloadJob object created from provided data
 	 */
 	static async getFromDownload(dmName, download)
 	{
@@ -1167,8 +1193,18 @@ class DownloadJob{
 
 	}
 
-	static async getFromLinks(dmName, links, originPageUrl, originPageReferer){
-
+	/**
+	 * Creates a job from link information
+	 * This is used in context-menu scripts where we don't have any Download object
+	 * and only have access to raw links
+	 * @param {string} dmName 
+	 * @param {array} links 
+	 * @param {string} originPageUrl 
+	 * @param {string} originPageReferer 
+	 * @returns A DownloadJob object created from provided data
+	 */
+	static async getFromLinks(dmName, links, originPageUrl, originPageReferer)
+	{
 		let downloadsInfo = [];
 		let originPageCookies = (originPageUrl)? await Utils.getCookies(originPageUrl) : '';
 		//get the cookies for each link and add it to all download items

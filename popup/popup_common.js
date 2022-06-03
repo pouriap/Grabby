@@ -32,6 +32,9 @@ async function getBackgroundData()
 	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
 }
 
+/**
+ * Populates the drop down list of download managers
+ */
 function populateDMs()
 {
 	let availableDMs = DLGPop.availableDMs;

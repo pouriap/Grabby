@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 /**
- * This is called every time a button is clicked in a popup dialog
+ * This is called every time something with '.action' class is clicked in a popup dialog
  * @param {Download} selectedDl 
  * @param {Element} clickedAction 
  */
@@ -65,6 +65,9 @@ function actionClicked(selectedDl, clickedAction)
 	}
 }
 
+/**
+ * This is called when background data (DLG) is received via messaging
+ */
 function onBgDataRcvd() { 
 
 	//populate list of downloads

@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 });
 
 /**
- * This is called every time a button is clicked in a popup dialog
+ * This is called every time something with '.action' class is clicked in a popup dialog
  * @param {Download} selectedDl 
  * @param {Element} clickedAction 
  */
@@ -66,6 +66,9 @@ function actionClicked(selectedDl, clickedAction)
 	}
 }
 
+/**
+ * Sends a message to background to tell it the download dialog is closing
+ */
 window.addEventListener("beforeunload", function() {
 	let downloadPageTabId = DLGPop.selectedDl.reqDetails.tabId;
 	let message = {
@@ -78,6 +81,9 @@ window.addEventListener("beforeunload", function() {
 	browser.runtime.sendMessage(message);
 });
 
+/**
+ * This is called when background data (DLG) is received via messaging
+ */
 function onBgDataRcvd() { 
 	let classReason = (DEBUG)? ' ('+DLGPop.selectedDl.classReason+')' : '';
 	document.getElementById("filename").innerHTML = DLGPop.selectedDl.getFilename() + classReason;
