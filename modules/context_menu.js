@@ -25,7 +25,7 @@ class ContextMenu {
 
 		//menu click listener
 		browser.menus.onClicked.addListener((info, tab) => {
-			return ContextMenu.doOnMenuClicked(info, tab, OptionUtils.getDefaultDM());
+			return ContextMenu.doOnMenuClicked(info, tab, Options.getDefaultDM());
 		});
 	}
 

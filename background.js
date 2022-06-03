@@ -69,8 +69,8 @@ var DLG = new DownloadGrab();
 		DLG._nativeMsging = nativeMsging;
 		DLG.sendNativeMsg = function(msg){DLG._nativeMsging.sendMessage(msg);}
 
-		let options = await OptionUtils.load();
-		OptionUtils.applyOptions(options);
+		let options = await Options.load();
+		Options.apply(options);
 
 		//todo: fix this
 		let res = await browser.storage.local.get({blacklist: []});

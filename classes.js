@@ -9,7 +9,7 @@ class DLGBase
 	{
 		/**
 		 * all grabbed downloads
-		 * this will be set in applyOptions()
+		 * this will be set in Options.apply()
 		 * @type {FixedSizeMap}
 		 */
 		this.allDownloads = {};

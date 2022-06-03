@@ -9,11 +9,11 @@ async function saveOptions(e) {
 
 	e.preventDefault();
 
-	let optionsData = OptionUtils.optionsData;
+	let optionsData = Options.optionsData;
 
 	let optionsToSave = {};
 
-	for(optionName in optionsData){
+	for(let optionName in optionsData){
 		let optionType = optionsData[optionName].type;
 		let e = document.getElementById(optionName);
 		if(!e){
@@ -32,7 +32,7 @@ async function saveOptions(e) {
 		}
 	}
 
-	//options are save in local storage but we need to update app.options too
+	//options are saved in local storage but we need to update app.options too
 	let message = {
 		type: Messaging.TYP_SAVE_OPTIONS,
 		options: optionsToSave

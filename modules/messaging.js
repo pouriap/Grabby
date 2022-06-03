@@ -15,13 +15,13 @@ class Messaging {
 		log('message received:', message);
 
 		if(message.type === Messaging.TYP_SAVE_OPTIONS){
-			OptionUtils.save(message.options);
+			Options.save(message.options);
 			//set options
-			OptionUtils.applyOptions(message.options);
+			Options.apply(message.options);
 			log('saved options: ', DLG.options);
 		}
 		else if(message.type === Messaging.TYP_LOAD_OPTIONS){
-			return OptionUtils.loadForUI();
+			return Options.loadForUI();
 		}
 		else if(message.type === Messaging.TYP_CLEAR_LIST){
 			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);

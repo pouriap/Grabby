@@ -1,17 +1,18 @@
-class OptionUtils {
-
-	static async loadForUI(){
-		let options = await browser.storage.local.get(OptionUtils.getDefaults());
+class Options 
+{
+	static async loadForUI()
+	{
+		let options = await browser.storage.local.get(Options.getDefaults());
 		let uiOpts = {};
 		for(let optName in options){
 			let optionVal = options[optName];
-			let optionData = OptionUtils.optionsData[optName];
+			let optionData = Options.optionsData[optName];
 			uiOpts[optName] = {};
 			Object.assign(uiOpts[optName], optionData);
 			uiOpts[optName].name = optName;
 			uiOpts[optName].value = optionVal;
 			uiOpts[optName].extra = (optionData.extra)?
-				await OptionUtils._getExtra(optionVal, optionData.extra) : '';
+				await Options._getExtra(optionVal, optionData.extra) : '';
 		}
 		return uiOpts;
 	}
@@ -24,7 +25,7 @@ class OptionUtils {
 	}
 
 	static load(){
-		return browser.storage.local.get(OptionUtils.getDefaults());
+		return browser.storage.local.get(Options.getDefaults());
 	}
 
 	static save(options){
@@ -33,13 +34,13 @@ class OptionUtils {
 
 	static getDefaults(){
 		let defaultOptions = {};
-		for(let optionName in OptionUtils.optionsData){
-			defaultOptions[optionName] = OptionUtils.optionsData[optionName].default;
+		for(let optionName in Options.optionsData){
+			defaultOptions[optionName] = Options.optionsData[optionName].default;
 		}
 		return defaultOptions;
 	}
 
-	static applyOptions(options)
+	static apply(options)
 	{
 		DLG.options = options;
 		//create a new list of downloads in case the downloas history size is changed in options
@@ -98,7 +99,7 @@ class OptionUtils {
 
 }
 
-OptionUtils.optionsData= {
+Options.optionsData= {
 
 	overrideDlDialog: {
 		type: 'checkbox',
@@ -131,28 +132,24 @@ OptionUtils.optionsData= {
 		type: 'textbox',
 		default: '',
 		desc: "Ignore files with these extensions:",
-		process: 'get-exts-from-list',
 		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	includedExts: {
 		type: 'textbox',
 		default: '',
 		desc: "Detect files with these extensions as downloads:",
-		process: 'get-exts-from-list',
 		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	forcedExts: {
 		type: 'textbox',
 		default: '',
 		desc: "Directly download files with these extensions with my default manager:",
-		process: 'get-exts-from-list',
 		attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
 	},
 	blacklistDomains: {
 		type: 'textbox',
 		default: '',
 		desc: "Do not grab from these domains:",
-		process: 'get-vals-from-list',
 		attrs: [{name: 'placeholder', value: 'example.com,example.org,...'}],
 		endsection: true,
 	},

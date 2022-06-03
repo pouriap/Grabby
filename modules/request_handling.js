@@ -357,7 +357,7 @@ class RequestHandling {
 		DLG.addToAllDownloads(download);
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){
-			let dmName = OptionUtils.getDefaultDM();
+			let dmName = Options.getDefaultDM();
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
 				Utils.performJob(job);
 			});

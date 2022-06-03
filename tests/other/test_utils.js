@@ -2,7 +2,7 @@ var app;
 
 function initApp(options){
 	app = new DlGrabApp([]);
-	OptionUtils.applyOptions(options);
+	Options.apply(options);
 	app.runtime.blacklist = [];
 }
 
