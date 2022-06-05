@@ -68,11 +68,9 @@ function actionClicked(selectedDl, clickedAction)
  * Sends a message to background to tell it the download dialog is closing
  */
 window.addEventListener("beforeunload", function() {
-	let downloadPageTabId = DLGPop.selectedDl.reqDetails.tabId;
 	let message = {
 		type: Messaging.TYP_DL_DIALOG_CLOSING, 
 		windowId: windowId, 
-		downloadPageTabId: downloadPageTabId,
 		downloadHash: DLGPop.selectedDl.getHash(),
 		continueWithBrowser: DLGPop.continueWithBrowser
 	};

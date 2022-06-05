@@ -42,6 +42,8 @@ native application must be in accordance with our No Surprises policy.
 //todo: support "download selection"
 //todo: I18N
 //todo: option to do this automatically for files like this from now on
+//todo: how do we handle redirects?
+//todo: add curl and wget commands
 
 var DLG = new DownloadGrab();
 

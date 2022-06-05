@@ -10,6 +10,7 @@ async function getBackgroundData()
 	let limit = response.DLGJSON.allDownloads.limit;
 	let allDlsJSON = response.DLGJSON.allDownloads.list;
 	let allDownloads = new FixedSizeMap(limit);
+	let currentTab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
 
 	//populate our local version of allDownloads using the JSON data
 	for(let downloadHash of Object.keys(allDlsJSON))
@@ -18,11 +19,8 @@ async function getBackgroundData()
 		reqDetails = downloadJSON.reqDetails;
 		resDetails = downloadJSON.resDetails;
 		let download = new Download(reqDetails, resDetails);
-		download.classReason = downloadJSON.classReason;
-		download.reported = downloadJSON.reported;
-		download.action = downloadJSON.act;
-		download.category = downloadJSON.cat;
-		download.hash = downloadJSON.hash;
+		//copy everything from downloadJSON to the new download object
+		Object.assign(download, downloadJSON);
 		allDownloads.put(downloadHash, download);
 	};
 
@@ -30,6 +28,8 @@ async function getBackgroundData()
 	DLGPop.availableDMs = response.DLGJSON.availableDMs;
 	DLGPop.options = response.DLGJSON.options;
 	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
+	DLGPop.currentTabUrl = currentTab.url;
+
 }
 
 /**

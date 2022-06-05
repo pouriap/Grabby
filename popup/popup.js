@@ -77,7 +77,14 @@ function onBgDataRcvd() {
 
 	for (const key of keys) {
 
+		/**
+		 * @type {Download}
+		 */
 		let download = DLGPop.allDownloads.get(key);
+
+		if(download.origin != DLGPop.currentTabUrl){
+			continue;
+		}
 
 		let listItem = document.createElement("li");
 		listItem.setAttribute("id", "req_" + download.requestId);

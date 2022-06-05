@@ -52,8 +52,9 @@ class Messaging {
 				download.resolve({cancel: true});
 			}
 			//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
-			//if we are not continuing with browser then close the empty tab
-			let downloadPageTabId = message.downloadPageTabId;
+			//if this is a download that opens in an empty new tab and we are not 
+			//continuing with browser then close the empty tab
+			let downloadPageTabId = download.reqDetails.tabId;
 			browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
 				if(tabInfo.url === "about:blank"){
 					log('closing tab: ', tabInfo);

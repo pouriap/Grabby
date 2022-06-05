@@ -49,6 +49,11 @@ class DownloadGrabPopup extends DLGBase
 		 * @type {boolean}
 		 */
 		this.continueWithBrowser = false;
+		/**
+		 * Id of the current tab
+		 * @type {number}
+		 */
+		this.currentTabUrl = '';
 	}
 }
 
@@ -141,7 +146,7 @@ class Download {
 		this.statusCode = resDetails.statusCode;
 		this.time = resDetails.timeStamp;
 		this.resourceType = resDetails.type;
-		this.origin = reqDetails.originUrl || "N/A";
+		this.origin = reqDetails.originUrl || resDetails.url;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
 	}
@@ -1162,15 +1167,11 @@ class DownloadJob{
 		let originPageCookies = '';
 		let originPageReferer = '';
 
-		if(download.origin)
-		{
-			originPageCookies = await Utils.getCookies(download.origin);
-
-			let tabs = await browser.tabs.query({url: download.origin});
-			if(tabs[0]){
-				let originTabId = tabs[0].id;
-				originPageReferer = await Utils.executeScript(originTabId, {code: 'document.referrer'});
-			}
+		originPageCookies = await Utils.getCookies(download.origin);
+		let tabs = await browser.tabs.query({url: download.origin});
+		if(tabs[0]){
+			let originTabId = tabs[0].id;
+			originPageReferer = await Utils.executeScript(originTabId, {code: 'document.referrer'});
 		}
 
 		let downloadInfo = new DownloadInfo(
