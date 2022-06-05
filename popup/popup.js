@@ -82,7 +82,7 @@ function onBgDataRcvd() {
 		 */
 		let download = DLGPop.allDownloads.get(key);
 
-		if(download.origin != DLGPop.currentTabUrl){
+		if( DLGPop.options.showOnlyTabDls && (download.origin != DLGPop.currentTabUrl) ){
 			continue;
 		}
 

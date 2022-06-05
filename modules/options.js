@@ -100,6 +100,11 @@ Options.optionsData =
 		type: 'textbox',
 		default: '20',
 		desc: 'Number of items to keep in downloads history:',
+	},
+	showOnlyTabDls: {
+		type: 'checkbox',
+		default: true,
+		desc: 'Show only downlods originated from current tab in the popup list',
 		endsection: true,
 	},
 
