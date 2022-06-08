@@ -104,27 +104,17 @@ class NativeMessaging {
 		NativeMessaging.port.postMessage(message);
 	}
 
-	doOnNativeMessage(message){
-		//black addon stdout
-		//green node.js stdout
-		//blue flashgot.exe stdout
-		if(message.type === 'download_complete'){
-			log.color('green', `download complete: ${message.job}`);
+	doOnNativeMessage(message)
+	{
+		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO){
+			log.color('green', `got info for ${message.dlHash}:`);
+			console.log(message.info);
 		}
-		else if(message.type === 'download_failed'){
-			log.color('green', `download FAILED: ${message.job}`);
-		}
-		else if(message.type === 'flashgot_output'){
-			log.color('blue', `${message.output}`);
-		}
-		else if(message.type === 'exception'){
-			log.color('green', `exception in host.js: ${message.error}`);
-		}
-		else if(message.type === 'error'){
+		else if(message.type === NativeMessaging.MSGTYP_ERR){
 			log.color('red', `Error in native app: ${message.content}`);
 		}
 		else{
-			log.color('red', `cexception in host.js: ${message}`);
+			log.color('red', `Bad message from native app:`, message);
 		}
 	}
 
@@ -133,17 +123,16 @@ class NativeMessaging {
 /** @type {ProperPort} */
 NativeMessaging.port = null;
 NativeMessaging.DLG_ADDON_ID = "download.grab.pouriap";
-NativeMessaging.MSGTYP_GET_AVAIL_DMS = "get_available_dms"
-NativeMessaging.MSGTYP_AVAIL_DMS = "available_dms"
-NativeMessaging.MSGTYP_DOWNLOAD = "download"
-NativeMessaging.MSGTYP_YTDL_INFO = "ytdl_getinfo"
-NativeMessaging.MSGTYP_YTDL_AUD = "ytdl_download_audio"
-NativeMessaging.MSGTYP_YTDL_VID = "ytdl_download_video"
-NativeMessaging.MSGTYP_ERR = "app_error"
-NativeMessaging.MSGTYP_MSG = "app_message"
-NativeMessaging.MSGTYP_HYTDLINFO = "app_ytdl_info"
-NativeMessaging.MSGTYP_HDLPROG = "app_download_progress"
-NativeMessaging.MSGTYP_UNSUPP = "unsupported"
+NativeMessaging.MSGTYP_GET_AVAIL_DMS = "get_available_dms";
+NativeMessaging.MSGTYP_AVAIL_DMS = "available_dms";
+NativeMessaging.MSGTYP_DOWNLOAD = "download";
+NativeMessaging.MSGTYP_YTDL_INFO = "ytdl_getinfo";
+NativeMessaging.MSGTYP_YTDL_AUD = "ytdl_download_audio";
+NativeMessaging.MSGTYP_YTDL_VID = "ytdl_download_video";
+NativeMessaging.MSGTYP_YTDLPROG = "app_download_progress";
+NativeMessaging.MSGTYP_ERR = "app_error";
+NativeMessaging.MSGTYP_MSG = "app_message";
+NativeMessaging.MSGTYP_UNSUPP = "unsupported";
 
 function ProperPort(){
 	this._connected = false;

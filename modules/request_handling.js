@@ -91,7 +91,29 @@ class RequestHandling {
 
 		let filter = new ReqFilter(download, DLG.options);
 
-		if(!RequestHandling.isIgnored(download, filter)){
+		if(filter.isStreamManifest())
+		{
+			let f = browser.webRequest.filterResponseData(details.requestId);
+			let decoder = new TextDecoder("utf-8");
+			let response = "";
+
+			//we handle streams differently because they are different
+			//also because the manifest becomes available after all the chunks are received
+			//while our download handling logic is all synchronous
+			download.act = ReqFilter.ACT_IGNORE;
+
+			f.ondata = event => {
+				response += decoder.decode(event.data, {stream: true});
+				f.write(event.data);
+			}
+		  
+			f.onstop = event => {
+				f.disconnect();
+				RequestHandling.handleStream(download, response);
+			}
+		}
+
+		else if(!RequestHandling.isIgnored(download, filter)){
 			//first determine its category
 			RequestHandling.determineCategory(download, filter);
 			//then group similar categories together into a class
@@ -135,12 +157,8 @@ class RequestHandling {
 			return true;
 		}
 
-		if(filter.isStreamManifest()){
-			log('got a manifest: ', filter.download);
-		}
-
 		//the only AJAX we're interested in is stream manifests
-		if(filter.isAJAX() && !filter.isStreamManifest()){
+		if(filter.isAJAX() /*&& !filter.isStreamManifest()*/ ){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
@@ -198,10 +216,10 @@ class RequestHandling {
 			download.cat = ReqFilter.CAT_FILE_MEDIA;
 			return;
 		}
-		if(filter.isMimeStreamManifest()){
-			download.cat = ReqFilter.CAT_STREAM_MANIFEST;
-			return;
-		}
+		// if(filter.isMimeStreamManifest()){
+		// 	download.cat = ReqFilter.CAT_STREAM_MANIFEST;
+		// 	return;
+		// }
 		if(filter.isMimeCompressed()){
 			download.cat = ReqFilter.CAT_FILE_COMP;
 			return;
@@ -226,10 +244,10 @@ class RequestHandling {
 			download.cat = ReqFilter.CAT_FILE_MEDIA;
 			return;
 		}
-		if(filter.isExtStreamManifest()){
-			download.cat = ReqFilter.CAT_STREAM_MANIFEST;
-			return;
-		}
+		// if(filter.isExtStreamManifest()){
+		// 	download.cat = ReqFilter.CAT_STREAM_MANIFEST;
+		// 	return;
+		// }
 		if(filter.isExtCompressed()){
 			download.cat = ReqFilter.CAT_FILE_COMP;
 			return;
@@ -288,10 +306,10 @@ class RequestHandling {
 			download.classReason = 'web res';
 			download.class = ReqFilter.CLS_INLINE_WEB_RES;
 		}
-		else if(download.cat === ReqFilter.CAT_STREAM_MANIFEST){
-			download.classReason = 'stream';
-			download.cass = ReqFilter.CLS_YTDL;
-		}
+		// else if(download.cat === ReqFilter.CAT_STREAM_MANIFEST){
+		// 	download.classReason = 'stream';
+		// 	download.cass = ReqFilter.CLS_YTDL;
+		// }
 		else if(
 			download.cat === ReqFilter.CAT_FILE_MEDIA ||
 			download.cat === ReqFilter.CAT_FILE_COMP ||
@@ -349,9 +367,9 @@ class RequestHandling {
 			}
 		}
 
-		else if(download.cass === ReqFilter.CLS_YTDL){
-			download.act = ReqFilter.ACT_YTDL;
-		}
+		// else if(download.cass === ReqFilter.CLS_YTDL){
+		// 	download.act = ReqFilter.ACT_YTDL;
+		// }
 
 		//overrides
 		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isForcedInOpts()){
@@ -399,4 +417,28 @@ class RequestHandling {
 		
 	}
 
+	/**
+	 * 
+	 * @param {Download} download 
+	 * @param {string} manifest 
+	 */
+	static handleStream(download, manifest)
+	{
+		let parser = new m3u8Parser.Parser();
+		parser.push(manifest);
+		parser.end();
+		let parsedManifest = parser.manifest;
+		if(parsedManifest.segments.length == 0)
+		{
+			log('we got a main manifest: ', download.url, parsedManifest);
+			let msg = {
+				type: NativeMessaging.MSGTYP_YTDL_INFO, 
+				url: download.url, 
+				dlHash: download.getHash()
+			};
+			DLG.sendNativeMsg(msg);
+		}
+	}
+
 }
+
