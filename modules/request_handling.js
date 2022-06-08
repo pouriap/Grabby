@@ -76,7 +76,7 @@ class RequestHandling {
 	 */
 	static doOnHeadersReceived(details) {
 
-		log("receiving: ", details);
+		//log("receiving: ", details);
 
 		let requestId = details.requestId;
 		let requestOfThisResponse = DLG.allRequests.get(requestId);
@@ -124,14 +124,23 @@ class RequestHandling {
 	 */
 	static isIgnored(download, filter){
 
-		//ain't no downloads in these (hopefully)
+		//ain't no downloads in these (hopefully :)
 		if(
 			filter.isWebSocket() ||
 			!filter.isStatusOK() ||
-			filter.isAJAX() ||
 			//todo: fix this madness
 			filter.isBlackListed(DLG.blacklist)
 		){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;
+		}
+
+		if(filter.isStreamManifest()){
+			log('got a manifest: ', filter.download);
+		}
+
+		//the only AJAX we're interested in is stream manifests
+		if(filter.isAJAX() && !filter.isStreamManifest()){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
@@ -189,6 +198,10 @@ class RequestHandling {
 			download.cat = ReqFilter.CAT_FILE_MEDIA;
 			return;
 		}
+		if(filter.isMimeStreamManifest()){
+			download.cat = ReqFilter.CAT_STREAM_MANIFEST;
+			return;
+		}
 		if(filter.isMimeCompressed()){
 			download.cat = ReqFilter.CAT_FILE_COMP;
 			return;
@@ -211,6 +224,10 @@ class RequestHandling {
 		}
 		if(filter.isExtMedia()){
 			download.cat = ReqFilter.CAT_FILE_MEDIA;
+			return;
+		}
+		if(filter.isExtStreamManifest()){
+			download.cat = ReqFilter.CAT_STREAM_MANIFEST;
 			return;
 		}
 		if(filter.isExtCompressed()){
@@ -271,6 +288,10 @@ class RequestHandling {
 			download.classReason = 'web res';
 			download.class = ReqFilter.CLS_INLINE_WEB_RES;
 		}
+		else if(download.cat === ReqFilter.CAT_STREAM_MANIFEST){
+			download.classReason = 'stream';
+			download.cass = ReqFilter.CLS_YTDL;
+		}
 		else if(
 			download.cat === ReqFilter.CAT_FILE_MEDIA ||
 			download.cat === ReqFilter.CAT_FILE_COMP ||
@@ -326,6 +347,10 @@ class RequestHandling {
 			else{
 				download.act = ReqFilter.ACT_GRAB;
 			}
+		}
+
+		else if(download.cass === ReqFilter.CLS_YTDL){
+			download.act = ReqFilter.ACT_YTDL;
 		}
 
 		//overrides

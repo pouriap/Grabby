@@ -473,6 +473,18 @@ class ReqFilter {
 		return this._isMedia;
 	}
 
+	isStreamManifest(){
+		if(typeof this._isStreamManifest === 'undefined'){
+			this._isStreamManifest = 
+				this._isInMimeList(constants.hlsMimes) ||
+				this._isInMimeList(constants.dashMimes) ||
+				this._isInExtensionList(constants.hlsExts) ||
+				this._isInExtensionList(constants.dashExts);
+
+		}
+		return this._isStreamManifest;
+	}
+
 	isBrowserMedia(){
 		if(typeof this._isBrowserMedia === 'undefined'){
 			this._isBrowserMedia = this._isInTypeList(constants.mediaTypes);
@@ -680,6 +692,10 @@ class ReqFilter {
 	isMimeMedia(){
 		return this._isInMimeList(constants.mediaMimes);
 	}
+	isMimeStreamManifest(){
+		return 	this._isInMimeList(constants.hlsMimes) || 
+			this._isInMimeList(constants.dashMimes);
+	}
 	isMimeCompressed(){
 		return this._isInMimeList(constants.compressedMimes);
 	}
@@ -698,6 +714,10 @@ class ReqFilter {
 	}
 	isExtMedia(){
 		return this._isInExtensionList(constants.mediaExts);
+	}
+	isExtStreamManifest(){
+		return	this._isInExtensionList(constants.hlsExts) ||
+			this._isInExtensionList(constants.dashExts);
 	}
 	isExtCompressed(){
 		return this._isInExtensionList(constants.compressedExts);
@@ -722,6 +742,7 @@ ReqFilter.CAT_FILE_MEDIA = 'media file';
 ReqFilter.CAT_FILE_COMP = 'compressed file';
 ReqFilter.CAT_FILE_DOC = 'document file';
 ReqFilter.CAT_FILE_BIN = 'binary file';
+ReqFilter.CAT_STREAM_MANIFEST = 'stream manifest';
 ReqFilter.CAT_UKNOWN = 'unknown';
 
 //classes of requests
@@ -729,12 +750,14 @@ ReqFilter.CLS_INLINE_WEB_RES = 'web res';
 ReqFilter.CLS_INLINE_MEDIA = 'web media';
 ReqFilter.CLS_WEB_OTHER = 'web page';
 ReqFilter.CLS_DOWNLOAD = 'download';
+ReqFilter.CLS_YTDL = 'ytdl';
 
 //types of action
 ReqFilter.ACT_GRAB = 'grab';
 ReqFilter.ACT_IGNORE = 'ignore';
 ReqFilter.ACT_FORCE_DL = 'force dl';
 ReqFilter.ACT_GRAB_SILENT = 'grab silent';
+ReqFilter.ACT_YTDL = 'ytdl';
 
 /**
  * A fixed sized map with key->value pairs
@@ -806,8 +829,8 @@ var constants = {
 	webSocketTypes: ['websocket'],
 
 
-
-
+	// These are things that are web resources such as images and css and we generally
+	// do not want to grab them
 	webResTypes: ['stylesheet', 'script', 'font', 'image', 'imageset'],
 	webOtherTypes: [
 		'xbl', 'xml_dtd', 'xslt', 'web_manifest', 
@@ -834,7 +857,7 @@ var constants = {
 	],
 
 
-
+	// Images
 	imageExts: ['jpg', 'jpeg', 'png', 'gif', 'svg', 'ico', 'bmp', 'webp', 'tif', 'tiff'],
 	imageMimes: [
 		'image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/vnd.microsoft.icon', 
@@ -843,6 +866,7 @@ var constants = {
 	imageTypes: ['image', 'imageset'],
 
 
+	// Fonts
 	fontExts: ['ttf', 'otf', 'eot', 'woff2', 'woff'],
 	fontMimes: [
 		'font/ttf', 'font/otf', 'application/vnd.ms-fontobject', 'font/woff', 'font/woff2', 
@@ -851,7 +875,7 @@ var constants = {
 		'font'
 	],
 
-
+	// Texty things
 	textualExts : [
 		//static content
 		'css', 'js', 'html', 'htm', 'dhtml', 'xhtml', 'json', 'jsonld', 'xml', 'rss',
@@ -868,12 +892,15 @@ var constants = {
 	textualTypes: ['stylesheet', 'script', 'xbl', 'xml_dtd', 'xslt', 'web_manifest'],
 
 
+	// These are types as defined by Mozilla associated with web requests
 	otherWebTypes: ['object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative'],
 
 
+	// AJAX obviously
 	ajaxTypes: ['xmlhttprequest'],
 
 
+	// Compresses things
 	compressedExts: [
 		'zip', 'gzip', 'gz', 'bz', 'bz2', '7z', 'tar', 'tgz', 'rar', 'jar', 'xpi', 'apk',
 	],
@@ -884,6 +911,7 @@ var constants = {
 	],
 
 
+	// Media things
 	mediaExts: [
 		//audio 
 		'wav', 'wave', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
@@ -905,6 +933,22 @@ var constants = {
 	],
 
 
+	// Stream things
+	hlsExts: [
+		'm3u8',
+	],
+	hlsMimes: [
+		'application/x-mpegURL', 'vnd.apple.mpegURL',
+	],
+	dashExts: [
+		'mpd',
+	],
+	dashMimes: [
+		'application/dash+xml', 'video/vnd.mpeg.dash.mpd',
+	],
+
+
+	// Document things
 	documentExts : [
 		//documents
 		'doc', 'xls', 'ppt', 'docx', 'xlsx', 'pptx', 'pdf', 'epub', 'mobi', 'djvu', 'cbr',
@@ -915,6 +959,7 @@ var constants = {
 	],
 
 
+	// Binary things
 	binaryExts: [
 		//platform-specific
 		'exe', 'msi', 'deb', 'rpm', 'pkg', 'dmg', 'app', 
@@ -927,6 +972,7 @@ var constants = {
 	],
 
 
+	// Things that are displayable in the browser
 	disPlayableExts: [
 		'wav', 'wave', 'ogg', 'oga', 'ogv', 'ogx', 'spx', 'opus', 'webm', 'flac', 'mp3', 
 		'mp4', 'm4a', 'm4p', 'm4b', 'm4r', 'm4v', 'txt', 'pdf'
@@ -937,6 +983,8 @@ var constants = {
 		'text/plain', 'application/pdf'
 	],
 
+
+	// Yes I wrote all of this
 	mimesToExts : {
 		"audio/aac" : "aac",
 		"audio/x-aac" : "aac",
@@ -1036,6 +1084,8 @@ var constants = {
 		"application/x-7z-compressed" : "7z"
 	},
 
+
+	// And this
 	extsToMimes: {
 		"aac" : ["audio/aac", "audio/x-aac"],
 		"abw" : ["application/x-abiword"],
