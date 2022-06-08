@@ -53,7 +53,12 @@ class DownloadGrabPopup extends DLGBase
 		 * Id of the current tab
 		 * @type {number}
 		 */
-		this.currentTabUrl = '';
+		this.currTabId = -1;
+		/**
+		 * URL of the current tab
+		 * @type {string}
+		 */
+		this.currTabUrl = '';
 	}
 }
 
@@ -147,8 +152,13 @@ class Download {
 		this.time = resDetails.timeStamp;
 		this.resourceType = resDetails.type;
 		this.origin = reqDetails.originUrl || resDetails.url;
+		this.tabId = reqDetails.tabId;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
+		// Yes I'm doing this in the constructor and nobody can stop me
+		browser.tabs.get(reqDetails.tabId).then((tabInfo) => {
+			this.tabUrl = tabInfo.url;
+		});
 	}
 
 	getHash(){

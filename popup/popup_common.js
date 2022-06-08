@@ -28,8 +28,8 @@ async function getBackgroundData()
 	DLGPop.availableDMs = response.DLGJSON.availableDMs;
 	DLGPop.options = response.DLGJSON.options;
 	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
-	DLGPop.currentTabUrl = currentTab.url;
-
+	DLGPop.currTabUrl = currentTab.url;
+	DLGPop.currTabId = currentTab.id;
 }
 
 /**

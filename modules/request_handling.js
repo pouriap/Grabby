@@ -397,6 +397,11 @@ class RequestHandling {
 			return;
 		}
 
+		//todo: if a file is generated with a different URL each time we open a page
+		//then consequent openings of that page adds the same file to the download list
+		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
+		//warning: example is porn
+
 		DLG.addToAllDownloads(download);
 
 		if(download.act === ReqFilter.ACT_FORCE_DL){

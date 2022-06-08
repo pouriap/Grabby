@@ -82,7 +82,12 @@ function onBgDataRcvd() {
 		 */
 		let download = DLGPop.allDownloads.get(key);
 
-		if( DLGPop.options.showOnlyTabDls && (download.origin != DLGPop.currentTabUrl) ){
+		if( 
+			DLGPop.options.showOnlyTabDls &&
+			download.tabId != DLGPop.currTabId && 
+			download.tabUrl != DLGPop.currTabUrl
+		){
+			//log('hiding dl: ', download.url, ' because ', download.origin, ' =/= ', DLGPop.currTabUrl);
 			continue;
 		}
 
