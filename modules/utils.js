@@ -19,6 +19,16 @@ class Utils {
 		a.href = url;
 		return a.pathname;
 	}
+	
+	/**
+	 * Gets a "clean" URL, i.e. a URL without query string and fragments, etc.
+	 * @param {string} url 
+	 */
+	static getCleanUrl(url){
+		let a = document.createElement('a');
+		a.href = url;
+		return (a.hostname + a.pathname);
+	}
 
 	static getFileName(url){
 		let path = Utils.getPath(url);

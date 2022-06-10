@@ -172,22 +172,19 @@ class Download {
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
 		//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
-		if(this.tabId >= 0){
+		try{
 			browser.tabs.get(this.tabId).then((tabInfo) => {
 				if(tabInfo.url != "about:blank"){
 					this.tabUrl = tabInfo.url;
 				}
 				else{
-					browser.tabs.get(tabInfo.openerTabId).then((tabInfo2) => {
-						this.tabUrl = tabInfo2.url;
-						this.tabId = tabInfo2.id;
-					}).catch((e) => {
-						this.tabUrl = '';
-					});
+					this.tabUrl = this.origin;
 				}
 			}).catch((e) => {
-				this.tabUrl = '';
+				this.tabUrl = this.origin;
 			});
+		}catch(e){
+			this.tabUrl = this.origin;
 		}
 	}
 

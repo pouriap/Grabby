@@ -55,12 +55,14 @@ class Messaging {
 			//if this is a download that opens in an empty new tab and we are not 
 			//continuing with browser then close the empty tab
 			let downloadPageTabId = download.reqDetails.tabId;
-			browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
-				if(tabInfo.url === "about:blank"){
-					log('closing tab: ', tabInfo);
-					browser.tabs.remove(tabInfo.id);
-				}
-			});
+			try{
+				browser.tabs.get(downloadPageTabId).then((tabInfo)=>{
+					if(tabInfo.url === "about:blank"){
+						log('closing blank tab: ', tabInfo);
+						browser.tabs.remove(tabInfo.id);
+					}
+				});
+			}catch(e){};
 		}
 
 		else if(message.type === Messaging.TYP_CONT_WITH_BROWSER)
