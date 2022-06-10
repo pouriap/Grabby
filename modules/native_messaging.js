@@ -110,16 +110,18 @@ class NativeMessaging {
 		{
 			log.color('green', `got info for ${message.dlHash}:`);
 			console.log(message.info);
+			let st = new StreamDownload(message.info);
+			DLG.addToAllStreams(st);
 		}
 
 		else if(message.type === NativeMessaging.MSGTYP_ERR)
 		{
-			log.color('red', `Error in native app: ${message.content}`);
+			log.err('Error in native app', message.content);
 		}
 
 		else
 		{
-			log.color('red', `Bad message from native app:`, message);
+			log.err('Bad message from native app', message);
 		}
 	}
 

@@ -14,6 +14,12 @@ class DLGBase
 		 */
 		this.allDownloads = {};
 		/**
+		 * all grabbed streams
+		 * this will be set in Options.apply()
+		 * @type {FixedSizeMap}
+		 */
+		 this.allStreams = {};
+		/**
 		 * a map containing all currently open download dialogs
 		 * @type {object}
 		 */
@@ -92,6 +98,16 @@ class DownloadGrab extends DLGBase
 		let hash = download.getHash();
 		//we put hash of URL as key to prevent the same URL being added by different requests
 		this.allDownloads.put(hash, download);
+	}
+
+	/**
+	 * Adds a stream download to our main list of stream downloads
+	 * @param {StreamDownload} stream 
+	 */
+	addToAllStreams = function(stream)
+	{
+		let hash = stream.getHash();
+		this.allStreams.put(hash, stream);
 	}
 
 	/**
@@ -319,6 +335,19 @@ class Download {
 
 class StreamDownload
 {
+	constructor(ytdlInfo){
+		Object.assign(this, ytdlInfo);
+		//todo: get it properly
+		this.manifestUrl = ytdlInfo.manifestUrl;
+	}
+
+	getHash()
+	{
+		if(typeof this.hash === 'undefined'){
+			this.hash = md5(this.manifestUrl);
+		}
+		return this.hash;
+	}
 }
 
 //todo: i'm not loving how this is now coupled with options
