@@ -106,14 +106,19 @@ class NativeMessaging {
 
 	doOnNativeMessage(message)
 	{
-		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO){
+		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO)
+		{
 			log.color('green', `got info for ${message.dlHash}:`);
 			console.log(message.info);
 		}
-		else if(message.type === NativeMessaging.MSGTYP_ERR){
+
+		else if(message.type === NativeMessaging.MSGTYP_ERR)
+		{
 			log.color('red', `Error in native app: ${message.content}`);
 		}
-		else{
+
+		else
+		{
 			log.color('red', `Bad message from native app:`, message);
 		}
 	}

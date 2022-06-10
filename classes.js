@@ -155,10 +155,14 @@ class Download {
 		this.tabId = reqDetails.tabId;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
-		// Yes I'm doing this in the constructor and nobody can stop me
-		browser.tabs.get(reqDetails.tabId).then((tabInfo) => {
-			this.tabUrl = tabInfo.url;
-		});
+		//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
+		if(this.tabId >= 0){
+			browser.tabs.get(this.tabId).then((tabInfo) => {
+				this.tabUrl = tabInfo.url;
+			}).catch((e) => {
+				this.tabUrl = '';
+			});
+		}
 	}
 
 	getHash(){
@@ -483,16 +487,26 @@ class ReqFilter {
 		return this._isMedia;
 	}
 
-	isStreamManifest(){
-		if(typeof this._isStreamManifest === 'undefined'){
-			this._isStreamManifest = 
+	isHlsManifest(){
+		if(typeof this._isHlsManifest === 'undefined'){
+			this._isHlsManifest = 
 				this._isInMimeList(constants.hlsMimes) ||
-				this._isInMimeList(constants.dashMimes) ||
-				this._isInExtensionList(constants.hlsExts) ||
-				this._isInExtensionList(constants.dashExts);
-
+				this._isInExtensionList(constants.hlsExts);
 		}
-		return this._isStreamManifest;
+		return this._isHlsManifest;
+	}
+
+	isDashManifest(){
+		if(typeof this._isDashManifest === 'undefined'){
+			this._isDashManifest = 
+				this._isInMimeList(constants.dashMimes) ||
+				this._isInExtensionList(constants.dashExts);
+		}
+		return this._isDashManifest;
+	}
+
+	isStreamManifest(){
+		return this.isHlsManifest() || this.isDashManifest();
 	}
 
 	isBrowserMedia(){
@@ -752,7 +766,6 @@ ReqFilter.CAT_FILE_MEDIA = 'media file';
 ReqFilter.CAT_FILE_COMP = 'compressed file';
 ReqFilter.CAT_FILE_DOC = 'document file';
 ReqFilter.CAT_FILE_BIN = 'binary file';
-ReqFilter.CAT_STREAM_MANIFEST = 'stream manifest';
 ReqFilter.CAT_UKNOWN = 'unknown';
 
 //classes of requests
@@ -760,7 +773,6 @@ ReqFilter.CLS_INLINE_WEB_RES = 'web res';
 ReqFilter.CLS_INLINE_MEDIA = 'web media';
 ReqFilter.CLS_WEB_OTHER = 'web page';
 ReqFilter.CLS_DOWNLOAD = 'download';
-ReqFilter.CLS_YTDL = 'ytdl';
 
 //types of action
 ReqFilter.ACT_GRAB = 'grab';

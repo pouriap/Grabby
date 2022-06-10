@@ -45,6 +45,10 @@ native application must be in accordance with our No Surprises policy.
 //todo: option to do this automatically for files like this from now on
 //todo: how do we handle redirects?
 //todo: add curl and wget commands
+//todo: config file for ytdl?
+//todo: support proxy for ytdl
+//todo: ytdl -N, --concurrent-fragments N option
+//todo: ytdl --newline option
 
 var DLG = new DownloadGrab();
 

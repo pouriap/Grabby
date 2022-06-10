@@ -56,8 +56,8 @@
 	"background": {
 		"scripts": [
 			"libs/md5.js",
-			"libs/m3u8-parser.min.js",
-			"libs/mpd-parser.min.js",
+			"libs/m3u8-parser.js",
+			"libs/mpd-parser.js",
 			"classes.js",
 			"modules/utils.js",
 			"modules/native_messaging.js",
