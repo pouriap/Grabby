@@ -14,12 +14,6 @@ class DLGBase
 		 */
 		this.allDownloads = {};
 		/**
-		 * all grabbed streams
-		 * this will be set in Options.apply()
-		 * @type {FixedSizeMap}
-		 */
-		 this.allStreams = {};
-		/**
 		 * a map containing all currently open download dialogs
 		 * @type {object}
 		 */
@@ -101,16 +95,6 @@ class DownloadGrab extends DLGBase
 	}
 
 	/**
-	 * Adds a stream download to our main list of stream downloads
-	 * @param {StreamDownload} stream 
-	 */
-	addToAllStreams = function(stream)
-	{
-		let hash = stream.getHash();
-		this.allStreams.put(hash, stream);
-	}
-
-	/**
 	 * opens the download dialog
 	 * here's how things happen because WebExtensions suck ass:
 	 * we open the download dialog window
@@ -172,19 +156,22 @@ class Download {
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
 		//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
-		try{
+		if(this.tabId >= 0){
 			browser.tabs.get(this.tabId).then((tabInfo) => {
 				if(tabInfo.url != "about:blank"){
 					this.tabUrl = tabInfo.url;
 				}
 				else{
-					this.tabUrl = this.origin;
+					browser.tabs.get(tabInfo.openerTabId).then((tabInfo2) => {
+						this.tabUrl = tabInfo2.url;
+						this.tabId = tabInfo2.id;
+					}).catch((e) => {
+						this.tabUrl = '';
+					});
 				}
 			}).catch((e) => {
-				this.tabUrl = this.origin;
+				this.tabUrl = '';
 			});
-		}catch(e){
-			this.tabUrl = this.origin;
 		}
 	}
 
@@ -328,23 +315,6 @@ class Download {
 		return this.fileExtension;
 	}
 
-}
-
-class StreamDownload
-{
-	constructor(ytdlInfo){
-		Object.assign(this, ytdlInfo);
-		//todo: get it properly
-		this.manifestUrl = ytdlInfo.manifestUrl;
-	}
-
-	getHash()
-	{
-		if(typeof this.hash === 'undefined'){
-			this.hash = md5(this.manifestUrl);
-		}
-		return this.hash;
-	}
 }
 
 //todo: i'm not loving how this is now coupled with options

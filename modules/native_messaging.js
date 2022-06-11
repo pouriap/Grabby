@@ -108,10 +108,10 @@ class NativeMessaging {
 	{
 		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO)
 		{
-			log.color('green', `got info for ${message.dlHash}:`);
-			console.log(message.info);
-			let st = new StreamDownload(message.info);
-			DLG.addToAllStreams(st);
+			log.color('green', `got info for ${message.dlHash}:`, message.info);
+			let dl = DLG.allDownloads.get(message.dlHash);
+			dl.streamInfo = message.info;
+			dl.hidden = false;
 		}
 
 		else if(message.type === NativeMessaging.MSGTYP_ERR)

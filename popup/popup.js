@@ -82,6 +82,10 @@ function onBgDataRcvd() {
 		 */
 		let download = DLGPop.allDownloads.get(key);
 
+		if(download.hidden){
+			continue;
+		}
+
 		if( 
 			DLGPop.options.showOnlyTabDls &&
 			download.tabId != DLGPop.currTabId && 
@@ -97,9 +101,17 @@ function onBgDataRcvd() {
 		listItem.setAttribute("title", download.url);
 		listItem.setAttribute("data-hash", key);
 		let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
-		listItem.innerHTML = download.getFilename() + reason;
 
-		listItem.addEventListener("click", function(evt){
+		//if it's a file download
+		if(!download.streamInfo){
+			listItem.innerHTML = download.getFilename() + reason;
+		}
+		else{
+			listItem.innerHTML = download.streamInfo.title;
+		}
+
+		listItem.addEventListener("click", function(evt)
+		{
 			//todo: when you click a download and make some changes and then click another download 
 			// the same changes are still there because it's the same page
 			document.getElementById('action-report').setAttribute('class', 'action');
@@ -108,7 +120,13 @@ function onBgDataRcvd() {
 			let hash = this.getAttribute("data-hash");
 			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
 			log('item clicked: ', DLGPop.selectedDl);
-			showDownloadDetails(DLGPop.selectedDl);
+
+			if(DLGPop.selectedDl.streamInfo){
+				showStreamDetails(DLGPop.selectedDl);
+			}
+			else{
+				showDownloadDetails(DLGPop.selectedDl);
+			}
 		});
 
 		//this is for getting the info we put in tests
@@ -134,9 +152,11 @@ function onBgDataRcvd() {
  * Shows the details popup for a particular download item
  * @param {Download} download 
  */
-function showDownloadDetails(download){
+function showDownloadDetails(download)
+{
 	let dlList = document.getElementById("downloads-list");
-	let actionList = document.getElementById("download-details");
+	let dlDetails = document.getElementById("download-details");
+
 	document.getElementById("filename").innerHTML = download.getFilename();
 	document.getElementById("filename").setAttribute("title", download.getFilename());
 	document.getElementById("size").innerHTML = 
@@ -149,8 +169,33 @@ function showDownloadDetails(download){
 	document.getElementById("origin").innerHTML = download.origin;
 	document.getElementById("origin").setAttribute("title", download.origin);
 	document.getElementById("output").style.display = 'none';
+
 	hideElement(dlList);
-	showElement(actionList);
+	showElement(dlDetails);
+}
+
+/**
+ * Shows the details popup for a particular stream download
+ * @param {Download} download 
+ */
+ function showStreamDetails(download)
+ {
+	let dlList = document.getElementById("downloads-list");
+	let dlDetails = document.getElementById("download-details");
+	let info = download.streamInfo;
+
+	document.getElementById("filename").innerHTML = info.title;
+	document.getElementById("filename").setAttribute("title", info.filename);
+	document.getElementById("host").innerHTML = Utils.getDomain(download.origin);
+	document.getElementById("time").innerHTML = 
+		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
+	document.getElementById("url").innerHTML = download.url;
+	document.getElementById("origin").innerHTML = download.origin;
+	document.getElementById("origin").setAttribute("title", download.origin);
+	document.getElementById("output").style.display = 'none';
+
+	hideElement(dlList);
+	showElement(dlDetails);
 }
 
 /**

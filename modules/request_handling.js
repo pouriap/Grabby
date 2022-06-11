@@ -102,11 +102,11 @@ class RequestHandling {
 		// Waiting for the response body is not synchronous
 		if(filter.isStreamManifest())
 		{
+			download.act = ReqFilter.ACT_IGNORE;
+
 			let f = browser.webRequest.filterResponseData(details.requestId);
 			let decoder = new TextDecoder("utf-8");
 			let response = "";
-
-			download.act = ReqFilter.ACT_IGNORE;
 
 			f.ondata = (event) => {
 				response += decoder.decode(event.data, {stream: true});
@@ -440,6 +440,11 @@ class RequestHandling {
 		if(parsedManifest.segments.length == 0)
 		{
 			log('we got a main manifest: ', filter.download.url, parsedManifest);
+
+			//hide it because we don't want to show it until we get the info
+			filter.download.hidden = true;
+			DLG.addToAllDownloads(filter.download);
+
 			let msg = {
 				type: NativeMessaging.MSGTYP_YTDL_INFO, 
 				url: filter.download.tabUrl, 

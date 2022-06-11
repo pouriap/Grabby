@@ -11,6 +11,7 @@
 
 	<div id="content">
 
+		<!-- HTML for list of downloads -->
 		<ul id="downloads-list">
 			<li class="list-title">
 				<img id="action-clearList" src="../icons/clear.svg" title="Clear List"/>
@@ -19,6 +20,7 @@
 			<li id="no-dl" style="display:none;">No Downloads</li>
 		</ul>
 
+		<!-- HTML for details of a file download -->
 		<div id="download-details" class="hidden">
 
 			<div class="action" id="action-back">Back To Downloads List</div>
@@ -63,6 +65,39 @@
 				<a class="action" id="action-report" title="Click this if Download Grab has mistakenly detected this request as a download">Report falsely detected download</a>
 			</ul>
 
+		</div>
+
+		<!-- HTML for details of a stream download -->
+		<div id="stream-details" class="hidden">
+
+			<div class="action" id="action-back">Back To Downloads List</div>
+
+			<ul id="info">
+				<li class="desc" id="filename"></li>
+
+				<li class="desc desc-name">
+					From: <span class="desc" id="host"></span>
+				</li>
+				<li class="desc desc-name">
+					Requested: <span class="desc" id="time"></span>
+				</li>
+				<li class="desc desc-name">
+					Origin Page: <span class="desc" id="origin"></span>
+				</li>
+				<li class="desc" id="output"></li>
+			</ul>
+
+			<div id="stream-formats">
+
+			</div>
+
+			<ul id="actions">
+				<li class="action" id="action-download">Download</li>
+				<br>
+				<img src="spinner.gif" id="spinner">
+				<a class="action" id="action-report" title="Click this if Download Grab has mistakenly detected this request as a download">Report falsely detected download</a>
+			</ul>
+			
 		</div>
 		
 	</div>
