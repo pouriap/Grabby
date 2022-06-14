@@ -422,6 +422,12 @@ class RequestHandling {
 	static handleStream(filter, manifest)
 	{
 		let parsedManifest = {};
+		let tabId = filter.download.tabId.toString();
+		let sendToYTDL = false;
+
+		if(!DLG.tabs[tabId]){
+			DLG.tabs[tabId] = {};
+		}
 
 		if(filter.isHlsManifest()){
 			let parser = new m3u8Parser.Parser();
@@ -433,28 +439,40 @@ class RequestHandling {
 			parsedManifest = mpdParser.parse(manifest);
 		}
 		else{
-			log.err("we got an unknown manifest", manifest);
+			log.err("We got an unknown manifest:", manifest);
 			return;
 		}
 
 		if(parsedManifest.segments.length == 0)
 		{
 			log('we got a main manifest: ', filter.download.url, parsedManifest);
+			DLG.tabs[tabId].manifestSent = true;
+			sendToYTDL = true;
+		}
+		else{
+			log('we got a sub-manifest: ', filter.download.url, parsedManifest);
+			//when the page only has a sub-manifest and not a main playlist
+			//example of this: https://videoshub.com/videos/25312764
+			if(!DLG.tabs[tabId].manifestSent){
+				log("but there has been no main manifest");
+				sendToYTDL = true;
+			}
+		}
 
+		if(sendToYTDL)
+		{
 			//hide it because we don't want to show it until we get the info
 			filter.download.hidden = true;
 			DLG.addToAllDownloads(filter.download);
 
 			let msg = {
 				type: NativeMessaging.MSGTYP_YTDL_INFO, 
-				url: filter.download.tabUrl, 
+				page_url: filter.download.tabUrl, 
+				manifest_url: filter.download.url,
 				dlHash: filter.download.getHash()
 			};
 			DLG.sendNativeMsg(msg);
-		}
 
-		else{
-			log('we got a sub-manifest: ', filter.download.url, parsedManifest);
 		}
 	}
 

@@ -108,20 +108,33 @@ class NativeMessaging {
 	{
 		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO)
 		{
-			log.color('green', `got info for ${message.dlHash}:`, message.info);
+			log('got info for ' + message.dlHash, message.info);
 			let dl = DLG.allDownloads.get(message.dlHash);
 			dl.streamInfo = message.info;
-			dl.hidden = false;
+
+			if(typeof message.info === 'object')
+			{
+				dl.hidden = false;
+				browser.browserAction.setBadgeText({text: 'vid', tabId: dl.tabId});
+				if(message.is_from_manifest){
+					log("THIS SHIT BE FROM A MANIFEST!");
+				}
+			}
+			else
+			{
+				log.err("Bad response from YTDL:", message.info);
+			}
+			
 		}
 
 		else if(message.type === NativeMessaging.MSGTYP_ERR)
 		{
-			log.err('Error in native app', message.content);
+			log.err('Error in native app:', message.content);
 		}
 
 		else
 		{
-			log.err('Bad message from native app', message);
+			log.err('Bad message from native app:', message);
 		}
 	}
 

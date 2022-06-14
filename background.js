@@ -58,6 +58,8 @@ var DLG = new DownloadGrab();
 
 	try
 	{
+		setTabListeners();
+
 		let nativeMsging = new NativeMessaging();
 
 		//get available DMs from flashgot
@@ -91,7 +93,7 @@ var DLG = new DownloadGrab();
 	}
 	catch(e)
 	{
-		log.err('addon could not be initialized: ', e);
+		log.err('Addon could not be initialized:', e);
 		//todo: remove notifications or make them look good
 		let options = {
 			type: "basic", 
@@ -103,3 +105,13 @@ var DLG = new DownloadGrab();
 	}
 
 })();
+
+function setTabListeners()
+{
+	browser.tabs.onCreated.addListener((tab) => {
+		DLG.tabs[tab.id.toString()] = {};
+	});
+	browser.tabs.onRemoved.addListener((tabId) => {
+		delete DLG.tabs[tabId.toString()];
+	})
+}

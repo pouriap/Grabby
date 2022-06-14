@@ -94,7 +94,7 @@ class Utils {
 			return res;
 		}
 		catch(e){
-			log.err('error executing script: ', e);
+			log.err('Error executing script: ', e);
 			return '';
 		}
 	}
