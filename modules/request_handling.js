@@ -32,8 +32,8 @@ class RequestHandling {
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	static doOnBeforeRequest(details){
-
+	static doOnBeforeRequest(details)
+	{
 		let formDataArr = (
 			details.method === "POST" && 
 			details.requestBody &&
@@ -63,7 +63,8 @@ class RequestHandling {
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	static doOnBeforeSendHeaders(details){
+	static doOnBeforeSendHeaders(details)
+	{
 		//store request details
 		let request = DLG.allRequests.get(details.requestId);
 		request.details = details;
@@ -77,9 +78,12 @@ class RequestHandling {
 	 * to our list of downloads
 	 * @param {object} details 
 	 */
-	static doOnHeadersReceived(details) {
+	static doOnHeadersReceived(details)
+	{
 
 		//log("receiving: ", details);
+
+		//console.time(details.requestId);
 
 		let requestId = details.requestId;
 		let requestOfThisResponse = DLG.allRequests.get(requestId);
@@ -138,7 +142,8 @@ class RequestHandling {
 	/**
 	 * Runs once a request is completed
 	 */
-	static doOnCompleted(details){
+	static doOnCompleted(details)
+	{
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
@@ -152,8 +157,8 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	static isIgnored(download, filter){
-
+	static isIgnored(download, filter)
+	{
 		//ain't no downloads in these (hopefully :)
 		if(
 			filter.isWebSocket() ||
@@ -191,8 +196,8 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	static determineCategory(download, filter){
-
+	static determineCategory(download, filter)
+	{
 		/**
 		 * use types to determine category first, because they are the most certain
 		 */
@@ -278,8 +283,8 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	static determineClass(download, filter){
-
+	static determineClass(download, filter)
+	{
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
 			download.class = ReqFilter.CLS_INLINE_WEB_RES;
@@ -335,8 +340,8 @@ class RequestHandling {
 	 * @param {Download} download 
 	 * @param {ReqFilter} filter 
 	 */
-	static determineAction(download, filter){
-
+	static determineAction(download, filter)
+	{
 		if(download.class === ReqFilter.CLS_WEB_OTHER){
 			download.act = ReqFilter.ACT_IGNORE;
 		}
@@ -385,6 +390,8 @@ class RequestHandling {
 	 */
 	static performAction(download)
 	{
+		//console.timeEnd(download.reqDetails.requestId);
+
 		if(download.act === ReqFilter.ACT_IGNORE){
 			return;
 		}

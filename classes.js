@@ -151,7 +151,8 @@ class Download {
 	 * @param {object} reqDetails the 'details' object attached to a request
 	 * @param {object} resDetails the 'details' object attached to a response
 	 */
-	constructor(reqDetails, resDetails){
+	constructor(reqDetails, resDetails, tabUrl = '')
+	{
 		this.requestId = resDetails.requestId;
 		this.url = resDetails.url;
 		this.statusCode = resDetails.statusCode;
@@ -159,25 +160,27 @@ class Download {
 		this.resourceType = resDetails.type;
 		this.origin = reqDetails.originUrl || resDetails.url;
 		this.tabId = reqDetails.tabId;
+		this.tabUrl = tabUrl || this.origin;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
-		//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
-		try
+
+		//if we don't have the tab url then get it
+		//and we do it in the constructor too
+		//no one can stop us!
+		if(!tabUrl)
 		{
-			browser.tabs.get(this.tabId).then((tabInfo) => {
-				if(tabInfo.url != "about:blank"){
-					this.tabUrl = tabInfo.url;
-				}
-				else{
-					this.tabUrl = this.origin;
-				}
-			}).catch((e) => {
-				this.tabUrl = this.origin;
-			});
+			//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
+			try
+			{
+				browser.tabs.get(this.tabId).then((tabInfo) => {
+					if(tabInfo.url != "about:blank"){
+						this.tabUrl = tabInfo.url;
+					}
+				}).catch((e) => {});
+			}
+			catch(e){}
 		}
-		catch(e){
-			this.tabUrl = this.origin;
-		}
+
 	}
 
 	getHash(){
