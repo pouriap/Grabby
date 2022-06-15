@@ -60,7 +60,7 @@ ul, li{
 	padding: 10px 5px;
 	border-bottom: 1px solid #8c8fb1;
 	cursor: pointer;
-	transition: all 0.3s ease;
+	transition: all 0.2s ease;
 	width: 100%;
 	font-size: 12px;
 }
@@ -70,6 +70,8 @@ ul, li{
 }
 
 #downloads-list .dl-item:hover{
+	border-radius: 3px;
+	transition: all 0.1s ease;
 	background-color:#363959 !important;
 	color: #f9f9fa;
 }
