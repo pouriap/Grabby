@@ -154,21 +154,16 @@ function onBgDataRcvd() {
  */
 function showDownloadDetails(download)
 {
-	let dlList = document.getElementById("downloads-list");
-	let dlDetails = document.getElementById("download-details");
+	let dlList = document.querySelector("#downloads-list");
+	let dlDetails = document.querySelector("#download-details");
 
-	document.getElementById("filename").innerHTML = download.getFilename();
-	document.getElementById("filename").setAttribute("title", download.getFilename());
-	document.getElementById("size").innerHTML = 
+	document.querySelector("#download-details #filename").innerHTML = download.getFilename();
+	document.querySelector("#download-details #filename").setAttribute("title", download.getFilename());
+	document.querySelector("#download-details #size").innerHTML = 
 		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
-	document.getElementById("host").innerHTML = download.getHost();
-	document.getElementById("time").innerHTML = 
-		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
-	document.getElementById("url").innerHTML = download.url;
-	document.getElementById("url").setAttribute("title", download.url);
-	document.getElementById("origin").innerHTML = download.origin;
-	document.getElementById("origin").setAttribute("title", download.origin);
-	document.getElementById("output").style.display = 'none';
+	document.querySelector("#download-details #url").innerHTML = download.url;
+	document.querySelector("#download-details #url").setAttribute("title", download.url);
+	document.querySelector("#download-details #output").style.display = 'none';
 
 	hideElement(dlList);
 	showElement(dlDetails);
@@ -180,31 +175,29 @@ function showDownloadDetails(download)
  */
  function showStreamDetails(download)
  {
-	let dlList = document.getElementById("downloads-list");
-	let dlDetails = document.getElementById("download-details");
+	let dlList = document.querySelector("#downloads-list");
+	let strmDetails = document.querySelector("#stream-details");
 	let info = download.streamInfo;
 
-	document.getElementById("filename").innerHTML = info.title;
-	document.getElementById("filename").setAttribute("title", info.filename);
-	document.getElementById("host").innerHTML = Utils.getDomain(download.origin);
-	document.getElementById("time").innerHTML = 
-		(new Date(download.time)).toLocaleString("en-US", constants.dateForamt);
-	document.getElementById("url").innerHTML = download.url;
-	document.getElementById("origin").innerHTML = download.origin;
-	document.getElementById("origin").setAttribute("title", download.origin);
-	document.getElementById("output").style.display = 'none';
+	document.querySelector("#stream-details #filename").innerHTML = info.title;
+	document.querySelector("#stream-details #filename").setAttribute("title", info.title);
+	document.querySelector("#stream-details #duration").innerHTML = info.duration_string;
+	document.querySelector("#stream-details #duration").setAttribute("title", info.duration_string);
 
 	hideElement(dlList);
-	showElement(dlDetails);
+	showElement(strmDetails);
 }
 
 /**
  * shows the list of all download items
  */
-function showDownloadsList(){
-	let dlList = document.getElementById("downloads-list");
-	let actionList = document.getElementById("download-details");
-	hideElement(actionList);
+function showDownloadsList()
+{
+	let dlList = document.querySelector("#downloads-list");
+	let dlDetails = document.querySelector("#download-details");
+	let strmDetails = document.querySelector("#stream-details");
+	hideElement(dlDetails);
+	hideElement(strmDetails);
 	showElement(dlList);
 }
 

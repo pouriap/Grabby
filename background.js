@@ -49,6 +49,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: support proxy for ytdl
 //todo: ytdl -N, --concurrent-fragments N option
 //todo: ytdl --newline option
+//todo: show tumbnails for streams and mp4s
 
 var DLG = new DownloadGrab();
 
