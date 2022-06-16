@@ -50,6 +50,8 @@ native application must be in accordance with our No Surprises policy.
 //todo: ytdl -N, --concurrent-fragments N option
 //todo: ytdl --newline option
 //todo: show tumbnails for streams and mp4s
+//todo: show file type thumbnails for downloads
+//todo: make download list look like firefox download list
 
 var DLG = new DownloadGrab();
 

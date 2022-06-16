@@ -1,7 +1,7 @@
-class RequestHandling {
-
-	static init(){
-
+class RequestHandling 
+{
+	static init()
+	{
 		browser.webRequest.onBeforeRequest.addListener(
 			(details) => { return RequestHandling.doOnBeforeRequest(details) }, 
 			{urls: ["*://*/*"]},
@@ -436,16 +436,43 @@ class RequestHandling {
 			DLG.tabs[tabId] = {};
 		}
 
-		if(filter.isHlsManifest()){
-			let parser = new m3u8Parser.Parser();
-			parser.push(manifest);
-			parser.end();
-			parsedManifest = parser.manifest;
+		if(filter.isHlsManifest())
+		{
+			parsedManifest = Utils.praseHLS(manifest);
+
+			filter.download.dlgmanifests = [];
+
+			if(parsedManifest.playlists && parsedManifest.playlists.length > 0)
+			{
+				for(let format of parsedManifest.playlists)
+				{
+					var xhttp = new XMLHttpRequest();
+					xhttp.responseType = 'text';
+					xhttp.download = filter.download;
+					xhttp.num = parsedManifest.playlists.length;
+					xhttp.onreadystatechange = function() {
+						if (this.readyState == XMLHttpRequest.DONE) {
+							try{
+								this.download.dlgmanifests.push(Utils.praseHLS(xhttp.responseText));
+								if(this.download.dlgmanifests.length == this.num){
+									log.warn('got them all!');
+								}
+							}catch(e){
+								log(e);
+							}
+						}
+					};
+					xhttp.open("GET", format.uri);
+					xhttp.send();
+				}
+			}
 		}
-		else if(filter.isDashManifest()){
-			parsedManifest = mpdParser.parse(manifest);
+		else if(filter.isDashManifest())
+		{
+			parsedManifest = Utils.parseDASH(manifest, filter.download.url);
 		}
-		else{
+		else
+		{
 			log.err("We got an unknown manifest:", manifest);
 			return;
 		}
@@ -456,11 +483,13 @@ class RequestHandling {
 			DLG.tabs[tabId].manifestSent = true;
 			sendToYTDL = true;
 		}
-		else{
+		else
+		{
 			log('we got a sub-manifest: ', filter.download.url, parsedManifest);
 			//when the page only has a sub-manifest and not a main playlist
 			//example of this: https://videoshub.com/videos/25312764
-			if(!DLG.tabs[tabId].manifestSent){
+			if(!DLG.tabs[tabId].manifestSent)
+			{
 				log("but there has been no main manifest");
 				sendToYTDL = true;
 			}

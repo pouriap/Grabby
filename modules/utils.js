@@ -99,4 +99,28 @@ class Utils {
 		}
 	}
 
+	/**
+	 * Parses a .m3u8 HLS manifest
+	 * @param {string} manifest 
+	 * @returns The parsed manifest as a JSON object
+	 */
+	static praseHLS(manifest)
+	{
+		let parser = new m3u8Parser.Parser();
+		parser.push(manifest);
+		parser.end();
+		return parser.manifest;
+	}
+
+	/**
+	 * Parses a .mpd DASH manifest
+	 * @param {string} manifest 
+	 * @param {string} manifestURL 
+	 * @returns The parsed manifest as a JSON object
+	 */
+	static parseDASH(manifest, manifestURL)
+	{
+		return mpdParser.parse(manifest, {manifestUri: manifestURL});
+	}
+
 }
