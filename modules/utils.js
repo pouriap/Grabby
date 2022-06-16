@@ -27,7 +27,7 @@ class Utils {
 	static getCleanUrl(url){
 		let a = document.createElement('a');
 		a.href = url;
-		return (a.hostname + a.pathname);
+		return (a.protocol + '//' + a.hostname + a.pathname);
 	}
 
 	static getFileName(url){
@@ -121,6 +121,12 @@ class Utils {
 	static parseDASH(manifest, manifestURL)
 	{
 		return mpdParser.parse(manifest, {manifestUri: manifestURL});
+	}
+
+	static fetch(url)
+	{
+		const headers = {'X-DLG': '1'};
+		return fetch(url, {headers: headers});
 	}
 
 }

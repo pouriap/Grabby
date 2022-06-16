@@ -104,7 +104,7 @@ class RequestHandling
 		// So we have to wait until the response is completed, then parse it and figure if it's a playlist
 		// We can't do that using our normal download detection flow because it is synchronous 
 		// Waiting for the response body is not synchronous
-		if(filter.isStreamManifest())
+		if(filter.isStreamManifest() && !filter.isDLGRequest())
 		{
 			download.act = ReqFilter.ACT_IGNORE;
 
@@ -166,6 +166,12 @@ class RequestHandling
 			//todo: fix this madness
 			filter.isBlackListed(DLG.blacklist)
 		){
+			download.act = ReqFilter.ACT_IGNORE;
+			return true;
+		}
+
+		//we don't want to do grab our own requests
+		if(filter.isDLGRequest()){
 			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
@@ -444,26 +450,21 @@ class RequestHandling
 
 			if(parsedManifest.playlists && parsedManifest.playlists.length > 0)
 			{
+				var numManifests = parsedManifest.playlists.length;
+
 				for(let format of parsedManifest.playlists)
 				{
-					var xhttp = new XMLHttpRequest();
-					xhttp.responseType = 'text';
-					xhttp.download = filter.download;
-					xhttp.num = parsedManifest.playlists.length;
-					xhttp.onreadystatechange = function() {
-						if (this.readyState == XMLHttpRequest.DONE) {
-							try{
-								this.download.dlgmanifests.push(Utils.praseHLS(xhttp.responseText));
-								if(this.download.dlgmanifests.length == this.num){
-									log.warn('got them all!');
-								}
-							}catch(e){
-								log(e);
-							}
+					let url = Utils.getCleanUrl(filter.download.url);
+					url = url.substr(0, url.lastIndexOf('/')) + '/' + format.uri;
+					Utils.fetch(url).then((res) => {
+						let m = Utils.praseHLS(res.body);
+						filter.download.dlgmanifests.push(m);
+						if(filter.download.dlgmanifests.length == numManifests){
+							log.warn("got them all");
 						}
-					};
-					xhttp.open("GET", format.uri);
-					xhttp.send();
+					}).catch((e) => {
+						log(e);
+					});
 				}
 			}
 		}

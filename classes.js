@@ -194,6 +194,7 @@ class Download {
 	 * gets a header associated with this reqeust
 	 * @param {string} headerName name of the header
 	 * @param {string} headerDirection either "request" or "response"
+	 * @returns either the header or undefined
 	 */
 	getHeader(headerName, headerDirection){
 
@@ -702,6 +703,12 @@ class ReqFilter {
 			return true;
 		}
 		return false;
+	}
+
+	isDLGRequest(){
+		if(this.download.getHeader('X-DLG', 'request') != undefined){
+			return true;
+		}
 	}
 
 	isTypeWebRes(){

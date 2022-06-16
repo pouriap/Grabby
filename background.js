@@ -23,6 +23,7 @@
 //todo: store options in sync, what's wrong with me?
 //todo: save downloads list
 //TODO: check licenses for all included files here and in the C++ code
+//todo: could be useful: https://github.com/streamlink/streamlink
 //todo: policies:
 /*
 - Add-ons must only request those permissions that are necessary for function
