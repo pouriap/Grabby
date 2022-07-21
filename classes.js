@@ -804,7 +804,6 @@ ReqFilter.ACT_GRAB = 'grab';
 ReqFilter.ACT_IGNORE = 'ignore';
 ReqFilter.ACT_FORCE_DL = 'force dl';
 ReqFilter.ACT_GRAB_SILENT = 'grab silent';
-ReqFilter.ACT_YTDL = 'ytdl';
 
 /**
  * A fixed sized map with key->value pairs

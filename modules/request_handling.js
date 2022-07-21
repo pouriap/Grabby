@@ -98,33 +98,23 @@ class RequestHandling
 
 		let filter = new ReqFilter(download, DLG.options);
 
-		// Streams are different than normal downloads so we handle them here first
-		// The thing is we need to figure out if the manifest is a playlist or is for a sinle video
-		// We only want to send the main playlist manifest to ytdl
-		// So we have to wait until the response is completed, then parse it and figure if it's a playlist
-		// We can't do that using our normal download detection flow because it is synchronous 
-		// Waiting for the response body is not synchronous
+		// This is for handling streams, aka requests for HLS and DASH manifests
+		// Streams are AJAX and AJAX is ignored in the handling flow
+		// Also for streams we have to wait until the manifest body is received and parse it 
+		// which is async and doesn't work with our normal handling which is syn
+		// Also streams are different in every way so we handle them here first
 		if(filter.isStreamManifest() && !filter.isDLGRequest())
 		{
 			download.act = ReqFilter.ACT_IGNORE;
-
-			let f = browser.webRequest.filterResponseData(details.requestId);
-			let decoder = new TextDecoder("utf-8");
-			let response = "";
-
-			f.ondata = (event) => {
-				response += decoder.decode(event.data, {stream: true});
-				f.write(event.data);
-			}
-		  
-			f.onstop = (event) => {
-				f.disconnect();
-				RequestHandling.handleStream(filter, response);
-			}
+			StreamHandling.receiveManifest(details.requestId);
 		}
 
 		// This is for normal downloads
-		else if(!RequestHandling.isIgnored(download, filter))
+		if(RequestHandling.isIgnored(download, filter))
+		{
+			download.act = ReqFilter.ACT_IGNORE;
+		}
+		else
 		{
 			//first determine its category
 			RequestHandling.determineCategory(download, filter);
@@ -159,36 +149,34 @@ class RequestHandling
 	 */
 	static isIgnored(download, filter)
 	{
-		//ain't no downloads in these (hopefully :)
-		if(
-			filter.isWebSocket() ||
-			!filter.isStatusOK() ||
-			//todo: fix this madness
-			filter.isBlackListed(DLG.blacklist)
-		){
-			download.act = ReqFilter.ACT_IGNORE;
+		if(!filter.isStatusOK()){
+			return true;
+		}
+
+		if(filter.isWebSocket()){
+			return true;
+		}
+
+		//todo: fix this madness
+		if(filter.isBlackListed(DLG.blacklist)){
 			return true;
 		}
 
 		//we don't want to do grab our own requests
 		if(filter.isDLGRequest()){
-			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
 
-		//the only AJAX we're interested in is stream manifests
-		if(filter.isAJAX() && !filter.isStreamManifest() ){
-			download.act = ReqFilter.ACT_IGNORE;
+		//ain't no download in AJAX
+		if(filter.isAJAX()){
 			return true;
 		}
 
 		if(filter.isExcludedInOpts()){
-			download.act = ReqFilter.ACT_IGNORE;
 			return true;
 		}
 
 		if(filter.isSizeBlocked()){
-			download.act = ReqFilter.ACT_IGNORE;
 			return true;		
 		}
 
@@ -425,92 +413,6 @@ class RequestHandling
 			});
 		}
 		
-	}
-
-	/**
-	 * 
-	 * @param {ReqFilter} filter 
-	 * @param {string} manifest 
-	 */
-	static handleStream(filter, manifest)
-	{
-		let parsedManifest = {};
-		let tabId = filter.download.tabId.toString();
-		let sendToYTDL = false;
-
-		if(!DLG.tabs[tabId]){
-			DLG.tabs[tabId] = {};
-		}
-
-		if(filter.isHlsManifest())
-		{
-			parsedManifest = Utils.praseHLS(manifest);
-
-			filter.download.dlgmanifests = [];
-
-			if(parsedManifest.playlists && parsedManifest.playlists.length > 0)
-			{
-				var numManifests = parsedManifest.playlists.length;
-
-				for(let format of parsedManifest.playlists)
-				{
-					let url = Utils.getCleanUrl(filter.download.url);
-					url = url.substr(0, url.lastIndexOf('/')) + '/' + format.uri;
-					Utils.fetch(url).then((res) => {
-						let m = Utils.praseHLS(res.body);
-						filter.download.dlgmanifests.push(m);
-						if(filter.download.dlgmanifests.length == numManifests){
-							log.warn("got them all");
-						}
-					}).catch((e) => {
-						log(e);
-					});
-				}
-			}
-		}
-		else if(filter.isDashManifest())
-		{
-			parsedManifest = Utils.parseDASH(manifest, filter.download.url);
-		}
-		else
-		{
-			log.err("We got an unknown manifest:", manifest);
-			return;
-		}
-
-		if(parsedManifest.segments.length == 0)
-		{
-			log('we got a main manifest: ', filter.download.url, parsedManifest);
-			DLG.tabs[tabId].manifestSent = true;
-			sendToYTDL = true;
-		}
-		else
-		{
-			log('we got a sub-manifest: ', filter.download.url, parsedManifest);
-			//when the page only has a sub-manifest and not a main playlist
-			//example of this: https://videoshub.com/videos/25312764
-			if(!DLG.tabs[tabId].manifestSent)
-			{
-				log("but there has been no main manifest");
-				sendToYTDL = true;
-			}
-		}
-
-		if(sendToYTDL)
-		{
-			//hide it because we don't want to show it until we get the info
-			filter.download.hidden = true;
-			DLG.addToAllDownloads(filter.download);
-
-			let msg = {
-				type: NativeMessaging.MSGTYP_YTDL_INFO, 
-				page_url: filter.download.tabUrl, 
-				manifest_url: filter.download.url,
-				dlHash: filter.download.getHash()
-			};
-			DLG.sendNativeMsg(msg);
-
-		}
 	}
 
 }
