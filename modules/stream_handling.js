@@ -1,9 +1,7 @@
 class StreamHandling
 {
-	static receiveManifest(requestId)
-	{
-		download.act = ReqFilter.ACT_IGNORE;
-	
+	static receiveManifest(requestId, filter)
+	{	
 		let f = browser.webRequest.filterResponseData(requestId);
 		let decoder = new TextDecoder("utf-8");
 		let response = "";
@@ -36,7 +34,7 @@ class StreamHandling
 
 		if(filter.isHlsManifest())
 		{
-			parsedManifest = Utils.praseHLS(manifest);
+			parsedManifest = StreamHandling.parseHLS(manifest, filter.download.url);
 
 			filter.download.dlgmanifests = [];
 
@@ -46,13 +44,8 @@ class StreamHandling
 
 				for(let format of parsedManifest.playlists)
 				{
-					let url = Utils.getCleanUrl(filter.download.url);
-					//todo: get absolute URL of playlist URLs
-					//they may be absolute (https://xxxx), or from base domain (/xxxx)
-					//or relative (xxxx.m3u8)
-					url = url.substr(0, url.lastIndexOf('/')) + '/' + format.uri;
-					Utils.fetch(url).then((res) => {
-						let m = Utils.praseHLS(res.body);
+					Utils.fetch(format.uri).then((res) => {
+						let m = StreamHandling.parseHLS(res.body);
 						filter.download.dlgmanifests.push(m);
 						if(filter.download.dlgmanifests.length == numManifests){
 							log.warn("got them all");
@@ -65,7 +58,7 @@ class StreamHandling
 		}
 		else if(filter.isDashManifest())
 		{
-			parsedManifest = Utils.parseDASH(manifest, filter.download.url);
+			parsedManifest = StreamHandling.parseDASH(manifest, filter.download.url);
 		}
 		else
 		{
@@ -106,6 +99,45 @@ class StreamHandling
 			DLG.sendNativeMsg(msg);
 
 		}
+	}
+
+	/**
+	 * Parses a .m3u8 HLS manifest
+	 * @param {string} manifest 
+	 * @returns The parsed manifest as a JSON object
+	 */
+	static parseHLS(manifest, manifestURL)
+	{
+		let parser = new m3u8Parser.Parser();
+		parser.push(manifest);
+		parser.end();
+		let pManifest = parser.manifest;
+
+		//if the links to the sub-manifests(playlists) are not absolute paths then there might
+		//be issues later because we are in the addon context and not the web page context
+		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
+		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
+		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
+		if(pManifest.playlists && pManifest.playlists.length > 0)
+		{
+			for(let format of pManifest.playlists)
+			{
+				format.uri = (new URL(format.uri, manifestURL)).toString();
+			}
+		}
+
+		return pManifest;
+	}
+
+	/**
+	 * Parses a .mpd DASH manifest
+	 * @param {string} manifest 
+	 * @param {string} manifestURL 
+	 * @returns The parsed manifest as a JSON object
+	 */
+	static parseDASH(manifest, manifestURL)
+	{
+		return mpdParser.parse(manifest, {manifestUri: manifestURL});
 	}
 }
 

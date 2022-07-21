@@ -63,6 +63,7 @@
 			"modules/native_messaging.js",
 			"modules/context_menu.js",
 			"modules/request_handling.js",
+			"modules/stream_handling.js",
 			"modules/options.js",
 			"modules/messaging.js",
 			"modules/browser_dms.js",

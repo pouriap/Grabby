@@ -89,7 +89,7 @@ function onBgDataRcvd() {
 		if( 
 			DLGPop.options.showOnlyTabDls &&
 			download.tabId != DLGPop.currTabId && 
-			Utils.getCleanUrl(download.tabUrl) != Utils.getCleanUrl(DLGPop.currTabUrl)
+			Utils.getFullPath(download.tabUrl) != Utils.getFullPath(DLGPop.currTabUrl)
 		){
 			//log('hiding dl: ', download.url, ' because ', download.origin, ' =/= ', DLGPop.currTabUrl);
 			continue;

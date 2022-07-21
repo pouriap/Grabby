@@ -24,7 +24,7 @@ class Utils {
 	 * Gets a "clean" URL, i.e. a URL without query string and fragments, etc.
 	 * @param {string} url 
 	 */
-	static getCleanUrl(url){
+	static getFullPath(url){
 		let a = document.createElement('a');
 		a.href = url;
 		return (a.protocol + '//' + a.hostname + a.pathname);
@@ -97,30 +97,6 @@ class Utils {
 			log.err('Error executing script: ', e);
 			return '';
 		}
-	}
-
-	/**
-	 * Parses a .m3u8 HLS manifest
-	 * @param {string} manifest 
-	 * @returns The parsed manifest as a JSON object
-	 */
-	static praseHLS(manifest)
-	{
-		let parser = new m3u8Parser.Parser();
-		parser.push(manifest);
-		parser.end();
-		return parser.manifest;
-	}
-
-	/**
-	 * Parses a .mpd DASH manifest
-	 * @param {string} manifest 
-	 * @param {string} manifestURL 
-	 * @returns The parsed manifest as a JSON object
-	 */
-	static parseDASH(manifest, manifestURL)
-	{
-		return mpdParser.parse(manifest, {manifestUri: manifestURL});
 	}
 
 	static fetch(url)

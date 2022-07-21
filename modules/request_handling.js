@@ -106,7 +106,7 @@ class RequestHandling
 		if(filter.isStreamManifest() && !filter.isDLGRequest())
 		{
 			download.act = ReqFilter.ACT_IGNORE;
-			StreamHandling.receiveManifest(details.requestId);
+			StreamHandling.receiveManifest(details.requestId, filter);
 		}
 
 		// This is for normal downloads
