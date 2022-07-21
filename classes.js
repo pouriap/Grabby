@@ -1323,6 +1323,73 @@ class DownloadJob{
 
 }
 
+class StreamManifest
+{
+	constructor(url, fullManifest)
+	{
+		this.url = url;
+		this.fullManifest = fullManifest;
+	}
+
+	isMain()
+	{
+		return (this.fullManifest.playlists && this.fullManifest.playlists.length > 0);
+	}
+
+	isPlaylist()
+	{
+		return (this.fullManifest.segments && this.fullManifest.segments.length > 0);
+	}
+}
+
+class MainManifest
+{
+	/**
+	 * 
+	 * @param {StreamManifest} sManifest 
+	 * @param {Array} playlistURLs 
+	 */
+	constructor(sManifest, playlistURLs)
+	{
+		this.sManifest = sManifest;
+		this.playlistURLs = playlistURLs;
+	}
+
+	/**
+	 * 		
+	 * @param {StreamManifest} manifest 
+	 * @returns 
+	 */
+	static getFromHLS(manifest)
+	{
+		if(!manifest.isMain())
+		{
+			return;
+		}
+		//if the links to the sub-manifests(playlists) are not absolute paths then there might
+		//be issues later because we are in the addon context and not the web page context
+		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
+		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
+		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
+		for(let playlist of manifest.playlists)
+		{
+			let url = (new URL(playlist.uri, manifestURL)).toString();
+			playlistURLs.push(url);
+		}
+
+		return new MainManifest(manifest, playlistURLs);
+	}
+}
+
+class FormatManifest extends StreamManifest
+{
+	constructor(url, fullManifest, playlistURLs)
+	{
+		super(url, fullManifest);
+		this.playlistURLs = playlistURLs;
+	}
+}
+
 //special case for easier logging
 function log(...args)
 {

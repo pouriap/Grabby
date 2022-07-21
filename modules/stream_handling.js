@@ -20,124 +20,121 @@ class StreamHandling
 	/**
 	 * Handles a DASH or HLS manifest download
 	 * @param {ReqFilter} filter 
-	 * @param {string} manifest 
+	 * @param {string} rawManifest 
 	 */
-	static handle(filter, manifest)
+	static handle(filter, rawManifest)
 	{
-		let parsedManifest = {};
 		let tabId = filter.download.tabId.toString();
-		let sendToYTDL = false;
 
 		if(!DLG.tabs[tabId]){
 			DLG.tabs[tabId] = {};
 		}
 
-		if(filter.isHlsManifest())
+		let manifest = StreamHandling.parseManifest(filter, rawManifest);
+
+		if(manifest.isMain())
 		{
-			parsedManifest = StreamHandling.parseHLS(manifest, filter.download.url);
+			//log('we got a main manifest: ', filter.download.url, manifest);
+			DLG.tabs[tabId].hasMainManifest = true;
 
-			filter.download.dlgmanifests = [];
+			filter.download.playlists = [];
 
-			if(parsedManifest.playlists && parsedManifest.playlists.length > 0)
+			var numPlaylists = manifest.playlistURLs.length;
+
+			for(let url of manifest.playlistURLs)
 			{
-				var numManifests = parsedManifest.playlists.length;
-
-				for(let format of parsedManifest.playlists)
+				Utils.fetch(url).then((res) => 
 				{
-					Utils.fetch(format.uri).then((res) => {
-						let m = StreamHandling.parseHLS(res.body);
-						filter.download.dlgmanifests.push(m);
-						if(filter.download.dlgmanifests.length == numManifests){
-							log.warn("got them all");
-						}
-					}).catch((e) => {
-						log(e);
-					});
-				}
+					let m = StreamHandling.parseManifest(res.body);
+					filter.download.playlists.push(m);
+					if(filter.download.playlists.length == numPlaylists)
+					{
+						StreamHandling.parsePlaylists(filter.download);
+					}
+				})
+				.catch((e) => {
+					log(e);
+				});
 			}
 		}
-		else if(filter.isDashManifest())
+		else if(manifest.isPlaylist())
 		{
-			parsedManifest = StreamHandling.parseDASH(manifest, filter.download.url);
-		}
-		else
-		{
-			log.err("We got an unknown manifest:", manifest);
-			return;
-		}
-
-		if(parsedManifest.segments.length == 0)
-		{
-			log('we got a main manifest: ', filter.download.url, parsedManifest);
-			DLG.tabs[tabId].manifestSent = true;
-			sendToYTDL = true;
-		}
-		else
-		{
-			log('we got a sub-manifest: ', filter.download.url, parsedManifest);
-			//when the page only has a sub-manifest and not a main playlist
+			//log('we got a sub-manifest: ', filter.download.url, manifest);
+			//for cases when the page only has a sub-manifest and not a main playlist
 			//example of this: https://videoshub.com/videos/25312764
-			if(!DLG.tabs[tabId].manifestSent)
+			if(!DLG.tabs[tabId].hasMainManifest)
 			{
-				log("but there has been no main manifest");
-				sendToYTDL = true;
+				filter.download.playlists.push(manifest);
+				StreamHandling.parsePlaylists(filter.download);
 			}
 		}
-
-		if(sendToYTDL)
+		else
 		{
-			//hide it because we don't want to show it until we get the info
-			filter.download.hidden = true;
-			DLG.addToAllDownloads(filter.download);
-
-			let msg = {
-				type: NativeMessaging.MSGTYP_YTDL_INFO, 
-				page_url: filter.download.tabUrl, 
-				manifest_url: filter.download.url,
-				dlHash: filter.download.getHash()
-			};
-			DLG.sendNativeMsg(msg);
-
+			log.err('We got an unknown type of manifest:', rawManifest);
 		}
 	}
 
 	/**
-	 * Parses a .m3u8 HLS manifest
+	 * Parses a manifest text and returns a StreamManifest object
+	 * @param {ReqFilter} filter 
+	 * @param {string} rawManifest 
+	 * @returns {StreamManifest}
+	 */
+	static parseManifest(filter, rawManifest)
+	{
+		if(filter.isHlsManifest())
+		{
+			return StreamHandling.parseHLS(rawManifest, filter.download.url);
+		}
+		else if(filter.isDashManifest())
+		{
+			return StreamHandling.parseDASH(rawManifest, filter.download.url);
+		}
+		else
+		{
+			log.err("We got an unsupported manifest:", rawManifest);
+			return;
+		}
+	}
+
+
+	/**
+	 * Parses all playlists contained in a Download object
+	 * Parsing includes extracting all the info such as length, size, etc.
+	 * @param {Download} download 
+	 */
+	static parsePlaylists(download)
+	{
+		log.warn("got them all");
+	}
+
+	/**
+	 * Parses a .m3u8 HLS manifest and returns a StreamManifest object
 	 * @param {string} manifest 
-	 * @returns The parsed manifest as a JSON object
+	 * @param {string} manifestURL 
+	 * @returns {StreamManifest}
 	 */
 	static parseHLS(manifest, manifestURL)
 	{
 		let parser = new m3u8Parser.Parser();
 		parser.push(manifest);
 		parser.end();
+		
 		let pManifest = parser.manifest;
 
-		//if the links to the sub-manifests(playlists) are not absolute paths then there might
-		//be issues later because we are in the addon context and not the web page context
-		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
-		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
-		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
-		if(pManifest.playlists && pManifest.playlists.length > 0)
-		{
-			for(let format of pManifest.playlists)
-			{
-				format.uri = (new URL(format.uri, manifestURL)).toString();
-			}
-		}
-
-		return pManifest;
+		return new StreamManifest(manifestURL, pManifest);
 	}
 
 	/**
-	 * Parses a .mpd DASH manifest
+	 * Parses a .mpd DASH manifest and returns a StreamManifest object
 	 * @param {string} manifest 
 	 * @param {string} manifestURL 
-	 * @returns The parsed manifest as a JSON object
+	 * @returns {StreamManifest}
 	 */
 	static parseDASH(manifest, manifestURL)
 	{
-		return mpdParser.parse(manifest, {manifestUri: manifestURL});
+		let pManifest = mpdParser.parse(manifest, {manifestUri: manifestURL});
+		return new StreamManifest(manifestURL, pManifest);
 	}
 }
 
