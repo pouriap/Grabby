@@ -95,9 +95,11 @@ class Messaging {
 		}
 
 		//downloads a stream with youtubedl
-		else if(message.typ === Messaging.TYP_YTDL_GET)
+		else if(message.type === Messaging.TYP_YTDL_GET)
 		{
-
+			let download = DLG.allDownloads.get(message.downloadHash);
+			let job = YTDLJob.getFromDownload(download, message.formatId, message.ytdlType, message.location);
+			DLG.doYTDLJob(job);
 		}
 
 		//marks a download as reported and adds it to blacklist

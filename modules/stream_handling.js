@@ -46,8 +46,12 @@ class StreamHandling
 		}
 
 		let tabId = filter.download.tabId.toString();
-		if(!DLG.tabs[tabId]){
+		if(!DLG.tabs[tabId])
+		{
 			DLG.tabs[tabId] = {};
+		}
+		if(!DLG.tabs[tabId].knownPlaylists)
+		{
 			DLG.tabs[tabId].knownPlaylists = [];
 		}
 

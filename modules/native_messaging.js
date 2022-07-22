@@ -112,6 +112,26 @@ class NativeMessaging {
 			
 		}
 
+		else if(message.type === NativeMessaging.MSGTYP_YTDL_COMP)
+		{
+			let options = {
+				type: "basic", 
+				title: "Download Grab", 
+				message: "Download Complete"
+			};
+			browser.notifications.create(options);
+		}
+
+		else if(message.type === NativeMessaging.MSGTYP_MSG)
+		{
+			let options = {
+				type: "basic", 
+				title: "Download Grab", 
+				message: message.content
+			};
+			browser.notifications.create(options);
+		}
+
 		else if(message.type === NativeMessaging.MSGTYP_ERR)
 		{
 			log.err('Error in native app:', message.content);
@@ -137,6 +157,8 @@ NativeMessaging.MSGTYP_YTDL_VID = "ytdl_download_video";
 NativeMessaging.MSGTYP_YTDLPROG = "app_download_progress";
 NativeMessaging.MSGTYP_ERR = "app_error";
 NativeMessaging.MSGTYP_MSG = "app_message";
+NativeMessaging.MSGTYP_YTDL_COMP = "ytdl_comp";
+NativeMessaging.MSGTYP_YTDL_FAIL = "ytdl_fail";
 NativeMessaging.MSGTYP_UNSUPP = "unsupported";
 
 function ProperPort(){

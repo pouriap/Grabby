@@ -37,8 +37,13 @@ function actionClicked(selectedDl, clickedAction)
 			}
 			break;
 
-		case "action-ytdl-get":
-			downloadWithYtdl(selectedDl);
+		case "action-ytdl-video":
+			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'video', 'c:\\users\\pouria\\desktop');
+			break;
+
+		case "action-ytdl-audio":
+			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'audio', 'c:\\users\\pouria\\desktop');
+			break;
 
 		case "action-back":
 			showDownloadsList();
@@ -199,8 +204,8 @@ function showDownloadDetails(download)
 	{
 		let li = document.createElement('li');
 		li.setAttribute('class', 'format action');
-		li.setAttribute('id', 'action-ytdl-get');
-		li.setAttribute('data-id', format.id);
+		li.setAttribute('id', 'action-ytdl-video');
+		li.setAttribute('data-format-id', format.id);
 		document.querySelector("#stream-details #formats-list").appendChild(li);
 
 		let name = format.name;
@@ -209,6 +214,13 @@ function showDownloadDetails(download)
 
 		li.innerHTML = `${name} [ ${res}px / ~${size} ]`;
 	}
+
+	//add the listeners for the newly added elements
+	document.querySelectorAll("#stream-details .action").forEach(function(action){
+		action.addEventListener('click', (evt)=>{
+			actionClicked(DLGPop.selectedDl, action);
+		});
+	});
 
 	hideElement(dlList);
 	showElement(strmDetails);

@@ -167,7 +167,14 @@ class DownloadGrab extends DLGBase
 	{
 		let type = (job.type === 'video')? 
 			NativeMessaging.MSGTYP_YTDL_VID : NativeMessaging.MSGTYP_YTDL_AUD;
-		let message = {type: type, url: job.url, dlHash: job.dlHash};
+		let message = {
+			type: type, 
+			url: job.url, 
+			name: job.name,
+			location: job.location,
+			dlHash: job.dlHash
+		};
+		log('sending this ded srs', message);
 		this.sendNativeMsg(message);
 	}
 }
@@ -1362,10 +1369,12 @@ class DownloadJob{
 
 class YTDLJob
 {
-	constructor(url, type, dlHash)
+	constructor(url, type, name, location, dlHash)
 	{
 		this.url = url;
 		this.type = type;
+		this.name = name;
+		this.location = location;
 		this.dlHash = dlHash;
 	}
 
@@ -1374,15 +1383,13 @@ class YTDLJob
 	 * @param {Download} download 
 	 * @param {number} formatId 
 	 */
-	getFromDownload(download, formatId, type)
+	static getFromDownload(download, formatId, type, location)
 	{
-		download.hash
 		for(let format of download.manifest.playlists)
 		{
-			if(format.id === formatId)
+			if(format.id == formatId)
 			{
-				url = format.url;
-				return new YTDLJob(format.url, type, download.hash);
+				return new YTDLJob(format.url, type, download.manifest.title, location, download.hash);
 			}
 		}
 	}
