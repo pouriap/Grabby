@@ -99,10 +99,23 @@ class Utils {
 		}
 	}
 
-	static fetch(url)
+	static formatSeconds(seconds)
 	{
-		const headers = {'X-DLG': '1'};
-		return fetch(url, {headers: headers});
+		var date = new Date(null);
+		date.setSeconds(seconds);
+		if(seconds >= 60 * 60)
+		{
+			return date.toISOString().substr(11, 8);
+		}
+		else
+		{
+			return date.toISOString().substr(14, 5);
+		}
+	}
+
+	static formatFileSize(size)
+	{
+		return filesize(size);
 	}
 
 }

@@ -53,6 +53,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: show tumbnails for streams and mp4s
 //todo: show file type thumbnails for downloads
 //todo: make download list look like firefox download list
+//todo: do private window or new window tabs start from 0 or are they unique?
 
 var DLG = new DownloadGrab();
 
@@ -69,10 +70,12 @@ var DLG = new DownloadGrab();
 		//get available DMs from flashgot
 		let availableDMs = await nativeMsging.init();
 		//these are TCP server based DMs that we check using the browser itself
-		let browserDms = await BrowserDMs.getAvailableDMs();
-		if(browserDms.length){
-			availableDMs.push(browserDms);
-		}
+
+		//todo: uncomment and make it quicker
+		//let browserDms = await BrowserDMs.getAvailableDMs();
+		// if(browserDms.length){
+		// 	availableDMs.push(browserDms);
+		// }
 		if(availableDMs.length == 0){
 			throw "No download managers found on system";
 		}

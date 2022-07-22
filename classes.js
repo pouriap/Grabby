@@ -163,6 +163,10 @@ class Download {
 		this.tabUrl = tabUrl || this.origin;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
+		/**
+		 * @type {MainManifest}
+		 */
+		this.manifest = undefined;
 
 		//if we don't have the tab url then get it
 		//and we do it in the constructor too
@@ -1325,68 +1329,147 @@ class DownloadJob{
 
 class StreamManifest
 {
-	constructor(url, fullManifest)
+	constructor(url, streamFormat, fullManifest)
 	{
 		this.url = url;
+		this.streamFormat = streamFormat;
 		this.fullManifest = fullManifest;
 	}
 
-	isMain()
+	getType()
 	{
-		return (this.fullManifest.playlists && this.fullManifest.playlists.length > 0);
+		if(this.fullManifest.playlists && this.fullManifest.playlists.length > 0)
+		{
+			return 'main';
+		}
+		else if(this.fullManifest.segments && this.fullManifest.segments.length > 0)
+		{
+			return 'playlist';
+		}
+		else
+		{
+			return undefined;
+		}
 	}
 
-	isPlaylist()
-	{
-		return (this.fullManifest.segments && this.fullManifest.segments.length > 0);
-	}
 }
 
 class MainManifest
 {
 	/**
 	 * 
-	 * @param {StreamManifest} sManifest 
-	 * @param {Array} playlistURLs 
+	 * @param {StreamManifest} fullManifest 
+	 * @param {Playlist[]} playlists 
 	 */
-	constructor(sManifest, playlistURLs)
+	constructor(fullManifest, playlists)
 	{
-		this.sManifest = sManifest;
-		this.playlistURLs = playlistURLs;
+		this.fullManifest = fullManifest;
+		this.playlists = playlists;
+	}
+
+	getPlaylistsSorted()
+	{
+		//order
+		playlists.slice().sort((a, b)=>{
+			return a.pictureSize - b.pictureSize;
+		});
 	}
 
 	/**
-	 * 		
+	 * 	Gets a new instance from a StreamManifest object	
 	 * @param {StreamManifest} manifest 
 	 * @returns 
 	 */
-	static getFromHLS(manifest)
+	static getFromBase(manifest)
 	{
-		if(!manifest.isMain())
+		let playlists = [];
+
+		let id = 0;
+		for(let playlist of manifest.fullManifest.playlists)
 		{
-			return;
+			let p = Playlist.getFromRawPlaylist(playlist, manifest.url, id);
+			playlists.push(p);
+			id++;
 		}
+
+		return new MainManifest(manifest.fullManifest, playlists);
+	}
+}
+
+class PlaylistManifest
+{
+	constructor(duration, fullManifest)
+	{
+		this.duration = duration;
+		this.fullManifest = fullManifest;
+	}
+
+	/**
+	 * 
+	 * @param {StreamManifest} manifest 
+	 * @returns {PlaylistManifest}
+	 */
+	static getFromBase(manifest)
+	{
+		let duration = 0;
+		for(let seg of manifest.fullManifest.segments)
+		{
+			duration += seg.duration;
+		}
+		return new PlaylistManifest(duration, manifest.fullManifest);
+	}
+}
+
+class Playlist
+{
+	constructor(id, name, url, res, bitrate, pictureSize, fileSize = -1, duration = -1)
+	{
+		this.id = id;
+		this.name = name;
+		this.url = url;
+		this.res = res;
+		this.bitrate = bitrate;
+		this.pictureSize = pictureSize;
+		this.fileSize = fileSize;
+		this.duration = duration;
+	}
+
+	/**
+	 * Updates duration and filesize data
+	 * @param {PlaylistManifest} manifest
+	 */
+	update(manifest)
+	{
+		if(manifest.duration)
+		{
+			this.duration = manifest.duration;
+			this.fileSize = manifest.duration * this.bitrate / 8;
+		}
+	}
+
+	static getFromRawPlaylist(playlist, manifestURL, id)
+	{
+		let bitrate = 0;
+		if(playlist.attributes.BANDWIDTH){
+			bitrate = playlist.attributes.BANDWIDTH;
+		}
+		let w = 0;
+		let h = 0;
+		if(playlist.attributes.RESOLUTION)
+		{
+			w = playlist.attributes.RESOLUTION.width || 0;
+			h = playlist.attributes.RESOLUTION.height || 0;
+		}
+		let pictureSize = w * h;
+		let res = (w && h)? w.toString() + 'x' + h.toString() : 'unknown';
+		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : ((w)? w + 'p' : 'Format #'+id);
 		//if the links to the sub-manifests(playlists) are not absolute paths then there might
 		//be issues later because we are in the addon context and not the web page context
 		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
 		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
 		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
-		for(let playlist of manifest.playlists)
-		{
-			let url = (new URL(playlist.uri, manifestURL)).toString();
-			playlistURLs.push(url);
-		}
-
-		return new MainManifest(manifest, playlistURLs);
-	}
-}
-
-class FormatManifest extends StreamManifest
-{
-	constructor(url, fullManifest, playlistURLs)
-	{
-		super(url, fullManifest);
-		this.playlistURLs = playlistURLs;
+		let url = (new URL(playlist.uri, manifestURL)).toString();
+		return new Playlist(id, name, url, res, bitrate, pictureSize);
 	}
 }
 
