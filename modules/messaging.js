@@ -1,3 +1,8 @@
+/**
+ * This class is used for communication between the popup context and the background context
+ * It listens for messages from the popup and does things that are not possible to do in popup
+ */
+
 class Messaging {
 
 	static init(){
@@ -7,7 +12,7 @@ class Messaging {
 	}
 
 	/**
-	 * Sends a message
+	 * Convenience static method for sending a browser message
 	 * @param {object} msg 
 	 * @returns {Promise}
 	 */
@@ -17,11 +22,12 @@ class Messaging {
 	}
 
 	/**
-	 * Runs when a message is received from a script
+	 * Handles incoming messages
 	 * @param {object} message 
 	 */
 	static doOnMessage(message) 
 	{
+		//saves options
 		if(message.type === Messaging.TYP_SAVE_OPTIONS)
 		{
 			Options.save(message.options);
@@ -30,17 +36,22 @@ class Messaging {
 			log('saved options: ', DLG.options);
 		}
 
+		//clears the all downloads list
 		else if(message.type === Messaging.TYP_CLEAR_LIST)
 		{
 			DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 		}
 
+		//gets a copy of DLG global variable
 		else if(message.type === Messaging.TYP_GET_DLG)
 		{
 			let data = {DLGJSON: DLG};
 			return Promise.resolve(data);
 		}
 
+		//called when DLG download dialog is closing
+		//used for cancelling a request we want to handle with download manager
+		//also for closing blank tabs that were opened for the download
 		else if(message.type === Messaging.TYP_DL_DIALOG_CLOSING)
 		{
 			delete DLG.downloadDialogs[message.windowId];
@@ -65,6 +76,7 @@ class Messaging {
 			}catch(e){};
 		}
 
+		//to continue with browser
 		else if(message.type === Messaging.TYP_CONT_WITH_BROWSER)
 		{
 			let download = DLG.allDownloads.get(message.downloadHash);
@@ -73,15 +85,7 @@ class Messaging {
 			}
 		}
 
-		//todo: unused
-		else if(message.type === Messaging.TYP_INTERCEPT_DL)
-		{
-			let download = DLG.allDownloads.get(message.downloadHash);
-			if(download.resolve){
-				download.resolve({cancel: true});
-			}
-		}
-
+		//downloads a download with the specified DM
 		else if(message.type === Messaging.TYP_DOWNLOAD)
 		{
 			let download = DLG.allDownloads.get(message.downloadHash);
@@ -90,6 +94,13 @@ class Messaging {
 			});
 		}
 
+		//downloads a stream with youtubedl
+		else if(message.typ === Messaging.TYP_YTDL_GET)
+		{
+			
+		}
+
+		//marks a download as reported and adds it to blacklist
 		else if(message.type === Messaging.TYP_DL_REPORTED)
 		{
 			let download = DLG.allDownloads.get(message.downloadHash);
@@ -109,7 +120,7 @@ Messaging.TYP_CLEAR_LIST = 'clear-list';
 Messaging.TYP_GET_DLG = 'get-bg';
 Messaging.TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 Messaging.TYP_CONT_WITH_BROWSER = 'con-with-browser';
-Messaging.TYP_INTERCEPT_DL = 'intercept-dl';
 Messaging.TYP_DOWNLOAD = 'download';
 Messaging.TYP_DL_REPORTED = 'dl-reported';
 Messaging.TYP_GET_OPTS_DATA = 'get-options-data';
+Messaging.TYP_YTDL_GET = 'ytdl-get'

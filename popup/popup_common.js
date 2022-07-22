@@ -95,6 +95,15 @@ function downloadWithFirefox(download)
 /**
  * @param {Download} download 
  */
+function downloadWithYtdl(download)
+{
+	let message = {type: Messaging.TYP_YTDL_GET, downloadHash: download.hash};
+	Messaging.sendMessage(message);
+}
+
+/**
+ * @param {Download} download 
+ */
 async function reportDownload(download, source){
 
 	setActionEnabled(document.getElementById("action-report"), false);

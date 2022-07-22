@@ -37,6 +37,9 @@ function actionClicked(selectedDl, clickedAction)
 			}
 			break;
 
+		case "action-ytdl-get":
+			downloadWithYtdl(selectedDl);
+
 		case "action-back":
 			showDownloadsList();
 			break;
@@ -51,7 +54,7 @@ function actionClicked(selectedDl, clickedAction)
 
 		case "dl-with-firefox":
 			document.getElementById("dm-list-container").classList.add("disabled");
-			break;
+			break;			
 
 		case "action-report":
 			let source = (window.location.href.indexOf("popup.html") !== -1)? "popup dialog" : "download dialog";
@@ -195,7 +198,8 @@ function showDownloadDetails(download)
 	for(let format of manifest.playlists)
 	{
 		let li = document.createElement('li');
-		li.setAttribute('class', 'format');
+		li.setAttribute('class', 'format action');
+		li.setAttribute('id', 'action-ytdl-get');
 		li.setAttribute('data-id', format.id);
 		document.querySelector("#stream-details #formats-list").appendChild(li);
 
