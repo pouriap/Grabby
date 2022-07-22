@@ -103,11 +103,11 @@ function onBgDataRcvd() {
 		let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
 
 		//if it's a file download
-		if(!download.streamInfo){
+		if(!download.manifest){
 			listItem.innerHTML = download.getFilename() + reason;
 		}
 		else{
-			listItem.innerHTML = download.streamInfo.title;
+			listItem.innerHTML = download.manifest.title;
 		}
 
 		listItem.addEventListener("click", function(evt)
@@ -121,7 +121,7 @@ function onBgDataRcvd() {
 			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
 			log('item clicked: ', DLGPop.selectedDl);
 
-			if(DLGPop.selectedDl.streamInfo){
+			if(DLGPop.selectedDl.manifest){
 				showStreamDetails(DLGPop.selectedDl);
 			}
 			else{
@@ -177,12 +177,13 @@ function showDownloadDetails(download)
  {
 	let dlList = document.querySelector("#downloads-list");
 	let strmDetails = document.querySelector("#stream-details");
-	let info = download.streamInfo;
+	let manifest = download.manifest;
 
-	document.querySelector("#stream-details #filename").innerHTML = info.title;
-	document.querySelector("#stream-details #filename").setAttribute("title", info.title);
-	document.querySelector("#stream-details #duration").innerHTML = info.duration_string;
-	document.querySelector("#stream-details #duration").setAttribute("title", info.duration_string);
+	let duration = Utils.formatSeconds(manifest.playlists[0].duration);
+	document.querySelector("#stream-details #filename").innerHTML = manifest.title;
+	document.querySelector("#stream-details #filename").setAttribute("title", manifest.title);
+	document.querySelector("#stream-details #duration").innerHTML = duration;
+	document.querySelector("#stream-details #duration").setAttribute("title", duration);
 
 	hideElement(dlList);
 	showElement(strmDetails);

@@ -1329,9 +1329,10 @@ class DownloadJob{
 
 class StreamManifest
 {
-	constructor(url, streamFormat, fullManifest)
+	constructor(url, title, streamFormat, fullManifest)
 	{
 		this.url = url;
+		this.title = title;
 		this.streamFormat = streamFormat;
 		this.fullManifest = fullManifest;
 	}
@@ -1361,10 +1362,11 @@ class MainManifest
 	 * @param {StreamManifest} fullManifest 
 	 * @param {Playlist[]} playlists 
 	 */
-	constructor(fullManifest, playlists)
+	constructor(fullManifest, playlists, title)
 	{
 		this.fullManifest = fullManifest;
 		this.playlists = playlists;
+		this.title = title;
 	}
 
 	getPlaylistsSorted()
@@ -1392,16 +1394,17 @@ class MainManifest
 			id++;
 		}
 
-		return new MainManifest(manifest.fullManifest, playlists);
+		return new MainManifest(manifest.fullManifest, playlists, manifest.title);
 	}
 }
 
 class PlaylistManifest
 {
-	constructor(duration, fullManifest)
+	constructor(duration, fullManifest, title)
 	{
 		this.duration = duration;
 		this.fullManifest = fullManifest;
+		this.title = title;
 	}
 
 	/**
@@ -1416,7 +1419,7 @@ class PlaylistManifest
 		{
 			duration += seg.duration;
 		}
-		return new PlaylistManifest(duration, manifest.fullManifest);
+		return new PlaylistManifest(duration, manifest.fullManifest, manifest.title);
 	}
 }
 

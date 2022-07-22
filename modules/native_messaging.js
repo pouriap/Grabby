@@ -110,7 +110,7 @@ class NativeMessaging {
 		{
 			log('got info for ' + message.dlHash, message.info);
 			let dl = DLG.allDownloads.get(message.dlHash);
-			dl.streamInfo = message.info;
+			dl.ytdlInfo = message.info;
 
 			if(typeof message.info === 'object')
 			{

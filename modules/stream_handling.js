@@ -1,5 +1,10 @@
 class StreamHandling
 {
+	/**
+	 * 
+	 * @param {number} requestId 
+	 * @param {ReqFilter} filter 
+	 */
 	static receiveManifest(requestId, filter)
 	{	
 		let f = browser.webRequest.filterResponseData(requestId);
@@ -11,9 +16,13 @@ class StreamHandling
 			f.write(event.data);
 		}
 	  
-		f.onstop = (event) => {
+		f.onstop = async (event) => {
 			console.time("manifest-handling");
-			StreamHandling.handle(filter, response);
+			let tabTitle = 'no-title';
+			if(filter.download.tabId >= 0){
+				tabTitle = (await browser.tabs.get(filter.download.tabId)).title;
+			}
+			StreamHandling.handle(filter, response, tabTitle);
 			console.timeEnd("manifest-handling");
 			//we first handle then give the request back to the browser
 			//if we give it back to the browser first it will start requesting the 
@@ -26,10 +35,11 @@ class StreamHandling
 	 * Handles a DASH or HLS manifest download
 	 * @param {ReqFilter} filter 
 	 * @param {string} rawManifest 
+	 * @param {number} tabTitle
 	 */
-	static handle(filter, rawManifest)
+	static handle(filter, rawManifest, tabTitle)
 	{
-		let bManifest = StreamHandling.parseRawManifest(filter, rawManifest);
+		let bManifest = StreamHandling.parseRawManifest(filter, rawManifest, tabTitle);
 
 		if(!bManifest){
 			return;
@@ -102,7 +112,7 @@ class StreamHandling
 	 * @param {string} rawManifest 
 	 * @returns {StreamManifest}
 	 */
-	static parseRawManifest(filter, rawManifest)
+	static parseRawManifest(filter, rawManifest, title)
 	{
 		if(filter.isHlsManifest())
 		{
@@ -110,13 +120,13 @@ class StreamHandling
 			parser.push(rawManifest);
 			parser.end();
 			let pManifest = parser.manifest;
-			return new StreamManifest(filter.download.url, 'hls', pManifest);
+			return new StreamManifest(filter.download.url, title, 'hls', pManifest);
 		}
 
 		else if(filter.isDashManifest())
 		{
 			let pManifest = mpdParser.parse(rawManifest, {manifestUri: manifestURL});
-			return new StreamManifest(filter.download.url, 'dash', pManifest);
+			return new StreamManifest(filter.download.url, title, 'dash', pManifest);
 		}
 
 		else
