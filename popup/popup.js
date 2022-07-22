@@ -179,11 +179,32 @@ function showDownloadDetails(download)
 	let strmDetails = document.querySelector("#stream-details");
 	let manifest = download.manifest;
 
+	document.querySelector("#stream-details #formats-list").innerHTML = "";
+
 	let duration = Utils.formatSeconds(manifest.playlists[0].duration);
 	document.querySelector("#stream-details #filename").innerHTML = manifest.title;
 	document.querySelector("#stream-details #filename").setAttribute("title", manifest.title);
 	document.querySelector("#stream-details #duration").innerHTML = duration;
 	document.querySelector("#stream-details #duration").setAttribute("title", duration);
+
+	//sort
+	manifest.playlists.sort((a, b)=>{
+		return a.pictureSize - b.pictureSize;
+	});
+
+	for(let format of manifest.playlists)
+	{
+		let li = document.createElement('li');
+		li.setAttribute('class', 'format');
+		li.setAttribute('data-id', format.id);
+		document.querySelector("#stream-details #formats-list").appendChild(li);
+
+		let name = format.name;
+		let res = format.res;
+		let size = filesize(parseInt(format.fileSize), {round: 0});
+
+		li.innerHTML = `${name} [ ${res}px / ~${size} ]`;
+	}
 
 	hideElement(dlList);
 	showElement(strmDetails);

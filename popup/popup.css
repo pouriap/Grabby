@@ -56,7 +56,7 @@ ul, li{
 	display: block !important;
 }
 
-#downloads-list .dl-item{
+#downloads-list .dl-item, #formats-list .format{
 	padding: 10px 5px;
 	border-bottom: 1px solid #8c8fb1;
 	cursor: pointer;
@@ -65,11 +65,11 @@ ul, li{
 	font-size: 12px;
 }
 
-#downloads-list .dl-item:last-child {
+#downloads-list .dl-item:last-child, #formats-list .format:last-child{
     border: none;
 }
 
-#downloads-list .dl-item:hover{
+#downloads-list .dl-item:hover, #formats-list .format:hover{
 	border-radius: 3px;
 	transition: all 0.1s ease;
 	background-color:#363959 !important;
@@ -221,6 +221,11 @@ li.spacer{
 }
 .success{
 	color: #12bc00;
+}
+
+#stream-details .available
+{
+	font-size: 14px;
 }
 
 #hiddeninput{

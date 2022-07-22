@@ -113,9 +113,4 @@ class Utils {
 		}
 	}
 
-	static formatFileSize(size)
-	{
-		return filesize(size);
-	}
-
 }

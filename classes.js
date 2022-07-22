@@ -1369,14 +1369,6 @@ class MainManifest
 		this.title = title;
 	}
 
-	getPlaylistsSorted()
-	{
-		//order
-		playlists.slice().sort((a, b)=>{
-			return a.pictureSize - b.pictureSize;
-		});
-	}
-
 	/**
 	 * 	Gets a new instance from a StreamManifest object	
 	 * @param {StreamManifest} manifest 
