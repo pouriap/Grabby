@@ -66,7 +66,7 @@ class StreamHandling
 				DLG.tabs[tabId].knownPlaylists.push(playlist.url);
 				//todo: change this to request ID because we are sending referer URL basically maybe some user doesn't want this
 				let headers = {
-					'X-DLG-MFSTHASH': filter.download.getHash(),
+					'X-DLG-MFSTHASH': filter.download.hash,
 					'X-DLG-MFSTID': playlist.id
 				};
 				fetch(playlist.url, {headers: headers});

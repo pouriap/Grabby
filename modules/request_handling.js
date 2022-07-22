@@ -400,7 +400,7 @@ class RequestHandling
 		if(download.act === ReqFilter.ACT_FORCE_DL){
 			let dmName = Options.getDefaultDM();
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
-				Utils.performJob(job);
+				DLG.doDownloadJob(job);
 			});
 			return {cancel: true};
 		}

@@ -23,6 +23,8 @@ class DLGBase
 		 * @type {array}
 		 */
 		this.availableDMs = [];
+		this.availExtDMs = [];
+		this.availBrowserDMs = [];
 		/**
 		 * addon options
 		 * @type {object}
@@ -81,6 +83,7 @@ class DownloadGrab extends DLGBase
 		 * will be set in background.js init code after a native messaging instance is created
 		 */
 		this.sendNativeMsg = function(){};
+
 		/**
 		 * all requests made by Firefox are stored here temporarily until we get their response
 		 * @type {FixedSizeMap}
@@ -95,7 +98,7 @@ class DownloadGrab extends DLGBase
 	addToAllDownloads = function(download)
 	{
 		//we do this here because we don't want to run hash on requests we will not use
-		let hash = download.getHash();
+		let hash = download.hash;
 		//we put hash of URL as key to prevent the same URL being added by different requests
 		this.allDownloads.put(hash, download);
 	}
@@ -135,8 +138,37 @@ class DownloadGrab extends DLGBase
 
 		creating.then((windowInfo) => {
 			let windowId = windowInfo.id;
-			this.downloadDialogs[windowId] = download.getHash();
+			this.downloadDialogs[windowId] = download.hash;
 		});
+	}
+
+	/**
+	 * Performs a download job
+	 * @param {DownloadJob} job 
+	 */
+	doDownloadJob(job)
+	{
+		if(this.availBrowserDMs.includes(job.dmName))
+		{
+			BrowserDMs.dms[job.dmName].download(job);
+		}
+		else
+		{
+			let message = {type: 'download', job: job};
+			this.sendNativeMsg(message);
+		}
+	}
+
+	/**
+	 * Performs a ytdl job
+	 * @param {YTDLJob} job 
+	 */
+	doYTDLJob(job)
+	{
+		let type = (job.type === 'video')? 
+			NativeMessaging.MSGTYP_YTDL_VID : NativeMessaging.MSGTYP_YTDL_AUD;
+		let message = {type: type, url: job.url, dlHash: job.dlHash};
+		this.sendNativeMsg(message);
 	}
 }
 
@@ -187,11 +219,12 @@ class Download {
 
 	}
 
-	getHash(){
-		if(typeof this.hash === 'undefined'){
-			this.hash = md5(this.url);
+	get hash()
+	{
+		if(typeof this._hash === 'undefined'){
+			this._hash = md5(this.url);
 		}
-		return this.hash;
+		return this._hash;
 	}
 
 	/**
@@ -1325,6 +1358,34 @@ class DownloadJob{
 
 	}
 
+}
+
+class YTDLJob
+{
+	constructor(url, type, dlHash)
+	{
+		this.url = url;
+		this.type = type;
+		this.dlHash = dlHash;
+	}
+
+	/**
+	 * Gets a YTDLJob from a download
+	 * @param {Download} download 
+	 * @param {number} formatId 
+	 */
+	getFromDownload(download, formatId, type)
+	{
+		download.hash
+		for(let format of download.manifest.playlists)
+		{
+			if(format.id === formatId)
+			{
+				url = format.url;
+				return new YTDLJob(format.url, type, download.hash);
+			}
+		}
+	}
 }
 
 class StreamManifest

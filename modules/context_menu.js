@@ -81,7 +81,7 @@ class ContextMenu {
 				result.originPageUrl, 
 				result.originPageReferer
 			).then((job)=>{
-				Utils.performJob(job);
+				DLG.doDownloadJob(job);
 			});
 		}
 

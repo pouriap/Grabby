@@ -68,20 +68,23 @@ var DLG = new DownloadGrab();
 		let nativeMsging = new NativeMessaging();
 
 		//get available DMs from flashgot
-		let availableDMs = await nativeMsging.init();
-		//these are TCP server based DMs that we check using the browser itself
+		let externalDMs = await nativeMsging.init();
 
-		//todo: uncomment and make it quicker
-		//let browserDms = await BrowserDMs.getAvailableDMs();
-		// if(browserDms.length){
-		// 	availableDMs.push(browserDms);
-		// }
+		//these are TCP server based DMs that we check using the browser itself
+		let browserDms = await BrowserDMs.getAvailableDMs();
+
+		let availableDMs = externalDMs.concat(browserDms);
+
 		if(availableDMs.length == 0){
 			throw "No download managers found on system";
 		}
+
 		DLG.availableDMs = availableDMs;
-		DLG._nativeMsging = nativeMsging;
-		DLG.sendNativeMsg = function(msg){DLG._nativeMsging.sendMessage(msg);}
+		DLG.availBrowserDMs = browserDms;
+		DLG.availExtDMs = externalDMs;
+
+		//ceate a function in DLG for sending native messages so it can be accessed globally
+		DLG.sendNativeMsg = function(msg){nativeMsging.sendMessage(msg);}
 
 		let options = await Options.load();
 		Options.apply(options);

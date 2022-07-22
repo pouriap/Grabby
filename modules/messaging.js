@@ -90,14 +90,14 @@ class Messaging {
 		{
 			let download = DLG.allDownloads.get(message.downloadHash);
 			DownloadJob.getFromDownload(message.dmName, download).then((job)=>{
-				Utils.performJob(job);
+				DLG.doDownloadJob(job);
 			});
 		}
 
 		//downloads a stream with youtubedl
 		else if(message.typ === Messaging.TYP_YTDL_GET)
 		{
-			
+
 		}
 
 		//marks a download as reported and adds it to blacklist

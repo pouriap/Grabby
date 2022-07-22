@@ -50,20 +50,6 @@ class Utils {
 	}
 
 	/**
-	 * 		
-	 * @param {DownloadJob} job 
-	 */
-	static async performJob(job){
-		let browserDMs = await BrowserDMs.getAvailableDMs();
-		if(browserDMs.includes(job.dmName)){
-			BrowserDMs.dms[job.dmName].download(job);
-		}
-		else{
-			NativeMessaging.download(job);
-		}
-	}
-
-	/**
 	 * Gets cookies associated with the given URL
 	 * @param {string} url 
 	 * @returns 

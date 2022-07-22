@@ -62,7 +62,7 @@ function downloadWithSelectedDM(download)
 	let selectedDM = DMs.options[DMs.selectedIndex].value;
 	let message = {
 		type: Messaging.TYP_DOWNLOAD, 
-		downloadHash: download.getHash(), 
+		downloadHash: download.hash, 
 		dmName: selectedDM
 	};
 	Messaging.sendMessage(message);
@@ -165,7 +165,7 @@ async function reportDownload(download, source){
 				//for popup context downloads
 				download.reported = true;
 				//for bg context downloads
-				let message = {type: Messaging.TYP_DL_REPORTED, downloadHash: download.getHash()};
+				let message = {type: Messaging.TYP_DL_REPORTED, downloadHash: download.hash};
 				Messaging.sendMessage(message);
 				continueWithBrowser(download);
 			}

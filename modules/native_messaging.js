@@ -89,21 +89,6 @@ class NativeMessaging {
 		this.port.postMessage(msg);
 	}
 
-	//todo make it non-static
-	/**
-	 * 
-	 * @param {DownloadJob} job 
-	 */
-	static download(job){
-
-		let message = {
-			type: 'download',
-			job: job
-		};
-
-		NativeMessaging.port.postMessage(message);
-	}
-
 	doOnNativeMessage(message)
 	{
 		if(message.type === NativeMessaging.MSGTYP_YTDL_INFO)

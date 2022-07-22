@@ -71,7 +71,7 @@ window.addEventListener("beforeunload", function() {
 	let message = {
 		type: Messaging.TYP_DL_DIALOG_CLOSING, 
 		windowId: windowId, 
-		downloadHash: DLGPop.selectedDl.getHash(),
+		downloadHash: DLGPop.selectedDl.hash,
 		continueWithBrowser: DLGPop.continueWithBrowser
 	};
 	Messaging.sendMessage(message);
