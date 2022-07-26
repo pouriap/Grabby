@@ -1525,7 +1525,7 @@ class Playlist
 		}
 		let pictureSize = w * h;
 		let res = (w && h)? w.toString() + 'x' + h.toString() : 'unknown';
-		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : ((w)? w + 'p' : 'Format #'+id);
+		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : ((h)? h + 'p' : 'Format-#' + (id + 1));
 		//if the links to the sub-manifests(playlists) are not absolute paths then there might
 		//be issues later because we are in the addon context and not the web page context
 		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls

@@ -65,7 +65,7 @@ ul, li{
 	font-size: 12px;
 }
 
-#downloads-list .dl-item:last-child, #formats-list .format:last-child{
+#downloads-list .dl-item:last-child{
     border: none;
 }
 
@@ -95,6 +95,10 @@ ul, li{
 	cursor: pointer;
 	border-radius: 2px;
 	font-weight: bold;
+}
+
+#stream-details.item-details li.action{
+	margin: 5px auto;
 }
 
 .item-details button.action{
