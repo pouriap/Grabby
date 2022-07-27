@@ -54,6 +54,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: show file type thumbnails for downloads
 //todo: make download list look like firefox download list
 //todo: do private window or new window tabs start from 0 or are they unique?
+//todo: show preview of media in download details
 
 var DLG = new DownloadGrab();
 

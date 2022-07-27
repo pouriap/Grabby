@@ -38,11 +38,11 @@ function actionClicked(selectedDl, clickedAction)
 			break;
 
 		case "action-ytdl-video":
-			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'video', 'c:\\users\\pouria\\desktop');
+			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'video');
 			break;
 
 		case "action-ytdl-audio":
-			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'audio', 'c:\\users\\pouria\\desktop');
+			downloadWithYtdl(selectedDl, clickedAction.getAttribute('data-format-id'), 'audio');
 			break;
 
 		case "action-back":

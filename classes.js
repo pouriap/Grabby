@@ -171,7 +171,6 @@ class DownloadGrab extends DLGBase
 			type: type, 
 			url: job.url, 
 			name: job.name,
-			location: job.location,
 			dlHash: job.dlHash
 		};
 		log('sending this ded srs', message);
@@ -1369,12 +1368,18 @@ class DownloadJob{
 
 class YTDLJob
 {
-	constructor(url, type, name, location, dlHash)
+	/**
+	 * 
+	 * @param {string} url URL to download
+	 * @param {string} type either 'audio' or 'video'
+	 * @param {string} fileName name of the file to save
+	 * @param {string} dlHash hash of Download object related to this job
+	 */
+	constructor(url, type, fileName, dlHash)
 	{
-		this.url = url;
+		this.url = encodeURI(url);
 		this.type = type;
-		this.name = name;
-		this.location = location;
+		this.name = fileName;
 		this.dlHash = dlHash;
 	}
 
@@ -1382,14 +1387,15 @@ class YTDLJob
 	 * Gets a YTDLJob from a download
 	 * @param {Download} download 
 	 * @param {number} formatId 
+	 * @param {string} type either 'audio' or 'video'
 	 */
-	static getFromDownload(download, formatId, type, location)
+	static getFromDownload(download, formatId, type)
 	{
 		for(let format of download.manifest.playlists)
 		{
 			if(format.id == formatId)
 			{
-				return new YTDLJob(format.url, type, download.manifest.title, location, download.hash);
+				return new YTDLJob(format.url, type, download.manifest.title, download.hash);
 			}
 		}
 	}

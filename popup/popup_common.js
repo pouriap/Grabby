@@ -95,14 +95,13 @@ function downloadWithFirefox(download)
 /**
  * @param {Download} download 
  */
-function downloadWithYtdl(download, formatId, type, location)
+function downloadWithYtdl(download, formatId, type)
 {
 	let message = {
 		type: Messaging.TYP_YTDL_GET, 
 		downloadHash: download.hash,
 		formatId: formatId,
-		ytdlType: type,
-		location: location
+		ytdlType: type
 	};
 	Messaging.sendMessage(message);
 }

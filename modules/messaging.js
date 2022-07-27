@@ -98,7 +98,7 @@ class Messaging {
 		else if(message.type === Messaging.TYP_YTDL_GET)
 		{
 			let download = DLG.allDownloads.get(message.downloadHash);
-			let job = YTDLJob.getFromDownload(download, message.formatId, message.ytdlType, message.location);
+			let job = YTDLJob.getFromDownload(download, message.formatId, message.ytdlType);
 			DLG.doYTDLJob(job);
 		}
 
