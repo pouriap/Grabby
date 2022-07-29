@@ -122,6 +122,21 @@ class NativeMessaging {
 			browser.notifications.create(options);
 		}
 
+		else if(message.type === NativeMessaging.MSGTYP_YTDL_FAIL)
+		{
+			let options = {
+				type: "basic", 
+				title: "Download Grab", 
+				message: "Download Failed"
+			};
+			browser.notifications.create(options);
+		}
+
+		else if(message.type === NativeMessaging.MSGTYP_YTDLPROG)
+		{
+			log.warn("progress: ", message.percent);
+		}
+
 		else if(message.type === NativeMessaging.MSGTYP_MSG)
 		{
 			let options = {
