@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", (event) => {
 
-	ui.get(".action").forEach(function(action){
-		action.addEventListener('click', (evt)=>{
-			actionClicked(DLGPop.selectedDl, action);
+	ui.getAll(".action").each(function(){
+		this.addEventListener('click', ()=>{
+			actionClicked(DLGPop.selectedDl, this);
 		});
 	});
 
@@ -29,7 +29,7 @@ function actionClicked(selectedDl, clickedAction)
 	switch(id){
 		
 		case "action-download":
-			if(document.getElementById("dl-with-dlgrab").checked){
+			if(ui.get("#dl-with-dlgrab").checked){
 				downloadWithSelectedDM(selectedDl);
 			}
 			else{
@@ -54,11 +54,11 @@ function actionClicked(selectedDl, clickedAction)
 			break;
 
 		case "dl-with-dlgrab":
-			document.getElementById("dm-list-container").classList.remove("disabled");
+			ui.get("#dm-list-container").classList.remove("disabled");
 			break;
 
 		case "dl-with-firefox":
-			document.getElementById("dm-list-container").classList.add("disabled");
+			ui.get("#dm-list-container").classList.add("disabled");
 			break;			
 
 		case "action-report":
@@ -74,16 +74,35 @@ function actionClicked(selectedDl, clickedAction)
 /**
  * This is called when background data (DLG) is received via messaging
  */
-function onBgDataRcvd() { 
+function onBgDataRcvd()
+{ 
+	showDownloadsList();
+}
+
+/**
+ * shows the list of all download items
+ */
+function showDownloadsList()
+{
+	ui.hide('.unique-display');
+
+	//this is called two different times
+	//1- when we click the popup button
+	//2- when we click back from a download details panel
+	//when we click back the downloads are already there and only hidden
+	//so we don't have to repopulate them in this case
+
+	if(ui.get('#downloads-list').getAttribute('populated')){
+		ui.show('#downloads-list');
+		return;
+	}
 
 	//populate list of downloads
 	let keys = DLGPop.allDownloads.getKeys();
 	//reverse to show latest downloads on top
 	keys.reverse();
-
-	populateDMs();
-
-	for (const key of keys) {
+	
+	for(const key of keys){
 
 		/**
 		 * @type {Download}
@@ -103,11 +122,12 @@ function onBgDataRcvd() {
 			continue;
 		}
 
-		let listItem = document.createElement("li");
-		listItem.setAttribute("id", "req_" + download.requestId);
-		listItem.setAttribute("class", "dl-item " + download.debug_gray);
-		listItem.setAttribute("title", download.url);
-		listItem.setAttribute("data-hash", key);
+		let listItem = ui.create('li', {
+			'id': "req_" + download.requestId,
+			'class': "dl-item " + download.debug_gray,
+			'title': download.url,
+			'data-hash': key
+		});
 		let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
 
 		listItem.innerHTML = download.getFilename() + reason;
@@ -116,8 +136,8 @@ function onBgDataRcvd() {
 		{
 			//todo: when you click a download and make some changes and then click another download 
 			// the same changes are still there because it's the same page
-			document.getElementById('action-report').setAttribute('class', 'action');
-			document.getElementById('action-report').innerHTML = 'Report falsely detected download';
+			ui.get('#action-report').setAttribute('class', 'action');
+			ui.get('#action-report').innerHTML = 'Report falsely detected download';
 
 			let hash = this.getAttribute("data-hash");
 			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
@@ -144,10 +164,11 @@ function onBgDataRcvd() {
 			});
 		}
 
-		document.getElementById("downloads-list").appendChild(listItem);
-
+		ui.get("#downloads-list").appendChild(listItem);
 	}
 
+	ui.get('#downloads-list').setAttribute('populated', 'populated');
+	ui.show('#downloads-list');
 }
 
 /**
@@ -156,38 +177,38 @@ function onBgDataRcvd() {
  */
 function showDownloadDetails(download)
 {
-	let dlList = document.querySelector("#downloads-list");
-	let dlDetails = document.querySelector("#download-details");
+	ui.hide('.unique-display');
 
-	document.querySelector("#download-details #filename").innerHTML = download.getFilename();
-	document.querySelector("#download-details #filename").setAttribute("title", download.getFilename());
-	document.querySelector("#download-details #size").innerHTML = 
+	ui.get("#download-details #filename").innerHTML = download.getFilename();
+	ui.get("#download-details #filename").setAttribute("title", download.getFilename());
+	ui.get("#download-details #size").innerHTML = 
 		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
-	document.querySelector("#download-details #url").innerHTML = download.url;
-	document.querySelector("#download-details #url").setAttribute("title", download.url);
-	document.querySelector("#download-details #output").style.display = 'none';
+	ui.get("#download-details #url").innerHTML = download.url;
+	ui.get("#download-details #url").setAttribute("title", download.url);
+	ui.get("#download-details #output").style.display = 'none';
 
-	hideElement(dlList);
-	showElement(dlDetails);
+	populateDMs();
+
+	ui.show('#download-details');
 }
 
 /**
  * Shows the details popup for a particular stream download
  * @param {Download} download 
  */
- function showStreamDetails(download)
- {
-	let dlList = document.querySelector("#downloads-list");
-	let strmDetails = document.querySelector("#stream-details");
+function showStreamDetails(download)
+{
+	ui.hide('.unique-display');
+
 	let manifest = download.manifest;
 
-	document.querySelector("#stream-details #formats-list").innerHTML = "";
+	ui.get("#stream-details #formats-list").innerHTML = "";
 
 	let duration = Utils.formatSeconds(manifest.playlists[0].duration);
-	document.querySelector("#stream-details #filename").innerHTML = manifest.title;
-	document.querySelector("#stream-details #filename").setAttribute("title", manifest.title);
-	document.querySelector("#stream-details #duration").innerHTML = duration;
-	document.querySelector("#stream-details #duration").setAttribute("title", duration);
+	ui.get("#stream-details #filename").innerHTML = manifest.title;
+	ui.get("#stream-details #filename").setAttribute("title", manifest.title);
+	ui.get("#stream-details #duration").innerHTML = duration;
+	ui.get("#stream-details #duration").setAttribute("title", duration);
 
 	//sort
 	manifest.playlists.sort((a, b)=>{
@@ -216,30 +237,15 @@ function showDownloadDetails(download)
 		});
 	});
 
-	hideElement(dlList);
-	showElement(strmDetails);
-}
-
-/**
- * shows the list of all download items
- */
-function showDownloadsList()
-{
-	let dlList = document.querySelector("#downloads-list");
-	let dlDetails = document.querySelector("#download-details");
-	let strmDetails = document.querySelector("#stream-details");
-	hideElement(dlDetails);
-	hideElement(strmDetails);
-	showElement(dlList);
+	ui.show('#stream-details');
 }
 
 /**
  * clears list of all download items
  */
-function clearDownloadsList(){
-	document.querySelectorAll(".dl-item").forEach((element)=>{
-        element.parentElement.removeChild(element);
-	});
+function clearDownloadsList()
+{
+	ui.get('#download-list').innerHTML = '';
 	let message = {type: Messaging.TYP_CLEAR_LIST};
 	Messaging.sendMessage(message);
 }

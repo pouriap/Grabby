@@ -186,14 +186,6 @@ async function reportDownload(download, source){
 
 }
 
-function hideElement(element){
-	element.classList.add("hidden");
-}
-
-function showElement(element){
-	element.classList.remove("hidden");
-}
-
 /**
  * @param {Element} element 
  * @param {boolean} enabled 
