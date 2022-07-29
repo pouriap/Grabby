@@ -125,4 +125,5 @@ Messaging.TYP_CONT_WITH_BROWSER = 'con-with-browser';
 Messaging.TYP_DOWNLOAD = 'download';
 Messaging.TYP_DL_REPORTED = 'dl-reported';
 Messaging.TYP_GET_OPTS_DATA = 'get-options-data';
-Messaging.TYP_YTDL_GET = 'ytdl-get'
+Messaging.TYP_YTDL_GET = 'ytdl-get';
+Messaging.TYP_YTDL_PROGRESS = 'ytdl-progress';

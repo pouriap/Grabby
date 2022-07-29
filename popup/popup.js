@@ -6,6 +6,26 @@ document.addEventListener("DOMContentLoaded", (event) => {
 		});
 	});
 
+	//download progress is sent to background via the native app, and then 
+	//sent here using messaging
+	browser.runtime.onMessage.addListener((msg) => { 
+		if(msg.type === Messaging.TYP_YTDL_PROGRESS)
+		{
+			let percent = msg.percent;
+			let dlHash = msg.dlHash;
+			let el = ui.get(`#downloads-list li[data-hash="${dlHash}"]`);
+
+			//remove the progress bar when download is complete
+			if(percent == '100')
+			{
+				el.style = '';
+			}
+			else{
+				el.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+			}
+		}
+	});
+
 	ui.get("#dl-with-dlgrab").click();
 
 	getBackgroundData().then(onBgDataRcvd);

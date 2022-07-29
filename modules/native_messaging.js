@@ -120,6 +120,13 @@ class NativeMessaging {
 				message: "Download Complete"
 			};
 			browser.notifications.create(options);
+
+			let msg = {
+				type: Messaging.TYP_YTDL_PROGRESS,
+				dlHash: message.dlHash,
+				percent: '100'
+			};
+			Messaging.sendMessage(msg);
 		}
 
 		else if(message.type === NativeMessaging.MSGTYP_YTDL_FAIL)
@@ -132,9 +139,16 @@ class NativeMessaging {
 			browser.notifications.create(options);
 		}
 
+		//we can't access popup UI from background context so we have to send a message to the popup
 		else if(message.type === NativeMessaging.MSGTYP_YTDLPROG)
 		{
-			log.warn("progress: ", message.percent);
+			let percent = message.percent.split('%')[0];
+			let msg = {
+				type: Messaging.TYP_YTDL_PROGRESS,
+				dlHash: message.dlHash,
+				percent: percent
+			};
+			Messaging.sendMessage(msg);
 		}
 
 		else if(message.type === NativeMessaging.MSGTYP_MSG)
