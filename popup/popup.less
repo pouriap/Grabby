@@ -1,0 +1,269 @@
+@ink-verylight: #8c8fb1;
+@ink-light: #363959;
+@ink-med: #202340;
+@ink-dark: #0f1126;
+
+@Grey10: #f9f9fa;
+@Grey20: #ededf0;
+@Grey30: #d7d7db;
+@Grey40: #b1b1b3;
+@Grey50: #737373;
+@Grey60: #4a4a4f;
+@Grey70: #38383d;
+@Grey80: #2a2a2e;
+@Grey90: #0c0c0d;
+
+@color-text: @ink-med;
+@color-disabled: @Grey40;
+@color-hover: @ink-light;
+
+html, body
+{
+	overflow-y: auto;
+	min-width: 350px;
+	font-size: 12px;
+	max-width: 350px;
+}
+
+ul, li
+{
+	list-style-type: none;
+	padding: 0;
+	text-align: center;
+}
+
+.clear{
+	clear: both;
+}
+
+.hidden{
+	display: none !important;
+}
+
+#content
+{
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	margin: 0 auto;
+	width: 100%;
+	color: @color-text;
+	cursor: default;
+}
+
+#popup-main
+{
+	cursor: default;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0 10px;
+
+	#list-title
+	{
+		font-size: 14px;
+		text-align: center;
+		padding: 15px;
+	}
+
+	#downloads-list{
+		width: 100%;
+	}
+
+	#no-dl
+	{
+		padding: 16px 0 0 0;
+		color:@color-disabled;
+		width: 100%;
+		height: 50px;
+		background-color: #f9f9fa;
+		
+		//only show 'no downloads' if it's the last child
+		&:last-child{
+			display: block !important;
+		}
+	}
+
+	.dl-item
+	{
+		padding: 10px 5px;
+		border-bottom: 1px solid @ink-verylight;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		width: 100%;
+		font-size: 12px;
+
+		&:hover
+		{
+			border-radius: 3px;
+			transition: all 0.1s ease;
+			background-color: @color-hover !important;
+			color: #f9f9fa;
+		}
+	}
+
+	.dl-item:last-child{
+		border: none;
+	}
+
+	#action-clearList
+	{
+		width: 22px;
+		position: absolute;
+		left: 10px;
+		top: 10px;
+		cursor: pointer;
+	}
+
+}
+
+
+#download-details, #stream-details
+{
+	width: 95%;
+	margin: 10px auto;
+	border: 1px solid;
+	padding: 20px;
+	border-radius: 4px;
+	
+	.desc
+	{
+		text-align: justify;
+		font-weight: normal;
+		max-height: 50px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+		-moz-user-select: text !important;
+	}
+
+	.desc-name
+	{
+		margin-top: 5px;
+		font-weight: bold;
+		-moz-user-select: none !important;
+	}
+
+	#filename
+	{
+		font-size: 18px;
+		font-weight: bold;
+		margin-bottom: 10px;
+	}
+
+	button.action{
+		padding: 3px;
+		width: 70px;
+	}
+	
+	li.action, div.action
+	{
+		color: @ink-dark;
+		text-decoration: none;
+		background: #ffffff;
+		padding: 5px;
+		border: 1px solid @ink-dark;
+		transition: all 0.4s ease 0s;
+		margin: 5px 20px;
+		cursor: pointer;
+		border-radius: 2px;
+		font-weight: bold;
+
+		&:hover
+		{
+			color: #ffffff;
+			background: @color-hover;
+			border-color: @color-hover;
+			transition: all 0.4s ease 0s;
+		}
+	}
+
+	.disabled-action, .disabled-action:hover
+	{
+		color: @color-disabled !important;
+		text-decoration: none;
+		background-color: #ffffff !important;
+		padding: 5px;
+		border: 1px solid @color-disabled !important;
+		transition: all 0.4s ease 0s;
+		margin: 5px 20px;
+		cursor: default;
+		border-radius: 2px;
+	}
+
+	#action-back
+	{
+		background-image: url('../icons/back.svg');
+		background-position:  5px 7px;
+		background-repeat:  no-repeat;
+		background-size: 12px;
+		width: 170px;
+		margin: 10px 0 40px;
+		text-align: right;
+		padding-right: 10px;
+
+		&:hover{
+			background-image: url('../icons/back-white.svg');
+		}
+	}
+
+	#action-report
+	{
+		border: none;
+		font-weight: normal;
+		background-color: inherit;
+		text-decoration: underline;
+
+		&:hover{
+			color:#d70022;
+			cursor: pointer;
+		}
+	}
+
+	#action-report.disabled-action
+	{
+		border: none !important;
+		color: inherit !important;
+		cursor: default !important;
+	}
+}
+
+
+#formats-list .format{
+	#popup-main .dl-item();
+}
+
+#stream-details li.action{
+	margin: 5px auto;
+}
+
+#downloader-choice{
+	border: 1px solid #abacb9;
+	border-radius: 4px;
+	padding: 3px 5px;
+}
+
+#actions{
+	margin-top: 20px;
+}
+
+li.spacer{
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+#stream-details .available
+{
+	font-size: 14px;
+}
+
+.debug_gray{
+	background-color: rgb(216, 216, 216);
+}
+
+.disabled{
+	pointer-events: none !important;
+	opacity: 0.5 !important;
+}
+
+#spinner{
+	display: none;
+}

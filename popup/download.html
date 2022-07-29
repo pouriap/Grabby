@@ -4,8 +4,8 @@
 
 <head>
 	<meta charset="utf-8">
-	<link rel="stylesheet" href="popup.css">
-	<link rel="stylesheet" href="download.css">
+	<link rel="stylesheet/less" type="text/css" href="popup.less" />
+	<link rel="stylesheet/less" type="text/css" href="download.less" />
 </head>
 
 <body>
@@ -22,7 +22,6 @@
 				<li class="desc desc-name">
 					From: <span class="desc" id="host"></span>
 				</li>
-				<li class="desc" id="output"></li>
 			</ul>
 
 			<div id="downloader-choice">
@@ -52,6 +51,7 @@
 
 	<script src="../classes.js"></script>
 	<script src="../libs/filesize.js"></script>
+	<script src="../libs/less.js"></script>
 	<script src="../modules/utils.js"></script>
 	<script src="../modules/ui.js"></script>
 	<script src="../modules/native_messaging.js"></script>

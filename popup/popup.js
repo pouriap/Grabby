@@ -92,8 +92,8 @@ function showDownloadsList()
 	//when we click back the downloads are already there and only hidden
 	//so we don't have to repopulate them in this case
 
-	if(ui.get('#downloads-list').getAttribute('populated')){
-		ui.show('#downloads-list');
+	if(ui.get('#popup-main').getAttribute('populated')){
+		ui.show('#popup-main');
 		return;
 	}
 
@@ -167,8 +167,8 @@ function showDownloadsList()
 		ui.get("#downloads-list").appendChild(listItem);
 	}
 
-	ui.get('#downloads-list').setAttribute('populated', 'populated');
-	ui.show('#downloads-list');
+	ui.get('#popup-main').setAttribute('populated', 'populated');
+	ui.show('#popup-main');
 }
 
 /**
@@ -185,7 +185,6 @@ function showDownloadDetails(download)
 		(download.getSize() !== "unknown")? filesize(download.getSize()) : download.getSize();
 	ui.get("#download-details #url").innerHTML = download.url;
 	ui.get("#download-details #url").setAttribute("title", download.url);
-	ui.get("#download-details #output").style.display = 'none';
 
 	populateDMs();
 
@@ -245,7 +244,7 @@ function showStreamDetails(download)
  */
 function clearDownloadsList()
 {
-	ui.get('#download-list').innerHTML = '';
+	ui.get("#downloads-list").innerHTML = '<li id="no-dl" style="display:none;">No Downloads</li>';
 	let message = {type: Messaging.TYP_CLEAR_LIST};
 	Messaging.sendMessage(message);
 }

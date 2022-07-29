@@ -87,6 +87,5 @@ function onBgDataRcvd() {
 	document.getElementById("size").innerHTML = 
 		(DLGPop.selectedDl.getSize() !== "unknown")? filesize(DLGPop.selectedDl.getSize()) : DLGPop.selectedDl.getSize();
 	document.getElementById("host").innerHTML = DLGPop.selectedDl.getHost();
-	document.getElementById("output").style.display = 'none';
 	populateDMs();
 }
