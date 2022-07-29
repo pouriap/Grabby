@@ -64,22 +64,9 @@ ul, li
 		padding: 15px;
 	}
 
-	#downloads-list{
-		width: 100%;
-	}
-
-	#no-dl
+	#downloads-list
 	{
-		padding: 16px 0 0 0;
-		color:@color-disabled;
 		width: 100%;
-		height: 50px;
-		background-color: #f9f9fa;
-		
-		//only show 'no downloads' if it's the last child
-		&:last-child{
-			display: block !important;
-		}
 	}
 
 	.dl-item
@@ -102,6 +89,20 @@ ul, li
 
 	.dl-item:last-child{
 		border: none;
+	}
+
+	#no-dl
+	{
+		padding: 16px 0 0 0;
+		color:@color-disabled;
+		width: 100%;
+		height: 50px;
+		background-color: #f9f9fa;
+		
+		//only show 'no downloads' if it's the last child
+		&:last-child{
+			display: block !important;
+		}
 	}
 
 	#action-clearList
@@ -154,7 +155,7 @@ ul, li
 		width: 70px;
 	}
 	
-	li.action, div.action
+	.action.button
 	{
 		color: @ink-dark;
 		text-decoration: none;
@@ -229,10 +230,9 @@ ul, li
 
 #formats-list .format{
 	#popup-main .dl-item();
-}
-
-#stream-details li.action{
 	margin: 5px auto;
+	border: 1px solid @ink-med;
+	border-radius: 4px;
 }
 
 #downloader-choice{
