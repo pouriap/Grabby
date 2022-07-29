@@ -60,6 +60,7 @@
 			"libs/mpd-parser.js",
 			"classes.js",
 			"modules/utils.js",
+			"modules/ui.js",
 			"modules/native_messaging.js",
 			"modules/context_menu.js",
 			"modules/request_handling.js",

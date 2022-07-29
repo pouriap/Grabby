@@ -204,7 +204,8 @@ class Download {
 		/**
 		 * @type {MainManifest}
 		 */
-		this.manifest = undefined;
+		this.manifest = {};
+		this.isStream = false;
 
 		//if we don't have the tab url then get it
 		//and we do it in the constructor too
@@ -267,6 +268,11 @@ class Download {
 	 * @returns file name or "unknown" if now available
 	 */
 	getFilename(){
+
+		if(this.isStream)
+		{
+			return this.manifest.title || "unknown";
+		}
 
 		if(typeof this.filename === "undefined"){
 

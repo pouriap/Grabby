@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", (event) => {
 
-	document.querySelectorAll(".action").forEach(function(action){
+	ui.get(".action").forEach(function(action){
 		action.addEventListener('click', (evt)=>{
 			actionClicked(DLGPop.selectedDl, action);
 		});
 	});
 
-	document.getElementById("dl-with-dlgrab").click();
+	ui.get("#dl-with-dlgrab").click();
 
 	getBackgroundData().then(onBgDataRcvd);
 
@@ -110,13 +110,7 @@ function onBgDataRcvd() {
 		listItem.setAttribute("data-hash", key);
 		let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
 
-		//if it's a file download
-		if(!download.manifest){
-			listItem.innerHTML = download.getFilename() + reason;
-		}
-		else{
-			listItem.innerHTML = download.manifest.title;
-		}
+		listItem.innerHTML = download.getFilename() + reason;
 
 		listItem.addEventListener("click", function(evt)
 		{
@@ -129,7 +123,7 @@ function onBgDataRcvd() {
 			DLGPop.selectedDl = DLGPop.allDownloads.get(hash);
 			log('item clicked: ', DLGPop.selectedDl);
 
-			if(DLGPop.selectedDl.manifest){
+			if(DLGPop.selectedDl.isStream){
 				showStreamDetails(DLGPop.selectedDl);
 			}
 			else{
