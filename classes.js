@@ -17,7 +17,7 @@ class DLGBase
 		 * a map containing all currently open download dialogs
 		 * @type {object}
 		 */
-		 this.downloadDialogs = {};
+		this.downloadDialogs = {};
 		/**
 		 * available download managers on system
 		 * @type {array}
@@ -189,7 +189,7 @@ class Download {
 	 * @param {object} reqDetails the 'details' object attached to a request
 	 * @param {object} resDetails the 'details' object attached to a response
 	 */
-	constructor(reqDetails, resDetails, tabUrl = '')
+	constructor(reqDetails, resDetails)
 	{
 		this.requestId = resDetails.requestId;
 		this.url = resDetails.url;
@@ -198,7 +198,6 @@ class Download {
 		this.resourceType = resDetails.type;
 		this.origin = reqDetails.originUrl || resDetails.url;
 		this.tabId = reqDetails.tabId;
-		this.tabUrl = tabUrl || this.origin;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
 		/**
@@ -206,24 +205,6 @@ class Download {
 		 */
 		this.manifest = {};
 		this.isStream = false;
-
-		//if we don't have the tab url then get it
-		//and we do it in the constructor too
-		//no one can stop us!
-		if(!tabUrl)
-		{
-			//todo: some things are not associated with a tab and have a -1 id like service workers (reddit.com)
-			try
-			{
-				browser.tabs.get(this.tabId).then((tabInfo) => {
-					if(tabInfo.url != "about:blank"){
-						this.tabUrl = tabInfo.url;
-					}
-				}).catch((e) => {});
-			}
-			catch(e){}
-		}
-
 	}
 
 	get hash()
@@ -232,6 +213,18 @@ class Download {
 			this._hash = md5(this.url);
 		}
 		return this._hash;
+	}
+
+	get tabUrl()
+	{
+		//todo: some things are not associated with a tab and have a -1 id 
+		//like service workers (reddit.com)
+		return DLG.tabs[this.tabId.toString()]? DLG.tabs[this.tabId.toString()].url : undefined;
+	}
+
+	get tabTitle()
+	{
+		return DLG.tabs[this.tabId.toString()]? DLG.tabs[this.tabId.toString()].title : 'no-title';
 	}
 
 	/**

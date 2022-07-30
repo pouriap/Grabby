@@ -113,7 +113,7 @@ var DLG = new DownloadGrab();
 			title: "Download Grab", 
 			message: "Error: initialization failed\nReason: " + e.toString(),
 		};
-		browser.notifications.create(options);		
+		browser.notifications.create(options);
 		return;
 	}
 
@@ -122,8 +122,15 @@ var DLG = new DownloadGrab();
 function setTabListeners()
 {
 	browser.tabs.onCreated.addListener((tab) => {
-		DLG.tabs[tab.id.toString()] = {};
+		DLG.tabs[tab.id.toString()] = tab;
 	});
+
+	browser.tabs.onCreated.addListener((tabId, changeInfo, tab) => {
+		DLG.tabs[tabId.toString()] = tab;
+	}, {
+		properties: ["status", "title", "url"]
+	});
+
 	browser.tabs.onRemoved.addListener((tabId) => {
 		delete DLG.tabs[tabId.toString()];
 	})

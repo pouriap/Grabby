@@ -16,13 +16,9 @@ class StreamHandling
 			f.write(event.data);
 		}
 	  
-		f.onstop = async (event) => {
+		f.onstop = (event) => {
 			console.time("manifest-handling");
-			let tabTitle = 'no-title';
-			if(filter.download.tabId >= 0){
-				tabTitle = (await browser.tabs.get(filter.download.tabId)).title;
-			}
-			StreamHandling.handle(filter, response, tabTitle);
+			StreamHandling.handle(filter, response);
 			console.timeEnd("manifest-handling");
 			//we first handle then give the request back to the browser
 			//if we give it back to the browser first it will start requesting the 
@@ -35,11 +31,10 @@ class StreamHandling
 	 * Handles a DASH or HLS manifest download
 	 * @param {ReqFilter} filter 
 	 * @param {string} rawManifest 
-	 * @param {number} tabTitle
 	 */
-	static handle(filter, rawManifest, tabTitle)
+	static handle(filter, rawManifest)
 	{
-		let bManifest = StreamHandling.parseRawManifest(filter, rawManifest, tabTitle);
+		let bManifest = StreamHandling.parseRawManifest(filter, rawManifest);
 
 		if(!bManifest){
 			return;
@@ -48,7 +43,7 @@ class StreamHandling
 		let tabId = filter.download.tabId.toString();
 		if(!DLG.tabs[tabId])
 		{
-			DLG.tabs[tabId] = {};
+			Utils.notification("Tab with ID: " + tabId + " does not exist");
 		}
 		if(!DLG.tabs[tabId].knownPlaylists)
 		{
@@ -95,6 +90,7 @@ class StreamHandling
 				if(download.subManifests.length == download.manifest.playlists.length)
 				{
 					log('got all manifests for: ', download);
+					download.hidden = false;
 				}
 			}
 
@@ -116,7 +112,7 @@ class StreamHandling
 	 * @param {string} rawManifest 
 	 * @returns {StreamManifest}
 	 */
-	static parseRawManifest(filter, rawManifest, title)
+	static parseRawManifest(filter, rawManifest)
 	{
 		if(filter.isHlsManifest())
 		{
@@ -124,13 +120,15 @@ class StreamHandling
 			parser.push(rawManifest);
 			parser.end();
 			let pManifest = parser.manifest;
-			return new StreamManifest(filter.download.url, title, 'hls', pManifest);
+			return new StreamManifest(
+				filter.download.url, filter.download.tabTitle, 'hls', pManifest);
 		}
 
 		else if(filter.isDashManifest())
 		{
 			let pManifest = mpdParser.parse(rawManifest, {manifestUri: manifestURL});
-			return new StreamManifest(filter.download.url, title, 'dash', pManifest);
+			return new StreamManifest(
+				filter.download.url, filter.download.tabTitle, 'dash', pManifest);
 		}
 
 		else

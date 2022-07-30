@@ -18,7 +18,7 @@ async function getBackgroundData()
 		let downloadJSON = allDlsJSON[downloadHash];
 		reqDetails = downloadJSON.reqDetails;
 		resDetails = downloadJSON.resDetails;
-		let download = new Download(reqDetails, resDetails, downloadJSON.tabUrl);
+		let download = new Download(reqDetails, resDetails);
 		//copy everything from downloadJSON to the new download object
 		Object.assign(download, downloadJSON);
 		allDownloads.put(downloadHash, download);

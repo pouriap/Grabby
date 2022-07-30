@@ -133,12 +133,7 @@ function showDownloadsList()
 			continue;
 		}
 
-		if( 
-			DLGPop.options.showOnlyTabDls &&
-			download.tabId != DLGPop.currTabId && 
-			Utils.getFullPath(download.tabUrl) != Utils.getFullPath(DLGPop.currTabUrl)
-		){
-			//log('hiding dl: ', download.url, ' because ', download.origin, ' =/= ', DLGPop.currTabUrl);
+		if(DLGPop.options.showOnlyTabDls && download.tabId != DLGPop.currTabId){
 			continue;
 		}
 

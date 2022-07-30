@@ -99,4 +99,14 @@ class Utils {
 		}
 	}
 
+	static notification(msg)
+	{
+		let options = {
+			type: "basic", 
+			title: "Download Grab", 
+			message: msg,
+		};
+		browser.notifications.create(options);
+	}
+
 }
