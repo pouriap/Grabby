@@ -64,7 +64,7 @@ var DLG = new DownloadGrab();
 
 	try
 	{
-		setTabListeners();
+		await setTabListeners();
 
 		let nativeMsging = new NativeMessaging();
 
@@ -119,16 +119,21 @@ var DLG = new DownloadGrab();
 
 })();
 
-function setTabListeners()
+async function setTabListeners()
 {
+	let info = await browser.runtime.getBrowserInfo();
+	let version = info.version.split('.')[0];
+
 	browser.tabs.onCreated.addListener((tab) => {
 		DLG.tabs[tab.id.toString()] = tab;
 	});
 
-	browser.tabs.onCreated.addListener((tabId, changeInfo, tab) => {
+	//'url' is only supported in FF88+
+	let props = (version < 88)? ["status", "title"] :  ["status", "title", "url"];
+	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 		DLG.tabs[tabId.toString()] = tab;
 	}, {
-		properties: ["status", "title", "url"]
+		properties: props
 	});
 
 	browser.tabs.onRemoved.addListener((tabId) => {

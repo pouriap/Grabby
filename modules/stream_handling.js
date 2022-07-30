@@ -41,18 +41,19 @@ class StreamHandling
 		}
 
 		let tabId = filter.download.tabId.toString();
-		if(!DLG.tabs[tabId])
-		{
-			Utils.notification("Tab with ID: " + tabId + " does not exist");
-		}
-		if(!DLG.tabs[tabId].knownPlaylists)
-		{
-			DLG.tabs[tabId].knownPlaylists = [];
-		}
 
 		if(bManifest.getType() === 'main')
 		{
 			//log('we got a main manifest: ', filter.download.url, bManifest);
+
+			if(!DLG.tabs[tabId])
+			{
+				Utils.notification("Tab with ID: " + tabId + " does not exist");
+			}
+			if(!DLG.tabs[tabId].knownPlaylists)
+			{
+				DLG.tabs[tabId].knownPlaylists = [];
+			}
 
 			let manifest = MainManifest.getFromBase(bManifest);
 
@@ -96,7 +97,8 @@ class StreamHandling
 
 			//for cases when the page only has a sub-manifest without a main manifest
 			//example of this: https://videoshub.com/videos/25312764
-			else if(!DLG.tabs[tabId].knownPlaylists.includes(bManifest.url))
+			else if(DLG.tabs[tabId].knownPlaylists &&
+				!DLG.tabs[tabId].knownPlaylists.includes(bManifest.url))
 			{
 				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				filter.download.manifest = PlaylistManifest.getFromBase(bManifest);
