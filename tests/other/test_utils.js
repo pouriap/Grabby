@@ -7,7 +7,7 @@ function initApp(options){
 }
 
 function req(dlInfo){
-	let handler = new RequestHandling(app);
+	let handler = new RequestFiltering(app);
 	handler.performAction = function (download, app) {
 		return download.act;
 	}

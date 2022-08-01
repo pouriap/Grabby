@@ -98,7 +98,7 @@ var DLG = new DownloadGrab();
 
 		Messaging.init();
 
-		RequestHandling.init();
+		RequestFiltering.init();
 
 		ContextMenu.init();
 

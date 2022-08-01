@@ -747,12 +747,6 @@ class ReqFilter {
 		return false;
 	}
 
-	isDLGRequest(){
-		if(this.download.getHeader('X-DLG', 'request') != undefined){
-			return true;
-		}
-	}
-
 	isTypeWebRes(){
 		if(typeof this._isTypWebRes === 'undefined'){
 			this._isTypWebRes = this._isInTypeList(constants.webResTypes);

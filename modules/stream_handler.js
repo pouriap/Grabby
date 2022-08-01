@@ -1,4 +1,4 @@
-class StreamHandling
+class StreamHandler
 {
 	/**
 	 * 
@@ -18,7 +18,7 @@ class StreamHandling
 	  
 		f.onstop = (event) => {
 			console.time("manifest-handling");
-			StreamHandling.handle(filter, response);
+			StreamHandler.handle(filter, response);
 			console.timeEnd("manifest-handling");
 			//we first handle then give the request back to the browser
 			//if we give it back to the browser first it will start requesting the 
@@ -34,7 +34,7 @@ class StreamHandling
 	 */
 	static handle(filter, rawManifest)
 	{
-		let bManifest = StreamHandling.parseRawManifest(filter, rawManifest);
+		let bManifest = StreamHandler.parseRawManifest(filter, rawManifest);
 
 		if(!bManifest){
 			return;
