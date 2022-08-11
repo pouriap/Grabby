@@ -2,3 +2,4 @@
 *.code-workspace
 _extras/
 /_Native Client/win/_installer/*.exe
+node_modules/
