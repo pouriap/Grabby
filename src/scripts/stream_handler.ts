@@ -132,7 +132,7 @@ class StreamHandler implements RequestHandler
 
 	}
 
-	private parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest
+	private parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest | undefined
 	{
 		if(filter.isHlsManifest())
 		{
