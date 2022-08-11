@@ -20,7 +20,7 @@ namespace ContextMenu
 	const SCRIPT_GET_ALL = '../content_scripts/get_all_links.js';
 	const SCRIPT_GET_SELECTION = '../content_scripts/get_selection_links.js';
 
-	export function setupListeners()
+	export function startListeners()
 	{
 		//add grab all menu
 		browser.menus.create({

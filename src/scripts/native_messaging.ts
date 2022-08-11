@@ -153,7 +153,7 @@ namespace NativeMessaging
 
 	let port: ProperPort;
 
-	export function startListeners()
+	export function startListeners(): Promise<string[]>
 	{
 		port = new ProperPort();
 		port.connect();
@@ -184,7 +184,7 @@ namespace NativeMessaging
 
 	/* private stuff */
 	
-	function getAvailDMs(): Promise<MSGRCV_AvailDMs[]>
+	function getAvailDMs(): Promise<string[]>
 	{
 		return new Promise((resolve, reject) => {
 			try

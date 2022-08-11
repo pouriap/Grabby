@@ -73,11 +73,11 @@ var DLG = new DownloadGrab();
 		let externalDMs = await NativeMessaging.startListeners();
 
 		//these are TCP server based DMs that we check using the browser itself
-		let browserDms: BrowserDM[] = [];
+		let browserDms: string[] = [];
 		//todo: uncomment
 		//let browserDms = await BrowserDMs.getAvailableDMs();
 
-		let availableDMs = externalDMs.concat(browserDms);
+		let availableDMs: string[] = externalDMs.concat(browserDms);
 
 		if(availableDMs.length == 0){
 			throw "No download managers found on system";
@@ -87,9 +87,6 @@ var DLG = new DownloadGrab();
 		DLG.availBrowserDMs = browserDms;
 		DLG.availExtDMs = externalDMs;
 
-		//ceate a function in DLG for sending native messages so it can be accessed globally
-		DLG.sendNativeMsg = function(msg){nativeMsging.sendMessage(msg);}
-
 		let options = await Options.load();
 		Options.apply(options);
 
@@ -97,11 +94,11 @@ var DLG = new DownloadGrab();
 		let res = await browser.storage.local.get({blacklist: []});
 		DLG.blacklist = res.blacklist;
 
-		Messaging.init();
+		Messaging.startListeners();
 
-		RequestFiltering.init();
+		RequestFiltering.startListeners();
 
-		ContextMenu.init();
+		ContextMenu.startListeners();
 
 		log.d('addon init successful');
 	}
