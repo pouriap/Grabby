@@ -67,15 +67,13 @@ var DLG = new DownloadGrab();
 
 	try
 	{
-		await setTabListeners();
-
-		let nativeMsging = new NativeMessaging();
+		await Tabs.startListeners();
 
 		//get available DMs from flashgot
-		let externalDMs = await nativeMsging.init();
+		let externalDMs = await NativeMessaging.startListeners();
 
 		//these are TCP server based DMs that we check using the browser itself
-		let browserDms = [];
+		let browserDms: BrowserDM[] = [];
 		//todo: uncomment
 		//let browserDms = await BrowserDMs.getAvailableDMs();
 
@@ -120,25 +118,3 @@ var DLG = new DownloadGrab();
 	}
 
 })();
-
-async function setTabListeners()
-{
-	let info = await browser.runtime.getBrowserInfo();
-	let version = info.version.split('.')[0];
-
-	browser.tabs.onCreated.addListener((tab) => {
-		DLG.tabs[tab.id.toString()] = tab;
-	});
-
-	//'url' is only supported in FF88+
-	let props = (version < 88)? ["status", "title"] :  ["status", "title", "url"];
-	browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-		DLG.tabs[tabId.toString()] = tab;
-	}, {
-		properties: props
-	});
-
-	browser.tabs.onRemoved.addListener((tabId) => {
-		delete DLG.tabs[tabId.toString()];
-	})
-}

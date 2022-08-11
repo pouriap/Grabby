@@ -94,6 +94,13 @@ namespace NativeMessaging
 	/* recived messages */
 	//these are messages we receive from the native app and never send outself
 	//so just a type will suffice becasue we never want to create a new object
+
+	type MSGRCV_AvailDMs = {
+		name: string,
+		available: boolean,
+		error?: string
+	}
+
 	type MSGRCV_YTDLInfo = {
 		type: string,
 		dlHash: string,
@@ -151,18 +158,15 @@ namespace NativeMessaging
 		port = new ProperPort();
 		port.connect();
 
-		return new Promise((resolve, reject) => {
-
+		return new Promise((resolve, reject) => 
+		{
 			let timer = setTimeout(() => {
 				reject("Native app took too long to respond");
 			}, 5000);
 
-			getAvailDMs().then((response: any) => {
-				if(typeof response.availableDMs != 'object'){
-					reject("bad DM list from native app");
-				}
+			getAvailDMs().then((availableDMs) => {
 				start();
-				resolve(response.availableDMs);
+				resolve(availableDMs);
 			})
 			.catch((reason) => {
 				reject(reason);
@@ -180,7 +184,7 @@ namespace NativeMessaging
 
 	/* private stuff */
 	
-	function getAvailDMs()
+	function getAvailDMs(): Promise<MSGRCV_AvailDMs[]>
 	{
 		return new Promise((resolve, reject) => {
 			try
@@ -206,8 +210,11 @@ namespace NativeMessaging
 					else if(response.type != MSGTYP_AVAIL_DMS){
 						reject("bad response type from native app: " + response.type);
 					}
+					else if(!response.availableDMs){
+						reject("bad DM list from native app");
+					}
 					else{
-						resolve(response);
+						resolve(response.availableDMs);
 					}
 				});
 
