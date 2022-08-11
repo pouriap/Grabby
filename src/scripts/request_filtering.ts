@@ -75,9 +75,9 @@ namespace RequestFiltering
 	 * Runs once response headers are received 
 	 * We create a download here if the response matches our criteria and add it 
 	 * to our list of downloads
-	 * @param {object} details 
+	 * @param details 
 	 */
-	function doOnHeadersReceived(details: any)
+	function doOnHeadersReceived(details: any): Promise<webx_BlockingResponse>
 	{
 
 		//log("receiving: ", details);
@@ -88,7 +88,7 @@ namespace RequestFiltering
 		let requestOfThisResponse = DLG.allRequests.get(requestId);
 		
 		if(typeof requestOfThisResponse === 'undefined'){
-			return;
+			return Promise.resolve({cancel: false});
 		}
 
 		//creating a new download object because the original will be deleted from allRequests
@@ -97,6 +97,12 @@ namespace RequestFiltering
 
 		let filter = new ReqFilter(download, DLG.options);
 
+		if(isIgnored(filter)){
+			return Promise.resolve({cancel: false});
+		}
+
+		let handler: RequestHandler;
+
 		// This is for handling streams, aka requests for HLS and DASH manifests
 		// Streams are AJAX and AJAX is ignored in the handling flow
 		// Also for streams we have to wait until the manifest body is received and parse it 
@@ -104,20 +110,15 @@ namespace RequestFiltering
 		// Also streams are different in every way so we handle them here first
 		if(filter.isStreamManifest())
 		{
-			download.isStream = true;
-			download.hidden = true;
-			StreamHandler.receiveManifest(details.requestId, filter);
+			handler = new StreamHandler(download, filter);
 		}
-
 		// This is for normal downloads
-		if(!isIgnored(download, filter))
+		else
 		{
-			DownloadHandler.handle(download, filter);
+			handler = new DownloadHandler(download, filter);
 		}
 
-		//perform said action
-		return performAction(download);
-		
+		return handler.handle();
 	}
 
 	/**
@@ -135,10 +136,9 @@ namespace RequestFiltering
 	/**
 	 * If the filter has an explicit action associated with it that ignores all rules
 	 * then this function sets it
-	 * @param download 
 	 * @param filter 
 	 */
-	function isIgnored(download: Download, filter: ReqFilter)
+	function isIgnored(filter: ReqFilter)
 	{
 		if(!filter.isStatusOK()){
 			return true;
@@ -153,8 +153,7 @@ namespace RequestFiltering
 			return true;
 		}
 
-		//ain't no download in AJAX
-		if(filter.isAJAX()){
+		if(filter.isAJAX() && !filter.isStreamManifest()){
 			return true;
 		}
 
@@ -167,44 +166,6 @@ namespace RequestFiltering
 		}
 
 		return false;
-	}
-
-	/**
-	 * Performs the action that is assigned to a request in determineAction()
-	 * @param download 
-	 */
-	function performAction(download: Download)
-	{
-		//console.timeEnd(download.reqDetails.requestId);
-
-		if(download.act === ReqFilter.ACT_IGNORE){
-			return;
-		}
-
-		//todo: if a file is generated with a different URL each time we open a page
-		//then consequent openings of that page adds the same file to the download list
-		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
-		//warning: example is porn
-
-		DLG.addToAllDownloads(download);
-
-		if(download.act === ReqFilter.ACT_FORCE_DL){
-			let dmName = Options.getDefaultDM();
-			DownloadJob.getFromDownload(dmName, download).then((job)=>{
-				DLG.doDownloadJob(job);
-			});
-			return {cancel: true};
-		}
-
-		if(download.act === ReqFilter.ACT_GRAB && DLG.options.overrideDlDialog){
-			//the request will be paused until this promise is resolved
-			return new Promise(function(resolve)
-			{
-				download.resolve = resolve;
-				DLG.showDlDialog(download);
-			});
-		}
-		
 	}
 
 }

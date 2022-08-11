@@ -136,8 +136,6 @@ class Download
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
-	//ignore all downloads by default, in case we forget to process them by bug
-	act = ReqFilter.ACT_IGNORE;
 	//a Promise.resolve object is stored here for downloads that we intercept from the browser
 	//calling resolve() on this download will continue the request
 	resolve: ((value: unknown) => void) | undefined = undefined;
@@ -363,12 +361,6 @@ class ReqFilter
 	public static readonly CLS_INLINE_MEDIA = 'web media';
 	public static readonly CLS_WEB_OTHER = 'web page';
 	public static readonly CLS_DOWNLOAD = 'download';
-
-	//types of action
-	public static readonly ACT_GRAB = 'grab';
-	public static readonly ACT_IGNORE = 'ignore';
-	public static readonly ACT_FORCE_DL = 'force dl';
-	public static readonly ACT_GRAB_SILENT = 'grab silent';
 
 	private _isWebSocket: bool_und = undefined;
 	private _isImage: bool_und = undefined;
@@ -868,6 +860,13 @@ class ReqFilter
 	}
 
 	
+}
+
+interface RequestHandler
+{
+	download: Download;
+	filter: ReqFilter;
+	handle(): Promise<webx_BlockingResponse>;
 }
 
 /**

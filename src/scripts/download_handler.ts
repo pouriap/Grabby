@@ -1,18 +1,33 @@
-class DownloadHandler
+class DownloadHandler implements RequestHandler
 {
+	download: Download;
+	filter: ReqFilter;
+
+	private readonly ACT_GRAB = 'grab';
+	private readonly ACT_IGNORE = 'ignore';
+	private readonly ACT_FORCE_DL = 'force dl';
+	private readonly ACT_GRAB_SILENT = 'grab silent';
+
+	constructor(download: Download, filter: ReqFilter)
+	{
+		this.download = download;
+		this.filter = filter;
+	}
+
 	/**
 	 * Handles a download
 	 * @param download 
 	 * @param filter 
 	 */
-	static handle(download: Download, filter: ReqFilter)
+	handle()
 	{
 		//first determine its category
-		DownloadHandler.determineCategory(download, filter);
+		this.determineCategory(this.download, this.filter);
 		//then group similar categories together into a class
-		DownloadHandler.determineClass(download, filter);
+		this.determineClass(this.download, this.filter);
 		//then determine the action based on what class the request is
-		DownloadHandler.determineAction(download, filter);
+		let action = this.determineAction(this.download, this.filter);
+		return this.performAction(this.download, action);
 	}
 
 	/**
@@ -21,7 +36,7 @@ class DownloadHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	static determineCategory(download: Download, filter: ReqFilter)
+	private determineCategory(download: Download, filter: ReqFilter)
 	{
 		/**
 		 * use types to determine category first, because they are the most certain
@@ -108,7 +123,7 @@ class DownloadHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	static determineClass(download: Download, filter: ReqFilter)
+	private determineClass(download: Download, filter: ReqFilter)
 	{
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
@@ -165,46 +180,88 @@ class DownloadHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	static determineAction(download: Download, filter: ReqFilter)
+	private determineAction(download: Download, filter: ReqFilter): string
 	{
+		let act = this.ACT_IGNORE;
+
 		if(download.class === ReqFilter.CLS_WEB_OTHER){
-			download.act = ReqFilter.ACT_IGNORE;
+			act = this.ACT_IGNORE;
 		}
 
 		if(download.class === ReqFilter.CLS_INLINE_WEB_RES){
 			if(DLG.options.excludeWebFiles){
-				download.act = ReqFilter.ACT_IGNORE;
+				act = this.ACT_IGNORE;
 			}
 			else{
-				download.act = ReqFilter.ACT_GRAB_SILENT;
+				act = this.ACT_GRAB_SILENT;
 			}
 		}
 
 		else if(download.class === ReqFilter.CLS_INLINE_MEDIA){
-			download.act = ReqFilter.ACT_GRAB_SILENT;
+			act = this.ACT_GRAB_SILENT;
 		}
 
 		else if(download.class === ReqFilter.CLS_DOWNLOAD){
 			if( !filter.hasAttachment() && filter.isDisplayedInBrowser() ){
-				download.act = ReqFilter.ACT_GRAB_SILENT;
+				act = this.ACT_GRAB_SILENT;
 			}
 			else{
-				download.act = ReqFilter.ACT_GRAB;
+				act = this.ACT_GRAB;
 			}
 		}
 
 		//overrides
 		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isForcedInOpts()){
 			download.classReason = 'opts-force';
-			download.act = ReqFilter.ACT_FORCE_DL;
-			return;
+			return this.ACT_FORCE_DL;
 		}
 
 		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isIncludedInOpts()){
 			download.classReason = 'opts-include';
-			download.act = ReqFilter.ACT_GRAB;
-			return;
+			return this.ACT_GRAB;
 		}
 
+		return act;
+	}
+
+	/**
+	 * Performs the action that is assigned to a request in determineAction()
+	 * @param download 
+	 */
+	private performAction(download: Download, act: string): Promise<webx_BlockingResponse>
+	{
+		//console.timeEnd(download.reqDetails.requestId);
+
+		if(act === this.ACT_IGNORE){
+			return Promise.resolve({cancel: false});
+		}
+
+		//todo: if a file is generated with a different URL each time we open a page
+		//then consequent openings of that page adds the same file to the download list
+		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
+		//warning: example is porn
+
+		DLG.addToAllDownloads(download);
+
+		if(act === this.ACT_FORCE_DL){
+			let dmName = Options.getDefaultDM();
+			DownloadJob.getFromDownload(dmName, download).then((job)=>{
+				DLG.doDownloadJob(job);
+			});
+			return Promise.resolve({cancel: true});
+		}
+
+		if(act === this.ACT_GRAB && DLG.options.overrideDlDialog){
+			//the request will be paused until this promise is resolved
+			return new Promise(function(resolve)
+			{
+				//@ts-ignore	this be something special
+				download.resolve = resolve;
+				DLG.showDlDialog(download);
+			});
+		}
+
+		//for safety in case nothing above runs
+		return Promise.resolve({cancel: false});	
 	}
 }

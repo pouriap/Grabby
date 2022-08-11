@@ -1,9 +1,32 @@
 declare var m3u8Parser : any;
 declare var mpdParser: any;
 
-class StreamHandler
+class StreamHandler implements RequestHandler
 {
-	static receiveManifest(requestId: number, filter: ReqFilter)
+	download: Download;
+	filter: ReqFilter;
+
+	constructor(download: Download, filter: ReqFilter)
+	{
+		this.download = download;
+		this.filter = filter;
+	}
+
+	handle()
+	{
+		this.download.isStream = true;
+		this.download.hidden = true;
+		this.receiveManifest(this.download.requestId, this.filter);
+		//we always continue the request for streams cause we don't wanna block anything
+		return Promise.resolve({cancel: false});
+	}
+
+	/**
+	 * Receives the response body of the manifest request and prepares it for parsing
+	 * @param requestId
+	 * @param filter
+	 */
+	private receiveManifest(requestId: number, filter: ReqFilter)
 	{	
 		let f = browser.webRequest.filterResponseData(requestId);
 		let decoder = new TextDecoder("utf-8");
@@ -16,7 +39,7 @@ class StreamHandler
 	  
 		f.onstop = (event: any) => {
 			console.time("manifest-handling");
-			StreamHandler.handle(filter, response);
+			this.doHandle(filter, response);
 			console.timeEnd("manifest-handling");
 			//we first handle then give the request back to the browser
 			//if we give it back to the browser first it will start requesting the 
@@ -25,9 +48,9 @@ class StreamHandler
 		}
 	}
 
-	static handle(filter: ReqFilter, rawManifest: string)
+	private doHandle(filter: ReqFilter, rawManifest: string)
 	{
-		let bManifest = StreamHandler.parseRawManifest(filter, rawManifest);
+		let bManifest = this.parseRawManifest(filter, rawManifest);
 
 		if(!bManifest){
 			return;
@@ -109,7 +132,7 @@ class StreamHandler
 
 	}
 
-	static parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest
+	private parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest
 	{
 		if(filter.isHlsManifest())
 		{
