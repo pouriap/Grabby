@@ -1,6 +1,6 @@
-class ui
+namespace ui
 {	
-	static create(type: string, attrs: {[index:string]: string})
+	export function create(type: string, attrs: {[index:string]: string})
 	{
 		let el = document.createElement(type);
 		for(let attr in attrs)
@@ -15,7 +15,7 @@ class ui
 	 * @param el a single element, or a query selector for a single element
 	 * @param attrs key->value map of attributes
 	 */
-	static update(el: string | HTMLElement, attrs: {[index: string]: string})
+	export function update(el: string | HTMLElement, attrs: {[index: string]: string})
 	{
 		//if it's a query
 		if(typeof el === 'string')
@@ -33,13 +33,13 @@ class ui
 		}
 	}
 
-	static get(query: string): HTMLElement | undefined
+	export function get(query: string): HTMLElement | undefined
 	{
 		let e = document.querySelector(query) as HTMLElement;
 		return (e)? e : undefined;
 	}
 
-	static getAll(query: string)
+	export function getAll(query: string)
 	{
 		return document.querySelectorAll(query);
 	}
@@ -48,7 +48,7 @@ class ui
 	 * Hides the specified element(s)
 	 * @param el a single element, or a query selector for one or more elements
 	 */
-	static hide(el: HTMLElement | string)
+	export function hide(el: HTMLElement | string)
 	{
 		//if it's an element
 		if(typeof el === 'object')
@@ -70,7 +70,7 @@ class ui
 	 * Unhides the specified element(s)
 	 * @param el a single element, or a query selector for one or more elements
 	 */
-	static show(el: HTMLElement | string)
+	export function show(el: HTMLElement | string)
 	{
 		//if it's an element
 		if(typeof el === 'object')

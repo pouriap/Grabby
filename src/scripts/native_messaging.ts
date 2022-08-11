@@ -66,6 +66,7 @@ namespace NativeMessaging
 		}
 	}
 
+
 	/* now some types */
 	export interface NativeMessage
 	{
@@ -145,7 +146,7 @@ namespace NativeMessaging
 
 	let port: ProperPort;
 
-	export function init()
+	export function startListeners()
 	{
 		port = new ProperPort();
 		port.connect();
@@ -160,7 +161,7 @@ namespace NativeMessaging
 				if(typeof response.availableDMs != 'object'){
 					reject("bad DM list from native app");
 				}
-				startListening();
+				start();
 				resolve(response.availableDMs);
 			})
 			.catch((reason) => {
@@ -219,7 +220,7 @@ namespace NativeMessaging
 		});
 	}
 	
-	function startListening()
+	function start()
 	{
 		//set the final handlers
 		port.setOnMessage(doOnNativeMessage);

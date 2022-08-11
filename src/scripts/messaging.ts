@@ -15,6 +15,7 @@ namespace Messaging
 	const TYP_YTDL_GET = 'ytdl-get';
 	export const TYP_YTDL_PROGRESS = 'ytdl-progress';
 
+
 	export interface Message
 	{
 		type: string;
@@ -67,7 +68,8 @@ namespace Messaging
 		constructor(public dlHash: string, public percent: string){};
 	}
 
-	export function init()
+
+	export function startListeners()
 	{
 		browser.runtime.onMessage.addListener((msg: Message) => { 
 			return doOnMessage(msg);

@@ -2,7 +2,7 @@
 //because if we run the script twice we will get 'redeclaration' error if we use 'let'
 
 var linkNodes = document.links;
-var links: context_link[] = [];
+var links: ContextMenu.link[] = [];
 
 for(let i=0; i<linkNodes.length; i++)
 {
@@ -11,13 +11,13 @@ for(let i=0; i<linkNodes.length; i++)
 	let desc = (isAnchor)? 
 		(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
 	let href = linkNode.href;
-	let link: context_link = {href: href, desc: desc};
+	let link: ContextMenu.link = {href: href, desc: desc};
 	links.push(link);
 }
 
 var originPageUrl = window.location.href;
 var originPageReferer = document.referrer;
-var result: context_result = {
+var result: ContextMenu.result = {
 	links: links,
 	originPageUrl: originPageUrl,
 	originPageReferer: originPageReferer,

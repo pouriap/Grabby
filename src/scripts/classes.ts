@@ -1369,7 +1369,7 @@ class DownloadJob
 	 * @param originPageReferer 
 	 * @returns A DownloadJob object created from provided data
 	 */
-	static async getFromContext(dmName: string, result: context_result)
+	static async getFromContext(dmName: string, result: ContextMenu.result)
 	{
 		let originPageUrl = result.originPageUrl;
 		let originPageReferer = result.originPageReferer;

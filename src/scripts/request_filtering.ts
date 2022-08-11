@@ -1,27 +1,27 @@
-class RequestFiltering 
+namespace RequestFiltering 
 {
-	static init()
+	export function startListeners()
 	{
 		browser.webRequest.onBeforeRequest.addListener(
-			(details: any) => { return RequestFiltering.doOnBeforeRequest(details) }, 
+			(details: any) => { return doOnBeforeRequest(details) }, 
 			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			(details: any) => { return RequestFiltering.doOnBeforeSendHeaders(details) }, 
+			(details: any) => { return doOnBeforeSendHeaders(details) }, 
 			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			(details: any) => { return RequestFiltering.doOnHeadersReceived(details) }, 
+			(details: any) => { return doOnHeadersReceived(details) }, 
 			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details: any) => { return RequestFiltering.doOnCompleted(details) }, 
+			(details: any) => { return doOnCompleted(details) }, 
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -32,7 +32,7 @@ class RequestFiltering
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	static doOnBeforeRequest(details: any)
+	function doOnBeforeRequest(details: any)
 	{
 		let formDataArr = (
 			details.method === "POST" && 
@@ -62,7 +62,7 @@ class RequestFiltering
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	static doOnBeforeSendHeaders(details: any)
+	function doOnBeforeSendHeaders(details: any)
 	{
 		//store request details
 		let request = DLG.allRequests.get(details.requestId);
@@ -77,7 +77,7 @@ class RequestFiltering
 	 * to our list of downloads
 	 * @param {object} details 
 	 */
-	static doOnHeadersReceived(details: any)
+	function doOnHeadersReceived(details: any)
 	{
 
 		//log("receiving: ", details);
@@ -110,20 +110,20 @@ class RequestFiltering
 		}
 
 		// This is for normal downloads
-		if(!RequestFiltering.isIgnored(download, filter))
+		if(!isIgnored(download, filter))
 		{
 			DownloadHandler.handle(download, filter);
 		}
 
 		//perform said action
-		return RequestFiltering.performAction(download);
+		return performAction(download);
 		
 	}
 
 	/**
 	 * Runs once a request is completed
 	 */
-	static doOnCompleted(details: any)
+	function doOnCompleted(details: any)
 	{
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
@@ -138,7 +138,7 @@ class RequestFiltering
 	 * @param download 
 	 * @param filter 
 	 */
-	static isIgnored(download: Download, filter: ReqFilter)
+	function isIgnored(download: Download, filter: ReqFilter)
 	{
 		if(!filter.isStatusOK()){
 			return true;
@@ -173,7 +173,7 @@ class RequestFiltering
 	 * Performs the action that is assigned to a request in determineAction()
 	 * @param download 
 	 */
-	static performAction(download: Download)
+	function performAction(download: Download)
 	{
 		//console.timeEnd(download.reqDetails.requestId);
 

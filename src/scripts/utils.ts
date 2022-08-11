@@ -1,10 +1,10 @@
-class Utils
+namespace Utils
 {
 	/**
 	 * Gets domain name of a url
 	 * @param url 
 	 */
-	static getDomain(url: string)
+	export function getDomain(url: string)
 	{
 		let a = document.createElement('a');
 		a.href = url;
@@ -15,7 +15,7 @@ class Utils
 	 * Gets path part of a url
 	 * @param url 
 	 */
-	static getPath(url: string)
+	export function getPath(url: string)
 	{
 		let a = document.createElement('a');
 		a.href = url;
@@ -26,14 +26,14 @@ class Utils
 	 * Gets a "clean" URL, i.e. a URL without query string and fragments, etc.
 	 * @param url 
 	 */
-	static getFullPath(url: string)
+	export function getFullPath(url: string)
 	{
 		let a = document.createElement('a');
 		a.href = url;
 		return (a.protocol + '//' + a.hostname + a.pathname);
 	}
 
-	static getFileName(url: string)
+	export function getFileName(url: string)
 	{
 		let path = Utils.getPath(url);
 		path = decodeURI(path);
@@ -44,7 +44,7 @@ class Utils
 		return (filename)? filename : '';
 	}
 
-	static getExtFromFileName(filename: string)
+	export function getExtFromFileName(filename: string)
 	{
 		let chuncks = filename.split('.');
 		let ext = '';
@@ -58,7 +58,7 @@ class Utils
 	 * Gets cookies associated with the given URL
 	 * @param url 
 	 */
-	static async getCookies(url: string){
+	export async function getCookies(url: string){
 		let cookies = '';
 		let cookiesArr = await browser.cookies.getAll({url: url});
 		for(let cookie of cookiesArr){
@@ -72,7 +72,7 @@ class Utils
 	 * @param tabId 
 	 * @param data 
 	 */
-	static async executeScript(tabId: number, data: object)
+	export async function executeScript(tabId: number, data: object)
 	{
 		try
 		{
@@ -92,7 +92,7 @@ class Utils
 	 * @param seconds number of seconds
 	 * @returns 
 	 */
-	static formatSeconds(seconds: number)
+	export function formatSeconds(seconds: number)
 	{
 		var date = new Date(0);
 		date.setSeconds(seconds);
@@ -106,7 +106,7 @@ class Utils
 		}
 	}
 
-	static notification(msg: string)
+	export function notification(msg: string)
 	{
 		let options = {
 			type: "basic", 
