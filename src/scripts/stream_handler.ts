@@ -97,7 +97,12 @@ class StreamHandler
 				!DLG.tabs.get(tabId).knownPlaylists.includes(bManifest.url))
 			{
 				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
-				filter.download.manifest = PlaylistManifest.getFromBase(bManifest);
+				//we have to manually create a proper MainManifest for this download here
+				let playlist = new Playlist(0, 'single-video', bManifest.url, 'unknown', 0, 0);
+				playlist.update(manifest);
+				let pls = [playlist];
+				let m = new MainManifest(bManifest, pls, manifest.title);
+				filter.download.manifest = m;
 				log.d('got a single manifest for: ', filter.download);
 			}
 		}
