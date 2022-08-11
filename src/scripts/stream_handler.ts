@@ -1,22 +1,20 @@
+declare var m3u8Parser : any;
+declare var mpdParser: any;
+
 class StreamHandler
 {
-	/**
-	 * 
-	 * @param {number} requestId 
-	 * @param {ReqFilter} filter 
-	 */
-	static receiveManifest(requestId, filter)
+	static receiveManifest(requestId: number, filter: ReqFilter)
 	{	
 		let f = browser.webRequest.filterResponseData(requestId);
 		let decoder = new TextDecoder("utf-8");
 		let response = "";
 	
-		f.ondata = (event) => {
+		f.ondata = (event: any) => {
 			response += decoder.decode(event.data, {stream: true});
 			f.write(event.data);
 		}
 	  
-		f.onstop = (event) => {
+		f.onstop = (event: any) => {
 			console.time("manifest-handling");
 			StreamHandler.handle(filter, response);
 			console.timeEnd("manifest-handling");
@@ -27,12 +25,7 @@ class StreamHandler
 		}
 	}
 
-	/**
-	 * Handles a DASH or HLS manifest download
-	 * @param {ReqFilter} filter 
-	 * @param {string} rawManifest 
-	 */
-	static handle(filter, rawManifest)
+	static handle(filter: ReqFilter, rawManifest: string)
 	{
 		let bManifest = StreamHandler.parseRawManifest(filter, rawManifest);
 
@@ -40,34 +33,34 @@ class StreamHandler
 			return;
 		}
 
-		let tabId = filter.download.tabId.toString();
+		let tabId = filter.download.tabId;
 
 		if(bManifest.getType() === 'main')
 		{
 			//log('we got a main manifest: ', filter.download.url, bManifest);
 
-			if(!DLG.tabs[tabId])
+			if(!DLG.tabs.get(tabId))
 			{
 				Utils.notification("Tab with ID: " + tabId + " does not exist");
 			}
-			if(!DLG.tabs[tabId].knownPlaylists)
+			if(!DLG.tabs.get(tabId).knownPlaylists)
 			{
-				DLG.tabs[tabId].knownPlaylists = [];
+				DLG.tabs.get(tabId).knownPlaylists = [];
 			}
 
 			let manifest = MainManifest.getFromBase(bManifest);
 
 			filter.download.manifest = manifest;
-			filter.download.subManifests = [];
+
 			DLG.addToAllDownloads(filter.download);
 
 			for(let playlist of manifest.playlists)
 			{
-				DLG.tabs[tabId].knownPlaylists.push(playlist.url);
+				DLG.tabs.get(tabId).knownPlaylists.push(playlist.url);
 				//todo: change this to request ID because we are sending referer URL basically maybe some user doesn't want this
 				let headers = {
 					'X-DLG-MFSTHASH': filter.download.hash,
-					'X-DLG-MFSTID': playlist.id
+					'X-DLG-MFSTID': playlist.id.toString()
 				};
 				fetch(playlist.url, {headers: headers});
 			}
@@ -82,39 +75,36 @@ class StreamHandler
 			//if it has a hash header it means it's a playlist we reqested
 			if(hash)
 			{
-				/**
-				 * @type {Download}
-				 */
 				let download = DLG.allDownloads.get(hash);
-				download.subManifests.push(manifest);
+
+				if(!download.manifest){
+					log.err('Download does not have a manifest', download);
+				}
+
+				download.fetchedPlaylists++;
 				download.manifest.playlists[id].update(manifest);
-				if(download.subManifests.length == download.manifest.playlists.length)
+
+				if(download.fetchedPlaylists == download.manifest.playlists.length)
 				{
-					log('got all manifests for: ', download);
+					log.d('got all manifests for: ', download);
 					download.hidden = false;
 				}
 			}
 
 			//for cases when the page only has a sub-manifest without a main manifest
 			//example of this: https://videoshub.com/videos/25312764
-			else if(DLG.tabs[tabId].knownPlaylists &&
-				!DLG.tabs[tabId].knownPlaylists.includes(bManifest.url))
+			else if(DLG.tabs.get(tabId).knownPlaylists &&
+				!DLG.tabs.get(tabId).knownPlaylists.includes(bManifest.url))
 			{
 				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				filter.download.manifest = PlaylistManifest.getFromBase(bManifest);
-				log('got a single manifest for: ', filter.download);
+				log.d('got a single manifest for: ', filter.download);
 			}
 		}
 
 	}
 
-	/**
-	 * Parses a manifest text and returns a StreamManifest object
-	 * @param {ReqFilter} filter 
-	 * @param {string} rawManifest 
-	 * @returns {StreamManifest}
-	 */
-	static parseRawManifest(filter, rawManifest)
+	static parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest
 	{
 		if(filter.isHlsManifest())
 		{
@@ -128,14 +118,14 @@ class StreamHandler
 
 		else if(filter.isDashManifest())
 		{
-			let pManifest = mpdParser.parse(rawManifest, {manifestUri: manifestURL});
+			let pManifest = mpdParser.parse(rawManifest, {manifestUri: filter.download.url});
 			return new StreamManifest(
 				filter.download.url, filter.download.tabTitle, 'dash', pManifest);
 		}
 
 		else
 		{
-			log.err("We got an unsupported manifest:", rawManifest);
+			log.warn("We got an unsupported manifest:", rawManifest);
 			return undefined;
 		}
 	}

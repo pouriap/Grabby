@@ -1,42 +1,15 @@
-'use strict';
-
 /**
  * Base class for the 'DLG' global variable
  */
-class DLGBase
+abstract class DLGBase
 {
-	constructor()
-	{
-		/**
-		 * all grabbed downloads
-		 * this will be set in Options.apply()
-		 * @type {FixedSizeMap}
-		 */
-		this.allDownloads = {};
-		/**
-		 * a map containing all currently open download dialogs
-		 * @type {object}
-		 */
-		this.downloadDialogs = {};
-		/**
-		 * available download managers on system
-		 * @type {array}
-		 */
-		this.availableDMs = [];
-		this.availExtDMs = [];
-		this.availBrowserDMs = [];
-		/**
-		 * addon options
-		 * @type {object}
-		 */
-		this.options = {};
-		/**
-		 * list of all open tabs
-		 * we can put useful things in it
-		 * @type {object}
-		 */
-		this.tabs = {};
-	}
+	allDownloads = new FixedSizeMap<string, Download>(100);
+	downloadDialogs = new Map<number, string>();
+	availableDMs: string[] = [];
+	availExtDMs: string[] = [];
+	availBrowserDMs: string[] = [];
+	tabs = new Map<number, any>();
+	abstract options: OPTIONS;
 }
 
 /**
@@ -44,30 +17,11 @@ class DLGBase
  */
 class DownloadGrabPopup extends DLGBase
 {
-	constructor()
-	{
-		super();
-		/**
-		 * the Download object for the clicked link
-		 * @type {Download} 
-		 */
-		this.selectedDl = null;
-		/**
-		 * wheter this download was intercepted by Download Grab
-		 * @type {boolean}
-		 */
-		this.continueWithBrowser = false;
-		/**
-		 * Id of the current tab
-		 * @type {number}
-		 */
-		this.currTabId = -1;
-		/**
-		 * URL of the current tab
-		 * @type {string}
-		 */
-		this.currTabUrl = '';
-	}
+	selectedDl: Download | null = null;
+	continueWithBrowser = false;
+	currTabId = -1;
+	currTabUrl = '';
+	options: OPTIONS;
 }
 
 /**
@@ -75,27 +29,10 @@ class DownloadGrabPopup extends DLGBase
  */
 class DownloadGrab extends DLGBase
 {
-	constructor()
-	{
-		super();
-		/**
-		 * sends a message to the native app
-		 * will be set in background.js init code after a native messaging instance is created
-		 */
-		this.sendNativeMsg = function(){};
+	allRequests = new FixedSizeMap<string, any>(100);
+	options: OPTIONS;
 
-		/**
-		 * all requests made by Firefox are stored here temporarily until we get their response
-		 * @type {FixedSizeMap}
-		 */
-		this.allRequests = new FixedSizeMap(100);
-	}
-
-	/**
-	 * Adds a download to our main list of downloads
-	 * @param {Download} download 
-	 */
-	addToAllDownloads = function(download)
+	addToAllDownloads(download: Download)
 	{
 		//we do this here because we don't want to run hash on requests we will not use
 		let hash = download.hash;
@@ -105,16 +42,15 @@ class DownloadGrab extends DLGBase
 
 	/**
 	 * opens the download dialog
-	 * here's how things happen because WebExtensions suck ass:
+	 * here's how things happen because WebExtensions suck:
 	 * we open the download dialog window
 	 * we store the windowId along with the associated download's hash in app.downloadDialogs
 	 * after the dialog loads it sends a message to the background script requesting the download hash
 	 * background script gives download dialogs the hash based on the windowId 
 	 * download dialog gets the Download object from the hash and populates the dialog
 	 * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
-	 * @param {Download} dl 
 	 */
-	showDlDialog = function(dl)
+	showDlDialog(dl: Download)
 	{
 		var download = dl;
 		let screenW = window.screen.width;
@@ -126,7 +62,7 @@ class DownloadGrab extends DLGBase
 
 		let createData = {
 			type: "detached_panel",
-			titlePreface: download.getFilename(),
+			titlePreface: download.filename,
 			url: "popup/download.html",
 			allowScriptsToClose : true,
 			width: windowW,
@@ -136,17 +72,13 @@ class DownloadGrab extends DLGBase
 		};
 		let creating = browser.windows.create(createData);
 
-		creating.then((windowInfo) => {
+		creating.then((windowInfo: any) => {
 			let windowId = windowInfo.id;
-			this.downloadDialogs[windowId] = download.hash;
+			this.downloadDialogs.set(windowId, download.hash);
 		});
 	}
 
-	/**
-	 * Performs a download job
-	 * @param {DownloadJob} job 
-	 */
-	doDownloadJob(job)
+	doDownloadJob(job: DownloadJob)
 	{
 		if(this.availBrowserDMs.includes(job.dmName))
 		{
@@ -154,27 +86,29 @@ class DownloadGrab extends DLGBase
 		}
 		else
 		{
-			let message = {type: 'download', job: job};
-			this.sendNativeMsg(message);
+			let msg = new NativeMessaging.MSG_Download(job);
+			NativeMessaging.sendMessage(msg);
 		}
 	}
 
-	/**
-	 * Performs a ytdl job
-	 * @param {YTDLJob} job 
-	 */
-	doYTDLJob(job)
+	doYTDLJob(job: YTDLJob)
 	{
-		let type = (job.type === 'video')? 
-			NativeMessaging.MSGTYP_YTDL_VID : NativeMessaging.MSGTYP_YTDL_AUD;
-		let message = {
-			type: type, 
-			url: job.url, 
-			name: job.name,
-			dlHash: job.dlHash
-		};
-		log('sending this ded srs', message);
-		this.sendNativeMsg(message);
+		let msg: NativeMessaging.NativeMessage;
+
+		if(job.type === 'video')
+		{
+			msg = new NativeMessaging.MSG_YTDLVideo(job.url, job.filename, job.dlHash);
+		}
+		else if(job.type === 'audio')
+		{
+			msg = new NativeMessaging.MSG_YTDLAUdio(job.url, job.filename, job.dlHash);
+		}
+		else
+		{
+			log.err(`job not supported: ${job}`);
+		}
+
+		NativeMessaging.sendMessage(msg);
 	}
 }
 
@@ -182,14 +116,44 @@ class DownloadGrab extends DLGBase
  * Class representing a download
  * Basically any web request is a download
  */
-class Download {
+class Download
+{
+	requestId: number;
+	url: string;
+	statusCode: number;
+	time: number;
+	resourceType: string;
+	origin: string;
+	tabId: number;
+	reqDetails: any;
+	resDetails: any;
+	//these are set after processing
+	ytdlInfo: any = undefined;
+	manifest: MainManifest | undefined = undefined;
+	fetchedPlaylists = 0;
+	isStream = false;
+	hidden = false;
+	cat = '';
+	class = '';
+	classReason = 'no-class-yet';
+	//ignore all downloads by default, in case we forget to process them by bug
+	act = ReqFilter.ACT_IGNORE;
+	//a Promise.resolve object is stored here for downloads that we intercept from the browser
+	//calling resolve() on this download will continue the request
+	resolve: ((value: unknown) => void) | undefined = undefined;
+
+	private _hash = '';
+	private _filename: str_und = undefined;
+	private _host: str_und = undefined;
+	private _filesize: num_und = undefined;
+	private _fileExtension: str_und = undefined;
 
 	/**
 	 * Creates a new Download object
-	 * @param {object} reqDetails the 'details' object attached to a request
-	 * @param {object} resDetails the 'details' object attached to a response
+	 * @param reqDetails the 'details' object attached to a request
+	 * @param resDetails the 'details' object attached to a response
 	 */
-	constructor(reqDetails, resDetails)
+	constructor(reqDetails: any, resDetails: any)
 	{
 		this.requestId = resDetails.requestId;
 		this.url = resDetails.url;
@@ -200,41 +164,44 @@ class Download {
 		this.tabId = reqDetails.tabId;
 		this.reqDetails = reqDetails;
 		this.resDetails = resDetails;
-		/**
-		 * @type {MainManifest}
-		 */
-		this.manifest = {};
-		this.isStream = false;
 	}
 
 	get hash()
 	{
-		if(typeof this._hash === 'undefined'){
+		if(this._hash === ''){
 			this._hash = md5(this.url);
 		}
 		return this._hash;
 	}
 
-	get tabUrl()
+	get tabUrl(): string | undefined
 	{
 		//todo: some things are not associated with a tab and have a -1 id 
 		//like service workers (reddit.com)
-		return DLG.tabs[this.tabId.toString()]? DLG.tabs[this.tabId.toString()].url : undefined;
+		//todo: why does this not give an error???!!!
+		//return DLG.tabs.get(this.tabId)? DLG.tabs.get(this.tabId) : undefined;
+
+		if(DLG.tabs.get(this.tabId)){
+			return DLG.tabs.get(this.tabId).url;
+		}
+		else{
+			return undefined;
+		}
 	}
 
-	get tabTitle()
+	get tabTitle(): string
 	{
-		return DLG.tabs[this.tabId.toString()]? DLG.tabs[this.tabId.toString()].title : 'no-title';
+		return DLG.tabs.get(this.tabId)? DLG.tabs.get(this.tabId).title : 'no-title';
 	}
 
 	/**
 	 * gets a header associated with this reqeust
-	 * @param {string} headerName name of the header
-	 * @param {string} headerDirection either "request" or "response"
+	 * @param headerName name of the header
+	 * @param headerDirection either "request" or "response"
 	 * @returns either the header or undefined
 	 */
-	getHeader(headerName, headerDirection){
-
+	getHeader(headerName: string, headerDirection: string): string | undefined
+	{
 		let headers;
 		if(headerDirection === 'request'){
 			headers = this.reqDetails.requestHeaders;
@@ -243,7 +210,7 @@ class Download {
 			headers = this.resDetails.responseHeaders;
 		}
 
-		let headerItem =  headers.find(function(header){
+		let headerItem =  headers.find(function(header: any){
 			return header.name.toLowerCase() === headerName.toLowerCase();
 		});
 
@@ -253,23 +220,23 @@ class Download {
 		else{
 			return undefined;
 		}
-
 	}
 
 	/**
 	 * get file name (if available) of the resouce requested
 	 * @returns file name or "unknown" if now available
 	 */
-	getFilename(){
-
+	//todo: new getter
+	get filename(): string
+	{
 		if(this.isStream)
 		{
-			return this.manifest.title || "unknown";
+			return (this.manifest as MainManifest).title || "unknown";
 		}
 
-		if(typeof this.filename === "undefined"){
+		if(typeof this._filename === "undefined"){
 
-			this.filename = "unknown";
+			this._filename = "unknown";
 
 			let disposition = this.getHeader('content-disposition', 'response');
 			if(disposition){
@@ -278,92 +245,95 @@ class Download {
 				//first try filename*= because it takes precedence according to docs
 				let matches = disposition.match(regex1);
 				if(matches && matches[2]){
-					this.filename = decodeURI(matches[2]);
+					this._filename = decodeURI(matches[2]);
 				}
 				//then look for filename=
 				else{
 					matches = disposition.match(regex2);
 					if(matches && matches[1]){
-						this.filename = decodeURI(matches[1]);
+						this._filename = decodeURI(matches[1]);
 					}
 				}
 
 			}
 			//use URL if content-disposition didn't provide a file name
-			if(this.filename === "unknown"){
+			if(this._filename === "unknown"){
 				let filename = Utils.getFileName(this.url);
 				if(filename){
-					this.filename = filename;
+					this._filename = filename;
 				}
 			}
 			//if the url has no file extension give it a serial number
 			//useful for urls like 'media.tenor.com/videos/9dd6603af0ac712c6a38dde9255746cd/mp4'
 			//where lots of resources have the same path and hence the same filename
-			if(this.filename !== "unknown" && this.filename.indexOf(".") === -1){
-				this.filename = this.filename + "_" + this.requestId;
+			if(this._filename !== "unknown" && this._filename.indexOf(".") === -1){
+				this._filename = this._filename + "_" + this.requestId;
 				//try to guess the file extension based on mime type
-				let mimeType = this.getHeader('content-type', 'response');
-				let extension = constants.mimesToExts[mimeType];
+				let mimeType = this.getHeader('content-type', 'response') || '';
+				let extension = constants.mimesToExts[mimeType] as any;
 				if(extension){
-					this.filename = `${this.filename}.${extension}`;
+					this._filename = `${this._filename}.${extension}`;
 				}
 			}
 
 		}
 
-		return this.filename;
+		return this._filename;
 	}
 
-	getHost(){
-
-		if(typeof this.host === "undefined"){
-			this.host = "unknown";
+	get host()
+	//todo: new getter
+	{
+		if(typeof this._host === "undefined"){
+			this._host = "unknown";
 			let host = this.getHeader("host", "request");
 			if(host){
-				this.host = host;
+				this._host = host;
 			}
 		}
 
-		return this.host;
+		return this._host;
 	}
 
 	/**
 	 * get content-length (if available) of the resource requested
-	 * @returns size in MB or "unknown" if not available
+	 * @returns size in MB or -1 if not available
 	 */
-	getSize(){
+	//todo: new getter
+	get size(){
 
-		if(typeof this.fileSize === "undefined"){
+		if(typeof this._filesize === "undefined"){
 
-			this.fileSize = "unknown";
+			this._filesize = -1; //todo: used to be 'unknown
 
 			let contentLength = this.getHeader("content-length", "response");
 			let size = Number(contentLength);
 			if(Number.isInteger(size)){
-				this.fileSize = size;
+				this._filesize = size;
 			}
 		}
 
-		return this.fileSize;
+		return this._filesize;
 	}
 
 	/**
 	 * gets the extension of the resource requested (if available)
 	 * @returns the extension in lower case or "unknown" if no extension if available
 	 */
-	getFileExtension(){
+	//todo: new getter
+	get fileExtension()
+	{
+		if(typeof this._fileExtension === "undefined"){
 
-		if(typeof this.fileExtension === "undefined"){
+			this._fileExtension = "unknown";
 
-			this.fileExtension = "unknown";
-
-			let ext = Utils.getExtFromFileName(this.getFilename());
+			let ext = Utils.getExtFromFileName(this.filename);
 			if(ext){
-				this.fileExtension = ext;
+				this._fileExtension = ext;
 			}
 		}
 
-		return this.fileExtension;
+		return this._fileExtension;
 	}
 
 }
@@ -373,24 +343,67 @@ class Download {
  * A class containing all sorts of functions to determine if a request is an 
  * actual download we are interested in
  */
-class ReqFilter {
+class ReqFilter
+{
+	//todo: change these to numbers
+	//categories of file types
+	public static readonly CAT_WEB_RES = 'web res';
+	public static readonly CAT_WEBRES_API = 'web res api';
+	public static readonly CAT_OTHER_WEB = 'other web';
+	public static readonly CAT_OTHERWEB_API = 'other web api';
+	public static readonly CAT_MEDIA_API = 'media api';
+	public static readonly CAT_FILE_MEDIA = 'media file';
+	public static readonly CAT_FILE_COMP = 'compressed file';
+	public static readonly CAT_FILE_DOC = 'document file';
+	public static readonly CAT_FILE_BIN = 'binary file';
+	public static readonly CAT_UKNOWN = 'unknown';
 
-	/**
-	 * 
-	 * @param {Download} download 
-	 */
-	constructor(download, options){
-		this.download = download;
-		this.options = options;
-	}
+	//classes of requests
+	public static readonly CLS_INLINE_WEB_RES = 'web res';
+	public static readonly CLS_INLINE_MEDIA = 'web media';
+	public static readonly CLS_WEB_OTHER = 'web page';
+	public static readonly CLS_DOWNLOAD = 'download';
 
-	/* private funcitons */
+	//types of action
+	public static readonly ACT_GRAB = 'grab';
+	public static readonly ACT_IGNORE = 'ignore';
+	public static readonly ACT_FORCE_DL = 'force dl';
+	public static readonly ACT_GRAB_SILENT = 'grab silent';
 
-	/**
-	 * 
-	 * @param {array} list 
-	 */
-	_isInProtocolList(list){
+	private _isWebSocket: bool_und = undefined;
+	private _isImage: bool_und = undefined;
+	private _isWebImage: bool_und = undefined;
+	private _isFont: bool_und = undefined;
+	private _isWebFont: bool_und = undefined;
+	private _isTextual: bool_und = undefined;
+	private _isWebTextual: bool_und = undefined;
+	private _isWebResource: bool_und = undefined;
+	private _isMedia: bool_und = undefined;
+	private _isHlsManifest: bool_und = undefined;
+	private _isDashManifest: bool_und = undefined;
+	private _isBrowserMedia: bool_und = undefined;
+	private _isDisplayedInBrowser: bool_und = undefined;
+	private _isCompressed: bool_und = undefined;
+	private _isDocument: bool_und = undefined;
+	private _isOtherBinary: bool_und = undefined;
+	private _hasAttachment: bool_und = undefined;
+	private _isAJAX: bool_und = undefined;
+	private _isStatusOK: bool_und = undefined;
+	private _isExcludedInOpts: bool_und = undefined;
+	private _isIncludedInOpts: bool_und = undefined;
+	private _isForcedInOpts: bool_und = undefined;
+	private _isTypWebRes: bool_und = undefined;
+	private _isTypWebOther: bool_und = undefined;
+	private _isTypMedia: bool_und = undefined;
+
+	/* constructor */
+
+	constructor(public download: Download, public options: OPTIONS){}
+
+	/* private methods */
+
+	private _isInProtocolList(list: string[])
+	{
 		for(let protocol of list){
 			if(this.download.url.startsWith(protocol)){
 				return true;
@@ -399,23 +412,17 @@ class ReqFilter {
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param {array} list 
-	 */
-	_isInExtensionList(list){
-		let extension = this.download.getFileExtension();
+	private _isInExtensionList(list: string[])
+	{
+		let extension = this.download.fileExtension;
 		if (extension !== "unknown" && list.includes(extension)) {
 			return true;
 		}
 		return false;
 	}
 
-	/**
-	 * 
-	 * @param {array} list 
-	 */
-	_isInMimeList(list){
+	private _isInMimeList(list: string[])
+	{
 		let mime = this.download.getHeader("content-type", "response");
 		if (mime){
 			mime = mime.toLowerCase();
@@ -432,25 +439,28 @@ class ReqFilter {
 
 	/**
 	 * 
-	 * @param {array} list list of webRequest.ResourceTypes 
+	 * @param list list of webRequest.ResourceTypes 
 	 */
-	_isInTypeList(list){
+	private _isInTypeList(list: string[])
+	{
 		return list.includes(this.download.resourceType);
 	}
 
 	
-	/* public functions */
+	/* public methods */
 
-	isSizeBlocked(){
+	isSizeBlocked()
+	{
 		let sizeLimit = this.options.grabFilesLargerThanMB * 1000000;
-		let size = this.download.getSize();
+		let size = this.download.size;
 		if(size === 0){
 			return true;
 		}
-		return size !== 'unknown' && size < sizeLimit;
+		return size !== -1 && size < sizeLimit;
 	}
 
-	isWebSocket(){
+	isWebSocket()
+	{
 		if(typeof this._isWebSocket === 'undefined'){
 			this._isWebSocket = 
 				this._isInTypeList(constants.webSocketTypes) ||
@@ -459,7 +469,8 @@ class ReqFilter {
 		return this._isWebSocket; 
 	}
 
-	isImage(){
+	isImage()
+	{
 		if(typeof this._isImage === 'undefined'){
 			this._isImage = 
 			this._isInTypeList(constants.imageTypes) ||
@@ -469,14 +480,16 @@ class ReqFilter {
 		return this._isImage;
 	}
 
-	isWebImage(){
+	isWebImage()
+	{
 		if(typeof this._isWebImage === 'undefined'){
 			this._isWebImage = this._isInTypeList(constants.imageTypes);
 		}
 		return this._isWebImage;
 	}
 
-	isFont(){
+	isFont()
+	{
 		if(typeof this._isFont === 'undefined'){
 			this._isFont = 
 				this._isInTypeList(constants.fontTypes) ||
@@ -486,14 +499,16 @@ class ReqFilter {
 		return this._isFont;
 	}
 
-	isWebFont(){
+	isWebFont()
+	{
 		if(typeof this._isWebFont === 'undefined'){
 			this._isWebFont = this._isInTypeList(constants.fontTypes);
 		}
 		return this._isWebFont;
 	}
 
-	isTextual(){
+	isTextual()
+	{
 		if(typeof this._isTextual === 'undefined'){
 			this._isTextual = 
 				this._isInTypeList(constants.textualTypes) ||
@@ -503,7 +518,8 @@ class ReqFilter {
 		return this._isTextual;
 	}
 
-	isWebTextual(){
+	isWebTextual()
+	{
 		if(typeof this._isWebTextual === 'undefined'){
 			this._isWebTextual = false;
 			if(this._isInTypeList(constants.textualTypes)){
@@ -524,14 +540,16 @@ class ReqFilter {
 		return this._isWebTextual;
 	}
 
-	isOtherWebResource(){
+	isOtherWebResource()
+	{
 		if(typeof this._isWebResource === 'undefined'){
 			this._isWebSocket = this._isInTypeList(constants.otherWebTypes);
 		}
 		return this._isWebSocket;
 	}
 
-	isMedia(){
+	isMedia()
+	{
 		if(typeof this._isMedia === 'undefined'){
 			this._isMedia = 
 				//media type is anything that is loaded from a <video> or <audio> tag
@@ -548,7 +566,8 @@ class ReqFilter {
 		return this._isMedia;
 	}
 
-	isHlsManifest(){
+	isHlsManifest()
+	{
 		if(typeof this._isHlsManifest === 'undefined'){
 			this._isHlsManifest = 
 				this._isInMimeList(constants.hlsMimes) ||
@@ -557,7 +576,8 @@ class ReqFilter {
 		return this._isHlsManifest;
 	}
 
-	isDashManifest(){
+	isDashManifest()
+	{
 		if(typeof this._isDashManifest === 'undefined'){
 			this._isDashManifest = 
 				this._isInMimeList(constants.dashMimes) ||
@@ -566,11 +586,13 @@ class ReqFilter {
 		return this._isDashManifest;
 	}
 
-	isStreamManifest(){
+	isStreamManifest()
+	{
 		return this.isHlsManifest() || this.isDashManifest();
 	}
 
-	isBrowserMedia(){
+	isBrowserMedia()
+	{
 		if(typeof this._isBrowserMedia === 'undefined'){
 			this._isBrowserMedia = this._isInTypeList(constants.mediaTypes);
 		}
@@ -581,7 +603,8 @@ class ReqFilter {
 	 * media file that can be played inside Firefox
 	 * reference: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
 	 */
-	isDisplayedInBrowser(){
+	isDisplayedInBrowser()
+	{
 		if(typeof this._isDisplayedInBrowser === 'undefined'){
 			if(!this.options.playMediaInBrowser){
 				this._isDisplayedInBrowser = false;
@@ -596,7 +619,8 @@ class ReqFilter {
 		return this._isDisplayedInBrowser;
 	}
 
-	isCompressed(){
+	isCompressed()
+	{
 		if(typeof this._isCompressed === 'undefined'){
 			this._isCompressed = 
 				this._isInExtensionList(constants.compressedExts) ||
@@ -605,7 +629,8 @@ class ReqFilter {
 		return this._isCompressed;
 	}
 
-	isDocument(){
+	isDocument()
+	{
 		if(typeof this._isDocument === 'undefined'){
 			this._isDocument = 
 				this._isInExtensionList(constants.documentExts) ||
@@ -614,7 +639,8 @@ class ReqFilter {
 		return this._isDocument;
 	}
 
-	isOtherBinary(){
+	isOtherBinary()
+	{
 		if(typeof this._isOtherBinary === 'undefined'){
 			this._isOtherBinary = 
 				this._isInExtensionList(constants.binaryExts) ||
@@ -626,29 +652,34 @@ class ReqFilter {
 	/**
 	 * does this request have an "attachment" header?
 	 */
-	hasAttachment(){
+	hasAttachment()
+	{
 		if(typeof this._hasAttachment === 'undefined'){
 			let disposition = this.download.getHeader('content-disposition', 'response');
 			//apparently firefox considers requests as download even if attachment is not set
 			//and only content-disposition is set
 			//example: https://www.st.com/resource/en/datasheet/lm317.pdf even if we tamper
 			//content-disposition into something like "blablabla" firefox still shows download dialog
-			this._hasAttachment = ( disposition && disposition.toLowerCase().indexOf("inline") === -1 );
+			this._hasAttachment = ( 
+				typeof disposition != 'undefined' && 
+				disposition.toLowerCase().indexOf("inline") === -1 
+			);
 		}
 		return this._hasAttachment;
 	}
 
-	isAJAX(){
+	isAJAX()
+	{
 		if(typeof this._isAJAX === 'undefined'){
 			this._isAJAX = this._isInTypeList(constants.ajaxTypes);
 		}
 		return this._isAJAX;
 	}
 
-	isStatusOK(){
-
-		if(typeof this._isStatusOK === 'undefined'){
-
+	isStatusOK()
+	{
+		if(typeof this._isStatusOK === 'undefined')
+		{
 			this._isStatusOK = false;
 
 			//OK and Not-Modified are ok
@@ -682,11 +713,13 @@ class ReqFilter {
 		return this._isStatusOK;
 	}
 
-	isFromCache(){
+	isFromCache()
+	{
 		return this.download.resDetails.fromCache;
 	}
 
-	isExcludedInOpts(){
+	isExcludedInOpts()
+	{
 		if(typeof this._isExcludedInOpts === 'undefined'){
 			if(this._isInExtensionList(this.options.excludedExts)){
 				this._isExcludedInOpts = true; 
@@ -702,7 +735,8 @@ class ReqFilter {
 		return this._isExcludedInOpts;
 	}
 
-	isIncludedInOpts(){
+	isIncludedInOpts()
+	{
 		if(typeof this._isIncludedInOpts === 'undefined'){
 			if(this._isInExtensionList(this.options.includedExts)){
 				this._isIncludedInOpts = true; 
@@ -718,7 +752,8 @@ class ReqFilter {
 		return this._isIncludedInOpts;
 	}
 
-	isForcedInOpts(){
+	isForcedInOpts()
+	{
 		if(typeof this._isForcedInOpts === 'undefined'){
 			if(this._isInExtensionList(this.options.forcedExts)){
 				this._isForcedInOpts = true; 
@@ -734,12 +769,13 @@ class ReqFilter {
 		return this._isForcedInOpts;
 	}
 
-	isBlackListed(blacklist){
+	isBlackListed(blacklist: string[])
+	{
 		if(blacklist.includes(this.download.url)){
 			return true;
 		}
 		if(
-			this.options.blacklistDomains.includes(this.download.getHost()) ||
+			this.options.blacklistDomains.includes(this.download.host) ||
 			this.options.blacklistDomains.includes(Utils.getDomain(this.download.origin))
 		){
 			return true;
@@ -747,99 +783,92 @@ class ReqFilter {
 		return false;
 	}
 
-	isTypeWebRes(){
+	isTypeWebRes()
+	{
 		if(typeof this._isTypWebRes === 'undefined'){
 			this._isTypWebRes = this._isInTypeList(constants.webResTypes);
 		}
 		return this._isTypWebRes;
 	}
 
-	isTypeWebOther(){
+	isTypeWebOther()
+	{
 		if(typeof this._isTypWebOther === 'undefined'){
 			this._isTypWebOther = this._isInTypeList(constants.webOtherTypes);
 		}
 		return this._isTypWebOther;
 	}
 
-	isTypeMedia(){
+	isTypeMedia()
+	{
 		if(typeof this._isTypMedia === 'undefined'){
 			this._isTypMedia = this._isInTypeList(constants.mediaTypes);
 		}
 		return this._isTypMedia;
 	}
 
-	isMimeWebRes(){
+	isMimeWebRes()
+	{
 		return this._isInMimeList(constants.webResMimes);
 	}
-	isMimeWebOther(){
+	isMimeWebOther()
+	{
 		return this._isInMimeList(constants.webOtherMimes);
 	}
-	isMimeMedia(){
+	isMimeMedia()
+	{
 		return this._isInMimeList(constants.mediaMimes);
 	}
-	isMimeStreamManifest(){
+	isMimeStreamManifest()
+	{
 		return 	this._isInMimeList(constants.hlsMimes) || 
 			this._isInMimeList(constants.dashMimes);
 	}
-	isMimeCompressed(){
+	isMimeCompressed()
+	{
 		return this._isInMimeList(constants.compressedMimes);
 	}
-	isMimeDocument(){
+	isMimeDocument()
+	{
 		return this._isInMimeList(constants.documentMimes);
 	}
-	isMimeGeneralBinary(){
+	isMimeGeneralBinary()
+	{
 		return this._isInMimeList(constants.generalBinaryMimes);
 	}
 
-	isExtWebRes(){
+	isExtWebRes()
+	{
 		return this._isInExtensionList(constants.webResExts);
 	}
-	isExtWebOther(){
+	isExtWebOther()
+	{
 		return this._isInExtensionList(constants.webOtherExts);
 	}
-	isExtMedia(){
+	isExtMedia()
+	{
 		return this._isInExtensionList(constants.mediaExts);
 	}
-	isExtStreamManifest(){
+	isExtStreamManifest()
+	{
 		return	this._isInExtensionList(constants.hlsExts) ||
 			this._isInExtensionList(constants.dashExts);
 	}
-	isExtCompressed(){
+	isExtCompressed()
+	{
 		return this._isInExtensionList(constants.compressedExts);
 	}
-	isExtDocument(){
+	isExtDocument()
+	{
 		return this._isInExtensionList(constants.documentExts);
 	}
-	isExtBinary(){
+	isExtBinary()
+	{
 		return this._isInExtensionList(constants.binaryExts);
 	}
 
 	
 }
-//todo: change these to numbers
-//categories of file types
-ReqFilter.CAT_WEB_RES = 'web res';
-ReqFilter.CAT_WEBRES_API = 'web res api';
-ReqFilter.CAT_OTHER_WEB = 'other web';
-ReqFilter.CAT_OTHERWEB_API = 'other web api';
-ReqFilter.CAT_MEDIA_API = 'media api';
-ReqFilter.CAT_FILE_MEDIA = 'media file';
-ReqFilter.CAT_FILE_COMP = 'compressed file';
-ReqFilter.CAT_FILE_DOC = 'document file';
-ReqFilter.CAT_FILE_BIN = 'binary file';
-ReqFilter.CAT_UKNOWN = 'unknown';
-
-//classes of requests
-ReqFilter.CLS_INLINE_WEB_RES = 'web res';
-ReqFilter.CLS_INLINE_MEDIA = 'web media';
-ReqFilter.CLS_WEB_OTHER = 'web page';
-ReqFilter.CLS_DOWNLOAD = 'download';
-
-//types of action
-ReqFilter.ACT_GRAB = 'grab';
-ReqFilter.ACT_IGNORE = 'ignore';
-ReqFilter.ACT_FORCE_DL = 'force dl';
-ReqFilter.ACT_GRAB_SILENT = 'grab silent';
 
 /**
  * A fixed sized map with key->value pairs
@@ -847,58 +876,76 @@ ReqFilter.ACT_GRAB_SILENT = 'grab silent';
  * and the new element is put in
  * Duplicate elements will rewrite the old ones
  */
-class FixedSizeMap {
+class FixedSizeMap<T, V>
+{
+	maxSize = 100;
+	map = new Map<T, V>();
 
 	/**
 	 * 
-	 * @param {int} size 
-	 * @param {object} listData (optional) the data to initialize this FixedSizeMap with
+	 * @param maxSize max size of this map
+	 * @param listData (optional) the data to initialize this FixedSizeMap with
 	 */
-	constructor(size, listData) {
-		size = (Number(size));
-		this.limit = isNaN(size) ? 100 : size;
-		this.list = (listData) ? this._trimListData(listData, size) : {};
+	constructor(maxSize: number, listData?: Map<T, V>)
+	{
+		this.maxSize = maxSize;
+		this.map = (listData) ? this._trimMap(listData, maxSize) : new Map<T, V>();
 	}
 
-	getKeys() {
-		return Object.keys(this.list);
-	};
+	get keys()
+	{
+		return this.map.keys();
+	}
 
-	getValues() {
-		return Object.values(this.list);
-	};
+	get values()
+	{
+		return this.map.values();
+	}
 
-	getSize() {
-		return this.getKeys().length;
-	};
+	get size()
+	{
+		return this.map.size;
+	}
 
-	remove(key) {
-		delete this.list[key];
-	};
+	remove(key: T)
+	{
+		this.map.delete(key);
+	}
 
-	put(key, value) {
-		if (this.getSize() === this.limit) {
-			let firstItemKey = this.getKeys()[0];
+	put(key: T, value: V)
+	{
+		if (this.size === this.maxSize)
+		{
+			let firstItemKey = this.map.keys().next().value;
 			this.remove(firstItemKey);
 		}
-		this.list[key] = value;
-	};
 
-	get(key) {
-		return this.list[key];
-	};
+		this.map.set(key, value);
+	}
 
-	_trimListData(listData, targetSize) {
-		let keys = Object.keys(listData);
-		let size = keys.length;
-		if (targetSize < size) {
+	get(key: T): V
+	{
+		let dl = this.map.get(key);
+		if(!dl)
+		{
+			log.err(`Item with key: ${key} was not found`);
+		}
+
+		return dl;
+	}
+
+	private _trimMap(newMap: Map<T,V>, targetSize: number)
+	{
+		let keys = newMap.keys();
+		let size = newMap.size;
+		if (targetSize < size)
+		{
 			let diff = size - targetSize;
-			for (let i = 0; i < diff; i++) {
-				let k = keys[i];
-				delete listData[k];
+			for (let i = 0; i < diff; i++){
+				newMap.delete(keys.next().value);
 			}
 		}
-		return listData;
+		return newMap;
 	}
 	
 }
@@ -1066,8 +1113,8 @@ var constants = {
 	],
 
 
-	// Yes I wrote all of this
-	mimesToExts : {
+	mimesToExts:
+	{
 		"audio/aac" : "aac",
 		"audio/x-aac" : "aac",
 		"application/x-abiword" : "abw",
@@ -1104,7 +1151,6 @@ var constants = {
 		"application/json" : "json",
 		"application/ld+json" : "jsonld",
 		"audio/midi audio/x-midi" : "midi",
-		"text/javascript" : "mjs",
 		"audio/mpeg" : "mp3",
 		"audio/mpeg3" : "mp3",
 		"audio/x-mpeg-3" : "mp3",
@@ -1164,15 +1210,14 @@ var constants = {
 		"audio/3gpp2" : "3g2",
 		"application/x-7z" : "7z",
 		"application/x-7z-compressed" : "7z"
-	},
+	} as {[index:string]: string},
 
 
-	// And this
-	extsToMimes: {
+	extsToMimes: 
+	{
 		"aac" : ["audio/aac", "audio/x-aac"],
 		"abw" : ["application/x-abiword"],
 		"arc" : ["application/x-freearc"],
-		"avi" : ["video/x-msvideo"],
 		"azw" : ["application/vnd.amazon.ebook"],
 		"bin" : ["application/octet-stream"],
 		"bmp" : ["image/bmp"],
@@ -1182,7 +1227,8 @@ var constants = {
 		"css" : ["text/css"],
 		"csv" : ["text/csv"],
 		"doc" : ["application/msword"],
-		"pptx" : ["application/mspowerpoint", "application/powerpoint", "application/x-mspowerpoint"],
+		"ppt" : ["application/vnd.ms-powerpoint"],
+		"pptx" : ["application/mspowerpoint", "application/powerpoint", "application/x-mspowerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
 		"xlsx" : ["application/excel", "application/x-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
 		"docx" : ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
 		"eot" : ["application/vnd.ms-fontobject"],
@@ -1214,8 +1260,6 @@ var constants = {
 		"png" : ["image/png"],
 		"pdf" : ["application/pdf"],
 		"php" : ["application/php"],
-		"ppt" : ["application/vnd.ms-powerpoint"],
-		"pptx" : ["application/vnd.openxmlformats-officedocument.presentationml.presentation"],
 		"rar" : ["application/vnd.rar", "application/x-rar-compressed"],
 		"rtf" : ["application/rtf"],
 		"sh" : ["application/x-sh"],
@@ -1232,7 +1276,7 @@ var constants = {
 		"aiff" : ["audio/aiff",  "audio/x-aiff"],
 		"weba" : ["audio/webm"],
 		"webm" : ["video/webm"],
-		"avi" : ["application/x-troff-msvideo", "video/avi", "video/msvideo"],
+		"avi" : ["video/x-msvideo", "application/x-troff-msvideo", "video/avi", "video/msvideo"],
 		"webp" : ["image/webp"],
 		"woff" : ["font/woff"],
 		"woff2" : ["font/woff2"],
@@ -1244,7 +1288,7 @@ var constants = {
 		"3gp" : ["video/3gpp", "audio/3gpp"],
 		"3g2" : ["video/3gpp2", "audio/3gpp2"],
 		"7z" : ["application/x-7z", "application/x-7z-compressed"]
-	}
+	} as {[index: string]: string[]},
 
 }
 
@@ -1252,15 +1296,13 @@ var constants = {
  * A data structure represending information needed by FlashGot.exe to perform a download
  * This information is needed for every single download if a list of links is provided
  */
-class DownloadInfo{
-	constructor(url, desc, cookies, postData, filename, extension){
-		this.url = url || '';
-		this.desc = desc || '';
-		this.cookies = cookies || '';
-		this.postData = postData || '';
-		this.filename = filename || '';
-		this.extension = extension || '';
-	}
+type DownloadInfo = {
+	url: string,
+	desc: string,
+	cookies: string,
+	postData: string,
+	filename: string,
+	extension: string
 }
 
 /**
@@ -1269,32 +1311,24 @@ class DownloadInfo{
  * And the rest of the arguments are general and apply to all links
  * This is based on how .fgt files are structured
  */
-class DownloadJob{
-	
-	/**
-	 * 
-	 * @param {DownloadInfo[]} downloadsInfo 
-	 * @param {string} referer 
-	 * @param {string} originPageReferer 
-	 * @param {string} originPageCookies 
-	 * @param {string} dmName 
-	 */
-	constructor(downloadsInfo, referer, originPageReferer, originPageCookies, dmName){
-		this.downloadsInfo = downloadsInfo || '';
-		this.referer = referer || '';
-		this.originPageReferer = originPageReferer || '';
-		this.originPageCookies = originPageCookies || '';
-		this.useragent = navigator.userAgent;
-		this.dmName = dmName || '';
+class DownloadJob
+{	
+	useragent: string = navigator.userAgent;
+
+	constructor(public downloadsInfo: DownloadInfo[], public referer: string, 
+		public originPageReferer: string, public originPageCookies: string, 
+		public dmName:string)
+	{
+		//nada
 	}
 
 	/**
 	 * Creates a job from a Download object
-	 * @param {string} dmName 
-	 * @param {Download} download 
+	 * @param dmName 
+	 * @param download 
 	 * @returns A DownloadJob object created from provided data
 	 */
-	static async getFromDownload(dmName, download)
+	static async getFromDownload(dmName: string, download: Download)
 	{
 		let originPageCookies = '';
 		let originPageReferer = '';
@@ -1306,20 +1340,20 @@ class DownloadJob{
 			originPageReferer = await Utils.executeScript(originTabId, {code: 'document.referrer'});
 		}
 
-		let downloadInfo = new DownloadInfo(
-			download.url, 
-			download.getFilename(),
-			download.getHeader('cookie', 'request') || '',
-			download.reqDetails.postData,
-			download.getFilename(),
-			download.getFileExtension()
-		);
+		let downloadInfo: DownloadInfo = {
+			url: download.url,
+			filename: download.filename,
+			cookies: download.getHeader('cookie', 'request') || '',
+			postData: download.reqDetails.postData,
+			desc: download.filename,
+			extension: download.fileExtension
+		};
 
 		return new DownloadJob(
 			[downloadInfo],
 			download.getHeader('referer', 'request') || '',
-			originPageReferer || '',
-			originPageCookies || '',
+			originPageReferer,
+			originPageCookies,
 			dmName
 		);
 
@@ -1329,31 +1363,42 @@ class DownloadJob{
 	 * Creates a job from link information
 	 * This is used in context-menu scripts where we don't have any Download object
 	 * and only have access to raw links
-	 * @param {string} dmName 
-	 * @param {array} links 
-	 * @param {string} originPageUrl 
-	 * @param {string} originPageReferer 
+	 * @param dmName 
+	 * @param links 
+	 * @param originPageUrl 
+	 * @param originPageReferer 
 	 * @returns A DownloadJob object created from provided data
 	 */
-	static async getFromLinks(dmName, links, originPageUrl, originPageReferer)
+	static async getFromContext(dmName: string, result: context_result)
 	{
-		let downloadsInfo = [];
+		let originPageUrl = result.originPageUrl;
+		let originPageReferer = result.originPageReferer;
+		let downloadsInfo: DownloadInfo[] = [];
 		let originPageCookies = (originPageUrl)? await Utils.getCookies(originPageUrl) : '';
 		//get the cookies for each link and add it to all download items
-		for(let link of links){
+		for(let link of result.links)
+		{
 			if(!link.href){
 				continue
 			}
 			let href = link.href;
-			let description = link.description || '';
-			let linkCookies = await Utils.getCookies(href) || '';
+			let desc = link.desc;
+			let linkCookies = await Utils.getCookies(href);
 			let filename = Utils.getFileName(href);
 			let extension = Utils.getExtFromFileName(filename);
-			let downloadInfo = new DownloadInfo(href, description, linkCookies, '', filename, extension);
+			let downloadInfo: DownloadInfo = {
+				url: href,
+				desc: desc,
+				cookies: linkCookies,
+				postData: '',
+				filename: filename,
+				extension: extension,
+			}
 			downloadsInfo.push(downloadInfo);
 		}
 
-		return new DownloadJob(downloadsInfo, originPageUrl, originPageReferer, originPageCookies, dmName);
+		return new DownloadJob(
+			downloadsInfo, originPageUrl, originPageReferer, originPageCookies, dmName);
 
 	}
 
@@ -1363,27 +1408,30 @@ class YTDLJob
 {
 	/**
 	 * 
-	 * @param {string} url URL to download
-	 * @param {string} type either 'audio' or 'video'
-	 * @param {string} fileName name of the file to save
-	 * @param {string} dlHash hash of Download object related to this job
+	 * @param url URL to download
+	 * @param type either 'audio' or 'video'
+	 * @param filename name of the file to save
+	 * @param dlHash hash of Download object related to this job
 	 */
-	constructor(url, type, fileName, dlHash)
+	constructor(public url: string, public type: string, 
+		public filename: string, public dlHash: string)
 	{
 		this.url = encodeURI(url);
-		this.type = type;
-		this.name = fileName;
-		this.dlHash = dlHash;
 	}
 
 	/**
 	 * Gets a YTDLJob from a download
-	 * @param {Download} download 
-	 * @param {number} formatId 
-	 * @param {string} type either 'audio' or 'video'
+	 * @param download 
+	 * @param formatId 
+	 * @param type either 'audio' or 'video'
 	 */
-	static getFromDownload(download, formatId, type)
+	static getFromDownload(download: Download, formatId: number, type: string): YTDLJob
 	{
+		if(!download.manifest)
+		{
+			log.err('Download is not a stream');
+		}
+
 		for(let format of download.manifest.playlists)
 		{
 			if(format.id == formatId)
@@ -1391,12 +1439,15 @@ class YTDLJob
 				return new YTDLJob(format.url, type, download.manifest.title, download.hash);
 			}
 		}
+
+		log.err('Format with id ' + formatId + ' not found');
 	}
 }
 
 class StreamManifest
 {
-	constructor(url, title, streamFormat, fullManifest)
+	constructor(public url: string, public title: string, 
+		public streamFormat: string, public fullManifest: any)
 	{
 		this.url = url;
 		this.title = title;
@@ -1426,22 +1477,21 @@ class MainManifest
 {
 	/**
 	 * 
-	 * @param {StreamManifest} fullManifest 
-	 * @param {Playlist[]} playlists 
+	 * @param fullManifest 
+	 * @param playlists 
 	 */
-	constructor(fullManifest, playlists, title)
+	constructor(public fullManifest: StreamManifest, public playlists: Playlist[], 
+		public title: string)
 	{
-		this.fullManifest = fullManifest;
-		this.playlists = playlists;
-		this.title = title;
+		//nada
 	}
 
 	/**
 	 * 	Gets a new instance from a StreamManifest object	
-	 * @param {StreamManifest} manifest 
+	 * @param manifest 
 	 * @returns 
 	 */
-	static getFromBase(manifest)
+	static getFromBase(manifest: StreamManifest)
 	{
 		let playlists = [];
 
@@ -1459,19 +1509,17 @@ class MainManifest
 
 class PlaylistManifest
 {
-	constructor(duration, fullManifest, title)
+	constructor(public duration: number, public fullManifest: any, public title: string)
 	{
-		this.duration = duration;
-		this.fullManifest = fullManifest;
-		this.title = title;
+		//nada
 	}
 
 	/**
 	 * 
-	 * @param {StreamManifest} manifest 
-	 * @returns {PlaylistManifest}
-	 */
-	static getFromBase(manifest)
+	 * @param manifest 
+	 * @returns 	 
+	*/
+	static getFromBase(manifest: StreamManifest): PlaylistManifest
 	{
 		let duration = 0;
 		for(let seg of manifest.fullManifest.segments)
@@ -1484,23 +1532,18 @@ class PlaylistManifest
 
 class Playlist
 {
-	constructor(id, name, url, res, bitrate, pictureSize, fileSize = -1, duration = -1)
+	constructor(public id: number, public nickName: string, public url: string, 
+		public res: string, public bitrate: number, public pictureSize: number, 
+		public fileSize = -1, public duration = -1)
 	{
-		this.id = id;
-		this.name = name;
-		this.url = url;
-		this.res = res;
-		this.bitrate = bitrate;
-		this.pictureSize = pictureSize;
-		this.fileSize = fileSize;
-		this.duration = duration;
+		//nada
 	}
 
 	/**
 	 * Updates duration and filesize data
-	 * @param {PlaylistManifest} manifest
+	 * @param manifest
 	 */
-	update(manifest)
+	update(manifest: PlaylistManifest)
 	{
 		if(manifest.duration)
 		{
@@ -1509,7 +1552,7 @@ class Playlist
 		}
 	}
 
-	static getFromRawPlaylist(playlist, manifestURL, id)
+	static getFromRawPlaylist(playlist: any, manifestURL: string, id: number)
 	{
 		let bitrate = 0;
 		if(playlist.attributes.BANDWIDTH){
@@ -1533,40 +1576,4 @@ class Playlist
 		let url = (new URL(playlist.uri, manifestURL)).toString();
 		return new Playlist(id, name, url, res, bitrate, pictureSize);
 	}
-}
-
-//special case for easier logging
-function log(...args)
-{
-	if(!log.DEBUG) return;
-
-	args.forEach((arg) => {
-		console.log(arg);
-	});
-
-}
-
-log.DEBUG = true;
-
-log.err = function(...args)
-{
-	args.forEach((arg) => {
-		console.error(arg);
-	});
-}
-
-log.warn = function(...args)
-{
-	args.forEach((arg) => {
-		console.warn(arg);
-	});
-}
-
-log.color = function(color, ...args)
-{
-	if(!log.DEBUG) return;
-
-	args.forEach((arg) => {
-		console.log(`%c${arg}`, `color:${color};`);
-	});
 }

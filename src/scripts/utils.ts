@@ -1,10 +1,11 @@
-class Utils {
-
+class Utils
+{
 	/**
 	 * Gets domain name of a url
-	 * @param {string} url 
+	 * @param url 
 	 */
-	static getDomain(url){
+	static getDomain(url: string)
+	{
 		let a = document.createElement('a');
 		a.href = url;
 		return a.hostname;
@@ -12,9 +13,10 @@ class Utils {
 
 	/**
 	 * Gets path part of a url
-	 * @param {string} url 
+	 * @param url 
 	 */
-	static getPath(url){
+	static getPath(url: string)
+	{
 		let a = document.createElement('a');
 		a.href = url;
 		return a.pathname;
@@ -22,15 +24,17 @@ class Utils {
 	
 	/**
 	 * Gets a "clean" URL, i.e. a URL without query string and fragments, etc.
-	 * @param {string} url 
+	 * @param url 
 	 */
-	static getFullPath(url){
+	static getFullPath(url: string)
+	{
 		let a = document.createElement('a');
 		a.href = url;
 		return (a.protocol + '//' + a.hostname + a.pathname);
 	}
 
-	static getFileName(url){
+	static getFileName(url: string)
+	{
 		let path = Utils.getPath(url);
 		path = decodeURI(path);
 		if(path.slice(-1) === '/'){
@@ -40,7 +44,8 @@ class Utils {
 		return (filename)? filename : '';
 	}
 
-	static getExtFromFileName(filename){
+	static getExtFromFileName(filename: string)
+	{
 		let chuncks = filename.split('.');
 		let ext = '';
 		if(chuncks.length > 1){
@@ -51,10 +56,9 @@ class Utils {
 
 	/**
 	 * Gets cookies associated with the given URL
-	 * @param {string} url 
-	 * @returns 
+	 * @param url 
 	 */
-	static async getCookies(url){
+	static async getCookies(url: string){
 		let cookies = '';
 		let cookiesArr = await browser.cookies.getAll({url: url});
 		for(let cookie of cookiesArr){
@@ -65,29 +69,32 @@ class Utils {
 
 	/**
 	 * Performs an executeScript on a tab
-	 * @param {number} tabId 
-	 * @param {object} data 
-	 * @returns 
+	 * @param tabId 
+	 * @param data 
 	 */
-	static async executeScript(tabId, data)
+	static async executeScript(tabId: number, data: object)
 	{
 		try
 		{
 			let res = await browser.tabs.executeScript(tabId, data);
 			if(res.length == 1){
-				return res[0];
+				res = res[0];
 			}
-			return res;
+			return (res != 'undefined')? res : '';
 		}
 		catch(e){
 			log.err('Error executing script: ', e);
-			return '';
 		}
 	}
 
-	static formatSeconds(seconds)
+	/**
+	 * Formats time in seconds into proper time format like hh:mm:ss
+	 * @param seconds number of seconds
+	 * @returns 
+	 */
+	static formatSeconds(seconds: number)
 	{
-		var date = new Date(null);
+		var date = new Date(0);
 		date.setSeconds(seconds);
 		if(seconds >= 60 * 60)
 		{
@@ -99,7 +106,7 @@ class Utils {
 		}
 	}
 
-	static notification(msg)
+	static notification(msg: string)
 	{
 		let options = {
 			type: "basic", 

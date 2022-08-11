@@ -1,4 +1,7 @@
-'use strict';
+//todo: wrap all webext types in classes
+
+declare var browser: any;
+declare var filesize: any;
 
 //todo: unicode in headers (content-disposition) is not supported by firefox
 //todo: report:  If you send a file to FDM[3] then the filename will be empty, but it'll appear in comments, but that just how FlashGot worked, so I don't know if consider it as a bug or not.
@@ -60,7 +63,7 @@ var DLG = new DownloadGrab();
 
 (async () => {
 
-	log('initializing addon...');
+	log.d('initializing addon...');
 
 	try
 	{
@@ -102,11 +105,10 @@ var DLG = new DownloadGrab();
 
 		ContextMenu.init();
 
-		log('addon init successful');
+		log.d('addon init successful');
 	}
 	catch(e)
 	{
-		log.err('Addon could not be initialized:', e);
 		//todo: remove notifications or make them look good
 		let options = {
 			type: "basic", 
@@ -114,7 +116,7 @@ var DLG = new DownloadGrab();
 			message: "Error: initialization failed\nReason: " + e.toString(),
 		};
 		browser.notifications.create(options);
-		return;
+		log.err('Addon could not be initialized:', e);
 	}
 
 })();

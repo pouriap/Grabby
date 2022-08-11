@@ -2,10 +2,10 @@ class DownloadHandler
 {
 	/**
 	 * Handles a download
-	 * @param {Download} download 
-	 * @param {ReqFilter} filter 
+	 * @param download 
+	 * @param filter 
 	 */
-	static handle(download, filter)
+	static handle(download: Download, filter: ReqFilter)
 	{
 		//first determine its category
 		DownloadHandler.determineCategory(download, filter);
@@ -18,10 +18,10 @@ class DownloadHandler
 	/**
 	 * Determines the category of a request
 	 * Category is one of those defined in ReqFilter
-	 * @param {Download} download 
-	 * @param {ReqFilter} filter 
+	 * @param download 
+	 * @param filter 
 	 */
-	static determineCategory(download, filter)
+	static determineCategory(download: Download, filter: ReqFilter)
 	{
 		/**
 		 * use types to determine category first, because they are the most certain
@@ -105,10 +105,10 @@ class DownloadHandler
 	 
 	/**
 	 * Determines what action should be done about a request 
-	 * @param {Download} download 
-	 * @param {ReqFilter} filter 
+	 * @param download 
+	 * @param filter 
 	 */
-	static determineClass(download, filter)
+	static determineClass(download: Download, filter: ReqFilter)
 	{
 		if(download.cat === ReqFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
@@ -152,7 +152,7 @@ class DownloadHandler
 		else if
 		(
 			(!download.resDetails.documentUrl || !download.resDetails.originUrl) &&
-			download.getFileExtension() !== 'unknown'
+			download.fileExtension !== 'unknown'
 		){
 			download.classReason = 'extension with no document/origin'
 			download.class = ReqFilter.CLS_DOWNLOAD;
@@ -162,10 +162,10 @@ class DownloadHandler
 	 
 	/**
 	 * Determines what action should be done about a request 
-	 * @param {Download} download 
-	 * @param {ReqFilter} filter 
+	 * @param download 
+	 * @param filter 
 	 */
-	static determineAction(download, filter)
+	static determineAction(download: Download, filter: ReqFilter)
 	{
 		if(download.class === ReqFilter.CLS_WEB_OTHER){
 			download.act = ReqFilter.ACT_IGNORE;

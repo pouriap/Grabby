@@ -3,25 +3,25 @@ class RequestFiltering
 	static init()
 	{
 		browser.webRequest.onBeforeRequest.addListener(
-			(details) => { return RequestFiltering.doOnBeforeRequest(details) }, 
+			(details: any) => { return RequestFiltering.doOnBeforeRequest(details) }, 
 			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			(details) => { return RequestFiltering.doOnBeforeSendHeaders(details) }, 
+			(details: any) => { return RequestFiltering.doOnBeforeSendHeaders(details) }, 
 			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			(details) => { return RequestFiltering.doOnHeadersReceived(details) }, 
+			(details: any) => { return RequestFiltering.doOnHeadersReceived(details) }, 
 			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details) => { return RequestFiltering.doOnCompleted(details) }, 
+			(details: any) => { return RequestFiltering.doOnCompleted(details) }, 
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -32,7 +32,7 @@ class RequestFiltering
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	static doOnBeforeRequest(details)
+	static doOnBeforeRequest(details: any)
 	{
 		let formDataArr = (
 			details.method === "POST" && 
@@ -53,8 +53,7 @@ class RequestFiltering
 
 		//store post data in request object
 		//more data are added to it in later stages of request
-		let request = {};
-		request.postData = postData;
+		let request = {postData: postData};
 
 		DLG.allRequests.put(details.requestId, request);
 	}
@@ -63,7 +62,7 @@ class RequestFiltering
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	static doOnBeforeSendHeaders(details)
+	static doOnBeforeSendHeaders(details: any)
 	{
 		//store request details
 		let request = DLG.allRequests.get(details.requestId);
@@ -78,7 +77,7 @@ class RequestFiltering
 	 * to our list of downloads
 	 * @param {object} details 
 	 */
-	static doOnHeadersReceived(details)
+	static doOnHeadersReceived(details: any)
 	{
 
 		//log("receiving: ", details);
@@ -97,11 +96,6 @@ class RequestFiltering
 		let download = new Download(requestOfThisResponse.details, details);
 
 		let filter = new ReqFilter(download, DLG.options);
-
-		//by default we ignore everything
-		//just in case we forgot to do it in our handlers
-		//because we have to reuturn a result from this function since it's blocking the request
-		download.act = ReqFilter.ACT_IGNORE;
 
 		// This is for handling streams, aka requests for HLS and DASH manifests
 		// Streams are AJAX and AJAX is ignored in the handling flow
@@ -129,7 +123,7 @@ class RequestFiltering
 	/**
 	 * Runs once a request is completed
 	 */
-	static doOnCompleted(details)
+	static doOnCompleted(details: any)
 	{
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
@@ -141,10 +135,10 @@ class RequestFiltering
 	/**
 	 * If the filter has an explicit action associated with it that ignores all rules
 	 * then this function sets it
-	 * @param {Download} download 
-	 * @param {ReqFilter} filter 
+	 * @param download 
+	 * @param filter 
 	 */
-	static isIgnored(download, filter)
+	static isIgnored(download: Download, filter: ReqFilter)
 	{
 		if(!filter.isStatusOK()){
 			return true;
@@ -177,9 +171,9 @@ class RequestFiltering
 
 	/**
 	 * Performs the action that is assigned to a request in determineAction()
-	 * @param {Download} download 
+	 * @param download 
 	 */
-	static performAction(download)
+	static performAction(download: Download)
 	{
 		//console.timeEnd(download.reqDetails.requestId);
 
@@ -204,7 +198,8 @@ class RequestFiltering
 
 		if(download.act === ReqFilter.ACT_GRAB && DLG.options.overrideDlDialog){
 			//the request will be paused until this promise is resolved
-			return new Promise(function(resolve){
+			return new Promise(function(resolve)
+			{
 				download.resolve = resolve;
 				DLG.showDlDialog(download);
 			});

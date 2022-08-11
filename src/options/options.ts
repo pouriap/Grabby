@@ -6,16 +6,17 @@ var DLGPop = new DownloadGrabPopup();
 document.addEventListener("DOMContentLoaded", loadOptions);
 
 // save options when save is clicked
-document.querySelector("form").addEventListener("submit", saveOptions);
+document.querySelector("form")?.addEventListener("submit", saveOptions);
 
 // saves the options in the HTML form into browser storage and then applies it in runtime too
-async function saveOptions(e) {
+async function saveOptions(evt: Event)
+{
 
-	e.preventDefault();
+	evt.preventDefault();
 
 	let optionsData = Options.optionsData;
 
-	let optionsToSave = {};
+	let optionsToSave: OPTIONS = {} as OPTIONS;
 
 	for(let optionName in optionsData)
 	{
@@ -29,37 +30,33 @@ async function saveOptions(e) {
 		switch(optionType)
 		{
 			case 'textbox':
-				optionsToSave[optionName] = e.value;
+				optionsToSave[optionName] = (e as HTMLInputElement).value;
 				break;
 			case 'checkbox':
-				optionsToSave[optionName] = e.checked;
+				optionsToSave[optionName] = (e as HTMLInputElement).checked;
 				break;
 			case 'dropdown':
-				optionsToSave[optionName] = e.value;
+				optionsToSave[optionName] = (e as HTMLOptionElement).value;
 				break;
 		}
 	}
 
 	//options are saved in local storage but we need to update runtime options too
-	message = {
-		type: Messaging.TYP_SAVE_OPTIONS,
-		options: optionsToSave
-	};
-	Messaging.sendMessage(message);
-
+	let msg = new Messaging.MSGSaveOptions(optionsToSave);
+	Messaging.sendMessage(msg);
 }
 
 // loads options from browser storage and processes them to create a form
 async function loadOptions()
 {
-	let message = {type: Messaging.TYP_GET_DLG};
-	let res = await Messaging.sendMessage(message);
+	let msg = new Messaging.MSGGetDLG();
+	let res = await Messaging.sendMessage(msg);
 	DLGPop.availableDMs = res.DLGJSON.availableDMs;
 
 	//get the currently saved options
 	let options = await Options.load();
 
-	let uiOptions = {};
+	let uiOptions : {[index: string]: any} = {};
 
 	//process the raw options into an object with data for UI
 	for(let option in options)
@@ -77,11 +74,11 @@ async function loadOptions()
 		let optionData = uiOptions[option];
 		optionData.name = option;
 		let optionDiv = createOptionDiv(optionData);
-		document.getElementById('options-form').appendChild(optionDiv);
+		document.getElementById('options-form')?.appendChild(optionDiv);
 		//put a line after each section
 		if(optionData.endsection){
 			let hr = document.createElement('hr');
-			document.getElementById('options-form').appendChild(hr);
+			document.getElementById('options-form')?.appendChild(hr);
 		}
 	}
 
@@ -90,11 +87,11 @@ async function loadOptions()
 	btn.setAttribute('class', 'browser-style');
 	btn.setAttribute('type', 'submit');
 	btn.innerHTML = "Save";
-	document.getElementById('options-form').appendChild(btn);
+	document.getElementById('options-form')?.appendChild(btn);
 	
 }
 
-function createOptionDiv(optionData)
+function createOptionDiv(optionData: any)
 {
 	let div = document.createElement('div');
 	div.setAttribute('class', 'panel-formElements-item');
@@ -103,7 +100,7 @@ function createOptionDiv(optionData)
 	return div;
 }
 
-function createElement(optionData)
+function createElement(optionData: any)
 {
 	var e;
 
@@ -132,7 +129,7 @@ function createElement(optionData)
 	return e;
 }
 
-function createLabel(optionData)
+function createLabel(optionData: any)
 {
 	let label = document.createElement('label');
 	label.setAttribute("for", optionData.name);
