@@ -12,8 +12,10 @@
   "author": "Pouria Pirhadi",
   "license": "ISC",
   "dependencies": {
+    "del": "^6.1.1",
     "gulp": "^4.0.2",
     "gulp-less": "^5.0.0",
+    "gulp-replace": "^1.1.3",
     "gulp-typescript": "^6.0.0-alpha.1",
     "typescript": "^4.2.3"
   }
