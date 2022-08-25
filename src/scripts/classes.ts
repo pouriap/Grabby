@@ -9,7 +9,19 @@ abstract class DLGBase
 	availExtDMs: string[] = [];
 	availBrowserDMs: string[] = [];
 	tabs = new Map<number, any>();
-	abstract options: OPTIONS;
+	options: Options.DLGOptions;
+}
+
+type DLGJSON =
+{
+	allDownloads: {[index: string]: object};
+	allRequests: {[index: string]: object};
+	downloadDialogs: {[index: number]: string};
+	availableDMs: string[];
+	availExtDMs: string[];
+	availBrowserDMs: string[];
+	tabs: {[index: number]: object};
+	options: Options.DLGOptions;
 }
 
 /**
@@ -21,7 +33,6 @@ class DownloadGrabPopup extends DLGBase
 	continueWithBrowser = false;
 	currTabId = -1;
 	currTabUrl = '';
-	options: OPTIONS;
 }
 
 /**
@@ -30,7 +41,6 @@ class DownloadGrabPopup extends DLGBase
 class DownloadGrab extends DLGBase
 {
 	allRequests = new FixedSizeMap<string, any>(100);
-	options: OPTIONS;
 
 	addToAllDownloads(download: Download)
 	{
@@ -390,7 +400,7 @@ class ReqFilter
 
 	/* constructor */
 
-	constructor(public download: Download, public options: OPTIONS){}
+	constructor(public download: Download, public options: Options.DLGOptions){}
 
 	/* private methods */
 

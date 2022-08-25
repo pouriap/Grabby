@@ -1,5 +1,11 @@
 //TODO: chekc all included scripts in htmls and see if we still need them
 
+type DrawableOption = 
+{
+	name: string;
+	optionUI: Options.OptionUI<unknown, unknown>;
+}
+
 var DLGPop = new DownloadGrabPopup();
 
 // load current options when page is loaded
@@ -11,38 +17,36 @@ document.querySelector("form")?.addEventListener("submit", saveOptions);
 // saves the options in the HTML form into browser storage and then applies it in runtime too
 async function saveOptions(evt: Event)
 {
-
 	evt.preventDefault();
 
-	let optionsData = Options.optionsData;
+	let defaultOpts = new Options.DLGOptions();
+	let optionsUI = new Options.OptionsUI(defaultOpts);
 
-	let optionsToSave: OPTIONS = {} as OPTIONS;
-
-	for(let optionName in optionsData)
+	//populate real options first and then do the deferred options
+	for(let optionName in defaultOpts)
 	{
-		let optionType = optionsData[optionName].type;
+		let optionUI = <Options.OptionUI<unknown, Element>> optionsUI[optionName];
+		if(Options.isDeferred(optionUI)) continue;
+
 		let e = document.getElementById(optionName);
 
-		if(!e){
-			continue;
-		}
+		if(!e) log.err("Option doesn't exist in UI: ", optionName);
 
-		switch(optionType)
-		{
-			case 'textbox':
-				optionsToSave[optionName] = (e as HTMLInputElement).value;
-				break;
-			case 'checkbox':
-				optionsToSave[optionName] = (e as HTMLInputElement).checked;
-				break;
-			case 'dropdown':
-				optionsToSave[optionName] = (e as HTMLOptionElement).value;
-				break;
-		}
+		optionUI.save(e);
 	}
 
+	//populate deferred options
+	for(let optionName in defaultOpts)
+	{
+		let optionUI = optionsUI[optionName];
+		if(!Options.isDeferred(optionUI)) continue;
+		optionUI.save(undefined);
+	}
+
+	Options.save(optionsUI.opt);
+
 	//options are saved in local storage but we need to update runtime options too
-	let msg = new Messaging.MSGSaveOptions(optionsToSave);
+	let msg = new Messaging.MSGSaveOptions(optionsUI.opt);
 	Messaging.sendMessage(msg);
 }
 
@@ -50,33 +54,34 @@ async function saveOptions(evt: Event)
 async function loadOptions()
 {
 	let msg = new Messaging.MSGGetDLG();
-	let res = await Messaging.sendMessage(msg);
+	let res = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
 	DLGPop.availableDMs = res.DLGJSON.availableDMs;
 
 	//get the currently saved options
-	let options = await Options.load();
+	Options.load();
+	let options = Options.opt;
 
-	let uiOptions : {[index: string]: any} = {};
+	let optionsUI = new Options.OptionsUI(options);
 
-	//process the raw options into an object with data for UI
-	for(let option in options)
+	for(let optionName in options)
 	{
-		let optionVal = options[option];
-		let optionData = Options.optionsData[option];
-		uiOptions[option] = {};
-		Object.assign(uiOptions[option], optionData);
-		uiOptions[option].value = optionVal;
-	}
+		let optionUI = <Options.OptionUI<unknown, unknown>> optionsUI[optionName];
 
-	//iterate through the UI options and create each option as a <div> then append it to the form
-	for(let option in uiOptions)
-	{
-		let optionData = uiOptions[option];
-		optionData.name = option;
-		let optionDiv = createOptionDiv(optionData);
+		//deferred options don't have a UI
+		if(Options.isDeferred(optionUI)){
+			continue;
+		}
+
+		let d: DrawableOption = {
+			name: optionName,
+			optionUI: optionUI,
+		};
+
+		let optionDiv = createOptionDiv(d);
 		document.getElementById('options-form')?.appendChild(optionDiv);
-		//put a line after each section
-		if(optionData.endsection){
+
+		if(optionUI.endsection)
+		{
 			let hr = document.createElement('hr');
 			document.getElementById('options-form')?.appendChild(hr);
 		}
@@ -91,7 +96,7 @@ async function loadOptions()
 	
 }
 
-function createOptionDiv(optionData: any)
+function createOptionDiv(optionData: DrawableOption)
 {
 	let div = document.createElement('div');
 	div.setAttribute('class', 'panel-formElements-item');
@@ -100,28 +105,35 @@ function createOptionDiv(optionData: any)
 	return div;
 }
 
-function createElement(optionData: any)
+function createElement(optionData: DrawableOption)
 {
-	var e;
+	let e: Element;
 
-	switch (optionData.type)
+	let name = optionData.name;
+	let optionUI = optionData.optionUI;
+
+	if(Options.isCheckbox(optionUI))
 	{
-		case 'textbox':
-			e = createTextBox(optionData);
-			break;
-		case 'checkbox':
-			e = createCheckBox(optionData);
-			break;
-		case 'dropdown':
-			e = createDropDown(optionData);
-			break;
+		e = createCheckBox(name, optionUI);
+	}
+	else if(Options.isTextbox(optionUI))
+	{
+		e = createTextBox(name, optionUI);
+	}
+	else if(Options.isDropdown(optionUI))
+	{
+		e = createDropDown(name, optionUI);
+	}
+	else
+	{
+		log.err('Unkown option type: ', optionUI);
 	}
 
 	e.setAttribute("id", optionData.name);
 
-	if(optionData.attrs)
+	if(optionUI.attrs)
 	{
-		for(let attr of optionData.attrs){
+		for(let attr of optionUI.attrs){
 			e.setAttribute(attr.name, attr.value);
 		}
 	}
@@ -129,41 +141,43 @@ function createElement(optionData: any)
 	return e;
 }
 
-function createLabel(optionData: any)
+function createLabel(optionData: DrawableOption)
 {
 	let label = document.createElement('label');
 	label.setAttribute("for", optionData.name);
-	label.innerHTML = optionData.desc;
+	label.innerHTML = optionData.optionUI.desc;
 	return label;
 }
 
-function createCheckBox(optionData)
+function createCheckBox(id: string, optionUI: Options.CheckboxOption)
 {
 	let checkBox = document.createElement("input");
 	checkBox.setAttribute("type", "checkbox");
-	checkBox.setAttribute("id", optionData.name);
-	checkBox.checked = optionData.value;
+	checkBox.setAttribute("id", id);
+	checkBox.checked = optionUI.load();
 	return checkBox;
 }
 
-function createTextBox(optionData)
+function createTextBox(id: string, optionUI: Options.TextboxOption)
 {
 	let txtBox = document.createElement("input");
 	txtBox.setAttribute("type", "text");
-	txtBox.setAttribute("id", optionData.name);
-	txtBox.value = optionData.value;
+	txtBox.setAttribute("id", id);
+	txtBox.value = optionUI.load();
 	return txtBox;
 }
 
-function createDropDown(optionData)
+function createDropDown(id: string, optionUI: Options.DropdownOption)
 {
 	//populate the list
-	let itemsList = optionData.getListData(DLGPop);
+	let data = optionUI.load();
+	let itemList = data.list;
+	let selectedItem = data.selected;
 
 	let dropDwn = document.createElement("select");
-	dropDwn.setAttribute("id", optionData.name);
+	dropDwn.setAttribute("id", id);
 
-	for(let itemName of itemsList)
+	for(let itemName of itemList)
 	{
 		let item = document.createElement('option');
 		item.value = itemName;
@@ -171,16 +185,15 @@ function createDropDown(optionData)
 		item.id = itemName;
 		item.onclick = function(){
 			let selectedItem = dropDwn.options[dropDwn.selectedIndex].value;
-			document.getElementById(optionData.name).value = selectedItem;
+			(<HTMLInputElement>document.getElementById(id)).value = selectedItem;
 		};
 		dropDwn.appendChild(item);
 		//is this the selected one?
-		if(optionData.value === item.value){
+		if(selectedItem === item.value){
 			item.setAttribute('selected', 'selected');
-			dropDwn.value = optionData.value;
+			dropDwn.value = selectedItem;
 		}
 	}
 
 	return dropDwn;
-
 }

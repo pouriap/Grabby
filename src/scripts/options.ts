@@ -1,8 +1,6 @@
 namespace Options
 {
-	/* types */
-
-	class DLGOptions
+	export class DLGOptions
 	{
 		[index: string]: unknown;
 		overrideDlDialog: boolean = true;
@@ -21,43 +19,56 @@ namespace Options
 		defaultDM: string = '';
 	}
 
-	type OptionNames<T> = 
+	export type OptionNames<T> = 
 	{
 		[Property in keyof DLGOptions]: T;
 	}
 
-	type OptionUI<T, V> =
+	export type OptionUI<T, V> =
 	{
-		type: 'textbox' | 'checkbox' | 'dropdown' | 'hidden';
+		type: 'textbox' | 'checkbox' | 'dropdown' | 'deferred';
 		desc: string;
 		endsection?: boolean;
 		attrs?: pair[];
-		getListData?: (arg?: any) => string[];
 		load: () => T;
 		save: (e: V) => void;
 	}
 
-	type CheckboxOption = OptionUI<boolean, HTMLInputElement> &
+	export type CheckboxOption = OptionUI<boolean, HTMLInputElement> &
 	{
 		type: 'checkbox';
 	}
 
-	type TextboxOption = OptionUI<string, HTMLInputElement> & 
+	export type TextboxOption = OptionUI<string, HTMLInputElement> & 
 	{
 		type: 'textbox';
 	}
 
-	type DropdownOption = OptionUI<{selected: string, list: string[]}, HTMLOptionElement> & 
+	export type DropdownOption = OptionUI<{selected: string, list: string[]}, HTMLOptionElement> & 
 	{
 		type: 'dropdown';
 	}
 
-	type HiddenOption = OptionUI<void, undefined> &
+	export type DeferredOption = OptionUI<void, undefined> &
 	{
-		type: 'hidden';
+		type: 'deferred';
 	}
 
-	/* exports */
+	export function isCheckbox(obj: any): obj is CheckboxOption {
+		return obj.type === 'checkbox';
+	}
+
+	export function isTextbox(obj: any): obj is TextboxOption {
+		return obj.type === 'textbox';
+	}
+
+	export function isDropdown(obj: any): obj is DropdownOption {
+		return obj.type === 'dropdown';
+	}
+
+	export function isDeferred(obj: any): obj is DeferredOption {
+		return obj.type === 'deferred';
+	}
 
 	export let opt = new DLGOptions();
 
@@ -72,13 +83,11 @@ namespace Options
 		return browser.storage.local.set(options);
 	}
 
-	//let ui: OptionNames<OptionUI<unknown>> = 
-	//let ui: Record<Options, OptionUI> =
-	class UIOptionsss implements OptionNames<unknown>
+	export class OptionsUI implements OptionNames<unknown>
 	{
 		[index: string]: unknown;
 
-		private opt = new DLGOptions();
+		opt = new DLGOptions();
 
 		constructor(opt: DLGOptions)
 		{
@@ -209,20 +218,20 @@ namespace Options
 			save: (e) => {this.opt.defaultDM = (e.value)? e.value : ''}
 		};
 
-		excludedMimes: HiddenOption = {
-			type: 'hidden',
+		excludedMimes: DeferredOption = {
+			type: 'deferred',
 			desc: '',
 			load: () => {},
 			save: () => {this.opt.excludedMimes = this.getMimesForExts(this.opt.excludedExts)}
 		};
-		includedMimes: HiddenOption = {
-			type: 'hidden',
+		includedMimes: DeferredOption = {
+			type: 'deferred',
 			desc: '',
 			load: () => {},
 			save: () => {this.opt.includedMimes = this.getMimesForExts(this.opt.includedExts)}
 		};
-		forcedMimes: HiddenOption = {
-			type: 'hidden',
+		forcedMimes: DeferredOption = {
+			type: 'deferred',
 			desc: '',
 			load: () => {},
 			save: () => {this.opt.forcedMimes = this.getMimesForExts(this.opt.forcedExts)}

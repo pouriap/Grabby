@@ -7,6 +7,7 @@ namespace Messaging
 	const TYP_SAVE_OPTIONS = 'save-options';
 	const TYP_CLEAR_LIST = 'clear-list';
 	const TYP_GET_DLG = 'get-bg';
+	const TYP_DLGJSON = 'dlg-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 	const TYP_CONT_WITH_BROWSER = 'con-with-browser';
 	const TYP_DOWNLOAD = 'download';
@@ -24,7 +25,7 @@ namespace Messaging
 	export class MSGSaveOptions implements Message
 	{
 		type = TYP_SAVE_OPTIONS;
-		constructor(public options: OPTIONS){};
+		constructor(public options: Options.DLGOptions){};
 	}
 	
 	export class MSGClearlist implements Message
@@ -35,6 +36,12 @@ namespace Messaging
 	export class MSGGetDLG implements Message
 	{
 		type = TYP_GET_DLG;
+	}
+
+	export class MSGDLGJSON implements Message
+	{
+		type = TYP_DLGJSON;
+		constructor(public DLGJSON: DLGJSON){};
 	}
 	
 	export class MSGDlDialogClosing implements Message
@@ -81,7 +88,7 @@ namespace Messaging
 	 * @param msg
 	 * @returns 
 	 */
-	export function sendMessage(msg: object): Promise<any>
+	export function sendMessage(msg: object): Promise<Message>
 	{
 		return browser.runtime.sendMessage(msg);
 	}
@@ -154,10 +161,11 @@ namespace Messaging
 		DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
 	}
 
-	function handleGetDLG(msg: MSGGetDLG)
+	function handleGetDLG(msg: MSGGetDLG): Promise<MSGDLGJSON>
 	{
 		return new Promise((resolve) => {
-			resolve({DLGJSON: DLG});
+			//@ts-ignore
+			resolve(new MSGDLGJSON(DLG));
 		});
 	}
 
