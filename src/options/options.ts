@@ -6,7 +6,7 @@ type DrawableOption =
 	optionUI: Options.OptionUI<unknown, unknown>;
 }
 
-var DLGPop = new DownloadGrabPopup();
+var DLGPop: DownloadGrabPopup;
 
 // load current options when page is loaded
 document.addEventListener("DOMContentLoaded", loadOptions);
@@ -32,7 +32,7 @@ async function saveOptions(evt: Event)
 
 		if(!e) log.err("Option doesn't exist in UI: ", optionName);
 
-		optionUI.save(e);
+		optionUI.setVal(e);
 	}
 
 	//populate deferred options
@@ -40,7 +40,7 @@ async function saveOptions(evt: Event)
 	{
 		let optionUI = optionsUI[optionName];
 		if(!Options.isDeferred(optionUI)) continue;
-		optionUI.save(undefined);
+		optionUI.setVal(undefined);
 	}
 
 	Options.save(optionsUI.opt);
@@ -55,7 +55,7 @@ async function loadOptions()
 {
 	let msg = new Messaging.MSGGetDLG();
 	let res = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
-	DLGPop.availableDMs = res.DLGJSON.availableDMs;
+	DLGPop = new DownloadGrabPopup(res.DLGJSON);
 
 	//get the currently saved options
 	Options.load();
@@ -154,7 +154,7 @@ function createCheckBox(id: string, optionUI: Options.CheckboxOption)
 	let checkBox = document.createElement("input");
 	checkBox.setAttribute("type", "checkbox");
 	checkBox.setAttribute("id", id);
-	checkBox.checked = optionUI.load();
+	checkBox.checked = optionUI.getVal();
 	return checkBox;
 }
 
@@ -163,14 +163,14 @@ function createTextBox(id: string, optionUI: Options.TextboxOption)
 	let txtBox = document.createElement("input");
 	txtBox.setAttribute("type", "text");
 	txtBox.setAttribute("id", id);
-	txtBox.value = optionUI.load();
+	txtBox.value = optionUI.getVal();
 	return txtBox;
 }
 
 function createDropDown(id: string, optionUI: Options.DropdownOption)
 {
 	//populate the list
-	let data = optionUI.load();
+	let data = optionUI.getVal();
 	let itemList = data.list;
 	let selectedItem = data.selected;
 

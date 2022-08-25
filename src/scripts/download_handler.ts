@@ -166,7 +166,7 @@ class DownloadHandler implements RequestHandler
 		//this should cover unknown file type downloads too
 		else if
 		(
-			(!download.resDetails.documentUrl || !download.resDetails.originUrl) &&
+			(!download.httpDetails.documentUrl || !download.httpDetails.originUrl) &&
 			download.fileExtension !== 'unknown'
 		){
 			download.classReason = 'extension with no document/origin'
@@ -244,7 +244,7 @@ class DownloadHandler implements RequestHandler
 		DLG.addToAllDownloads(download);
 
 		if(act === this.ACT_FORCE_DL){
-			let dmName = Options.getDefaultDM();
+			let dmName = Options.opt.defaultDM;
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
 				DLG.doDownloadJob(job);
 			});

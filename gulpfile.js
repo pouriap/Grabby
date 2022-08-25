@@ -40,9 +40,7 @@ task('ts-prod', function(){
 	var tsProject = ts.createProject("./tsconfig.json", {
 		removeComments: true, 
 	});
-	return tsProject.src().pipe(tsProject())
-		.on("error", () => {})
-		.js.pipe(dest("dist"));
+	return tsProject.src().pipe(tsProject()).js.pipe(dest("dist"));
 });
 
 task('default', parallel('copy-statics', 'less', 'ts-debug'));

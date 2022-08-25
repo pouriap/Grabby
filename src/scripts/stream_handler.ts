@@ -26,7 +26,7 @@ class StreamHandler implements RequestHandler
 	 * @param requestId
 	 * @param filter
 	 */
-	private receiveManifest(requestId: number, filter: ReqFilter)
+	private receiveManifest(requestId: string, filter: ReqFilter)
 	{	
 		let f = browser.webRequest.filterResponseData(requestId);
 		let decoder = new TextDecoder("utf-8");
@@ -98,7 +98,7 @@ class StreamHandler implements RequestHandler
 			//if it has a hash header it means it's a playlist we reqested
 			if(hash)
 			{
-				let download = DLG.allDownloads.get(hash);
+				let download = DLG.allDownloads.get(hash)!;
 
 				if(!download.manifest){
 					log.err('Download does not have a manifest', download);

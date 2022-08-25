@@ -151,14 +151,12 @@ namespace Messaging
 	function handleSaveOptions(msg: MSGSaveOptions)
 	{
 		Options.save(msg.options);
-		//set options
-		Options.apply(msg.options);
 		log.d('saved options: ', DLG.options);
 	}
 
 	function handleClearList(msg: MSGClearlist)
 	{
-		DLG.allDownloads = new FixedSizeMap(DLG.options.dlListSize);
+		DLG.allDownloads.clear();
 	}
 
 	function handleGetDLG(msg: MSGGetDLG): Promise<MSGDLGJSON>
@@ -175,7 +173,7 @@ namespace Messaging
 		if(msg.continueWithBrowser){
 			return;
 		}
-		let download = DLG.allDownloads.get(msg.dlHash);
+		let download = DLG.allDownloads.get(msg.dlHash)!;
 
 		if(download.resolve){
 			download.resolve({cancel: true});
@@ -184,7 +182,7 @@ namespace Messaging
 		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
 		//if this is a download that opens in an empty new tab and we are not 
 		//continuing with browser then close the empty tab
-		let downloadPageTabId = download.reqDetails.tabId;
+		let downloadPageTabId = download.httpDetails.tabId;
 		try{
 			browser.tabs.get(downloadPageTabId).then((tabInfo: any)=>{
 				if(tabInfo.url === "about:blank"){
@@ -205,7 +203,7 @@ namespace Messaging
 
 	function handleDownload(msg: MSGDownload)
 	{
-		let download = DLG.allDownloads.get(msg.dlHash);
+		let download = DLG.allDownloads.get(msg.dlHash)!;
 		DownloadJob.getFromDownload(msg.dmName, download).then((job)=>{
 			DLG.doDownloadJob(job);
 		});
@@ -213,7 +211,7 @@ namespace Messaging
 
 	function handleYTDLGet(msg: MSGYTDLGet)
 	{
-		let download = DLG.allDownloads.get(msg.dlHash);
+		let download = DLG.allDownloads.get(msg.dlHash)!;
 		let job = YTDLJob.getFromDownload(download, msg.formatId, msg.ytdlType);
 		DLG.doYTDLJob(job);
 	}

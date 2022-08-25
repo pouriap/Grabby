@@ -1,4 +1,4 @@
-var DLGPop = new DownloadGrabPopup();
+var DLGPop: DownloadGrabPopup;
 
 /**
  * Gets the DLG instance from the background script and makes a copy of the needed data inside it
@@ -6,28 +6,11 @@ var DLGPop = new DownloadGrabPopup();
 async function getBackgroundData()
 {
 	let msg = new Messaging.MSGGetDLG();
-	let response = await Messaging.sendMessage(msg);
-	let limit = response.DLGJSON.allDownloads.limit;
-	let allDlsJSON = response.DLGJSON.allDownloads.list;
-	let allDownloads = new FixedSizeMap<string, Download>(limit);
+	let response = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
+	DLGPop = new DownloadGrabPopup(response.DLGJSON);
+	
 	let currentTab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
 
-	//populate our local version of allDownloads using the JSON data
-	for(let downloadHash of Object.keys(allDlsJSON))
-	{
-		let downloadJSON = allDlsJSON[downloadHash];
-		let reqDetails = downloadJSON.reqDetails;
-		let resDetails = downloadJSON.resDetails;
-		let download = new Download(reqDetails, resDetails);
-		//copy everything from downloadJSON to the new download object
-		Object.assign(download, downloadJSON);
-		allDownloads.put(downloadHash, download);
-	};
-
-	DLGPop.allDownloads = allDownloads;
-	DLGPop.availableDMs = response.DLGJSON.availableDMs;
-	DLGPop.options = response.DLGJSON.options;
-	DLGPop.downloadDialogs = response.DLGJSON.downloadDialogs;
 	DLGPop.currTabUrl = currentTab.url;
 	DLGPop.currTabId = currentTab.id;
 }

@@ -285,7 +285,7 @@ namespace NativeMessaging
 	function handleYTDLInfo(msg: MSGRCV_YTDLInfo)
 	{
 		log.d('got info for ' + msg.dlHash, msg.info);
-		let dl = DLG.allDownloads.get(msg.dlHash);
+		let dl = DLG.allDownloads.get(msg.dlHash)!;
 
 		dl.ytdlInfo = msg.info;
 

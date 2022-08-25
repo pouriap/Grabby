@@ -114,7 +114,7 @@ function showDownloadsList()
 	}
 
 	//populate list of downloads
-	let keys = Array.from(DLGPop.allDownloads.keys);
+	let keys = Array.from(DLGPop.allDownloads.keys());
 	//reverse to show latest downloads on top
 	keys.reverse();
 	
@@ -167,8 +167,7 @@ function showDownloadsList()
 				let hash = this.getAttribute("data-hash")!;
 				let dl = DLGPop.allDownloads.get(hash)!;
 				let info = {
-					reqDetails: dl.reqDetails,
-					resDetails: dl.resDetails,
+					httpDetails: dl.httpDetails,
 				};
 				log.d(JSON.stringify(info).replace(/\\/g, '\\\\').replace(/'/g, "\\'"));
 			});

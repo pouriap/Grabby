@@ -3,25 +3,25 @@ namespace RequestFiltering
 	export function startListeners()
 	{
 		browser.webRequest.onBeforeRequest.addListener(
-			(details: any) => { return doOnBeforeRequest(details) }, 
+			(details: webx_beforeRequest) => { return doOnBeforeRequest(details) }, 
 			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			(details: any) => { return doOnBeforeSendHeaders(details) }, 
+			(details: webx_beforeSendHeaders) => { return doOnBeforeSendHeaders(details) }, 
 			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			(details: any) => { return doOnHeadersReceived(details) }, 
+			(details: webx_headersReceived) => { return doOnHeadersReceived(details) }, 
 			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details: any) => { return doOnCompleted(details) }, 
+			(details: webx_common) => { return doOnCompleted(details) }, 
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -32,7 +32,7 @@ namespace RequestFiltering
 	 * Runs before a request is sent
 	 * Is used to store POST data 
 	 */
-	function doOnBeforeRequest(details: any)
+	function doOnBeforeRequest(details: webx_beforeRequest)
 	{
 		let formDataArr = (
 			details.method === "POST" && 
@@ -53,22 +53,21 @@ namespace RequestFiltering
 
 		//store post data in request object
 		//more data are added to it in later stages of request
-		let request = {postData: postData};
+		let httpDetails: HTTPDetails = {} as HTTPDetails;
+		httpDetails.postData = postData;
 
-		DLG.allRequests.put(details.requestId, request);
+		DLG.allRequests.set(details.requestId, httpDetails);
 	}
 
 	/**
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	function doOnBeforeSendHeaders(details: any)
+	function doOnBeforeSendHeaders(details: webx_beforeSendHeaders)
 	{
-		//store request details
-		let request = DLG.allRequests.get(details.requestId);
-		request.details = details;
-		request.details.postData = request.postData;
-		delete request.postData;
+		//update http details
+		let httpDetails = DLG.allRequests.get(details.requestId)!;
+		Object.assign(httpDetails, details);
 	}
 
 	/**
@@ -77,23 +76,24 @@ namespace RequestFiltering
 	 * to our list of downloads
 	 * @param details 
 	 */
-	function doOnHeadersReceived(details: any): Promise<webx_BlockingResponse>
+	function doOnHeadersReceived(details: webx_headersReceived): Promise<webx_BlockingResponse>
 	{
 
 		//log("receiving: ", details);
 
 		//console.time(details.requestId);
 
-		let requestId = details.requestId;
-		let requestOfThisResponse = DLG.allRequests.get(requestId);
+		//update http details
+		let httpDetails = DLG.allRequests.get(details.requestId)!;
+		Object.assign(httpDetails, details);
 		
-		if(typeof requestOfThisResponse === 'undefined'){
+		if(typeof httpDetails === 'undefined'){
 			return Promise.resolve({cancel: false});
 		}
 
 		//creating a new download object because the original will be deleted from allRequests
 		//in doOnCompleted() after the request is completed or when DLG.allDownloads is full
-		let download = new Download(requestOfThisResponse.details, details);
+		let download = new Download(httpDetails);
 
 		let filter = new ReqFilter(download, DLG.options);
 
@@ -124,12 +124,12 @@ namespace RequestFiltering
 	/**
 	 * Runs once a request is completed
 	 */
-	function doOnCompleted(details: any)
+	function doOnCompleted(details: webx_common)
 	{
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map
 		//todo: try adding this to onResponseStarted
-		DLG.allRequests.remove(details.requestId);
+		DLG.allRequests.delete(details.requestId);
 	}
 
 
@@ -148,8 +148,7 @@ namespace RequestFiltering
 			return true;
 		}
 
-		//todo: fix this madness
-		if(filter.isBlackListed(DLG.blacklist)){
+		if(filter.isBlackListed()){
 			return true;
 		}
 

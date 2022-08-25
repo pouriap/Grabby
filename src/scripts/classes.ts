@@ -1,53 +1,83 @@
-/**
- * Base class for the 'DLG' global variable
- */
-abstract class DLGBase
-{
-	allDownloads = new FixedSizeMap<string, Download>(100);
-	downloadDialogs = new Map<number, string>();
-	availableDMs: string[] = [];
-	availExtDMs: string[] = [];
-	availBrowserDMs: string[] = [];
-	tabs = new Map<number, any>();
-	options: Options.DLGOptions;
-}
-
+//todo: in firefox maps are copied but in chrome they aren't
+//https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Chrome_incompatibilities#data_cloning_algorithm
 type DLGJSON =
 {
+	allRequests: Map<string, any>;
 	allDownloads: {[index: string]: object};
-	allRequests: {[index: string]: object};
-	downloadDialogs: {[index: number]: string};
+	downloadDialogs: Map<number, string>;
+	tabs: Map<number, any>;
+	options: Options.DLGOptions;
 	availableDMs: string[];
 	availExtDMs: string[];
 	availBrowserDMs: string[];
-	tabs: {[index: number]: object};
-	options: Options.DLGOptions;
 }
 
 /**
  * Class for the popup DLG instance (DLGPopup)
  */
-class DownloadGrabPopup extends DLGBase
+class DownloadGrabPopup
 {
+	allDownloads: Map<string, Download>;
+	downloadDialogs: Map<number, string>;
+	tabs: Map<number, any>;
+	options: Options.DLGOptions;
+	availableDMs: string[];
+	availExtDMs: string[];
+	availBrowserDMs: string[];
+
 	selectedDl: Download | null = null;
 	continueWithBrowser = false;
 	currTabId = -1;
 	currTabUrl = '';
+
+	constructor(dlgJSON: DLGJSON)
+	{
+		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
+		this.downloadDialogs = dlgJSON.downloadDialogs;
+		this.availableDMs = dlgJSON.availableDMs;
+		this.availExtDMs = dlgJSON.availExtDMs;
+		this.availBrowserDMs = dlgJSON.availBrowserDMs;
+		this.tabs = dlgJSON.tabs;
+		this.options = dlgJSON.options;
+	}
+
+	private recreateDownloads(allDownloads: {[index: string]: object}): Map<string, Download>
+	{
+		let newDownloads = new Map<string, Download>();
+
+		for(let downloadHash of Object.keys(allDownloads))
+		{
+			let downloadJSON = allDownloads[downloadHash] as any;
+			let download = new Download(downloadJSON.details);
+			//copy everything from downloadJSON to the new download object
+			Object.assign(download, downloadJSON);
+			newDownloads.set(downloadHash, download);
+		};
+
+		return newDownloads;
+	}
 }
 
 /**
  * Class for the main DLG instance
  */
-class DownloadGrab extends DLGBase
+class DownloadGrab
 {
-	allRequests = new FixedSizeMap<string, any>(100);
+	allRequests = new Map<string, HTTPDetails>();
+	allDownloads = new Map<string, Download>();
+	downloadDialogs = new Map<number, string>();
+	tabs = new Map<number, any>();
+	options = new Options.DLGOptions();
+	availableDMs: string[] = [];
+	availExtDMs: string[] = [];
+	availBrowserDMs: string[] = [];
 
 	addToAllDownloads(download: Download)
 	{
 		//we do this here because we don't want to run hash on requests we will not use
 		let hash = download.hash;
 		//we put hash of URL as key to prevent the same URL being added by different requests
-		this.allDownloads.put(hash, download);
+		this.allDownloads.set(hash, download);
 	}
 
 	/**
@@ -128,15 +158,14 @@ class DownloadGrab extends DLGBase
  */
 class Download
 {
-	requestId: number;
+	requestId: string;
 	url: string;
 	statusCode: number;
 	time: number;
 	resourceType: string;
 	origin: string;
 	tabId: number;
-	reqDetails: any;
-	resDetails: any;
+	httpDetails: HTTPDetails;
 	//these are set after processing
 	ytdlInfo: any = undefined;
 	manifest: MainManifest | undefined = undefined;
@@ -158,20 +187,17 @@ class Download
 
 	/**
 	 * Creates a new Download object
-	 * @param reqDetails the 'details' object attached to a request
-	 * @param resDetails the 'details' object attached to a response
 	 */
-	constructor(reqDetails: any, resDetails: any)
+	constructor(details: HTTPDetails)
 	{
-		this.requestId = resDetails.requestId;
-		this.url = resDetails.url;
-		this.statusCode = resDetails.statusCode;
-		this.time = resDetails.timeStamp;
-		this.resourceType = resDetails.type;
-		this.origin = reqDetails.originUrl || resDetails.url;
-		this.tabId = reqDetails.tabId;
-		this.reqDetails = reqDetails;
-		this.resDetails = resDetails;
+		this.requestId = details.requestId;
+		this.url = details.url;
+		this.statusCode = details.statusCode;
+		this.time = details.timeStamp;
+		this.resourceType = details.type;
+		this.origin = details.originUrl || details.url;
+		this.tabId = details.tabId;
+		this.httpDetails = details;
 	}
 
 	get hash()
@@ -212,10 +238,10 @@ class Download
 	{
 		let headers;
 		if(headerDirection === 'request'){
-			headers = this.reqDetails.requestHeaders;
+			headers = this.httpDetails.requestHeaders;
 		}
 		else{
-			headers = this.resDetails.responseHeaders;
+			headers = this.httpDetails.responseHeaders;
 		}
 
 		let headerItem =  headers.find(function(header: any){
@@ -717,7 +743,7 @@ class ReqFilter
 
 	isFromCache()
 	{
-		return this.download.resDetails.fromCache;
+		return this.download.httpDetails.fromCache;
 	}
 
 	isExcludedInOpts()
@@ -771,9 +797,9 @@ class ReqFilter
 		return this._isForcedInOpts;
 	}
 
-	isBlackListed(blacklist: string[])
+	isBlackListed()
 	{
-		if(blacklist.includes(this.download.url)){
+		if(Options.opt.blacklistURLs.includes(this.download.url)){
 			return true;
 		}
 		if(
@@ -885,79 +911,79 @@ interface RequestHandler
  * and the new element is put in
  * Duplicate elements will rewrite the old ones
  */
-class FixedSizeMap<T, V>
-{
-	maxSize = 100;
-	map = new Map<T, V>();
+// class FixedSizeMap<T, V>
+// {
+// 	maxSize = 100;
+// 	map = new Map<T, V>();
 
-	/**
-	 * 
-	 * @param maxSize max size of this map
-	 * @param listData (optional) the data to initialize this FixedSizeMap with
-	 */
-	constructor(maxSize: number, listData?: Map<T, V>)
-	{
-		this.maxSize = maxSize;
-		this.map = (listData) ? this._trimMap(listData, maxSize) : new Map<T, V>();
-	}
+// 	/**
+// 	 * 
+// 	 * @param maxSize max size of this map
+// 	 * @param listData (optional) the data to initialize this FixedSizeMap with
+// 	 */
+// 	constructor(maxSize: number, listData?: Map<T, V>)
+// 	{
+// 		this.maxSize = maxSize;
+// 		this.map = (listData) ? this._trimMap(listData, maxSize) : new Map<T, V>();
+// 	}
 
-	get keys()
-	{
-		return this.map.keys();
-	}
+// 	get keys()
+// 	{
+// 		return this.map.keys();
+// 	}
 
-	get values()
-	{
-		return this.map.values();
-	}
+// 	get values()
+// 	{
+// 		return this.map.values();
+// 	}
 
-	get size()
-	{
-		return this.map.size;
-	}
+// 	get size()
+// 	{
+// 		return this.map.size;
+// 	}
 
-	remove(key: T)
-	{
-		this.map.delete(key);
-	}
+// 	remove(key: T)
+// 	{
+// 		this.map.delete(key);
+// 	}
 
-	put(key: T, value: V)
-	{
-		if (this.size === this.maxSize)
-		{
-			let firstItemKey = this.map.keys().next().value;
-			this.remove(firstItemKey);
-		}
+// 	put(key: T, value: V)
+// 	{
+// 		if (this.size === this.maxSize)
+// 		{
+// 			let firstItemKey = this.map.keys().next().value;
+// 			this.remove(firstItemKey);
+// 		}
 
-		this.map.set(key, value);
-	}
+// 		this.map.set(key, value);
+// 	}
 
-	get(key: T): V
-	{
-		let dl = this.map.get(key);
-		if(!dl)
-		{
-			log.err(`Item with key: ${key} was not found`);
-		}
+// 	get(key: T): V
+// 	{
+// 		let dl = this.map.get(key);
+// 		if(!dl)
+// 		{
+// 			log.err(`Item with key: ${key} was not found`);
+// 		}
 
-		return dl;
-	}
+// 		return dl;
+// 	}
 
-	private _trimMap(newMap: Map<T,V>, targetSize: number)
-	{
-		let keys = newMap.keys();
-		let size = newMap.size;
-		if (targetSize < size)
-		{
-			let diff = size - targetSize;
-			for (let i = 0; i < diff; i++){
-				newMap.delete(keys.next().value);
-			}
-		}
-		return newMap;
-	}
+// 	private _trimMap(newMap: Map<T,V>, targetSize: number)
+// 	{
+// 		let keys = newMap.keys();
+// 		let size = newMap.size;
+// 		if (targetSize < size)
+// 		{
+// 			let diff = size - targetSize;
+// 			for (let i = 0; i < diff; i++){
+// 				newMap.delete(keys.next().value);
+// 			}
+// 		}
+// 		return newMap;
+// 	}
 	
-}
+// }
 
 var constants = {
 
@@ -1353,7 +1379,7 @@ class DownloadJob
 			url: download.url,
 			filename: download.filename,
 			cookies: download.getHeader('cookie', 'request') || '',
-			postData: download.reqDetails.postData,
+			postData: download.httpDetails.postData,
 			desc: download.filename,
 			extension: download.fileExtension
 		};

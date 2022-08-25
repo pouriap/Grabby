@@ -9,6 +9,7 @@ for(let i=0; i<linkNodes.length; i++)
 	let linkNode = linkNodes[i];
 	let isAnchor = (linkNode instanceof HTMLAnchorElement);
 	let desc = (isAnchor)? 
+		//@ts-ignore
 		(linkNode.title || linkNode.textContent) : (linkNode.alt || linkNode.title);
 	let href = linkNode.href;
 	let link: ContextMenu.link = {href: href, desc: desc};

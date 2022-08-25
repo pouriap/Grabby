@@ -45,7 +45,7 @@ namespace ContextMenu
 
 		//menu click listener
 		browser.menus.onClicked.addListener((info: any, tab: any) => {
-			return doOnMenuClicked(info, tab, Options.getDefaultDM());
+			return doOnMenuClicked(info, tab, Options.opt.defaultDM);
 		});
 	}
 

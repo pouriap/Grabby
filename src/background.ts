@@ -2,6 +2,7 @@
 
 declare var browser: any;
 declare var filesize: any;
+declare var md5: any;
 
 //todo: unicode in headers (content-disposition) is not supported by firefox
 //todo: report:  If you send a file to FDM[3] then the filename will be empty, but it'll appear in comments, but that just how FlashGot worked, so I don't know if consider it as a bug or not.
@@ -87,12 +88,7 @@ var DLG = new DownloadGrab();
 		DLG.availBrowserDMs = browserDms;
 		DLG.availExtDMs = externalDMs;
 
-		let options = await Options.load();
-		Options.apply(options);
-
-		//todo: fix this
-		let res = await browser.storage.local.get({blacklist: []});
-		DLG.blacklist = res.blacklist;
+		await Options.load();
 
 		Messaging.startListeners();
 
