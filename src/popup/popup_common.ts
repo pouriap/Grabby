@@ -7,6 +7,7 @@ async function getBackgroundData()
 {
 	let msg = new Messaging.MSGGetDLG();
 	let response = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
+	log.d('mozilla gave us this: ', response);
 	DLGPop = new DownloadGrabPopup(response.DLGJSON);
 	
 	let currentTab = (await browser.tabs.query({currentWindow: true, active: true}))[0];

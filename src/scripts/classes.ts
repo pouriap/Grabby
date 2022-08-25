@@ -74,6 +74,7 @@ class DownloadGrab
 
 	addToAllDownloads(download: Download)
 	{
+		log.d('adding to all downloads: ', download);
 		//we do this here because we don't want to run hash on requests we will not use
 		let hash = download.hash;
 		//we put hash of URL as key to prevent the same URL being added by different requests

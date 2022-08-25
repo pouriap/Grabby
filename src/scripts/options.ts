@@ -73,13 +73,11 @@ namespace Options
 
 	export let opt = new DLGOptions();
 
-	export function load(): Promise<DLGOptions>
+	export async function load(): Promise<DLGOptions>
 	{
-		return new Promise((resolve) => {
-			let defaults = new DLGOptions();
-			opt = browser.storage.local.get(defaults);
-			resolve(opt);
-		});
+		let defaults = new DLGOptions();
+		opt = await browser.storage.local.get(defaults);
+		return opt;
 	}
 
 	export function save(options?: DLGOptions): Promise<undefined|string>
