@@ -1,10 +1,8 @@
-//todo: wrap all webext types in classes
-
 declare var browser: any;
 declare var filesize: any;
 declare var md5: any;
 
-//todo: unicode in headers (content-disposition) is not supported by firefox
+//todo: unicode in headers (content-disposition) is not supported by firefox [is it added? https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/HttpHeaders]
 //todo: report:  If you send a file to FDM[3] then the filename will be empty, but it'll appear in comments, but that just how FlashGot worked, so I don't know if consider it as a bug or not.
 //todo: add context menu for image/audio/video elements
 //todo: Grab selection shouldn't appear in context menu when only a simple text is selected

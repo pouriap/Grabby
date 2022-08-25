@@ -8,6 +8,7 @@ task('copy-statics', function(){
 	return src([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
+		'./src/**/*.json',
 		'./src/**/*.jpg',
 		'./src/**/*.png',
 		'./src/**/*.gif',
