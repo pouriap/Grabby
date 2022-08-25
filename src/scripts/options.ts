@@ -1,6 +1,8 @@
 namespace Options
 {
-	class Options
+	/* types */
+
+	class DLGOptions
 	{
 		[index: string]: unknown;
 		overrideDlDialog: boolean = true;
@@ -21,295 +23,211 @@ namespace Options
 
 	type OptionNames<T> = 
 	{
-		[Property in keyof Options]: T;
+		[Property in keyof DLGOptions]: T;
 	}
 
-	export function load()
+	type OptionUI<T, V> =
 	{
-		let defaults = new Options();
-		for(let optionName in defaults)
-		{
-			defaults[optionName] = data[optionName].default;
-		}
-		
-		let loadedOpts = browser.storage.local.get(defaults);
-
-		//put the normal options
-		for(let optionName of optionNames)
-		{
-			Options[optionName] = loadedOpts[optionName];
-		}
-
-		//put the options that need processing
-
-	}
-
-	type OptionData<T> = 
-	{
-		type: string;
-		default: T;
+		type: 'textbox' | 'checkbox' | 'dropdown' | 'hidden';
 		desc: string;
 		endsection?: boolean;
 		attrs?: pair[];
 		getListData?: (arg?: any) => string[];
+		load: () => T;
+		save: (e: V) => void;
 	}
 
-	let data: OptionNames<OptionData<unknown>> = 
+	type CheckboxOption = OptionUI<boolean, HTMLInputElement> &
 	{
-		overrideDlDialog: <OptionData<boolean>> {
-			type: 'checkbox',
-			default: true,
-			desc: "Override Firefox's download dialog",
-		},
-		playMediaInBrowser: <OptionData<boolean>> {
-			type: 'checkbox',
-			default: true,
-			desc: "Do not offer to download files that can be displayed inside browser (text, media and pdf)",
-		},
-		dlListSize: <OptionData<number>> {
-			type: 'textbox',
-			default: 20,
-			desc: 'Number of items to keep in downloads history:',
-		},
-		showOnlyTabDls: <OptionData<boolean>> {
-			type: 'checkbox',
-			default: true,
-			desc: 'Show only downlods originated from current tab in the popup list',
-			endsection: true,
-		},
-	
-		grabFilesLargerThanMB: <OptionData<number>> {
-			type: 'textbox',
-			default: 0,
-			desc: "Ignore files smaller than (MB):"
-		},
-		excludeWebFiles: <OptionData<boolean>> {
-			type: 'checkbox',
-			default: true,
-			desc: "Ignore common web files (images, fonts, etc.)",
-		},
-		excludedExts: <OptionData<string>> {
-			type: 'textbox',
-			default: '',
-			desc: "Ignore files with these extensions:",
-			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		includedExts: <OptionData<string>> {
-			type: 'textbox',
-			default: '',
-			desc: "Detect files with these extensions as downloads:",
-			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		forcedExts: <OptionData<string>> {
-			type: 'textbox',
-			default: '',
-			desc: "Directly download files with these extensions with my default manager:",
-			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		blacklistDomains: <OptionData<string>> {
-			type: 'textbox',
-			default: '',
-			desc: "Do not grab from these domains:",
-			attrs: [{name: 'placeholder', value: 'example.com,example.org,...'}],
-			endsection: true,
-		},
-	
-		defaultDM: <OptionData<string>> {
-			type: 'dropdown',
-			default: '',
-			desc: "Default download manager: ",
-			getListData: function(dlgInstance: DownloadGrab){
-				return dlgInstance.availableDMs;
-			},
-		},
-
-		excludedMimes: <OptionData<string>> {
-			type: 'processed',
-			default: '',
-			desc: '',
-		},
-		includedMimes: <OptionData<string>> {
-			type: 'processed',
-			default: '',
-			desc: '',
-		},
-		forcedMimes: <OptionData<string>> {
-			type: 'processed',
-			default: '',
-			desc: '',
-		},
-	}
-}
-
-namespace OptionsSSS
-{
-	/**
-	 * Loads options from browser storage
-	 */
-	export function load(): Promise<OPTIONS>
-	{
-		return browser.storage.local.get(getDefaults());
+		type: 'checkbox';
 	}
 
-	/**
-	 * Saves options to browser storage
-	 */
-	export function save(options: OPTIONS)
+	type TextboxOption = OptionUI<string, HTMLInputElement> & 
 	{
-		browser.storage.local.set(options);
+		type: 'textbox';
 	}
 
-	function getDefaults(): OPTIONS
+	type DropdownOption = OptionUI<{selected: string, list: string[]}, HTMLOptionElement> & 
 	{
-		let defaultOptions: OPTIONS = {} as OPTIONS;
-		for(let optionName in optionsData)
+		type: 'dropdown';
+	}
+
+	type HiddenOption = OptionUI<void, undefined> &
+	{
+		type: 'hidden';
+	}
+
+	/* exports */
+
+	export let opt = new DLGOptions();
+
+	export function load()
+	{
+		let defaults = new DLGOptions();
+		opt = browser.storage.local.get(defaults);
+	}
+
+	export function save(options: DLGOptions): Promise<undefined|string>
+	{
+		return browser.storage.local.set(options);
+	}
+
+	//let ui: OptionNames<OptionUI<unknown>> = 
+	//let ui: Record<Options, OptionUI> =
+	class UIOptionsss implements OptionNames<unknown>
+	{
+		[index: string]: unknown;
+
+		private opt = new DLGOptions();
+
+		constructor(opt: DLGOptions)
 		{
-			if(!defaultOptions[optionName]){
-				continue;
+			this.opt = opt;
+		}
+
+		private getExtsFromList(extList: string)
+		{
+			let extsArr = [];
+			//remove spaces
+			extList = extList.replace(/\s/g, '');
+			for(let ext of extList.split(',')){
+				//remove dot in case people have put dots in ext list
+				if(ext.startsWith('.')){
+					ext = ext.substr(1);
+				}
+				extsArr.push(ext);
 			}
-			defaultOptions[optionName] = optionsData[optionName].default;
+			return extsArr;
 		}
-		return defaultOptions;
-	}
-
-	export function apply(options: OPTIONS)
-	{
-		DLG.options = options;
-		//create a new list of downloads in case the downloas history size is changed in options
-		DLG.allDownloads = new FixedSizeMap(options.dlListSize, DLG.allDownloads.map);
-		//exclusion,inclusion,download lists
-		DLG.options.excludedExts = _getExtsFromList(options.excludedExts);
-		DLG.options.excludedMimes = _getMimesForExts(DLG.options.excludedExts);
-		DLG.options.includedExts = _getExtsFromList(options.includedExts);
-		DLG.options.includedMimes = _getMimesForExts(DLG.options.includedExts);
-		DLG.options.forcedExts = _getExtsFromList(options.forcedExts);
-		DLG.options.forcedMimes = _getMimesForExts(DLG.options.forcedExts);
-		DLG.options.blacklistDomains = _getValuesFromList(DLG.options.blacklistDomains);
-	}
-
-	export function getDefaultDM(){
-		return DLG.options.defaultDM || DLG.availableDMs[0];
-	}
-
-	function _getExtsFromList(extList: string)
-	{
-		if(!extList){
-			return [];
-		}
-
-		let extsArr = [];
-
-		//remove spaces
-		extList = extList.replace(/\s/g, '');
-		for(let ext of extList.split(',')){
-			//remove dot in case people have put dots in ext list
-			if(ext.startsWith('.')){
-				ext = ext.substr(1);
+	
+		private getMimesForExts(extsArr: string[])
+		{
+			let mimesArr: string[] = [];
+			for(let ext of extsArr){
+				let mimesOfExt = constants.extsToMimes[ext];
+				if(mimesOfExt){
+					mimesArr = mimesArr.concat(mimesOfExt);
+				}
 			}
-			extsArr.push(ext);
+			return mimesArr;
+		}
+	
+		private getValuesFromList(list: string)
+		{
+			//remove spaces
+			list = list.replace(/\s/g, '');
+			return list.split(',');
 		}
 
-		return extsArr;
-	}
-
-	function _getMimesForExts(extsArr: string[])
-	{
-		if(!extsArr){
-			return [];
-		}
-
-		let mimesArr: string[] = [];
-
-		for(let ext of extsArr){
-			let mimesOfExt = constants.extsToMimes[ext];
-			if(mimesOfExt){
-				mimesArr = mimesArr.concat(mimesOfExt);
-			}
-		}
-
-		return mimesArr;
-	}
-
-	function _getValuesFromList(list: string)
-	{
-		if(!list){return [];}
-		//remove spaces
-		list = list.replace(/\s/g, '');
-		return list.split(',');
-	}
-
-	export let optionsData : OPTIONS = 
-	{
-		overrideDlDialog: {
+		overrideDlDialog: CheckboxOption = {
 			type: 'checkbox',
-			default: true,
 			desc: "Override Firefox's download dialog",
-		},
-		playMediaInBrowser: {
+			load: () => {return this.opt.overrideDlDialog},
+			save: (e) => {this.opt.overrideDlDialog = e.checked},
+		};
+		playMediaInBrowser: CheckboxOption = {
 			type: 'checkbox',
-			default: true,
 			desc: "Do not offer to download files that can be displayed inside browser (text, media and pdf)",
-		},
-		dlListSize: {
+			load: () => {return this.opt.playMediaInBrowser},
+			save: (e) => {this.opt.playMediaInBrowser = e.checked},
+		};
+		dlListSize: TextboxOption = {
 			type: 'textbox',
-			default: '20',
 			desc: 'Number of items to keep in downloads history:',
-		},
-		showOnlyTabDls: {
+			load: () => {return this.opt.dlListSize.toString()},
+			save: (e) => {this.opt.dlListSize = Number(e.value)},
+		};
+		showOnlyTabDls: CheckboxOption = {
 			type: 'checkbox',
-			default: true,
 			desc: 'Show only downlods originated from current tab in the popup list',
 			endsection: true,
-		},
+			load: () => {return this.opt.showOnlyTabDls},
+			save: (e) => {this.opt.showOnlyTabDls = e.checked},
+		};
 	
-		grabFilesLargerThanMB: {
+		grabFilesLargerThanMB: TextboxOption = {
 			type: 'textbox',
-			default: '0',
-			desc: "Ignore files smaller than (MB):"
-		},
-		excludeWebFiles: {
+			desc: "Ignore files smaller than (MB):",
+			load: () => {return this.opt.grabFilesLargerThanMB.toString()},
+			save: (e) => {this.opt.grabFilesLargerThanMB = Number(e.value)},
+		};
+		excludeWebFiles: CheckboxOption = {
 			type: 'checkbox',
-			default: true,
 			desc: "Ignore common web files (images, fonts, etc.)",
-		},
-		excludedExts: {
+			load: () => {return this.opt.excludeWebFiles},
+			save: (e) => {this.opt.excludeWebFiles = e.checked},
+		};
+		excludedExts: TextboxOption = {
 			type: 'textbox',
-			default: '',
 			desc: "Ignore files with these extensions:",
 			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		includedExts: {
+			load: () => {return this.opt.excludedExts.join(', ')},
+			save: (e) => {this.opt.excludedExts = this.getExtsFromList(e.value)},
+		};
+		includedExts: TextboxOption = {
 			type: 'textbox',
-			default: '',
 			desc: "Detect files with these extensions as downloads:",
 			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		forcedExts: {
+			load: () => {return this.opt.includedExts.join(', ')},
+			save: (e) => {this.opt.includedExts = this.getExtsFromList(e.value)},
+		};
+		forcedExts: TextboxOption = {
 			type: 'textbox',
-			default: '',
 			desc: "Directly download files with these extensions with my default manager:",
 			attrs: [{name: 'placeholder', value: 'ext1,ext2,ext3,...'}],
-		},
-		blacklistDomains: {
+			load: () => {return this.opt.forcedExts.join(', ')},
+			save: (e) => {this.opt.forcedExts = this.getExtsFromList(e.value)},
+		};
+		blacklistDomains: TextboxOption = {
 			type: 'textbox',
-			default: '',
 			desc: "Do not grab from these domains:",
 			attrs: [{name: 'placeholder', value: 'example.com,example.org,...'}],
 			endsection: true,
-		},
+			load: () => {return this.opt.blacklistDomains.join(', ')},
+			save: (e) => {this.opt.blacklistDomains = this.getValuesFromList(e.value)},
+		};
 	
-		defaultDM: {
+		defaultDM: DropdownOption = {
 			type: 'dropdown',
-			default: '',
 			desc: "Default download manager: ",
-			getListData: function(dlgInstance: DownloadGrab){
-				return dlgInstance.availableDMs;
-			},
-		},
+			load: () => {
+				let i: DLGBase;
+				if(DLG) i = DLG;
+				else if(DLGPop) i = DLGPop;
+				else log.err('could not grab DLG instance to populate DM list');
 
-		//non-ui options
-		excludedMimes: undefined,
-		includedMimes: undefined,
-		forcedMimes: undefined,
+				let def: string;
+				if(this.opt.defaultDM) def = this.opt.defaultDM;
+				else if(i.availableDMs.length) def = i.availableDMs[0];
+				else def = '';
+
+				return {
+					selected: def,
+					list: i.availableDMs,
+				}
+			},
+			save: (e) => {this.opt.defaultDM = (e.value)? e.value : ''}
+		};
+
+		excludedMimes: HiddenOption = {
+			type: 'hidden',
+			desc: '',
+			load: () => {},
+			save: () => {this.opt.excludedMimes = this.getMimesForExts(this.opt.excludedExts)}
+		};
+		includedMimes: HiddenOption = {
+			type: 'hidden',
+			desc: '',
+			load: () => {},
+			save: () => {this.opt.includedMimes = this.getMimesForExts(this.opt.includedExts)}
+		};
+		forcedMimes: HiddenOption = {
+			type: 'hidden',
+			desc: '',
+			load: () => {},
+			save: () => {this.opt.forcedMimes = this.getMimesForExts(this.opt.forcedExts)}
+		};
+		
 	}
+
 }
