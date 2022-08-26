@@ -150,8 +150,11 @@ namespace Messaging
 
 	function handleSaveOptions(msg: MSGSaveOptions)
 	{
-		Options.save(msg.options);
-		log.d('saved options: ', DLG.options);
+		let saving = Options.save(msg.options);
+		saving.then((error) => {
+			if(error) log.err('saving options failed: ', error, msg.options);
+			else log.d('options saved: ', msg.options);
+		});
 	}
 
 	function handleClearList(msg: MSGClearlist)
@@ -163,11 +166,10 @@ namespace Messaging
 	{
 		return new Promise((resolve) => {
 			let json: DLGJSON = {
-				//@ts-ignore
 				allDownloads: Utils.mapToArray(DLG.allDownloads),
 				downloadDialogs: Utils.mapToArray(DLG.downloadDialogs),
 				tabs: Utils.mapToArray(DLG.tabs),
-				options: DLG.options,
+				options: Options.opt,
 				availableDMs: DLG.availableDMs,
 			}
 			resolve(new MSGDLGJSON((json)));

@@ -2,14 +2,16 @@ namespace log
 {
 	export let DEBUG = true;
 
-	export function d(...args: any[])
-	{
-		if(!DEBUG) return;
+	// export function d(...args: any[])
+	// {
+	// 	if(!DEBUG) return;
 
-		args.forEach((arg) => {
-			console.log(arg);
-		});
-	}
+	// 	args.forEach((arg) => {
+	// 		console.log(arg);
+	// 	});
+	// }
+
+	export var d = console.log.bind(window.console);
 
 	export function color(color: string, ...args: any[])
 	{

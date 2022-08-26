@@ -3,6 +3,7 @@ var ts = require('gulp-typescript');
 var less = require('gulp-less');
 var replace = require('gulp-replace');
 var del = require('del');
+var sourcemaps = require('gulp-sourcemaps');
 
 task('copy-statics', function(){
 	return src([
@@ -32,9 +33,13 @@ task('clean', function(){
 
 task('ts-debug', function(){
 	var tsProject = ts.createProject("./tsconfig.json");
-    return tsProject.src().pipe(tsProject())
+    return tsProject.src()
+		.pipe(sourcemaps.init())
+		.pipe(tsProject())
 		.on("error", () => {})
-		.js.pipe(dest("dist"));
+		.js
+		.pipe(sourcemaps.write())
+		.pipe(dest("dist"));
 });
 
 task('ts-prod', function(){

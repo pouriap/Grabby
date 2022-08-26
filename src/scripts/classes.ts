@@ -59,7 +59,6 @@ class DownloadGrab
 	allDownloads = new Map<string, Download>();
 	downloadDialogs = new Map<number, string>();
 	tabs = new Map<number, any>();
-	options = new Options.DLGOptions();
 	availableDMs: string[] = [];
 	availExtDMs: string[] = [];
 	availBrowserDMs: string[] = [];

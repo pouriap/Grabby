@@ -43,9 +43,6 @@ async function saveOptions(evt: Event)
 		optionUI.setVal(undefined);
 	}
 
-	Options.save(optionsUI.opt);
-
-	//options are saved in local storage but we need to update runtime options too
 	let msg = new Messaging.MSGSaveOptions(optionsUI.opt);
 	Messaging.sendMessage(msg);
 }
@@ -58,8 +55,7 @@ async function loadOptions()
 	DLGPop = new DownloadGrabPopup(res.DLGJSON);
 
 	//get the currently saved options
-	Options.load();
-	let options = Options.opt;
+	let options = await Options.load();
 
 	let optionsUI = new Options.OptionsUI(options);
 

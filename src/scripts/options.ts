@@ -82,8 +82,8 @@ namespace Options
 
 	export function save(options?: DLGOptions): Promise<undefined|string>
 	{
-		let toSave = (options)? options : opt;
-		return browser.storage.local.set(toSave);
+		if(options) opt = options;
+		return browser.storage.local.set(opt);
 	}
 
 	export class OptionsUI implements OptionNames<unknown>
@@ -204,8 +204,9 @@ namespace Options
 			desc: "Default download manager: ",
 			getVal: () => {
 				let availableDMs: string[] = [];
-				if(DLG) availableDMs = DLG.availableDMs;
-				else if(DLGPop) availableDMs = DLGPop.availableDMs
+
+				if(typeof DLG != 'undefined') availableDMs = DLG.availableDMs;
+				else if(typeof DLGPop != 'undefined') availableDMs = DLGPop.availableDMs;
 				else log.err('could not grab DLG instance to populate DM list');
 
 				let def: string;

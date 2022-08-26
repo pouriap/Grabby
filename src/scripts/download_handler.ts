@@ -189,7 +189,7 @@ class DownloadHandler implements RequestHandler
 		}
 
 		if(download.class === ReqFilter.CLS_INLINE_WEB_RES){
-			if(DLG.options.excludeWebFiles){
+			if(Options.opt.excludeWebFiles){
 				act = this.ACT_IGNORE;
 			}
 			else{
@@ -251,7 +251,7 @@ class DownloadHandler implements RequestHandler
 			return Promise.resolve({cancel: true});
 		}
 
-		if(act === this.ACT_GRAB && DLG.options.overrideDlDialog){
+		if(act === this.ACT_GRAB && Options.opt.overrideDlDialog){
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve)
 			{

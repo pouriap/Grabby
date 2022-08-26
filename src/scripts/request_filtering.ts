@@ -84,18 +84,19 @@ namespace RequestFiltering
 		//console.time(details.requestId);
 
 		//update http details
-		let httpDetails = DLG.allRequests.get(details.requestId)!;
-		Object.assign(httpDetails, details);
+		let httpDetails = DLG.allRequests.get(details.requestId);
 		
 		if(typeof httpDetails === 'undefined'){
 			return Promise.resolve({cancel: false});
 		}
 
+		Object.assign(httpDetails, details);
+
 		//creating a new download object because the original will be deleted from allRequests
 		//in doOnCompleted() after the request is completed or when DLG.allDownloads is full
 		let download = new Download(httpDetails);
 
-		let filter = new ReqFilter(download, DLG.options);
+		let filter = new ReqFilter(download, Options.opt);
 
 		if(isIgnored(filter)){
 			return Promise.resolve({cancel: false});
