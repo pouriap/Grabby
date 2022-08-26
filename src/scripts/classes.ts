@@ -1,15 +1,10 @@
-//todo: in firefox maps are copied but in chrome they aren't
-//https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Chrome_incompatibilities#data_cloning_algorithm
 type DLGJSON =
 {
-	allRequests: Map<string, any>;
-	allDownloads: {[index: string]: object};
-	downloadDialogs: Map<number, string>;
-	tabs: Map<number, any>;
+	allDownloads: [key: string, value: object][];
+	downloadDialogs: [key: number, value: string][];
+	tabs: [key: number, value: any][];
 	options: Options.DLGOptions;
 	availableDMs: string[];
-	availExtDMs: string[];
-	availBrowserDMs: string[];
 }
 
 /**
@@ -22,8 +17,6 @@ class DownloadGrabPopup
 	tabs: Map<number, any>;
 	options: Options.DLGOptions;
 	availableDMs: string[];
-	availExtDMs: string[];
-	availBrowserDMs: string[];
 
 	selectedDl: Download | null = null;
 	continueWithBrowser = false;
@@ -33,25 +26,24 @@ class DownloadGrabPopup
 	constructor(dlgJSON: DLGJSON)
 	{
 		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
-		this.downloadDialogs = dlgJSON.downloadDialogs;
+		this.downloadDialogs = new Map(dlgJSON.downloadDialogs);
+		this.tabs = new Map(dlgJSON.tabs);
 		this.availableDMs = dlgJSON.availableDMs;
-		this.availExtDMs = dlgJSON.availExtDMs;
-		this.availBrowserDMs = dlgJSON.availBrowserDMs;
-		this.tabs = dlgJSON.tabs;
 		this.options = dlgJSON.options;
 	}
 
-	private recreateDownloads(allDownloads: {[index: string]: object}): Map<string, Download>
+	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
 	{
 		let newDownloads = new Map<string, Download>();
 
-		for(let downloadHash of Object.keys(allDownloads))
+		for(let pair of allDownloads)
 		{
-			let downloadJSON = allDownloads[downloadHash] as any;
-			let download = new Download(downloadJSON.details);
+			let hash = pair[0];
+			let downloadJSON = pair[1] as Download;
+			let download = new Download(downloadJSON.httpDetails);
 			//copy everything from downloadJSON to the new download object
 			Object.assign(download, downloadJSON);
-			newDownloads.set(downloadHash, download);
+			newDownloads.set(hash, download);
 		};
 
 		return newDownloads;

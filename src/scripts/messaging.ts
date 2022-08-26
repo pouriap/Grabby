@@ -162,8 +162,15 @@ namespace Messaging
 	function handleGetDLG(msg: MSGGetDLG): Promise<MSGDLGJSON>
 	{
 		return new Promise((resolve) => {
-			//@ts-ignore
-			resolve(new MSGDLGJSON(DLG));
+			let json: DLGJSON = {
+				//@ts-ignore
+				allDownloads: Utils.mapToArray(DLG.allDownloads),
+				downloadDialogs: Utils.mapToArray(DLG.downloadDialogs),
+				tabs: Utils.mapToArray(DLG.tabs),
+				options: DLG.options,
+				availableDMs: DLG.availableDMs,
+			}
+			resolve(new MSGDLGJSON((json)));
 		});
 	}
 

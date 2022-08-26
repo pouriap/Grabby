@@ -116,4 +116,18 @@ namespace Utils
 		browser.notifications.create(options);
 	}
 
+	export function mapToArray<K, V>(map: Map<K, V>): [key: K, value: V][]
+	{
+		let arr: [key: K, value: V][] = [];
+
+		let keys = map.keys();
+		for(let key of keys)
+		{
+			let pair: [key: K, value: V] = [key, map.get(key)!];
+			arr.push(pair);
+		}
+
+		return arr;
+	}
+
 }
