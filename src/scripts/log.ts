@@ -2,32 +2,9 @@ namespace log
 {
 	export let DEBUG = true;
 
-	// export function d(...args: any[])
-	// {
-	// 	if(!DEBUG) return;
+	export var d = (DEBUG === true)? console.log.bind(window.console): ()=>{};
 
-	// 	args.forEach((arg) => {
-	// 		console.log(arg);
-	// 	});
-	// }
-
-	export var d = console.log.bind(window.console);
-
-	export function color(color: string, ...args: any[])
-	{
-		if(!DEBUG) return;
-
-		args.forEach((arg) => {
-			console.log(`%c${arg}`, `color:${color};`);
-		});
-	}
-
-	export function warn(...args: any[])
-	{
-		args.forEach((arg) => {
-			console.warn(arg);
-		});
-	}
+	export var warn = (DEBUG === true)? console.warn.bind(window.console): ()=>{};
 
 	export function err(...args: any[]): never
 	{

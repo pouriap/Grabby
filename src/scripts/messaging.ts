@@ -176,7 +176,7 @@ namespace Messaging
 		});
 	}
 
-	function handleDLDialog(msg: MSGDlDialogClosing)
+	async function handleDLDialog(msg: MSGDlDialogClosing)
 	{
 		DLG.downloadDialogs.delete(msg.windowId);
 		if(msg.continueWithBrowser){
@@ -192,14 +192,20 @@ namespace Messaging
 		//if this is a download that opens in an empty new tab and we are not 
 		//continuing with browser then close the empty tab
 		let downloadPageTabId = download.httpDetails.tabId;
-		try{
-			browser.tabs.get(downloadPageTabId).then((tabInfo: any)=>{
-				if(tabInfo.url === "about:blank"){
-					log.d('closing blank tab: ', tabInfo);
-					browser.tabs.remove(tabInfo.id);
+		log.warn('url be:', download.httpDetails.documentUrl);
+		try
+		{
+			let dlTab = await browser.tabs.get(downloadPageTabId);
+			if(dlTab.url === "about:blank"){
+				log.d('closing blank tab: ', dlTab);
+				try{
+					await browser.tabs.remove(dlTab.id);
+				}catch(e){
+					log.err('there was an error closing blank tab', e);
 				}
-			});
-		}catch(e){};
+			}
+		}catch(e){}	// we don't care if the download tab is not found, it means it's already closed
+
 	}
 
 	function handleContinue(msg: MSGContWithBrowser)
