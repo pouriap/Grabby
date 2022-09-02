@@ -176,7 +176,7 @@ namespace Messaging
 		});
 	}
 
-	async function handleDLDialog(msg: MSGDlDialogClosing)
+	function handleDLDialog(msg: MSGDlDialogClosing)
 	{
 		DLG.downloadDialogs.delete(msg.windowId);
 		if(msg.continueWithBrowser){
@@ -184,35 +184,37 @@ namespace Messaging
 		}
 		let download = DLG.allDownloads.get(msg.dlHash)!;
 
-		if(download.resolve){
-			download.resolve({cancel: true});
+		if(download.resolveRequest){
+			download.resolveRequest({cancel: true});
 		}
 
-		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
 		//if this is a download that opens in an empty new tab and we are not 
-		//continuing with browser then close the empty tab
-		let downloadPageTabId = download.httpDetails.tabId;
-		log.warn('url be:', download.httpDetails.documentUrl);
-		try
+		//continuing with browser then close the empty tab manually
+		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
+		if(typeof download.tabId != 'undefined')
 		{
-			let dlTab = await browser.tabs.get(downloadPageTabId);
-			if(dlTab.url === "about:blank"){
-				log.d('closing blank tab: ', dlTab);
-				try{
-					await browser.tabs.remove(dlTab.id);
-				}catch(e){
-					log.err('there was an error closing blank tab', e);
-				}
+			let dlTab = DLG.tabs.get(download.tabId);
+			if(!dlTab)
+			{
+				log.err(`tab with id ${download.tabId} does not exist`);
 			}
-		}catch(e){}	// we don't care if the download tab is not found, it means it's already closed
+
+			if(dlTab.url === "about:blank")
+			{
+				log.d('closing blank tab: ', dlTab);
+				browser.tabs.remove(dlTab.id).catch((e) => {
+					log.err('there was an error closing blank tab', e);
+				});
+			}
+		}
 
 	}
 
 	function handleContinue(msg: MSGContWithBrowser)
 	{
 		let download = DLG.allDownloads.get(msg.dlhash);
-		if(download?.resolve){
-			download.resolve({cancel: false});
+		if(download?.resolveRequest){
+			download.resolveRequest({cancel: false});
 		}
 	}
 

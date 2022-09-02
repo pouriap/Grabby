@@ -256,7 +256,7 @@ class DownloadHandler implements RequestHandler
 			return new Promise(function(resolve)
 			{
 				//@ts-ignore	this be something special
-				download.resolve = resolve;
+				download.resolveRequest = resolve;
 				DLG.showDlDialog(download);
 			});
 		}

@@ -169,7 +169,7 @@ class Download
 	classReason = 'no-class-yet';
 	//a Promise.resolve object is stored here for downloads that we intercept from the browser
 	//calling resolve() on this download will continue the request
-	resolve: ((value: unknown) => void) | undefined = undefined;
+	resolveRequest: ((value: unknown) => void) | undefined = undefined;
 
 	private _originTabId: num_und = -1;
 	private _originTabUrl: str_und = 'no-init';
