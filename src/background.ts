@@ -1,4 +1,4 @@
-declare var browser: any;
+declare var browser: webx_browser;
 declare var filesize: any;
 declare var md5: any;
 

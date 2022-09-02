@@ -1,3 +1,5 @@
+//todo: give filters to request listeners to ignore things we don't want
+
 namespace RequestFiltering 
 {
 	export function startListeners()
@@ -21,7 +23,7 @@ namespace RequestFiltering
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details: webx_common) => { return doOnCompleted(details) }, 
+			(details: webx_reqCommon) => { return doOnCompleted(details) }, 
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -125,7 +127,7 @@ namespace RequestFiltering
 	/**
 	 * Runs once a request is completed
 	 */
-	function doOnCompleted(details: webx_common)
+	function doOnCompleted(details: webx_reqCommon)
 	{
 		//remove the original download from allRequests to save memory
 		//this isn't really necessary because allRequest is a fixed sized map

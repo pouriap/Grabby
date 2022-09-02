@@ -58,18 +58,18 @@ class StreamHandler implements RequestHandler
 
 		let tabId = filter.download.tabId;
 
+		if(typeof tabId === 'undefined'){
+			log.err('this stream does not have a tabId', filter.download);
+		}
+
+		let streamTab = DLG.tabs.get(tabId);
+		if(typeof streamTab === 'undefined'){
+			log.err(`tab with id ${tabId} does not exist`);
+		}
+
 		if(bManifest.getType() === 'main')
 		{
 			//log('we got a main manifest: ', filter.download.url, bManifest);
-
-			if(!DLG.tabs.get(tabId))
-			{
-				Utils.notification("Tab with ID: " + tabId + " does not exist");
-			}
-			if(!DLG.tabs.get(tabId).knownPlaylists)
-			{
-				DLG.tabs.get(tabId).knownPlaylists = [];
-			}
 
 			let manifest = MainManifest.getFromBase(bManifest);
 
@@ -79,7 +79,7 @@ class StreamHandler implements RequestHandler
 
 			for(let playlist of manifest.playlists)
 			{
-				DLG.tabs.get(tabId).knownPlaylists.push(playlist.url);
+				streamTab.knownPlaylistUrls.push(playlist.url);
 				//todo: change this to request ID because we are sending referer URL basically maybe some user doesn't want this
 				let headers = {
 					'X-DLG-MFSTHASH': filter.download.hash,
@@ -116,8 +116,7 @@ class StreamHandler implements RequestHandler
 
 			//for cases when the page only has a sub-manifest without a main manifest
 			//example of this: https://videoshub.com/videos/25312764
-			else if(DLG.tabs.get(tabId).knownPlaylists &&
-				!DLG.tabs.get(tabId).knownPlaylists.includes(bManifest.url))
+			else if(!streamTab.knownPlaylistUrls.includes(bManifest.url))
 			{
 				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				//we have to manually create a proper MainManifest for this download here
@@ -134,6 +133,8 @@ class StreamHandler implements RequestHandler
 
 	private parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest | undefined
 	{
+		let streamTitle = (filter.download.tabTitle)? filter.download.tabTitle : 'Unknown Title';
+
 		if(filter.isHlsManifest())
 		{
 			let parser = new m3u8Parser.Parser();
@@ -141,14 +142,14 @@ class StreamHandler implements RequestHandler
 			parser.end();
 			let pManifest = parser.manifest;
 			return new StreamManifest(
-				filter.download.url, filter.download.tabTitle, 'hls', pManifest);
+				filter.download.url, streamTitle, 'hls', pManifest);
 		}
 
 		else if(filter.isDashManifest())
 		{
 			let pManifest = mpdParser.parse(rawManifest, {manifestUri: filter.download.url});
 			return new StreamManifest(
-				filter.download.url, filter.download.tabTitle, 'dash', pManifest);
+				filter.download.url, streamTitle, 'dash', pManifest);
 		}
 
 		else

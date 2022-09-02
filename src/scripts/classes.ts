@@ -14,7 +14,7 @@ class DownloadGrabPopup
 {
 	allDownloads: Map<string, Download>;
 	downloadDialogs: Map<number, string>;
-	tabs: Map<number, any>;
+	tabs: Map<number, webx_tab>;
 	options: Options.DLGOptions;
 	availableDMs: string[];
 
@@ -58,7 +58,7 @@ class DownloadGrab
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, Download>();
 	downloadDialogs = new Map<number, string>();
-	tabs = new Map<number, any>();
+	tabs = new Map<number, tabinfo>();
 	availableDMs: string[] = [];
 	availExtDMs: string[] = [];
 	availBrowserDMs: string[] = [];
@@ -155,8 +155,8 @@ class Download
 	statusCode: number;
 	time: number;
 	resourceType: string;
-	origin: string;
-	tabId: number;
+	tabId: number | undefined;
+	initiatorUrl: string | undefined;
 	httpDetails: HTTPDetails;
 	//these are set after processing
 	ytdlInfo: any = undefined;
@@ -171,6 +171,8 @@ class Download
 	//calling resolve() on this download will continue the request
 	resolve: ((value: unknown) => void) | undefined = undefined;
 
+	private _originTabId: num_und = -1;
+	private _originTabUrl: str_und = 'no-init';
 	private _hash = '';
 	private _filename: str_und = undefined;
 	private _host: str_und = undefined;
@@ -187,9 +189,91 @@ class Download
 		this.statusCode = details.statusCode;
 		this.time = details.timeStamp;
 		this.resourceType = details.type;
-		this.origin = details.originUrl || details.url;
-		this.tabId = details.tabId;
+		this.tabId = (details.tabId > 0)? details.tabId : undefined;
+		this.initiatorUrl = (details.originUrl)? details.originUrl : details.documentUrl;
 		this.httpDetails = details;
+	}
+
+	get originTabId(): number | undefined
+	{
+		//-1 means not initialized yet
+		//we need to return 'undefined' too so I couldn't use that
+		if(this._originTabId === -1)
+		{
+			//if this is a download not associated with any tabs like service workers (reddit.com)
+			if(typeof this.tabId === 'undefined')
+			{
+				log.err('we have a download without a tab', this);
+			}
+			//if this is a top-level document download
+			else if(typeof this.httpDetails.documentUrl === 'undefined')
+			{
+				//if it is a new tab opened from another document then it will have an originUrl
+				if(typeof this.httpDetails.originUrl != 'undefined')
+				{
+					let tab = DLG.tabs.get(this.tabId);
+					if(!tab){
+						log.err('no tab found for this download', this);
+					}
+					this._originTabId = tab.openerId;
+				}
+				//if not then it is a download with no origin, i.e. user typed in the URL
+				else
+				{
+					this._originTabId = undefined;
+				}
+			}
+			//if it is not a top-level document download then it's origin tab its own tab
+			else
+			{
+				if(typeof this.tabId === 'undefined')
+				{
+					log.err('download is not top-level but does not have tab id', this);
+				}
+
+				this._originTabId = this.tabId;
+			}
+		}
+
+		return this._originTabId;
+	}
+
+	get originTabUrl(): string | undefined
+	{
+		if(this.originTabUrl === 'no-init')
+		{
+			//if it doesn't have a tab id it doesn't have a tab url
+			if(typeof this.originTabId === 'undefined')
+			{
+				this._originTabUrl = undefined;
+			}
+			else
+			{
+				let tab = DLG.tabs.get(this.originTabId);
+				if(typeof tab === 'undefined')
+				{
+					log.err(`tab with id ${this.originTabId} not found`);
+				}
+				this._originTabUrl = tab.url;
+			}
+		}
+
+		return this.originTabUrl;
+	}
+
+	get tabTitle(): string | undefined
+	{
+		if(typeof this.tabId === 'undefined')
+		{
+			return undefined;
+		}
+		
+		let tab = DLG.tabs.get(this.tabId);
+		if(!tab){
+			log.err(`tab with id ${this.tabId} was not found`);
+		}
+
+		return tab.title;
 	}
 
 	get hash()
@@ -198,26 +282,6 @@ class Download
 			this._hash = md5(this.url);
 		}
 		return this._hash;
-	}
-
-	get tabUrl(): string | undefined
-	{
-		//todo: some things are not associated with a tab and have a -1 id 
-		//like service workers (reddit.com)
-		//todo: why does this not give an error???!!!
-		//return DLG.tabs.get(this.tabId)? DLG.tabs.get(this.tabId) : undefined;
-
-		if(DLG.tabs.get(this.tabId)){
-			return DLG.tabs.get(this.tabId).url;
-		}
-		else{
-			return undefined;
-		}
-	}
-
-	get tabTitle(): string
-	{
-		return DLG.tabs.get(this.tabId)? DLG.tabs.get(this.tabId).title : 'no-title';
 	}
 
 	/**
@@ -794,12 +858,18 @@ class ReqFilter
 		if(Options.opt.blacklistURLs.includes(this.download.url)){
 			return true;
 		}
-		if(
-			this.options.blacklistDomains.includes(this.download.host) ||
-			this.options.blacklistDomains.includes(Utils.getDomain(this.download.origin))
-		){
+
+		if(this.options.blacklistDomains.includes(this.download.host)){
 			return true;
 		}
+
+		if(this.download.initiatorUrl){
+			if(this.options.blacklistDomains.includes(
+				Utils.getDomain(this.download.initiatorUrl))){
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -1360,11 +1430,21 @@ class DownloadJob
 		let originPageCookies = '';
 		let originPageReferer = '';
 
-		originPageCookies = await Utils.getCookies(download.origin);
-		let tabs = await browser.tabs.query({url: download.origin});
-		if(tabs[0]){
-			let originTabId = tabs[0].id;
-			originPageReferer = await Utils.executeScript(originTabId, {code: 'document.referrer'});
+		if(download.initiatorUrl)
+		{
+			originPageCookies = await Utils.getCookies(download.initiatorUrl);
+		}
+		
+		if(download.originTabId)
+		{
+			try{
+				originPageReferer = await Utils.executeScript(
+					download.originTabId, 
+					{code: 'document.referrer'}
+				);
+			}
+			//the tab is closed so we can't get its referer
+			catch(e){}
 		}
 
 		let downloadInfo: DownloadInfo = {
@@ -1602,5 +1682,23 @@ class Playlist
 		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
 		let url = (new URL(playlist.uri, manifestURL)).toString();
 		return new Playlist(id, name, url, res, bitrate, pictureSize);
+	}
+}
+
+class tabinfo
+{
+	id: number;
+	url: string;
+	title: string;
+	openerId: number | undefined;
+	knownPlaylistUrls: string[] = [];
+	closed: boolean = false;
+
+	constructor(tab: webx_tab)
+	{
+		this.id = tab.id;
+		this.url = tab.url;
+		this.title = tab.title;
+		this.openerId = tab.openerTabId;
 	}
 }

@@ -72,15 +72,13 @@ namespace Utils
 	 * @param tabId 
 	 * @param data 
 	 */
-	export async function executeScript(tabId: number, data: object)
+	export async function executeScript(tabId: number, data: object): Promise<any | undefined>
 	{
 		try
 		{
 			let res = await browser.tabs.executeScript(tabId, data);
-			if(res.length == 1){
-				res = res[0];
-			}
-			return (res != 'undefined')? res : '';
+			if(res.length === 0) return undefined;
+			return (res[0] != 'undefined')? res : '';
 		}
 		catch(e){
 			log.err('Error executing script: ', e);
