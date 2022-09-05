@@ -14,7 +14,7 @@ class DownloadGrabPopup
 {
 	allDownloads: Map<string, Download>;
 	downloadDialogs: Map<number, string>;
-	tabs: Map<number, webx_tab>;
+	tabs: Map<number, tabinfo>;
 	options: Options.DLGOptions;
 	availableDMs: string[];
 
@@ -212,7 +212,8 @@ class Download
 				//if it is a new tab opened from another document then it will have an originUrl
 				if(typeof this.httpDetails.originUrl != 'undefined')
 				{
-					let tab = DLG.tabs.get(this.tabId);
+					let tab = (typeof DLG != 'undefined')? 
+						DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
 					if(!tab){
 						log.err('no tab found for this download', this);
 					}
@@ -250,7 +251,8 @@ class Download
 			}
 			else
 			{
-				let tab = DLG.tabs.get(this.originTabId);
+				let tab = (typeof DLG != 'undefined')? 
+					DLG.tabs.get(this.originTabId) : DLGPop.tabs.get(this.originTabId);
 				if(typeof tab === 'undefined')
 				{
 					log.err(`tab with id ${this.originTabId} not found`);
@@ -269,7 +271,8 @@ class Download
 			return undefined;
 		}
 		
-		let tab = DLG.tabs.get(this.tabId);
+		let tab = (typeof DLG != undefined)? 
+			DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
 		if(!tab){
 			log.err(`tab with id ${this.tabId} was not found`);
 		}
@@ -317,7 +320,6 @@ class Download
 	 * get file name (if available) of the resouce requested
 	 * @returns file name or "unknown" if now available
 	 */
-	//todo: new getter
 	get filename(): string
 	{
 		if(this.isStream)
