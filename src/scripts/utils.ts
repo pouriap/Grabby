@@ -78,7 +78,8 @@ namespace Utils
 		{
 			let res = await browser.tabs.executeScript(tabId, data);
 			if(res.length === 0) return undefined;
-			return (res[0] != 'undefined')? res : '';
+			if(res.length === 1) return (res[0] != 'undefined')? res[0] : '';
+			return res;
 		}
 		catch(e){
 			log.err('Error executing script: ', e);

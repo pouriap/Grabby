@@ -112,6 +112,7 @@ class DownloadGrab
 
 	doDownloadJob(job: DownloadJob)
 	{
+		log.d("doing job", job);
 		if(this.availBrowserDMs.includes(job.dmName))
 		{
 			BrowserDMs.dms[job.dmName].download(job);
