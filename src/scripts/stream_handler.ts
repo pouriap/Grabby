@@ -1,3 +1,6 @@
+//todo: add ability to cancel stream download
+//todo: show percent and download speed
+
 declare var m3u8Parser : any;
 declare var mpdParser: any;
 
@@ -56,20 +59,17 @@ class StreamHandler implements RequestHandler
 			return;
 		}
 
+		//requests for playlists that DLG sends do not have a tab id
 		let tabId = filter.download.tabId;
-
-		if(typeof tabId === 'undefined'){
-			log.err('this stream does not have a tabId', filter.download);
-		}
-
-		let streamTab = DLG.tabs.get(tabId);
-		if(typeof streamTab === 'undefined'){
-			log.err(`tab with id ${tabId} does not exist`);
-		}
+		let streamTab = (typeof tabId != 'undefined')? DLG.tabs.get(tabId) : undefined;
 
 		if(bManifest.getType() === 'main')
 		{
 			//log('we got a main manifest: ', filter.download.url, bManifest);
+
+			if(typeof streamTab === 'undefined'){
+				log.err('this main stream does not have a tab', filter.download);
+			}
 
 			let manifest = MainManifest.getFromBase(bManifest);
 
@@ -116,7 +116,7 @@ class StreamHandler implements RequestHandler
 
 			//for cases when the page only has a sub-manifest without a main manifest
 			//example of this: https://videoshub.com/videos/25312764
-			else if(!streamTab.knownPlaylistUrls.includes(bManifest.url))
+			else if(streamTab && !streamTab.knownPlaylistUrls.includes(bManifest.url))
 			{
 				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				//we have to manually create a proper MainManifest for this download here
@@ -126,6 +126,11 @@ class StreamHandler implements RequestHandler
 				let m = new MainManifest(bManifest, pls, manifest.title);
 				filter.download.manifest = m;
 				log.d('got a single manifest for: ', filter.download);
+			}
+
+			else if(typeof streamTab === 'undefined')
+			{
+				log.err('this playlist stream does not have a tab', filter.download);
 			}
 		}
 
