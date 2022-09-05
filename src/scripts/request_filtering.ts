@@ -118,6 +118,11 @@ namespace RequestFiltering
 		// This is for normal downloads
 		else
 		{
+			//some ignores specific to downloads
+			if(filter.isAJAX() || filter.isSizeBlocked()){
+				return Promise.resolve({cancel: false});
+			}
+
 			handler = new DownloadHandler(download, filter);
 		}
 
@@ -155,16 +160,8 @@ namespace RequestFiltering
 			return true;
 		}
 
-		if(filter.isAJAX() && !filter.isStreamManifest()){
-			return true;
-		}
-
 		if(filter.isExcludedInOpts()){
 			return true;
-		}
-
-		if(filter.isSizeBlocked()){
-			return true;		
 		}
 
 		return false;

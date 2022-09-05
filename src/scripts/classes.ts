@@ -177,7 +177,7 @@ class Download
 	private _hash = '';
 	private _filename: str_und = undefined;
 	private _host: str_und = undefined;
-	private _filesize: num_und = undefined;
+	private _filesize: num_und = -1;
 	private _fileExtension: str_und = undefined;
 
 	/**
@@ -375,7 +375,6 @@ class Download
 	}
 
 	get host()
-	//todo: new getter
 	{
 		if(typeof this._host === "undefined"){
 			this._host = "unknown";
@@ -392,12 +391,12 @@ class Download
 	 * get content-length (if available) of the resource requested
 	 * @returns size in MB or -1 if not available
 	 */
-	//todo: new getter
-	get size(){
+	get size(): number | undefined
+	{
+		//-1 means uninitialized
+		if(this._filesize === -1){
 
-		if(typeof this._filesize === "undefined"){
-
-			this._filesize = -1; //todo: used to be 'unknown
+			this._filesize = undefined; 
 
 			let contentLength = this.getHeader("content-length", "response");
 			let size = Number(contentLength);
@@ -413,7 +412,6 @@ class Download
 	 * gets the extension of the resource requested (if available)
 	 * @returns the extension in lower case or "unknown" if no extension if available
 	 */
-	//todo: new getter
 	get fileExtension()
 	{
 		if(typeof this._fileExtension === "undefined"){
@@ -431,7 +429,6 @@ class Download
 
 }
 
-//todo: i'm not loving how this is now coupled with options
 /**
  * A class containing all sorts of functions to determine if a request is an 
  * actual download we are interested in
@@ -538,12 +535,10 @@ class ReqFilter
 
 	isSizeBlocked()
 	{
-		let sizeLimit = this.options.grabFilesLargerThanMB * 1000000;
 		let size = this.download.size;
-		if(size === 0){
-			return true;
-		}
-		return size !== -1 && size < sizeLimit;
+		if(typeof size === 'undefined') return false;
+		let sizeLimit = this.options.grabFilesLargerThanMB * 1000000;
+		return size < sizeLimit;
 	}
 
 	isWebSocket()
