@@ -202,6 +202,7 @@ namespace Messaging
 			if(dlTab.url === "about:blank")
 			{
 				log.d('closing blank tab: ', dlTab);
+				download.isFromBlankTab = true;
 				browser.tabs.remove(dlTab.id).catch((e) => {});
 			}
 		}

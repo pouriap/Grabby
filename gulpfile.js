@@ -27,6 +27,12 @@ task('remove-debug', function(){
     	.pipe(dest('dist/'));
 });
 
+task('remove-size-limit', function(){
+	return src(['./dist/**/*options.js'])
+    	.pipe(replace('grabFilesLargerThanMB = 5', 'grabFilesLargerThanMB = 0'))
+    	.pipe(dest('dist/'));
+});
+
 task('clean', function(){
 	return del('dist/**', {force:true});
 });
@@ -49,7 +55,7 @@ task('ts-prod', function(){
 	return tsProject.src().pipe(tsProject()).js.pipe(dest("dist"));
 });
 
-task('default', parallel('copy-statics', 'less', 'ts-debug'));
+task('default', series(parallel('copy-statics', 'less', 'ts-debug'), 'remove-size-limit'));
 
 task('production', series('clean', parallel('copy-statics', 'less', 'ts-prod'), 'remove-debug'));
 

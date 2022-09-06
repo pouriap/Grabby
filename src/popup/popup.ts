@@ -126,9 +126,7 @@ function showDownloadsList()
 			continue;
 		}
 
-		if(DLGPop.options.showOnlyTabDls && download.tabId != DLGPop.currTabId && 
-			download.originTabId != DLGPop.currTabId
-		){
+		if(DLGPop.options.showOnlyTabDls && download.ownerTabId != DLGPop.currTabId){
 			continue;
 		}
 

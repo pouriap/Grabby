@@ -165,6 +165,7 @@ class Download
 	fetchedPlaylists = 0;
 	isStream = false;
 	hidden = false;
+	isFromBlankTab = false;
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
@@ -172,8 +173,6 @@ class Download
 	//calling resolve() on this download will continue the request
 	resolveRequest: ((value: unknown) => void) | undefined = undefined;
 
-	private _originTabId: num_und = -1;
-	private _originTabUrl: str_und = 'no-init';
 	private _hash = '';
 	private _filename: str_und = undefined;
 	private _host: str_und = undefined;
@@ -195,73 +194,30 @@ class Download
 		this.httpDetails = details;
 	}
 
-	get originTabId(): number | undefined
+	get ownerTabId(): number
 	{
-		//-1 means not initialized yet
-		//we need to return 'undefined' too so I couldn't use that
-		if(this._originTabId === -1)
-		{
-			//if this is a download not associated with any tabs like service workers (reddit.com)
-			if(typeof this.tabId === 'undefined')
-			{
-				log.err('we have a download without a tab', this);
-			}
-			//if this is a top-level document download
-			else if(typeof this.httpDetails.documentUrl === 'undefined')
-			{
-				//if it is a new tab opened from another document then it will have an originUrl
-				if(typeof this.httpDetails.originUrl != 'undefined')
-				{
-					let tab = (typeof DLG != 'undefined')? 
-						DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
-					if(!tab){
-						log.err('no tab found for this download', this);
-					}
-					this._originTabId = tab.openerId;
-				}
-				//if not then it is a download with no origin, i.e. user typed in the URL
-				else
-				{
-					this._originTabId = undefined;
-				}
-			}
-			//if it is not a top-level document download then it's origin tab its own tab
-			else
-			{
-				if(typeof this.tabId === 'undefined')
-				{
-					log.err('download is not top-level but does not have tab id', this);
-				}
-
-				this._originTabId = this.tabId;
-			}
+		//todo: handle this case
+		//if this is a download not associated with any tabs like service workers (reddit.com)
+		if(typeof this.tabId === 'undefined'){
+			log.err('download does not have a tab id', this);
 		}
 
-		return this._originTabId;
-	}
-
-	get originTabUrl(): string | undefined
-	{
-		if(this.originTabUrl === 'no-init')
+		if(this.isFromBlankTab)
 		{
-			//if it doesn't have a tab id it doesn't have a tab url
-			if(typeof this.originTabId === 'undefined')
-			{
-				this._originTabUrl = undefined;
+			let tab = (typeof DLG != 'undefined')? 
+				DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
+			if(typeof tab === 'undefined'){
+				log.err('no tab found for this download', this);
 			}
-			else
+			if(typeof tab.openerId === 'undefined')
 			{
-				let tab = (typeof DLG != 'undefined')? 
-					DLG.tabs.get(this.originTabId) : DLGPop.tabs.get(this.originTabId);
-				if(typeof tab === 'undefined')
-				{
-					log.err(`tab with id ${this.originTabId} not found`);
-				}
-				this._originTabUrl = tab.url;
+				log.err('blank tab does not have an opener id', tab);
 			}
+
+			return tab.openerId;
 		}
 
-		return this.originTabUrl;
+		return this.tabId;
 	}
 
 	get tabTitle(): string | undefined
@@ -1433,11 +1389,11 @@ class DownloadJob
 			originPageCookies = await Utils.getCookies(download.initiatorUrl);
 		}
 		
-		if(download.originTabId)
+		if(download.ownerTabId)
 		{
 			try{
 				originPageReferer = await Utils.executeScript(
-					download.originTabId, 
+					download.ownerTabId, 
 					{code: 'document.referrer'}
 				);
 			}
