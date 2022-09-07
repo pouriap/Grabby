@@ -33,6 +33,12 @@ task('remove-size-limit', function(){
     	.pipe(dest('dist/'));
 });
 
+task('remove-browser-dms', function(){
+	return src(['./dist/**/*background.js'])
+    	.pipe(replace('let browserDms = await BrowserDMs.getAvailableDMs()', 'let browserDms = []'))
+    	.pipe(dest('dist/'));
+});
+
 task('clean', function(){
 	return del('dist/**', {force:true});
 });
@@ -55,7 +61,7 @@ task('ts-prod', function(){
 	return tsProject.src().pipe(tsProject()).js.pipe(dest("dist"));
 });
 
-task('default', series(parallel('copy-statics', 'less', 'ts-debug'), 'remove-size-limit'));
+task('default', series(parallel('copy-statics', 'less', 'ts-debug'), parallel('remove-size-limit', 'remove-browser-dms')));
 
 task('production', series('clean', parallel('copy-statics', 'less', 'ts-prod'), 'remove-debug'));
 

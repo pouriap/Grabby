@@ -72,9 +72,7 @@ var DLG = new DownloadGrab();
 		let externalDMs = await NativeMessaging.startListeners();
 
 		//these are TCP server based DMs that we check using the browser itself
-		let browserDms: string[] = [];
-		//todo: uncomment
-		//let browserDms = await BrowserDMs.getAvailableDMs();
+		let browserDms = await BrowserDMs.getAvailableDMs();
 
 		let availableDMs: string[] = externalDMs.concat(browserDms);
 
