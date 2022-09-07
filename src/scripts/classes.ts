@@ -178,6 +178,8 @@ class Download
 	private _host: str_und = undefined;
 	private _filesize: num_und = -1;
 	private _fileExtension: str_und = undefined;
+	private _ownerTabId: num_und = undefined;
+	private _ownerTabUrl: str_und = undefined;
 
 	/**
 	 * Creates a new Download object
@@ -196,28 +198,50 @@ class Download
 
 	get ownerTabId(): number
 	{
-		//todo: handle this case
-		//if this is a download not associated with any tabs like service workers (reddit.com)
-		if(typeof this.tabId === 'undefined'){
-			log.err('download does not have a tab id', this);
+		if(typeof this._ownerTabId === 'undefined')
+		{
+			//todo: handle this case
+			//if this is a download not associated with any tabs like service workers (reddit.com)
+			if(typeof this.tabId === 'undefined'){
+				log.err('download does not have a tab id', this);
+			}
+
+			if(this.isFromBlankTab)
+			{
+				let tab = (typeof DLG != 'undefined')? 
+					DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
+				if(typeof tab === 'undefined'){
+					log.err('no tab found for this download', this);
+				}
+				if(typeof tab.openerId === 'undefined')
+				{
+					log.err('blank tab does not have an opener id', tab);
+				}
+
+				this._ownerTabId = tab.openerId;
+			}
+
+			this._ownerTabId = this.tabId;
 		}
 
-		if(this.isFromBlankTab)
+		return this._ownerTabId;
+	}
+
+	get ownerTabUrl(): string
+	{
+		if(typeof this._ownerTabUrl === 'undefined')
 		{
-			let tab = (typeof DLG != 'undefined')? 
-				DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
+			let id = this.ownerTabId;
+			let tab = (typeof DLG != 'undefined')? DLG.tabs.get(id) : DLGPop.tabs.get(id);
+
 			if(typeof tab === 'undefined'){
 				log.err('no tab found for this download', this);
 			}
-			if(typeof tab.openerId === 'undefined')
-			{
-				log.err('blank tab does not have an opener id', tab);
-			}
 
-			return tab.openerId;
+			this._ownerTabUrl = tab.url;
 		}
 
-		return this.tabId;
+		return this._ownerTabUrl;
 	}
 
 	get tabTitle(): string | undefined
@@ -435,6 +459,7 @@ class ReqFilter
 	private _isTypWebRes: bool_und = undefined;
 	private _isTypWebOther: bool_und = undefined;
 	private _isTypMedia: bool_und = undefined;
+	private _isFromSpecialPage: bool_und = undefined;
 
 	/* constructor */
 
@@ -485,7 +510,6 @@ class ReqFilter
 	{
 		return list.includes(this.download.resourceType);
 	}
-
 	
 	/* public methods */
 
@@ -825,6 +849,16 @@ class ReqFilter
 		}
 
 		return false;
+	}
+
+	isFromSpecialPage()
+	{
+		if(typeof this._isFromSpecialPage === 'undefined'){
+			let url = this.download.ownerTabUrl;
+			let domain = Utils.getDomain(url);
+			this._isFromSpecialPage = constants.specialDomains.includes(domain);
+		}
+		return this._isFromSpecialPage;
 	}
 
 	isTypeWebRes()

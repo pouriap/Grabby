@@ -2,6 +2,8 @@ const constants =
 {
 	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
+	specialDomains: ['www.youtube.com', 'youtu.be'],
+
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
 

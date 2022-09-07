@@ -1,4 +1,5 @@
 //todo: give filters to request listeners to ignore things we don't want
+//todo: ignore scripts, fonts and other web resources that it's very unlikely someone wants to download with a DM
 
 namespace RequestFiltering 
 {
@@ -153,21 +154,20 @@ namespace RequestFiltering
 	 */
 	function isIgnored(filter: ReqFilter)
 	{
-		if(!filter.isStatusOK()){
+		if(typeof filter.download.tabId === 'undefined'){
+			log.warn('ignoring request with -1 tab id', filter.download);
 			return true;
 		}
 
-		if(filter.isWebSocket()){
-			return true;
-		}
+		if(!filter.isStatusOK()) return true;
 
-		if(filter.isBlackListed()){
-			return true;
-		}
+		if(filter.isWebSocket()) return true;
 
-		if(filter.isExcludedInOpts()){
-			return true;
-		}
+		if(filter.isBlackListed()) return true;
+
+		if(filter.isExcludedInOpts()) return true;
+
+		if(filter.isFromSpecialPage()) return true;
 
 		return false;
 	}
