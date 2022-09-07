@@ -91,8 +91,13 @@ function actionClicked(selectedDl: Download, clickedAction: Element)
  */
 // @ts-ignore	//ignore duplicate declaration
 function onBgDataRcvd()
-{ 
-	showDownloadsList();
+{
+	if(typeof currTab.specialHandler != 'undefined'){
+		showSpecialPopup();
+	}
+	else{
+		showDownloadsList();
+	}
 }
 
 /**
@@ -126,7 +131,7 @@ function showDownloadsList()
 			continue;
 		}
 
-		if(DLGPop.options.showOnlyTabDls && download.ownerTabId != DLGPop.currTabId){
+		if(DLGPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
 			continue;
 		}
 
@@ -255,4 +260,24 @@ function clearDownloadsList()
 	ui.get("#downloads-list")!.innerHTML = '<li id="no-dl" style="display:none;">No Downloads</li>';
 	let msg = new Messaging.MSGClearlist();
 	Messaging.sendMessage(msg);
+}
+
+/**
+ * Shows a special popup for each special site
+ */
+function showSpecialPopup()
+{
+	switch(currTab.specialHandler)
+	{
+		case 'youtube':
+			showYoutubePopup();
+			break;
+		default:
+			break;
+	}
+}
+
+function showYoutubePopup()
+{
+	log.err('i have to display youtube video details');
 }

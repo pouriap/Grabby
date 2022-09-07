@@ -71,6 +71,7 @@ task('watch', function(){
 	watch([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
+		'./src/**/*.json',
 		'./src/**/*.jpg',
 		'./src/**/*.png',
 		'./src/**/*.gif',

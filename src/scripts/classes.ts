@@ -20,8 +20,6 @@ class DownloadGrabPopup
 
 	selectedDl: Download | null = null;
 	continueWithBrowser = false;
-	currTabId = -1;
-	currTabUrl = '';
 
 	constructor(dlgJSON: DLGJSON)
 	{

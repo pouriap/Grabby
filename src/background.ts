@@ -66,8 +66,6 @@ var DLG = new DownloadGrab();
 
 	try
 	{
-		await Tabs.startListeners();
-
 		//get available DMs from flashgot
 		let externalDMs = await NativeMessaging.startListeners();
 
@@ -85,6 +83,8 @@ var DLG = new DownloadGrab();
 		DLG.availExtDMs = externalDMs;
 
 		await Options.load();
+
+		Tabs.startListeners();
 
 		Messaging.startListeners();
 

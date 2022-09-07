@@ -1,4 +1,5 @@
 var DLGPop: DownloadGrabPopup;
+var currTab: tabinfo;
 
 /**
  * Gets the DLG instance from the background script and makes a copy of the needed data inside it
@@ -7,13 +8,10 @@ async function getBackgroundData()
 {
 	let msg = new Messaging.MSGGetDLG();
 	let response = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
-	log.d('mozilla gave us this: ', response);
 	DLGPop = new DownloadGrabPopup(response.DLGJSON);
-	
-	let currentTab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
 
-	DLGPop.currTabUrl = currentTab.url;
-	DLGPop.currTabId = currentTab.id;
+	let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
+	currTab = DLGPop.tabs.getsure(tab.id);
 }
 
 /**
