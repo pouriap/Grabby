@@ -863,7 +863,7 @@ class ReqFilter
 		if(typeof this._isFromSpecialPage === 'undefined'){
 			let url = this.download.ownerTabUrl;
 			let domain = Utils.getDomain(url);
-			this._isFromSpecialPage = constants.specialDomains.includes(domain);
+			this._isFromSpecialPage = Object.keys(constants.specialSites).includes(domain);
 		}
 		return this._isFromSpecialPage;
 	}
@@ -960,6 +960,12 @@ interface RequestHandler
 	download: Download;
 	filter: ReqFilter;
 	handle(): Promise<webx_BlockingResponse>;
+}
+
+interface SiteHandler
+{
+	tab: webx_tab;
+	handle(): void;
 }
 
 /**
@@ -1266,6 +1272,7 @@ class tabinfo
 	openerId: number | undefined;
 	knownPlaylistUrls: string[] = [];
 	closed: boolean = false;
+	specialHandler: string | undefined = undefined;
 	ytdlinfo: ytdlinfo | undefined = undefined;
 
 	constructor(tab: webx_tab)

@@ -68,6 +68,7 @@
 			"scripts/request_filtering.js",
 			"scripts/download_handler.js",
 			"scripts/stream_handler.js",
+			"scripts/site_handlers.js",
 			"scripts/tabs.js",
 			"scripts/types.js",
 			"scripts/options.js",

@@ -2,7 +2,10 @@ const constants =
 {
 	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
-	specialDomains: ['www.youtube.com', 'youtu.be'],
+	specialSites: {
+		'www.youtube.com': 'youtube', 
+		'youtu.be': 'youtube'
+	} as {[index: string]: string},
 
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],

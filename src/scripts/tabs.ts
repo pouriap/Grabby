@@ -9,7 +9,7 @@ namespace Tabs
 		let version = info.version.split('.')[0];
 		let props = (version < 88)? ["status", "title"] :  ["status", "title", "url"];
 		
-		browser.tabs.onUpdated.addListener(doOnTabUpdated, {properties: props});
+		browser.tabs.onUpdated.addListener(doOnUpdated, {properties: props});
 
 		browser.tabs.onRemoved.addListener(doOnRemoved);
 
@@ -26,17 +26,12 @@ namespace Tabs
 		DLG.tabs.set(tab.id, new tabinfo(tab));
 	}
 
-	function doOnTabUpdated(tabId:number, changeInfo: any, tab: webx_tab)
+	function doOnUpdated(tabId:number, changeInfo: any, tab: webx_tab)
 	{
 		DLG.tabs.set(tabId, new tabinfo(tab));
 		if(typeof changeInfo.status != 'undefined' && changeInfo.status === 'complete')
 		{
-			let domain = Utils.getDomain(tab.url);
-			if(domain === 'www.youtube.com')
-			{
-				let msg = new NativeMessaging.MSG_YTDLInfo(tab.url, tab.id);
-				NativeMessaging.sendMessage(msg);
-			}
+			handleSpecialSites(tab);
 		}
 	}
 
@@ -44,5 +39,29 @@ namespace Tabs
 	{
 		let tab = DLG.tabs.getsure(tabId);
 		tab.closed = true;
+	}
+
+	function handleSpecialSites(tab: webx_tab)
+	{
+		for(let domain of Object.keys(constants.specialSites))
+		{
+			if(Utils.getDomain(tab.url) != domain){
+				continue;
+			}
+
+			let site = constants.specialSites[domain];
+			let handler: SiteHandler;
+
+			if(site === 'youtube')
+			{
+				handler = new YoutubeHandler(tab);
+			}
+			else
+			{
+				log.err(`no handler available for ${site}`);
+			}
+
+			handler.handle();
+		}
 	}
 }
