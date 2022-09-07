@@ -165,7 +165,6 @@ class Download
 	fetchedPlaylists = 0;
 	isStream = false;
 	hidden = false;
-	isFromBlankTab = false;
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
@@ -180,6 +179,7 @@ class Download
 	private _fileExtension: str_und = undefined;
 	private _ownerTabId: num_und = undefined;
 	private _ownerTabUrl: str_und = undefined;
+	private _isFromBlankTab: bool_und = undefined;
 
 	/**
 	 * Creates a new Download object
@@ -220,8 +220,10 @@ class Download
 
 				this._ownerTabId = tab.openerId;
 			}
-
-			this._ownerTabId = this.tabId;
+			else
+			{
+				this._ownerTabId = this.tabId;
+			}
 		}
 
 		return this._ownerTabId;
@@ -242,6 +244,28 @@ class Download
 		}
 
 		return this._ownerTabUrl;
+	}
+
+	get isFromBlankTab(): boolean
+	{
+		if(typeof this._isFromBlankTab === 'undefined')
+		{
+			//blank tabs have a tab id
+			if(typeof this.tabId === 'undefined'){
+				this._isFromBlankTab = false;
+				return this._isFromBlankTab;
+			}
+	
+			let tab = (typeof DLG != 'undefined')? DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
+			
+			if(typeof tab === 'undefined'){
+				log.err(`tab with id ${this.tabId} does not exist`);
+			}
+	
+			this._isFromBlankTab = (tab.url === 'about:blank');
+		}
+
+		return this._isFromBlankTab;
 	}
 
 	get tabTitle(): string | undefined
