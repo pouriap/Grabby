@@ -58,6 +58,7 @@
 			"libs/md5.js",
 			"libs/m3u8-parser.js",
 			"libs/mpd-parser.js",
+			"scripts/constants.js",
 			"scripts/classes.js",
 			"scripts/log.js",
 			"scripts/utils.js",

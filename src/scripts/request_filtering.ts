@@ -32,8 +32,10 @@ namespace RequestFiltering
 
 	/**
 	 * Runs before a request is sent
-	 * Is used to store POST data 
+	 * Is used to store POST data and to put the request details in DLG.allRequests
+	 * If we don't store a request here it will be ignored by other callback functions below
 	 */
+	//todo: we can do some of our ignores here to be more efficient
 	function doOnBeforeRequest(details: webx_beforeRequest)
 	{
 		let formDataArr = (
@@ -58,6 +60,7 @@ namespace RequestFiltering
 		let httpDetails: HTTPDetails = {} as HTTPDetails;
 		httpDetails.postData = postData;
 
+		//store the request details in DLG.allRequests
 		DLG.allRequests.set(details.requestId, httpDetails);
 	}
 
@@ -68,7 +71,12 @@ namespace RequestFiltering
 	function doOnBeforeSendHeaders(details: webx_beforeSendHeaders)
 	{
 		//update http details
-		let httpDetails = DLG.allRequests.get(details.requestId)!;
+		let httpDetails = DLG.allRequests.get(details.requestId);
+
+		if(typeof httpDetails === 'undefined'){
+			return Promise.resolve({cancel: false});
+		}
+
 		Object.assign(httpDetails, details);
 	}
 
@@ -134,9 +142,6 @@ namespace RequestFiltering
 	 */
 	function doOnCompleted(details: webx_reqCommon)
 	{
-		//remove the original download from allRequests to save memory
-		//this isn't really necessary because allRequest is a fixed sized map
-		//todo: try adding this to onResponseStarted
 		DLG.allRequests.delete(details.requestId);
 	}
 
@@ -168,4 +173,3 @@ namespace RequestFiltering
 	}
 
 }
-

@@ -67,7 +67,7 @@ task('production', series('clean', parallel('copy-statics', 'less', 'ts-prod'), 
 
 task('watch', function(){       
 	watch('./src/**/*.less', series('less'));
-	watch('./src/**/*.ts', series('ts-debug'));
+	watch('./src/**/*.ts', series('ts-debug', parallel('remove-size-limit', 'remove-browser-dms')));
 	watch([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
