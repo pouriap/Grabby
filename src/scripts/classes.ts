@@ -40,7 +40,7 @@ class DownloadGrabPopup
 		{
 			let hash = pair[0];
 			let downloadJSON = pair[1] as Download;
-			let download = new Download(downloadJSON.httpDetails);
+			let download = new Download(downloadJSON.httpDetails, this.tabs);
 			//copy everything from downloadJSON to the new download object
 			Object.assign(download, downloadJSON);
 			newDownloads.set(hash, download);
@@ -180,11 +180,12 @@ class Download
 	private _ownerTabId: num_und = undefined;
 	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
+	private _tabs: SureMap<number, tabinfo>;
 
 	/**
 	 * Creates a new Download object
 	 */
-	constructor(details: HTTPDetails)
+	constructor(details: HTTPDetails, tabs: SureMap<number, tabinfo>)
 	{
 		this.requestId = details.requestId;
 		this.url = details.url;
@@ -194,6 +195,7 @@ class Download
 		this.tabId = (details.tabId > 0)? details.tabId : undefined;
 		this.initiatorUrl = (details.originUrl)? details.originUrl : details.documentUrl;
 		this.httpDetails = details;
+		this._tabs = tabs;
 	}
 
 	get ownerTabId(): number
@@ -208,8 +210,7 @@ class Download
 
 			if(this.isFromBlankTab)
 			{
-				let tab = (typeof DLG != 'undefined')? 
-					DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
+				let tab = this._tabs.getsure(this.tabId);
 
 				if(typeof tab.openerId === 'undefined')
 				{
@@ -231,8 +232,7 @@ class Download
 	{
 		if(typeof this._ownerTabUrl === 'undefined')
 		{
-			let id = this.ownerTabId;
-			let tab = (typeof DLG != 'undefined')? DLG.tabs.getsure(id) : DLGPop.tabs.getsure(id);
+			let tab =this._tabs.getsure(this.ownerTabId);
 			this._ownerTabUrl = tab.url;
 		}
 
@@ -249,8 +249,7 @@ class Download
 				return this._isFromBlankTab;
 			}
 	
-			let tab = (typeof DLG != 'undefined')? 
-				DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
+			let tab = this._tabs.getsure(this.tabId);
 			this._isFromBlankTab = (tab.url === 'about:blank');
 		}
 
@@ -264,9 +263,7 @@ class Download
 			return undefined;
 		}
 		
-		let tab = (typeof DLG != undefined)? 
-			DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
-
+		let tab = this._tabs.getsure(this.tabId);
 		return tab.title;
 	}
 
@@ -276,34 +273,6 @@ class Download
 			this._hash = md5(this.url);
 		}
 		return this._hash;
-	}
-
-	/**
-	 * gets a header associated with this reqeust
-	 * @param headerName name of the header
-	 * @param headerDirection either "request" or "response"
-	 * @returns either the header or undefined
-	 */
-	getHeader(headerName: string, headerDirection: string): string | undefined
-	{
-		let headers;
-		if(headerDirection === 'request'){
-			headers = this.httpDetails.requestHeaders;
-		}
-		else{
-			headers = this.httpDetails.responseHeaders;
-		}
-
-		let headerItem =  headers.find(function(header: any){
-			return header.name.toLowerCase() === headerName.toLowerCase();
-		});
-
-		if(headerItem){
-			return headerItem.value;
-		}
-		else{
-			return undefined;
-		}
 	}
 
 	/**
@@ -415,6 +384,34 @@ class Download
 		}
 
 		return this._fileExtension;
+	}
+
+	/**
+	 * gets a header associated with this reqeust
+	 * @param headerName name of the header
+	 * @param headerDirection either "request" or "response"
+	 * @returns either the header or undefined
+	 */
+	getHeader(headerName: string, headerDirection: string): string | undefined
+	{
+		let headers;
+		if(headerDirection === 'request'){
+			headers = this.httpDetails.requestHeaders;
+		}
+		else{
+			headers = this.httpDetails.responseHeaders;
+		}
+
+		let headerItem =  headers.find(function(header: any){
+			return header.name.toLowerCase() === headerName.toLowerCase();
+		});
+
+		if(headerItem){
+			return headerItem.value;
+		}
+		else{
+			return undefined;
+		}
 	}
 
 }

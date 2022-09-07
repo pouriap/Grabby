@@ -108,7 +108,7 @@ namespace RequestFiltering
 
 		//creating a new download object because the original will be deleted from allRequests
 		//in doOnCompleted() after the request is completed or when DLG.allDownloads is full
-		let download = new Download(httpDetails);
+		let download = new Download(httpDetails, DLG.tabs);
 
 		let filter = new ReqFilter(download, Options.opt);
 
