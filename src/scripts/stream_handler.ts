@@ -61,7 +61,7 @@ class StreamHandler implements RequestHandler
 
 		//requests for playlists that DLG sends do not have a tab id
 		let tabId = filter.download.tabId;
-		let streamTab = (typeof tabId != 'undefined')? DLG.tabs.get(tabId) : undefined;
+		let streamTab = (typeof tabId != 'undefined')? DLG.tabs.getsure(tabId) : undefined;
 
 		if(bManifest.getType() === 'main')
 		{

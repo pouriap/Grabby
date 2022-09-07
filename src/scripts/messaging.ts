@@ -193,11 +193,7 @@ namespace Messaging
 		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
 		if(typeof download.tabId != 'undefined')
 		{
-			let dlTab = DLG.tabs.get(download.tabId);
-			if(!dlTab)
-			{
-				log.err(`tab with id ${download.tabId} does not exist`);
-			}
+			let dlTab = DLG.tabs.getsure(download.tabId);
 
 			if(dlTab.url === "about:blank")
 			{

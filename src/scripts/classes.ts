@@ -14,7 +14,7 @@ class DownloadGrabPopup
 {
 	allDownloads: Map<string, Download>;
 	downloadDialogs: Map<number, string>;
-	tabs: Map<number, tabinfo>;
+	tabs: SureMap<number, tabinfo>;
 	options: Options.DLGOptions;
 	availableDMs: string[];
 
@@ -27,7 +27,7 @@ class DownloadGrabPopup
 	{
 		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
 		this.downloadDialogs = new Map(dlgJSON.downloadDialogs);
-		this.tabs = new Map(dlgJSON.tabs);
+		this.tabs = new SureMap(dlgJSON.tabs);
 		this.availableDMs = dlgJSON.availableDMs;
 		this.options = dlgJSON.options;
 	}
@@ -58,7 +58,7 @@ class DownloadGrab
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, Download>();
 	downloadDialogs = new Map<number, string>();
-	tabs = new Map<number, tabinfo>();
+	tabs = new SureMap<number, tabinfo>();
 	availableDMs: string[] = [];
 	availExtDMs: string[] = [];
 	availBrowserDMs: string[] = [];
@@ -209,10 +209,8 @@ class Download
 			if(this.isFromBlankTab)
 			{
 				let tab = (typeof DLG != 'undefined')? 
-					DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
-				if(typeof tab === 'undefined'){
-					log.err('no tab found for this download', this);
-				}
+					DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
+
 				if(typeof tab.openerId === 'undefined')
 				{
 					log.err('blank tab does not have an opener id', tab);
@@ -234,12 +232,7 @@ class Download
 		if(typeof this._ownerTabUrl === 'undefined')
 		{
 			let id = this.ownerTabId;
-			let tab = (typeof DLG != 'undefined')? DLG.tabs.get(id) : DLGPop.tabs.get(id);
-
-			if(typeof tab === 'undefined'){
-				log.err('no tab found for this download', this);
-			}
-
+			let tab = (typeof DLG != 'undefined')? DLG.tabs.getsure(id) : DLGPop.tabs.getsure(id);
 			this._ownerTabUrl = tab.url;
 		}
 
@@ -256,12 +249,8 @@ class Download
 				return this._isFromBlankTab;
 			}
 	
-			let tab = (typeof DLG != 'undefined')? DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
-			
-			if(typeof tab === 'undefined'){
-				log.err(`tab with id ${this.tabId} does not exist`);
-			}
-	
+			let tab = (typeof DLG != 'undefined')? 
+				DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
 			this._isFromBlankTab = (tab.url === 'about:blank');
 		}
 
@@ -276,10 +265,7 @@ class Download
 		}
 		
 		let tab = (typeof DLG != undefined)? 
-			DLG.tabs.get(this.tabId) : DLGPop.tabs.get(this.tabId);
-		if(!tab){
-			log.err(`tab with id ${this.tabId} was not found`);
-		}
+			DLG.tabs.getsure(this.tabId) : DLGPop.tabs.getsure(this.tabId);
 
 		return tab.title;
 	}
@@ -1290,5 +1276,20 @@ class tabinfo
 		this.url = tab.url;
 		this.title = tab.title;
 		this.openerId = tab.openerTabId;
+	}
+}
+
+class SureMap<K, V> extends Map<K, V>
+{
+	getsure(key: K) : V
+	{
+		let item = this.get(key);
+		
+		if(typeof item === 'undefined')
+		{
+			log.err(`item with key of ${key} is not present in this map`, this);
+		}
+
+		return item;
 	}
 }

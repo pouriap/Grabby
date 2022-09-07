@@ -2,27 +2,16 @@ namespace Tabs
 {
 	export async function startListeners()
 	{
-		browser.tabs.onCreated.addListener((tab: webx_tab) => {
-			DLG.tabs.set(tab.id, new tabinfo(tab));
-		});
+		browser.tabs.onCreated.addListener(doOnCreated);
 
 		//'url' is only supported in FF88+
 		let info = await browser.runtime.getBrowserInfo();
 		let version = info.version.split('.')[0];
 		let props = (version < 88)? ["status", "title"] :  ["status", "title", "url"];
-		browser.tabs.onUpdated.addListener((tabId:number, changeInfo: any, tab: webx_tab) => {
-			DLG.tabs.set(tabId, new tabinfo(tab));
-		}, {
-			properties: props
-		});
+		
+		browser.tabs.onUpdated.addListener(doOnTabUpdated, {properties: props});
 
-		browser.tabs.onRemoved.addListener((tabId: number) => {
-			let tab = DLG.tabs.get(tabId);
-			if(!tab){
-				log.err(`tab with id ${tabId} does not exist`);
-			}
-			tab.closed = true;
-		});
+		browser.tabs.onRemoved.addListener(doOnRemoved);
 
 		//put already open tabs in DLG.tabs
 		let tabs = await browser.tabs.query({});
@@ -30,5 +19,21 @@ namespace Tabs
 		{
 			DLG.tabs.set(tab.id, new tabinfo(tab));
 		}
+	}
+
+	function doOnCreated(tab: webx_tab)
+	{
+		DLG.tabs.set(tab.id, new tabinfo(tab));
+	}
+
+	function doOnTabUpdated(tabId:number, changeInfo: any, tab: webx_tab)
+	{
+		DLG.tabs.set(tabId, new tabinfo(tab));
+	}
+
+	function doOnRemoved(tabId: number)
+	{
+		let tab = DLG.tabs.getsure(tabId);
+		tab.closed = true;
 	}
 }
