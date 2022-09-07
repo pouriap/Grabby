@@ -6,25 +6,25 @@ namespace RequestFiltering
 	export function startListeners()
 	{
 		browser.webRequest.onBeforeRequest.addListener(
-			(details: webx_beforeRequest) => { return doOnBeforeRequest(details) }, 
+			doOnBeforeRequest,
 			{urls: ["*://*/*"]},
 			["requestBody"]
 		);
 	
 		browser.webRequest.onBeforeSendHeaders.addListener(
-			(details: webx_beforeSendHeaders) => { return doOnBeforeSendHeaders(details) }, 
+			doOnBeforeSendHeaders,
 			{urls: ["*://*/*"]},
 			["requestHeaders"]
 		);
 	
 		browser.webRequest.onHeadersReceived.addListener(
-			(details: webx_headersReceived) => { return doOnHeadersReceived(details) }, 
+			doOnHeadersReceived,
 			{urls: ["*://*/*"]},
 			["responseHeaders", "blocking"]
 		);
 	
 		browser.webRequest.onCompleted.addListener(
-			(details: webx_reqCommon) => { return doOnCompleted(details) }, 
+			doOnCompleted,
 			{urls: ["*://*/*"]},
 			[]
 		);
@@ -37,7 +37,7 @@ namespace RequestFiltering
 	 * If we don't store a request here it will be ignored by other callback functions below
 	 */
 	//todo: we can do some of our ignores here to be more efficient
-	function doOnBeforeRequest(details: webx_beforeRequest)
+	function doOnBeforeRequest(details: webx_beforeRequest): webx_BlockingResponse
 	{
 		let formDataArr = (
 			details.method === "POST" && 
@@ -63,22 +63,25 @@ namespace RequestFiltering
 
 		//store the request details in DLG.allRequests
 		DLG.allRequests.set(details.requestId, httpDetails);
+
+		return {cancel: false};
 	}
 
 	/**
 	 * Runs before a request is sent
 	 * Is used to store cookies, referer and other request info that is unavailable in reponse
 	 */
-	function doOnBeforeSendHeaders(details: webx_beforeSendHeaders)
+	function doOnBeforeSendHeaders(details: webx_beforeSendHeaders): webx_BlockingResponse
 	{
 		//update http details
 		let httpDetails = DLG.allRequests.get(details.requestId);
 
 		if(typeof httpDetails === 'undefined'){
-			return Promise.resolve({cancel: false});
+			return {cancel: false};
 		}
 
 		Object.assign(httpDetails, details);
+		return {cancel: false};
 	}
 
 	/**
@@ -141,9 +144,10 @@ namespace RequestFiltering
 	/**
 	 * Runs once a request is completed
 	 */
-	function doOnCompleted(details: webx_reqCommon)
+	function doOnCompleted(details: webx_reqCommon): webx_BlockingResponse
 	{
 		DLG.allRequests.delete(details.requestId);
+		return {cancel: false};
 	}
 
 
