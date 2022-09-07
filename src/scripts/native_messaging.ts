@@ -67,7 +67,8 @@ namespace NativeMessaging
 	}
 
 
-	/* now some types */
+	/* sent messages */
+	//these are the messsages we send to the native app
 	export interface NativeMessage
 	{
 		type: string;
@@ -91,6 +92,12 @@ namespace NativeMessaging
 		constructor(public url: string, public name: string, public dlHash: string){};
 	}
 
+	export class MSG_YTDLInfo implements NativeMessage
+	{
+		type = MSGTYP_YTDL_INFO;
+		constructor(public url: string, public tabId: number){};
+	}
+
 	/* recived messages */
 	//these are messages we receive from the native app and never send outself
 	//so just a type will suffice becasue we never want to create a new object
@@ -103,9 +110,8 @@ namespace NativeMessaging
 
 	type MSGRCV_YTDLInfo = {
 		type: string,
-		dlHash: string,
-		info: any,
-		is_from_manifest: Boolean
+		tabId: number,
+		info: ytdlinfo,
 	};
 
 	type MSGRCV_YTDLComp = {
@@ -284,18 +290,14 @@ namespace NativeMessaging
 	/* handlers */
 	function handleYTDLInfo(msg: MSGRCV_YTDLInfo)
 	{
-		log.d('got info for ' + msg.dlHash, msg.info);
-		let dl = DLG.allDownloads.get(msg.dlHash)!;
+		log.d('got info for ' + msg.tabId, msg.info);
+		let tab = DLG.tabs.getsure(msg.tabId);
 
-		dl.ytdlInfo = msg.info;
+		tab.ytdlinfo = msg.info;
 
 		if(typeof msg.info === 'object')
 		{
-			dl.hidden = false;
-			browser.browserAction.setBadgeText({text: 'vid', tabId: dl.tabId});
-			if(msg.is_from_manifest){
-				log.d("THIS SHIT BE FROM A MANIFEST!");
-			}
+			browser.browserAction.setBadgeText({text: 'vid', tabId: msg.tabId});
 		}
 		else
 		{

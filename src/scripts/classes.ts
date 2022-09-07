@@ -159,8 +159,8 @@ class Download
 	tabId: number | undefined;
 	initiatorUrl: string | undefined;
 	httpDetails: HTTPDetails;
-	//these are set after processing
-	ytdlInfo: any = undefined;
+
+	//these are set later
 	manifest: MainManifest | undefined = undefined;
 	fetchedPlaylists = 0;
 	isStream = false;
@@ -1266,6 +1266,7 @@ class tabinfo
 	openerId: number | undefined;
 	knownPlaylistUrls: string[] = [];
 	closed: boolean = false;
+	ytdlinfo: ytdlinfo | undefined = undefined;
 
 	constructor(tab: webx_tab)
 	{

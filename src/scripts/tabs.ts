@@ -29,6 +29,15 @@ namespace Tabs
 	function doOnTabUpdated(tabId:number, changeInfo: any, tab: webx_tab)
 	{
 		DLG.tabs.set(tabId, new tabinfo(tab));
+		if(typeof changeInfo.status != 'undefined' && changeInfo.status === 'complete')
+		{
+			let domain = Utils.getDomain(tab.url);
+			if(domain === 'www.youtube.com')
+			{
+				let msg = new NativeMessaging.MSG_YTDLInfo(tab.url, tab.id);
+				NativeMessaging.sendMessage(msg);
+			}
+		}
 	}
 
 	function doOnRemoved(tabId: number)
