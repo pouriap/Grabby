@@ -1187,7 +1187,7 @@ class MainManifest
 	 * @param fullManifest 
 	 * @param formats 
 	 */
-	constructor(public fullManifest: StreamManifest, public formats: FormatData[], 
+	constructor(public fullManifest: StreamManifest, public formats: ManifestFormatData[], 
 		public title: string)
 	{}
 
@@ -1198,12 +1198,12 @@ class MainManifest
 	 */
 	static getFromBase(manifest: StreamManifest)
 	{
-		let formats = [];
+		let formats: ManifestFormatData[] = [];
 
 		let id = 0;
 		for(let playlist of manifest.fullManifest.playlists)
 		{
-			let p = FormatData.getFromRawPlaylist(playlist, manifest.url, id);
+			let p = ManifestFormatData.getFromRawPlaylist(playlist, manifest.url, id);
 			formats.push(p);
 			id++;
 		}
@@ -1233,12 +1233,29 @@ class FormatManifest
 	}
 }
 
-class FormatData
+interface FormatData
 {
-	constructor(public id: number, public nickName: string, public url: string, 
-		public res: string, public bitrate: number, public pictureSize: number, 
-		public fileSize = -1, public duration = -1)
-	{}
+	id: number;
+	nickName: string;
+	res: string;
+	pictureSize: number;
+	fileSize: number;
+}
+
+class ManifestFormatData implements FormatData
+{
+	url: string;
+	bitrate: number;
+	duration: number;
+
+	constructor(public id: number, public nickName: string, url: string, 
+		public res: string, bitrate: number, public pictureSize: number, 
+		public fileSize = -1, duration = -1)
+	{
+		this.url = url;
+		this.bitrate = bitrate;
+		this.duration = duration;
+	}
 
 	/**
 	 * Updates duration and filesize data
@@ -1275,7 +1292,25 @@ class FormatData
 		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
 		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
 		let url = (new URL(playlist.uri, manifestURL)).toString();
-		return new FormatData(id, name, url, res, bitrate, pictureSize);
+		return new ManifestFormatData(id, name, url, res, bitrate, pictureSize);
+	}
+}
+
+class YTFormatData implements FormatData
+{
+	constructor(public id: number, public nickName: string, public res: string, 
+		public pictureSize: number, public fileSize: number)
+	{}
+
+	static getFromYTDLFormat(format: ytdl_format)
+	{
+		let id = format.format_id;
+		let nickName = format.height + 'p';
+		let res = format.resolution;
+		let pictureSize = format.width! * format.height!;
+		let fileSize = format.filesize;
+
+		return new YTFormatData(Number(id), nickName, res, pictureSize, filesize);
 	}
 }
 

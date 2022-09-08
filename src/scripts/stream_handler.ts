@@ -120,7 +120,7 @@ class StreamHandler implements RequestHandler
 			{
 				//log.warn(DLG.tabs[tabId].knownFormatUrls, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				//we have to manually create a proper MainManifest for this download here
-				let format = new FormatData(0, 'single-video', bManifest.url, 'unknown', 0, 0);
+				let format = new ManifestFormatData(0, 'single-video', bManifest.url, 'unknown', 0, 0);
 				format.update(manifest);
 				let formats = [format];
 				let m = new MainManifest(bManifest, formats, manifest.title);
