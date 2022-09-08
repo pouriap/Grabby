@@ -138,7 +138,29 @@ class StreamHandler implements RequestHandler
 
 	private parseRawManifest(filter: ReqFilter, rawManifest: string): StreamManifest | undefined
 	{
-		let streamTitle = (filter.download.tabTitle)? filter.download.tabTitle : 'Unknown Title';
+		let title = (filter.download.tabTitle)? filter.download.tabTitle : 'Unknown Title';
+
+		//a little thing to remove site names from titles
+		if(title != 'Unknown Title')
+		{
+			let domain = Utils.getDomain(filter.download.ownerTabUrl);
+			let domainW = domain.replace('www.', '');
+			let regStrings = [
+				'(.*)\\s*\\|\\s*{{host}}', 
+				'(.*)\\s*-\\s*{{host}}', 
+				'{{host}}\\s*\\|\\s*(.*)', 
+				'{{host}}\\s*-\\s*(.*)'
+			];
+			for(let regStr of regStrings)
+			{
+				let r1 = new RegExp(regStr.replace('{{host}}', domain), 'gi');
+				let r2 = new RegExp(regStr.replace('{{host}}', domainW), 'gi');
+				title = title.replace(r1, '$1');
+				title = title.replace(r2, '$1');
+			}
+		}
+
+		let streamTitle = title;
 
 		if(filter.isHlsManifest())
 		{
