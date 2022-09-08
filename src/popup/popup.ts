@@ -32,7 +32,7 @@ namespace PopupMenu
 	
 		ui.get("#dl-with-dlgrab")?.click();
 	
-		Popup.getBackgroundData().then(getCurrentTab).then(renderMenu);
+		Popup.getBackgroundData().then(getCurrentTab).then(render);
 	
 	});
 
@@ -79,7 +79,7 @@ namespace PopupMenu
 				break;
 	
 			case "action-back":
-				showDownloadsList();
+				renderDownloadsList();
 				break;
 	
 			case "action-clearList":
@@ -102,20 +102,20 @@ namespace PopupMenu
 	/**
 	 * This is called when background data (DLG) is received via messaging
 	 */
-	function renderMenu()
+	function render()
 	{
 		if(typeof currTab.specialHandler != 'undefined'){
-			showSpecialPopup();
+			renderSpecial();
 		}
 		else{
-			showDownloadsList();
+			renderDownloadsList();
 		}
 	}
 	
 	/**
 	 * shows the list of all download items
 	 */
-	function showDownloadsList()
+	function renderDownloadsList()
 	{
 		ui.hide('.unique-display');
 	
@@ -125,8 +125,8 @@ namespace PopupMenu
 		//when we click back the downloads are already there and only hidden
 		//so we don't have to repopulate them in this case
 	
-		if(ui.get('#popup-main')!.getAttribute('populated')){
-			ui.show('#popup-main');
+		if(ui.get('#popup-downloads')!.getAttribute('populated')){
+			ui.show('#popup-downloads');
 			return;
 		}
 	
@@ -166,13 +166,14 @@ namespace PopupMenu
 	
 				let hash = this.getAttribute("data-hash")!;
 				DLGPop.selectedDl = DLGPop.allDownloads.get(hash)!;
+
 				log.d('item clicked: ', DLGPop.selectedDl);
 	
 				if(DLGPop.selectedDl.isStream){
-					showStreamDetails(DLGPop.selectedDl);
+					renderStream(DLGPop.selectedDl.manifest!);
 				}
 				else{
-					showDownloadDetails(DLGPop.selectedDl);
+					renderDownload(DLGPop.selectedDl);
 				}
 			});
 	
@@ -194,14 +195,14 @@ namespace PopupMenu
 			ui.get("#downloads-list")!.appendChild(listItem);
 		}
 	
-		ui.get('#popup-main')!.setAttribute('populated', 'populated');
-		ui.show('#popup-main');
+		ui.get('#popup-downloads')!.setAttribute('populated', 'populated');
+		ui.show('#popup-downloads');
 	}
 	
 	/**
 	 * Shows the details popup for a particular download item
 	 */
-	function showDownloadDetails(download: Download)
+	function renderDownload(download: Download)
 	{
 		ui.hide('.unique-display');
 	
@@ -220,12 +221,10 @@ namespace PopupMenu
 	/**
 	 * Shows the details popup for a particular stream download
 	 */
-	function showStreamDetails(download: Download)
+	function renderStream(manifest: MainManifest)
 	{
 		ui.hide('.unique-display');
-	
-		let manifest = download.manifest!;
-	
+		
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 	
 		let duration = Utils.formatSeconds(manifest.playlists[0].duration);
@@ -277,19 +276,19 @@ namespace PopupMenu
 	/**
 	 * Shows a special popup for each special site
 	 */
-	function showSpecialPopup()
+	function renderSpecial()
 	{
 		switch(currTab.specialHandler)
 		{
 			case 'youtube':
-				showYoutubePopup();
+				renderYoutube();
 				break;
 			default:
 				break;
 		}
 	}
 	
-	function showYoutubePopup()
+	function renderYoutube()
 	{
 		log.err('i have to display youtube video details');
 	}
