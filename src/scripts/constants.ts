@@ -7,6 +7,8 @@ const constants =
 		'youtu.be': 'youtube'
 	} as {[index: string]: string},
 
+	ytStandardFormats: ['144p', '240p', '360p', '480p', '720p', '1080p'],
+
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
 

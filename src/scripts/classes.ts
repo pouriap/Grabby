@@ -1310,7 +1310,33 @@ class YTFormatData implements FormatData
 		let pictureSize = format.width! * format.height!;
 		let fileSize = format.filesize;
 
-		return new YTFormatData(Number(id), nickName, res, pictureSize, filesize);
+		return new YTFormatData(Number(id), nickName, res, pictureSize, fileSize);
+	}
+}
+
+class StreamDataUI
+{
+	constructor(public title: string, public duration: number, public formats: FormatData[]){}
+
+	static getFromManifest(manifest: MainManifest)
+	{
+		return new StreamDataUI(manifest.title, manifest.formats[0].duration, manifest.formats);
+	}
+
+	static getFromYTDLInfo(info: ytdlinfo)
+	{
+		let formats: YTFormatData[] = [];
+		for(let format of info.formats)
+		{
+			if(typeof format.format_note != 'string') continue; 
+			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
+			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
+			{
+				formats.push(YTFormatData.getFromYTDLFormat(format));
+			}
+		}
+
+		return new StreamDataUI(info.title, info.duration, formats);
 	}
 }
 

@@ -170,7 +170,7 @@ namespace PopupMenu
 				log.d('item clicked: ', DLGPop.selectedDl);
 	
 				if(DLGPop.selectedDl.isStream){
-					renderStream(DLGPop.selectedDl.manifest!);
+					renderStream(StreamDataUI.getFromManifest(DLGPop.selectedDl.manifest!));
 				}
 				else{
 					renderDownload(DLGPop.selectedDl);
@@ -221,24 +221,24 @@ namespace PopupMenu
 	/**
 	 * Shows the details popup for a particular stream download
 	 */
-	function renderStream(manifest: MainManifest)
+	function renderStream(data: StreamDataUI)
 	{
 		ui.hide('.unique-display');
 		
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 	
-		let duration = Utils.formatSeconds(manifest.formats[0].duration);
-		ui.get("#stream-details #filename")!.innerHTML = manifest.title;
-		ui.get("#stream-details #filename")!.setAttribute("title", manifest.title);
+		let duration = Utils.formatSeconds(data.duration);
+		ui.get("#stream-details #filename")!.innerHTML = data.title;
+		ui.get("#stream-details #filename")!.setAttribute("title", data.title);
 		ui.get("#stream-details #duration")!.innerHTML = duration;
 		ui.get("#stream-details #duration")!.setAttribute("title", duration);
 	
 		//sort
-		manifest.formats.sort((a, b)=>{
+		data.formats.sort((a, b)=>{
 			return a.pictureSize - b.pictureSize;
 		});
 	
-		for(let format of manifest.formats)
+		for(let format of data.formats)
 		{
 			let li = document.createElement('li');
 			li.setAttribute('class', 'format action');
@@ -290,6 +290,6 @@ namespace PopupMenu
 	
 	function renderYoutube()
 	{
-		log.err('i have to display youtube video details');
+		renderStream(StreamDataUI.getFromYTDLInfo(currTab.ytdlinfo!));
 	}
 }
