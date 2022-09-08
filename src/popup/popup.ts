@@ -227,18 +227,18 @@ namespace PopupMenu
 		
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 	
-		let duration = Utils.formatSeconds(manifest.playlists[0].duration);
+		let duration = Utils.formatSeconds(manifest.formats[0].duration);
 		ui.get("#stream-details #filename")!.innerHTML = manifest.title;
 		ui.get("#stream-details #filename")!.setAttribute("title", manifest.title);
 		ui.get("#stream-details #duration")!.innerHTML = duration;
 		ui.get("#stream-details #duration")!.setAttribute("title", duration);
 	
 		//sort
-		manifest.playlists.sort((a, b)=>{
+		manifest.formats.sort((a, b)=>{
 			return a.pictureSize - b.pictureSize;
 		});
 	
-		for(let format of manifest.playlists)
+		for(let format of manifest.formats)
 		{
 			let li = document.createElement('li');
 			li.setAttribute('class', 'format action');

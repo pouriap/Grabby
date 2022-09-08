@@ -46,7 +46,7 @@ class StreamHandler implements RequestHandler
 			console.timeEnd("manifest-handling");
 			//we first handle then give the request back to the browser
 			//if we give it back to the browser first it will start requesting the 
-			//sub-manifests before we had the chance to add them to DLG.tabs[tabId].knownPlaylists
+			//sub-manifests before we had the chance to add them to DLG.tabs[tabId].knownFormatUrls
 			f.disconnect();
 		}
 	}
@@ -59,7 +59,7 @@ class StreamHandler implements RequestHandler
 			return;
 		}
 
-		//requests for playlists that DLG sends do not have a tab id
+		//requests for formats that DLG sends do not have a tab id
 		let tabId = filter.download.tabId;
 		let streamTab = (typeof tabId != 'undefined')? DLG.tabs.getsure(tabId) : undefined;
 
@@ -77,25 +77,25 @@ class StreamHandler implements RequestHandler
 
 			DLG.addToAllDownloads(filter.download);
 
-			for(let playlist of manifest.playlists)
+			for(let format of manifest.formats)
 			{
-				streamTab.knownPlaylistUrls.push(playlist.url);
+				streamTab.knownFormatUrls.push(format.url);
 				//todo: change this to request ID because we are sending referer URL basically maybe some user doesn't want this
 				let headers = {
 					'X-DLG-MFSTHASH': filter.download.hash,
-					'X-DLG-MFSTID': playlist.id.toString()
+					'X-DLG-MFSTID': format.id.toString()
 				};
-				fetch(playlist.url, {headers: headers});
+				fetch(format.url, {headers: headers});
 			}
 		}
 
-		else if(bManifest.getType() === 'playlist')
+		else if(bManifest.getType() === 'format')
 		{
-			let manifest = PlaylistManifest.getFromBase(bManifest);
+			let manifest = FormatManifest.getFromBase(bManifest);
 			let hash = filter.download.getHeader('X-DLG-MFSTHASH', 'request');
 			let id = Number(filter.download.getHeader('X-DLG-MFSTID', 'request'));
 
-			//if it has a hash header it means it's a playlist we reqested
+			//if it has a hash header it means it's a format we reqested
 			if(hash)
 			{
 				let download = DLG.allDownloads.get(hash)!;
@@ -104,10 +104,10 @@ class StreamHandler implements RequestHandler
 					log.err('Download does not have a manifest', download);
 				}
 
-				download.fetchedPlaylists++;
-				download.manifest.playlists[id].update(manifest);
+				download.fetchedFormats++;
+				download.manifest.formats[id].update(manifest);
 
-				if(download.fetchedPlaylists == download.manifest.playlists.length)
+				if(download.fetchedFormats == download.manifest.formats.length)
 				{
 					log.d('got all manifests for: ', download);
 					download.hidden = false;
@@ -116,21 +116,21 @@ class StreamHandler implements RequestHandler
 
 			//for cases when the page only has a sub-manifest without a main manifest
 			//example of this: https://videoshub.com/videos/25312764
-			else if(streamTab && !streamTab.knownPlaylistUrls.includes(bManifest.url))
+			else if(streamTab && !streamTab.knownFormatUrls.includes(bManifest.url))
 			{
-				//log.warn(DLG.tabs[tabId].knownPlaylists, 'does not contain', filter.download.url, 'tabid: ', tabId);
+				//log.warn(DLG.tabs[tabId].knownFormatUrls, 'does not contain', filter.download.url, 'tabid: ', tabId);
 				//we have to manually create a proper MainManifest for this download here
-				let playlist = new Playlist(0, 'single-video', bManifest.url, 'unknown', 0, 0);
-				playlist.update(manifest);
-				let pls = [playlist];
-				let m = new MainManifest(bManifest, pls, manifest.title);
+				let format = new FormatData(0, 'single-video', bManifest.url, 'unknown', 0, 0);
+				format.update(manifest);
+				let formats = [format];
+				let m = new MainManifest(bManifest, formats, manifest.title);
 				filter.download.manifest = m;
 				log.d('got a single manifest for: ', filter.download);
 			}
 
 			else if(typeof streamTab === 'undefined')
 			{
-				log.err('this playlist stream does not have a tab', filter.download);
+				log.err('this format stream does not have a tab', filter.download);
 			}
 		}
 

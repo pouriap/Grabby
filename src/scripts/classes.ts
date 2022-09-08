@@ -160,7 +160,7 @@ class Download
 
 	//these are set later
 	manifest: MainManifest | undefined = undefined;
-	fetchedPlaylists = 0;
+	fetchedFormats = 0;
 	isStream = false;
 	hidden = false;
 	cat = '';
@@ -465,6 +465,7 @@ class ReqFilter
 	private _isTypWebOther: bool_und = undefined;
 	private _isTypMedia: bool_und = undefined;
 	private _isFromSpecialPage: bool_und = undefined;
+	private _isAddonRequest: bool_und = undefined;
 
 	/* constructor */
 
@@ -858,11 +859,20 @@ class ReqFilter
 
 	isFromSpecialPage()
 	{
-		if(typeof this._isFromSpecialPage === 'undefined'){
-			let url = this.download.ownerTabUrl;
-			let domain = Utils.getDomain(url);
-			this._isFromSpecialPage = Object.keys(constants.specialSites).includes(domain);
+		if(typeof this._isFromSpecialPage === 'undefined')
+		{
+			if(this.isAddonRequest())
+			{
+				this._isFromSpecialPage = false;
+			}
+			else
+			{
+				let url = this.download.ownerTabUrl;
+				let domain = Utils.getDomain(url);
+				this._isFromSpecialPage = Object.keys(constants.specialSites).includes(domain);	
+			}
 		}
+
 		return this._isFromSpecialPage;
 	}
 
@@ -950,6 +960,21 @@ class ReqFilter
 		return this._isInExtensionList(constants.binaryExts);
 	}
 
+	isAddonRequest()
+	{
+		if(typeof this._isAddonRequest === 'undefined')
+		{
+			this._isAddonRequest = false;
+
+			let originUrl = this.download.httpDetails.originUrl;
+			if(typeof originUrl != 'undefined' && originUrl.startsWith('moz-extension')){
+				this._isAddonRequest = true;
+			}
+		}
+
+		return this._isAddonRequest;
+	}
+
 	
 }
 
@@ -992,9 +1017,7 @@ class DownloadJob
 	constructor(public downloadsInfo: DownloadInfo[], public referer: string, 
 		public originPageReferer: string, public originPageCookies: string, 
 		public dmName:string)
-	{
-		//nada
-	}
+	{}
 
 	/**
 	 * Creates a job from a Download object
@@ -1116,7 +1139,7 @@ class YTDLJob
 			log.err('Download is not a stream');
 		}
 
-		for(let format of download.manifest.playlists)
+		for(let format of download.manifest.formats)
 		{
 			if(format.id == formatId)
 			{
@@ -1147,7 +1170,7 @@ class StreamManifest
 		}
 		else if(this.fullManifest.segments && this.fullManifest.segments.length > 0)
 		{
-			return 'playlist';
+			return 'format';
 		}
 		else
 		{
@@ -1162,13 +1185,11 @@ class MainManifest
 	/**
 	 * 
 	 * @param fullManifest 
-	 * @param playlists 
+	 * @param formats 
 	 */
-	constructor(public fullManifest: StreamManifest, public playlists: Playlist[], 
+	constructor(public fullManifest: StreamManifest, public formats: FormatData[], 
 		public title: string)
-	{
-		//nada
-	}
+	{}
 
 	/**
 	 * 	Gets a new instance from a StreamManifest object	
@@ -1177,57 +1198,53 @@ class MainManifest
 	 */
 	static getFromBase(manifest: StreamManifest)
 	{
-		let playlists = [];
+		let formats = [];
 
 		let id = 0;
 		for(let playlist of manifest.fullManifest.playlists)
 		{
-			let p = Playlist.getFromRawPlaylist(playlist, manifest.url, id);
-			playlists.push(p);
+			let p = FormatData.getFromRawPlaylist(playlist, manifest.url, id);
+			formats.push(p);
 			id++;
 		}
 
-		return new MainManifest(manifest.fullManifest, playlists, manifest.title);
+		return new MainManifest(manifest.fullManifest, formats, manifest.title);
 	}
 }
 
-class PlaylistManifest
+class FormatManifest
 {
 	constructor(public duration: number, public fullManifest: any, public title: string)
-	{
-		//nada
-	}
+	{}
 
 	/**
 	 * 
 	 * @param manifest 
 	 * @returns 	 
 	*/
-	static getFromBase(manifest: StreamManifest): PlaylistManifest
+	static getFromBase(manifest: StreamManifest): FormatManifest
 	{
 		let duration = 0;
 		for(let seg of manifest.fullManifest.segments)
 		{
 			duration += seg.duration;
 		}
-		return new PlaylistManifest(duration, manifest.fullManifest, manifest.title);
+		return new FormatManifest(duration, manifest.fullManifest, manifest.title);
 	}
 }
 
-class Playlist
+class FormatData
 {
 	constructor(public id: number, public nickName: string, public url: string, 
 		public res: string, public bitrate: number, public pictureSize: number, 
 		public fileSize = -1, public duration = -1)
-	{
-		//nada
-	}
+	{}
 
 	/**
 	 * Updates duration and filesize data
 	 * @param manifest
 	 */
-	update(manifest: PlaylistManifest)
+	update(manifest: FormatManifest)
 	{
 		if(manifest.duration)
 		{
@@ -1258,7 +1275,7 @@ class Playlist
 		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
 		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
 		let url = (new URL(playlist.uri, manifestURL)).toString();
-		return new Playlist(id, name, url, res, bitrate, pictureSize);
+		return new FormatData(id, name, url, res, bitrate, pictureSize);
 	}
 }
 
@@ -1268,7 +1285,7 @@ class tabinfo
 	url: string;
 	title: string;
 	openerId: number | undefined;
-	knownPlaylistUrls: string[] = [];
+	knownFormatUrls: string[] = [];
 	closed: boolean = false;
 	specialHandler: string | undefined = undefined;
 	ytdlinfo: ytdlinfo | undefined = undefined;

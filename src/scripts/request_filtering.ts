@@ -134,6 +134,11 @@ namespace RequestFiltering
 			if(filter.isAJAX() || filter.isSizeBlocked()){
 				return Promise.resolve({cancel: false});
 			}
+			if(typeof filter.download.tabId === 'undefined')
+			{
+				log.warn('ignoring request with -1 tab id', filter.download);
+				return Promise.resolve({cancel: false});
+			}
 
 			handler = new DownloadHandler(download, filter);
 		}
@@ -158,11 +163,6 @@ namespace RequestFiltering
 	 */
 	function isIgnored(filter: ReqFilter)
 	{
-		if(typeof filter.download.tabId === 'undefined'){
-			log.warn('ignoring request with -1 tab id', filter.download);
-			return true;
-		}
-
 		if(!filter.isStatusOK()) return true;
 
 		if(filter.isWebSocket()) return true;
