@@ -18,9 +18,6 @@ class DownloadGrabPopup
 	options: Options.DLGOptions;
 	availableDMs: string[];
 
-	selectedDl: Download | null = null;
-	continueWithBrowser = false;
-
 	constructor(dlgJSON: DLGJSON)
 	{
 		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
@@ -150,7 +147,7 @@ class Download
 	classReason = 'no-class-yet';
 	//a Promise.resolve object is stored here for downloads that we intercept from the browser
 	//calling resolve() on this download will continue the request
-	resolveRequest: ((value: unknown) => void) | undefined = undefined;
+	resolveRequest: ((value: webx_BlockingResponse) => void) | undefined = undefined;
 
 	private _hash = '';
 	private _filename: str_und = undefined;

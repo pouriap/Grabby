@@ -1,7 +1,6 @@
 namespace PopupMenu
 {
 	var currTab: tabinfo;
-	var selectedDl: Download;
 
 	document.addEventListener("DOMContentLoaded", (e) => {
 
@@ -50,14 +49,10 @@ namespace PopupMenu
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
-		let selectedDl = DLGPop.selectedDl;
+		let selectedDl = Popup.selectedDl;
 	
 		if(disabled){
 			return;
-		}
-		
-		if(!selectedDl){
-			log.err('no download is selected');
 		}
 		
 		switch(id)
@@ -184,18 +179,18 @@ namespace PopupMenu
 				ui.get('#action-report')!.innerHTML = 'Report falsely detected download';
 	
 				let hash = this.getAttribute("data-hash")!;
-				DLGPop.selectedDl = DLGPop.allDownloads.get(hash)!;
+				Popup.selectedDl = DLGPop.allDownloads.get(hash)!;
 
-				log.d('item clicked: ', DLGPop.selectedDl);
+				log.d('item clicked: ', Popup.selectedDl);
 	
-				if(DLGPop.selectedDl.isStream){
-					renderStream(StreamDataUI.getFromManifest(DLGPop.selectedDl.manifest!));
+				if(Popup.selectedDl.isStream){
+					renderStream(StreamDataUI.getFromManifest(Popup.selectedDl.manifest!));
 				}
-				else if(typeof DLGPop.selectedDl.specialHandler != 'undefined'){
+				else if(typeof Popup.selectedDl.specialHandler != 'undefined'){
 					renderSpecial();
 				}
 				else{
-					renderDownload(DLGPop.selectedDl);
+					renderDownload(Popup.selectedDl);
 				}
 			});
 	
@@ -300,7 +295,7 @@ namespace PopupMenu
 	 */
 	function renderSpecial()
 	{
-		switch(DLGPop.selectedDl!.specialHandler)
+		switch(Popup.selectedDl.specialHandler)
 		{
 			case 'youtube-video':
 				renderYtVideo();
@@ -312,6 +307,6 @@ namespace PopupMenu
 	
 	function renderYtVideo()
 	{
-		renderStream(StreamDataUI.getFromYTDLInfo(DLGPop.selectedDl!.ytdlinfo!));
+		renderStream(StreamDataUI.getFromYTDLInfo(Popup.selectedDl.ytdlinfo!));
 	}
 }

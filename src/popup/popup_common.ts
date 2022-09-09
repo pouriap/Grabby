@@ -2,6 +2,8 @@ var DLGPop: DownloadGrabPopup;
 
 namespace Popup
 {	
+	export var selectedDl: Download;
+
 	/**
 	 * Gets the DLG instance from the background script and makes a copy of the needed data inside it
 	 */
@@ -42,11 +44,9 @@ namespace Popup
 		window.close();
 	}
 	
-	export function continueWithBrowser(download: Download)
+	export function continueWithBrowser()
 	{
-		let msg = new Messaging.MSGContWithBrowser(download.hash);
-		Messaging.sendMessage(msg);
-		DLGPop.continueWithBrowser = true;
+		PopupDownload.continueWithBrowser = true;
 		window.close();
 	}
 	

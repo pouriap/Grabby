@@ -255,7 +255,6 @@ class DownloadHandler implements RequestHandler
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve)
 			{
-				//@ts-ignore	this be something special
 				download.resolveRequest = resolve;
 				DLG.showDlDialog(download);
 			});

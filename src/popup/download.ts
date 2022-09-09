@@ -1,5 +1,8 @@
 namespace PopupDownload
 {
+	// indicates whether we continue with browser after download dialog is closed or not
+	export var continueWithBrowser = false;
+
 	/**
 	 * id of this download dialog
 	 * used for closing blank tabs after a download dialog is closed
@@ -17,7 +20,7 @@ namespace PopupDownload
 		Popup.getBackgroundData().then(async function(){
 			windowId = (await browser.windows.getCurrent()).id;
 			let hash = DLGPop.downloadDialogs.get(windowId)!;
-			DLGPop.selectedDl = DLGPop.allDownloads.get(hash)!;
+			Popup.selectedDl = DLGPop.allDownloads.get(hash)!;
 			renderDownloadDialog();
 		});
 
@@ -30,29 +33,20 @@ namespace PopupDownload
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
-		let selectedDl = DLGPop.selectedDl;
+		let selectedDl = Popup.selectedDl;
 
 		if(disabled){
 			return;
 		}
 
-		if(!selectedDl){
-			log.err('no download is selected');
-		}
-
-		switch(id){
-			
+		switch(id)
+		{	
 			case "action-continue":
-				Popup.continueWithBrowser(selectedDl);
+				Popup.continueWithBrowser();
 				break;
 
 			case "action-download":
-				if( (document.getElementById("dl-with-dlgrab") as HTMLInputElement).checked){
-					Popup.downloadWithSelectedDM(selectedDl);
-				}
-				else{
-					Popup.downloadWithFirefox(selectedDl);
-				}
+				Popup.downloadWithSelectedDM(selectedDl);
 				break;
 			
 			case "action-cancel":
@@ -69,13 +63,8 @@ namespace PopupDownload
 	 */
 	window.addEventListener("beforeunload", function()
 	{
-		if(!DLGPop.selectedDl)
-		{
-			log.err('No download is selected');
-		}
-
-		let msg = new Messaging.MSGDlDialogClosing(DLGPop.continueWithBrowser, 
-			DLGPop.selectedDl.hash, windowId);
+		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, Popup.selectedDl.hash, 
+			windowId);
 		Messaging.sendMessage(msg);
 	});
 
@@ -84,17 +73,12 @@ namespace PopupDownload
 	 */
 	function renderDownloadDialog()
 	{
-		if(!DLGPop.selectedDl)
-		{
-			log.err('No download is selected');
-		}
-
-		let classReason = (log.DEBUG)? ' (' + DLGPop.selectedDl.classReason + ')' : '';
-		document.getElementById("filename")!.innerHTML = DLGPop.selectedDl.filename + classReason;
-		document.getElementById("filename")!.setAttribute("title", DLGPop.selectedDl.filename);
+		let classReason = (log.DEBUG)? ' (' + Popup.selectedDl.classReason + ')' : '';
+		document.getElementById("filename")!.innerHTML = Popup.selectedDl.filename + classReason;
+		document.getElementById("filename")!.setAttribute("title", Popup.selectedDl.filename);
 		document.getElementById("size")!.innerHTML = 
-			(DLGPop.selectedDl.size !== -1)? filesize(DLGPop.selectedDl.size) : DLGPop.selectedDl.size;
-		document.getElementById("host")!.innerHTML = DLGPop.selectedDl.host;
+			(Popup.selectedDl.size !== -1)? filesize(Popup.selectedDl.size) : Popup.selectedDl.size;
+		document.getElementById("host")!.innerHTML = Popup.selectedDl.host;
 		Popup.populateDMs();
 	}
 

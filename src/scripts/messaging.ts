@@ -9,7 +9,6 @@ namespace Messaging
 	const TYP_GET_DLG = 'get-bg';
 	const TYP_DLGJSON = 'dlg-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
-	const TYP_CONT_WITH_BROWSER = 'con-with-browser';
 	const TYP_DOWNLOAD = 'download';
 	const TYP_DL_REPORTED = 'dl-reported';
 	const TYP_GET_OPTS_DATA = 'get-options-data';
@@ -51,12 +50,6 @@ namespace Messaging
 		type = TYP_DL_DIALOG_CLOSING;
 		constructor(public continueWithBrowser: boolean, 
 			public dlHash: string, public windowId: number){};
-	}
-	
-	export class MSGContWithBrowser
-	{
-		type = TYP_CONT_WITH_BROWSER;
-		constructor(public dlhash: string){};
 	}
 	
 	export class MSGDownload
@@ -150,12 +143,6 @@ namespace Messaging
 			handleDLDialog(msg as MSGDlDialogClosing);
 		}
 
-		//to continue with browser
-		else if(msg.type === TYP_CONT_WITH_BROWSER)
-		{
-			handleContinue(msg as MSGContWithBrowser);
-		}
-
 		//downloads a download with the specified DM
 		else if(msg.type === TYP_DOWNLOAD)
 		{
@@ -213,17 +200,22 @@ namespace Messaging
 		});
 	}
 
+	//this message is received when download dialog is closing
 	function handleDLDialog(msg: MSGDlDialogClosing)
 	{
 		DLG.downloadDialogs.delete(msg.windowId);
-		if(msg.continueWithBrowser){
-			return;
-		}
 		let download = DLG.allDownloads.get(msg.dlHash)!;
 
-		if(download.resolveRequest){
-			download.resolveRequest({cancel: true});
+		if(typeof download.resolveRequest === 'undefined'){
+			log.err('download does not have resolve', download);
 		}
+
+		if(msg.continueWithBrowser){
+			download.resolveRequest({cancel: false});
+			return;
+		}
+
+		download.resolveRequest({cancel: true});
 
 		//if this is a download that opens in an empty new tab and we are not 
 		//continuing with browser then close the empty tab manually
@@ -239,14 +231,6 @@ namespace Messaging
 			}
 		}
 
-	}
-
-	function handleContinue(msg: MSGContWithBrowser)
-	{
-		let download = DLG.allDownloads.get(msg.dlhash);
-		if(download?.resolveRequest){
-			download.resolveRequest({cancel: false});
-		}
 	}
 
 	function handleDownload(msg: MSGDownload)
