@@ -71,7 +71,7 @@ namespace PopupMenu
 				break;
 	
 			case "action-ytdl-video":
-				ytdlVideo();
+				ytdlVideo(selectedDl, clickedAction.getAttribute('data-format-id')!);
 				break;
 	
 			case "action-ytdl-audio":
@@ -116,9 +116,10 @@ namespace PopupMenu
 		log.err(`format with id ${formatId} not found`);
 	}
 
-	function ytdlVideo()
+	function ytdlVideo(download: Download, formatId: string)
 	{
-
+		let msg = new Messaging.MSGYTDLVideo(download.url, download.filename, download.hash, formatId);
+		Messaging.sendMessage(msg);
 	}
 
 	function ytdlAudio()
@@ -259,7 +260,8 @@ namespace PopupMenu
 		{
 			let li = document.createElement('li');
 			li.setAttribute('class', 'format action');
-			li.setAttribute('id', 'action-ytdl-video');
+			let action = (data.type === 'manifest')? 'action-ytdl-manifest' : 'action-ytdl-video';
+			li.setAttribute('id', action);
 			li.setAttribute('data-format-id', format.id.toString());
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
 	

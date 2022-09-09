@@ -26,7 +26,7 @@ class SpecialSiteHandler implements RequestHandler
 	handleYoutube()
 	{
 		let url = this.download.url;
-		let videoPage = /^https:\/\/www.youtube.com\/watch\?v=.*/gm;
+		let videoPage = /^https:\/\/www\.youtube\.com\/watch\?v=.*/gm;
 
 		if(url.match(videoPage))
 		{
@@ -38,6 +38,12 @@ class SpecialSiteHandler implements RequestHandler
 			this.download.hidden = true;
 			DLG.addToAllDownloads(this.download);
 			return;
+		}
+
+		let ajaxPage = /^https:\/\/www\.youtube\.com\/youtubei\/v1\/player\?key=.*/gm;
+		if(url.match(ajaxPage))
+		{
+			log.d('this be ajax video', this.download);
 		}
 	}
 }

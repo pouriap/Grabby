@@ -73,12 +73,12 @@ namespace PopupDownload
 	 */
 	function renderDownloadDialog()
 	{
-		let classReason = (log.DEBUG)? ' (' + Popup.selectedDl.classReason + ')' : '';
-		document.getElementById("filename")!.innerHTML = Popup.selectedDl.filename + classReason;
-		document.getElementById("filename")!.setAttribute("title", Popup.selectedDl.filename);
-		document.getElementById("size")!.innerHTML = 
-			(Popup.selectedDl.size !== -1)? filesize(Popup.selectedDl.size) : Popup.selectedDl.size;
-		document.getElementById("host")!.innerHTML = Popup.selectedDl.host;
+		let download = Popup.selectedDl;
+		let classReason = (log.DEBUG)? ' (' + download.classReason + ')' : '';
+		ui.get("#filename")!.innerHTML = download.filename + classReason;
+		ui.get("#filename")!.setAttribute("title", download.filename);
+		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
+		ui.get("#host")!.innerHTML = download.host;
 		Popup.populateDMs();
 	}
 

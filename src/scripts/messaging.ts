@@ -223,14 +223,12 @@ namespace Messaging
 		if(typeof download.tabId != 'undefined')
 		{
 			let dlTab = DLG.tabs.getsure(download.tabId);
-
 			if(dlTab.url === "about:blank")
 			{
 				log.d('closing blank tab: ', dlTab);
 				browser.tabs.remove(dlTab.id).catch((e) => {});
 			}
 		}
-
 	}
 
 	function handleDownload(msg: MSGDownload)

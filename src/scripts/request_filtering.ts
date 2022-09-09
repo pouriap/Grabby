@@ -39,11 +39,12 @@ namespace RequestFiltering
 	//todo: we can do some of our ignores here to be more efficient
 	function doOnBeforeRequest(details: webx_beforeRequest): webx_BlockingResponse
 	{
-		let formDataArr = (
+		//todo: remove this from here and add to download object
+		let formDataArr: {[index: string]: string[]} = (
 			details.method === "POST" && 
 			details.requestBody &&
 			details.requestBody.formData)? 
-				details.requestBody.formData : [];
+				details.requestBody.formData : {};
 		
 		let postData = '';
 		for(let key in formDataArr){
@@ -59,6 +60,7 @@ namespace RequestFiltering
 		//store post data in request object
 		//more data are added to it in later stages of request
 		let httpDetails: HTTPDetails = {} as HTTPDetails;
+		Object.assign(httpDetails, details);
 		httpDetails.postData = postData;
 
 		//store the request details in DLG.allRequests

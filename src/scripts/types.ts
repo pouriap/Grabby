@@ -22,7 +22,7 @@ type webx_reqCommon = {
 
 type webx_beforeRequest = webx_reqCommon & {
 	incognito: boolean;
-	requestBody: {error: string, formData: {[index: string]: any}};
+	requestBody: {error?: string, formData?: {[index: string]: string[]}, raw?: [{bytes?: any, file?: string}]};
 }
 
 type webx_beforeSendHeaders = webx_reqCommon & {
