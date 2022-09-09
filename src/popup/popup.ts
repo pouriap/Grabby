@@ -1,6 +1,7 @@
 namespace PopupMenu
 {
 	var currTab: tabinfo;
+	var selectedDl: Download;
 
 	document.addEventListener("DOMContentLoaded", (e) => {
 
@@ -32,7 +33,7 @@ namespace PopupMenu
 	
 		ui.get("#dl-with-dlgrab")?.click();
 	
-		Popup.getBackgroundData().then(getCurrentTab).then(render);
+		Popup.getBackgroundData().then(getCurrentTab).then(renderDownloadsList);
 	
 	});
 
@@ -59,8 +60,8 @@ namespace PopupMenu
 			log.err('no download is selected');
 		}
 		
-		switch(id){
-			
+		switch(id)
+		{
 			case "action-download":
 				if( (ui.get("#dl-with-dlgrab") as HTMLInputElement).checked){
 					Popup.downloadWithSelectedDM(selectedDl);
@@ -69,13 +70,17 @@ namespace PopupMenu
 					Popup.downloadWithFirefox(selectedDl);
 				}
 				break;
+
+			case "action-ytdl-manifest":
+				ytdlManifest(selectedDl, Number(clickedAction.getAttribute('data-format-id')));
+				break;
 	
 			case "action-ytdl-video":
-				Popup.downloadWithYtdl(selectedDl, Number(clickedAction.getAttribute('data-format-id')), 'video');
+				ytdlVideo();
 				break;
 	
 			case "action-ytdl-audio":
-				Popup.downloadWithYtdl(selectedDl, Number(clickedAction.getAttribute('data-format-id')), 'audio');
+				ytdlAudio();
 				break;
 	
 			case "action-back":
@@ -98,18 +103,32 @@ namespace PopupMenu
 				break;
 		}
 	}
-	
-	/**
-	 * This is called when background data (DLG) is received via messaging
-	 */
-	function render()
+
+	function ytdlManifest(download: Download, formatId: number)
 	{
-		if(typeof currTab.specialHandler != 'undefined'){
-			renderSpecial();
+		let manifest = download.manifest!;
+		for(let format of manifest.formats)
+		{
+			if(format.id === formatId)
+			{
+				let url = format.url;
+				let msg = new Messaging.MSGYTDLManifest(url, download.hash, formatId.toString());
+				Messaging.sendMessage(msg);
+				return;
+			}
 		}
-		else{
-			renderDownloadsList();
-		}
+
+		log.err(`format with id ${formatId} not found`);
+	}
+
+	function ytdlVideo()
+	{
+
+	}
+
+	function ytdlAudio()
+	{
+
 	}
 	
 	/**
@@ -171,6 +190,9 @@ namespace PopupMenu
 	
 				if(DLGPop.selectedDl.isStream){
 					renderStream(StreamDataUI.getFromManifest(DLGPop.selectedDl.manifest!));
+				}
+				else if(typeof DLGPop.selectedDl.specialHandler != 'undefined'){
+					renderSpecial();
 				}
 				else{
 					renderDownload(DLGPop.selectedDl);
@@ -278,18 +300,18 @@ namespace PopupMenu
 	 */
 	function renderSpecial()
 	{
-		switch(currTab.specialHandler)
+		switch(DLGPop.selectedDl!.specialHandler)
 		{
-			case 'youtube':
-				renderYoutube();
+			case 'youtube-video':
+				renderYtVideo();
 				break;
 			default:
 				break;
 		}
 	}
 	
-	function renderYoutube()
+	function renderYtVideo()
 	{
-		renderStream(StreamDataUI.getFromYTDLInfo(currTab.ytdlinfo!));
+		renderStream(StreamDataUI.getFromYTDLInfo(DLGPop.selectedDl!.ytdlinfo!));
 	}
 }

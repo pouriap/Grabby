@@ -59,12 +59,6 @@ namespace Popup
 		});
 	}
 	
-	export function downloadWithYtdl(download: Download, formatId: number, type: string)
-	{
-		let msg = new Messaging.MSGYTDLGet(download.hash, formatId, type);
-		Messaging.sendMessage(msg);
-	}
-	
 	export function setActionEnabled(element: Element, enabled: boolean)
 	{
 		if(enabled){

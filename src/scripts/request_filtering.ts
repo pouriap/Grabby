@@ -118,12 +118,16 @@ namespace RequestFiltering
 
 		let handler: RequestHandler;
 
+		if(filter.getSpecialHandler())
+		{
+			handler = new SpecialSiteHandler(download, filter);
+		}
 		// This is for handling streams, aka requests for HLS and DASH manifests
 		// Streams are AJAX and AJAX is ignored in the handling flow
 		// Also for streams we have to wait until the manifest body is received and parse it 
 		// which is async and doesn't work with our normal handling which is syn
 		// Also streams are different in every way so we handle them here first
-		if(filter.isStreamManifest())
+		else if(filter.isStreamManifest())
 		{
 			handler = new StreamHandler(download, filter);
 		}
@@ -170,8 +174,6 @@ namespace RequestFiltering
 		if(filter.isBlackListed()) return true;
 
 		if(filter.isExcludedInOpts()) return true;
-
-		if(filter.isFromSpecialPage()) return true;
 
 		return false;
 	}

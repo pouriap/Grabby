@@ -80,22 +80,32 @@ namespace NativeMessaging
 		constructor(public job: DownloadJob){};
 	}
 
-	export class MSG_YTDLVideo implements NativeMessage
-	{
-		type = MSGTYP_YTDL_VID;
-		constructor(public url: string, public name: string, public dlHash: string){};
-	}
-
-	export class MSG_YTDLAUdio implements NativeMessage
-	{
-		type = MSGTYP_YTDL_AUD;
-		constructor(public url: string, public name: string, public dlHash: string){};
-	}
-
 	export class MSG_YTDLInfo implements NativeMessage
 	{
 		type = MSGTYP_YTDL_INFO;
-		constructor(public url: string, public tabId: number){};
+		constructor(public url: string, public dlHash: string){};
+	}
+
+	//the 'type' property of the following 3 is the same, only the contents of the message is different
+	export class MSG_YTDLManifest implements NativeMessage
+	{
+		type = MSGTYP_YTDL_GET;
+		constructor(public url: string, public filename: string, public dlHash: string, 
+			public formatId: string){};
+	}
+
+	export class MSG_YTDLVideo implements NativeMessage
+	{
+		type = MSGTYP_YTDL_GET;
+		constructor(public url: string, public filename: string, public dlHash: string,
+			public formatId: string){};
+	}
+
+	export class MSG_YTDLAudio implements NativeMessage
+	{
+		type = MSGTYP_YTDL_GET;
+		audioOnly = true;
+		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
 	/* recived messages */
@@ -110,14 +120,9 @@ namespace NativeMessaging
 
 	type MSGRCV_YTDLInfo = {
 		type: string,
-		tabId: number,
+		dlHash: string,
 		info: ytdlinfo,
 	};
-
-	type MSGRCV_YTDLComp = {
-		type: string,
-		dlHash: string,
-	}
 
 	type MSGRCV_YTDLFail = {
 		type: string,
@@ -126,8 +131,15 @@ namespace NativeMessaging
 
 	type MSGRCV_YTDLProg = {
 		type: string,
-		dlHash: string,
+		dlHash?: string,
+		tabId?: number,
 		percent: string
+	}
+
+	type MSGRCV_YTDLComp = {
+		type: string,
+		dlHash?: string,
+		tabId?: number,
 	}
 
 	type MSGRCV_General = {
@@ -148,8 +160,7 @@ namespace NativeMessaging
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
 	const MSGTYP_YTDL_INFO = "ytdl_getinfo";
-	const MSGTYP_YTDL_AUD = "ytdl_download_audio";
-	const MSGTYP_YTDL_VID = "ytdl_download_video";
+	const MSGTYP_YTDL_GET = "ytdl_get";
 	const MSGTYP_YTDLPROG = "app_download_progress";
 	const MSGTYP_ERR = "app_error";
 	const MSGTYP_MSG = "app_message";
@@ -290,36 +301,18 @@ namespace NativeMessaging
 	/* handlers */
 	function handleYTDLInfo(msg: MSGRCV_YTDLInfo)
 	{
-		log.d('got info for ' + msg.tabId, msg.info);
-		let tab = DLG.tabs.getsure(msg.tabId);
-
-		tab.ytdlinfo = msg.info;
-
+		log.d('received ytdl info', msg.info);
+		
 		if(typeof msg.info === 'object')
 		{
-			browser.browserAction.setBadgeText({text: 'vid', tabId: msg.tabId});
+			let dl = DLG.allDownloads.get(msg.dlHash)!;
+			dl.ytdlinfo = msg.info;
+			dl.hidden = false;
 		}
 		else
 		{
 			log.err("Bad response from YTDL:", msg.info);
 		}
-	}
-	
-	function handleYTDLComp(msg: MSGRCV_YTDLComp)
-	{
-		let options = {
-			type: "basic", 
-			title: "Download Grab", 
-			message: "Download Complete"
-		};
-		browser.notifications.create(options);
-
-		let message = {
-			type: Messaging.TYP_YTDL_PROGRESS,
-			dlHash: msg.dlHash,
-			percent: '100'
-		};
-		Messaging.sendMessage(message);
 	}
 
 	function handleYTDLFail(msg: MSGRCV_YTDLFail)
@@ -335,11 +328,22 @@ namespace NativeMessaging
 	function handleYTDLProg(msg: MSGRCV_YTDLProg)
 	{
 		let percent = msg.percent.split('%')[0];
-		let message = {
-			type: Messaging.TYP_YTDL_PROGRESS,
-			dlHash: msg.dlHash,
-			percent: percent
+		let specifier = (typeof msg.dlHash != 'undefined')? msg.dlHash : msg.tabId!;
+		let message = new Messaging.MSGYTDLProg(percent, specifier);
+		Messaging.sendMessage(message);
+	}
+
+	function handleYTDLComp(msg: MSGRCV_YTDLComp)
+	{
+		let options = {
+			type: "basic", 
+			title: "Download Grab", 
+			message: "Download Complete"
 		};
+		browser.notifications.create(options);
+
+		let specifier = (typeof msg.dlHash != 'undefined')? msg.dlHash : msg.tabId!;
+		let message = new Messaging.MSGYTDLProg('100', specifier);
 		Messaging.sendMessage(message);
 	}
 

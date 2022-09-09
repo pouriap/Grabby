@@ -1,25 +1,43 @@
-class YoutubeHandler implements SiteHandler
+class SpecialSiteHandler implements RequestHandler
 {
-	tab: webx_tab;
+	download: Download;
+	filter: ReqFilter;
 
-	constructor(tab: webx_tab){
-		this.tab = tab;
-	}
-
-	handle()
+	constructor(download: Download, filter: ReqFilter)
 	{
-		let path = Utils.getPath(this.tab.url);
-
-		//ignore channels
-		if(path.startsWith('/c/')) return; 
-		//ignore youtube main page
-		if(path.replace(/\//g, '').length === 0) return;
-
-		let msg = new NativeMessaging.MSG_YTDLInfo(this.tab.url, this.tab.id);
-		NativeMessaging.sendMessage(msg);
-		log.d('sending ytdl message', msg);
-
-		DLG.tabs.getsure(this.tab.id).specialHandler = 'youtube';
+		this.download = download;
+		this.filter = filter;
 	}
 
+	handle(): Promise<webx_BlockingResponse>
+	{
+		switch(this.filter.getSpecialHandler())
+		{
+			case 'youtube':
+				this.handleYoutube();
+				break;
+			default:
+				break;
+		}
+
+		return Promise.resolve({cancel: false});
+	}
+
+	handleYoutube()
+	{
+		let url = this.download.url;
+		let videoPage = /^https:\/\/www.youtube.com\/watch\?v=.*/gm;
+
+		if(url.match(videoPage))
+		{
+			log.d('handling youtube video page');
+			
+			let msg = new NativeMessaging.MSG_YTDLInfo(url, this.download.hash);
+			NativeMessaging.sendMessage(msg);
+			this.download.specialHandler = 'youtube-video';
+			this.download.hidden = true;
+			DLG.addToAllDownloads(this.download);
+			return;
+		}
+	}
 }

@@ -121,26 +121,6 @@ class DownloadGrab
 			NativeMessaging.sendMessage(msg);
 		}
 	}
-
-	doYTDLJob(job: YTDLJob)
-	{
-		let msg: NativeMessaging.NativeMessage;
-
-		if(job.type === 'video')
-		{
-			msg = new NativeMessaging.MSG_YTDLVideo(job.url, job.filename, job.dlHash);
-		}
-		else if(job.type === 'audio')
-		{
-			msg = new NativeMessaging.MSG_YTDLAUdio(job.url, job.filename, job.dlHash);
-		}
-		else
-		{
-			log.err(`job not supported: ${job}`);
-		}
-
-		NativeMessaging.sendMessage(msg);
-	}
 }
 
 /**
@@ -159,9 +139,11 @@ class Download
 	httpDetails: HTTPDetails;
 
 	//these are set later
+	isStream = false;
 	manifest: MainManifest | undefined = undefined;
 	fetchedFormats = 0;
-	isStream = false;
+	specialHandler: typeof constants.specialHandlers[number] | undefined = undefined;
+	ytdlinfo: ytdlinfo | undefined = undefined;
 	hidden = false;
 	cat = '';
 	class = '';
@@ -282,6 +264,11 @@ class Download
 		if(this.isStream)
 		{
 			return (this.manifest as MainManifest).title || "unknown";
+		}
+
+		if(typeof this.specialHandler != 'undefined')
+		{
+			return (this.ytdlinfo!.title);
 		}
 
 		if(typeof this._filename === "undefined"){
@@ -464,7 +451,7 @@ class ReqFilter
 	private _isTypWebRes: bool_und = undefined;
 	private _isTypWebOther: bool_und = undefined;
 	private _isTypMedia: bool_und = undefined;
-	private _isFromSpecialPage: bool_und = undefined;
+	private _specialHandler: str_und = undefined;
 	private _isAddonRequest: bool_und = undefined;
 
 	/* constructor */
@@ -857,23 +844,25 @@ class ReqFilter
 		return false;
 	}
 
-	isFromSpecialPage()
+	getSpecialHandler()
 	{
-		if(typeof this._isFromSpecialPage === 'undefined')
+		if(typeof this._specialHandler === 'undefined')
 		{
 			if(this.isAddonRequest())
 			{
-				this._isFromSpecialPage = false;
+				this._specialHandler = '';
 			}
 			else
 			{
+				//todo: maybe only check with request URL not owner tab url
 				let url = this.download.ownerTabUrl;
 				let domain = Utils.getDomain(url);
-				this._isFromSpecialPage = Object.keys(constants.specialSites).includes(domain);	
+				this._specialHandler = (typeof constants.specialSites[domain] != 'undefined')?
+					constants.specialSites[domain] : '';
 			}
 		}
 
-		return this._isFromSpecialPage;
+		return this._specialHandler;
 	}
 
 	isTypeWebRes()
@@ -983,12 +972,6 @@ interface RequestHandler
 	download: Download;
 	filter: ReqFilter;
 	handle(): Promise<webx_BlockingResponse>;
-}
-
-interface SiteHandler
-{
-	tab: webx_tab;
-	handle(): void;
 }
 
 /**
@@ -1109,46 +1092,6 @@ class DownloadJob
 
 	}
 
-}
-
-class YTDLJob
-{
-	/**
-	 * 
-	 * @param url URL to download
-	 * @param type either 'audio' or 'video'
-	 * @param filename name of the file to save
-	 * @param dlHash hash of Download object related to this job
-	 */
-	constructor(public url: string, public type: string, 
-		public filename: string, public dlHash: string)
-	{
-		this.url = encodeURI(url);
-	}
-
-	/**
-	 * Gets a YTDLJob from a download
-	 * @param download 
-	 * @param formatId 
-	 * @param type either 'audio' or 'video'
-	 */
-	static getFromDownload(download: Download, formatId: number, type: string): YTDLJob
-	{
-		if(!download.manifest)
-		{
-			log.err('Download is not a stream');
-		}
-
-		for(let format of download.manifest.formats)
-		{
-			if(format.id == formatId)
-			{
-				return new YTDLJob(format.url, type, download.manifest.title, download.hash);
-			}
-		}
-
-		log.err('Format with id ' + formatId + ' not found');
-	}
 }
 
 class StreamManifest
@@ -1330,6 +1273,7 @@ class StreamDataUI
 		{
 			if(typeof format.format_note != 'string') continue; 
 			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
+			if(!format.vcodec.startsWith('avc')) continue;
 			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
 			{
 				formats.push(YTFormatData.getFromYTDLFormat(format));
@@ -1348,8 +1292,6 @@ class tabinfo
 	openerId: number | undefined;
 	knownFormatUrls: string[] = [];
 	closed: boolean = false;
-	specialHandler: string | undefined = undefined;
-	ytdlinfo: ytdlinfo | undefined = undefined;
 
 	constructor(tab: webx_tab)
 	{

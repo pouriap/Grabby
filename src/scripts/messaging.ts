@@ -13,7 +13,9 @@ namespace Messaging
 	const TYP_DOWNLOAD = 'download';
 	const TYP_DL_REPORTED = 'dl-reported';
 	const TYP_GET_OPTS_DATA = 'get-options-data';
-	const TYP_YTDL_GET = 'ytdl-get';
+	const TYP_YTDL_MANIFEST = 'ytdl-manifest';
+	const TYP_YTDL_VIDEO = 'ytdl-video';
+	const TYP_YTDL_AUDIO = 'ytdl-audio';
 	export const TYP_YTDL_PROGRESS = 'ytdl-progress';
 
 
@@ -63,16 +65,40 @@ namespace Messaging
 		constructor(public dlHash: string, public dmName: string){};
 	}
 	
-	export class MSGYTDLGet
+	export class MSGYTDLManifest
 	{
-		type = TYP_YTDL_GET;
-		constructor(public dlHash: string, public formatId: number, public ytdlType: string){};
+		type = TYP_YTDL_MANIFEST;
+		constructor(public url: string, public dlHash: string, public formatId: string){};
+	}
+
+	export class MSGYTDLVideo
+	{
+		type = TYP_YTDL_VIDEO;
+		constructor(public url: string, public filename: string, public dlHash: string,
+			public formatId: string){};
+	}
+
+	export class MSGYTDLAudio
+	{
+		type = TYP_YTDL_AUDIO;
+		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
 	export class MSGYTDLProg
 	{
 		type = TYP_YTDL_PROGRESS;
-		constructor(public dlHash: string, public percent: string){};
+		dlHash: string | undefined;
+		tabId: number | undefined;
+		
+		constructor(public percent: string, specifier: number | string)
+		{
+			if(typeof specifier === 'string'){
+				this.dlHash = specifier;
+			}
+			if(typeof specifier === 'number'){
+				this.tabId = specifier;
+			}
+		};
 	}
 
 
@@ -136,10 +162,21 @@ namespace Messaging
 			handleDownload(msg as MSGDownload);
 		}
 
-		//downloads a stream with youtubedl
-		else if(msg.type === TYP_YTDL_GET)
+		//downloads a stream manifest
+		else if(msg.type === TYP_YTDL_MANIFEST)
 		{
-			handleYTDLGet(msg as MSGYTDLGet);
+			handleYTDLManif(msg as MSGYTDLManifest)
+		}
+
+		//downloads a video url
+		else if(msg.type === TYP_YTDL_VIDEO)
+		{
+			handleYTDLVid(msg as MSGYTDLVideo);
+		}
+
+		else if(msg.type === TYP_YTDL_AUDIO)
+		{
+			handleYTDLAud(msg as MSGYTDLAudio);
 		}
 
 		return Promise.resolve();
@@ -220,11 +257,24 @@ namespace Messaging
 		});
 	}
 
-	function handleYTDLGet(msg: MSGYTDLGet)
+	function handleYTDLManif(msg: MSGYTDLManifest)
 	{
 		let download = DLG.allDownloads.get(msg.dlHash)!;
-		let job = YTDLJob.getFromDownload(download, msg.formatId, msg.ytdlType);
-		DLG.doYTDLJob(job);
+		let manifest = download.manifest!;
+		let nmsg = new NativeMessaging.MSG_YTDLManifest(msg.url, manifest.title, msg.dlHash, msg.formatId);
+		NativeMessaging.sendMessage(nmsg);
+	}
+
+	function handleYTDLVid(msg: MSGYTDLVideo)
+	{
+		let nmsg = new NativeMessaging.MSG_YTDLVideo(msg.url, msg.filename, msg.dlHash, msg.formatId);
+		NativeMessaging.sendMessage(nmsg);
+	}
+
+	function handleYTDLAud(msg: MSGYTDLAudio)
+	{
+		let nmsg = new NativeMessaging.MSG_YTDLAudio(msg.url, msg.filename, msg.dlHash);
+		NativeMessaging.sendMessage(nmsg);
 	}
 
 }
