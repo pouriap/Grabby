@@ -49,7 +49,7 @@ namespace Messaging
 	{
 		type = TYP_DL_DIALOG_CLOSING;
 		constructor(public continueWithBrowser: boolean, 
-			public dlHash: string, public windowId: number){};
+			public dlHash: string){};
 	}
 	
 	export class MSGDownload
@@ -191,7 +191,6 @@ namespace Messaging
 		return new Promise((resolve) => {
 			let json: DLGJSON = {
 				allDownloads: Utils.mapToArray(DLG.allDownloads),
-				downloadDialogs: Utils.mapToArray(DLG.downloadDialogs),
 				tabs: Utils.mapToArray(DLG.tabs),
 				options: Options.opt,
 				availableDMs: DLG.availableDMs,
@@ -203,7 +202,6 @@ namespace Messaging
 	//this message is received when download dialog is closing
 	function handleDLDialog(msg: MSGDlDialogClosing)
 	{
-		DLG.downloadDialogs.delete(msg.windowId);
 		let download = DLG.allDownloads.get(msg.dlHash)!;
 
 		if(typeof download.resolveRequest === 'undefined'){

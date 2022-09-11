@@ -7,7 +7,6 @@ namespace PopupDownload
 	 * id of this download dialog
 	 * used for closing blank tabs after a download dialog is closed
 	 */
-	var windowId: number;
 
 	document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -18,8 +17,10 @@ namespace PopupDownload
 		});
 
 		Popup.getBackgroundData().then(async function(){
-			windowId = (await browser.windows.getCurrent()).id;
-			let hash = DLGPop.downloadDialogs.get(windowId)!;
+			let window = (await browser.windows.getCurrent({populate: true}));
+			let url = window.tabs[0].url;
+			//get the hash of the download which was added to the URL when this windows was created
+			let hash = url.substring(url.indexOf("?dlHash=") + 8);
 			Popup.selectedDl = DLGPop.allDownloads.get(hash)!;
 			renderDownloadDialog();
 		});
@@ -63,8 +64,7 @@ namespace PopupDownload
 	 */
 	window.addEventListener("beforeunload", function()
 	{
-		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, Popup.selectedDl.hash, 
-			windowId);
+		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, Popup.selectedDl.hash);
 		Messaging.sendMessage(msg);
 	});
 

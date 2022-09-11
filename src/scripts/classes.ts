@@ -1,7 +1,6 @@
 type DLGJSON =
 {
 	allDownloads: [key: string, value: object][];
-	downloadDialogs: [key: number, value: string][];
 	tabs: [key: number, value: any][];
 	options: Options.DLGOptions;
 	availableDMs: string[];
@@ -13,7 +12,6 @@ type DLGJSON =
 class DownloadGrabPopup
 {
 	allDownloads: Map<string, Download>;
-	downloadDialogs: Map<number, string>;
 	tabs: SureMap<number, tabinfo>;
 	options: Options.DLGOptions;
 	availableDMs: string[];
@@ -21,7 +19,6 @@ class DownloadGrabPopup
 	constructor(dlgJSON: DLGJSON)
 	{
 		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
-		this.downloadDialogs = new Map(dlgJSON.downloadDialogs);
 		this.tabs = new SureMap(dlgJSON.tabs);
 		this.availableDMs = dlgJSON.availableDMs;
 		this.options = dlgJSON.options;
@@ -52,7 +49,6 @@ class DownloadGrab
 {
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, Download>();
-	downloadDialogs = new Map<number, string>();
 	tabs = new SureMap<number, tabinfo>();
 	availableDMs: string[] = [];
 	availExtDMs: string[] = [];
@@ -90,19 +86,16 @@ class DownloadGrab
 		let createData = {
 			type: "detached_panel",
 			titlePreface: download.filename,
-			url: "popup/download.html",
+			//add the hash of the download to the URL of this window
+			//when the window is loaded our code will use the hash to get the download from DLGPop
+			url: "popup/download.html?dlHash=" + download.hash,
 			allowScriptsToClose : true,
 			width: windowW,
 			height: windowH,
 			left: leftMargin,
 			top: topMargin
 		};
-		let creating = browser.windows.create(createData);
-
-		creating.then((windowInfo: any) => {
-			let windowId = windowInfo.id;
-			this.downloadDialogs.set(windowId, download.hash);
-		});
+		browser.windows.create(createData);
 	}
 
 	doDownloadJob(job: DownloadJob)
