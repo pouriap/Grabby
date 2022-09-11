@@ -1,5 +1,7 @@
-namespace PopupMenu
+namespace Popup
 {
+	var selectedDl: Download;
+	var DLGPop: DownloadGrabPopup;
 	var currTab: tabinfo;
 
 	document.addEventListener("DOMContentLoaded", (e) => {
@@ -31,16 +33,16 @@ namespace PopupMenu
 		});
 	
 		ui.get("#dl-with-dlgrab")?.click();
-	
-		Popup.getBackgroundData().then(getCurrentTab).then(renderDownloadsList);
-	
-	});
 
-	async function getCurrentTab(): Promise<void>
-	{
-		let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
-		currTab = DLGPop.tabs.getsure(tab.id);
-	}
+		VUtils.getBackgroundData().then(async function(dlg)
+		{
+			DLGPop = dlg;
+			let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
+			currTab = DLGPop.tabs.getsure(tab.id);
+			renderDownloadsList();
+		});
+		
+	});
 
 	/**
 	 * This is called every time something with '.action' class is clicked in a popup dialog
@@ -49,7 +51,6 @@ namespace PopupMenu
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
-		let selectedDl = Popup.selectedDl;
 	
 		if(disabled){
 			return;
@@ -59,10 +60,10 @@ namespace PopupMenu
 		{
 			case "action-download":
 				if( (ui.get("#dl-with-dlgrab") as HTMLInputElement).checked){
-					Popup.downloadWithSelectedDM(selectedDl);
+					VUtils.downloadWithSelectedDM(selectedDl);
 				}
 				else{
-					Popup.downloadWithFirefox(selectedDl);
+					downloadWithFirefox(selectedDl);
 				}
 				break;
 
@@ -97,6 +98,15 @@ namespace PopupMenu
 			default:
 				break;
 		}
+	}
+
+	function downloadWithFirefox(download: Download)
+	{
+		browser.downloads.download({
+			filename: download.filename,
+			saveAs: true,
+			url: download.url
+		});
 	}
 
 	function ytdlManifest(download: Download, formatId: number)
@@ -180,18 +190,18 @@ namespace PopupMenu
 				ui.get('#action-report')!.innerHTML = 'Report falsely detected download';
 	
 				let hash = this.getAttribute("data-hash")!;
-				Popup.selectedDl = DLGPop.allDownloads.get(hash)!;
+				selectedDl = DLGPop.allDownloads.get(hash)!;
 
-				log.d('item clicked: ', Popup.selectedDl);
+				log.d('item clicked: ', selectedDl);
 	
-				if(Popup.selectedDl.isStream){
-					renderStream(StreamDataUI.getFromManifest(Popup.selectedDl.manifest!));
+				if(selectedDl.isStream){
+					renderStream(StreamDataUI.getFromManifest(selectedDl.manifest!));
 				}
-				else if(typeof Popup.selectedDl.specialHandler != 'undefined'){
+				else if(typeof selectedDl.specialHandler != 'undefined'){
 					renderSpecial();
 				}
 				else{
-					renderDownload(Popup.selectedDl);
+					renderDownload(selectedDl);
 				}
 			});
 	
@@ -231,7 +241,7 @@ namespace PopupMenu
 		ui.get("#download-details #url")!.innerHTML = download.url;
 		ui.get("#download-details #url")!.setAttribute("title", download.url);
 	
-		Popup.populateDMs();
+		VUtils.populateDMs();
 	
 		ui.show('#download-details');
 	}
@@ -297,7 +307,7 @@ namespace PopupMenu
 	 */
 	function renderSpecial()
 	{
-		switch(Popup.selectedDl.specialHandler)
+		switch(selectedDl.specialHandler)
 		{
 			case 'youtube-video':
 				renderYtVideo();
@@ -309,6 +319,7 @@ namespace PopupMenu
 	
 	function renderYtVideo()
 	{
-		renderStream(StreamDataUI.getFromYTDLInfo(Popup.selectedDl.ytdlinfo!));
+		renderStream(StreamDataUI.getFromYTDLInfo(selectedDl.ytdlinfo!));
 	}
+
 }

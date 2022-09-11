@@ -6,6 +6,8 @@ namespace PopupOptions
 		name: string;
 		optionUI: Options.OptionUI<unknown, unknown>;
 	}
+
+	var DLGPop: DownloadGrabPopup;
 		
 	// load current options when page is loaded
 	document.addEventListener("DOMContentLoaded", loadOptions);
@@ -48,9 +50,9 @@ namespace PopupOptions
 	
 	// loads options from browser storage and processes them to create a form
 	async function loadOptions()
-	{
-		await Popup.getBackgroundData();
-	
+	{	
+		DLGPop = await VUtils.getBackgroundData();
+
 		//get the currently saved options
 		let options = await Options.load();
 	
@@ -163,7 +165,7 @@ namespace PopupOptions
 	function createDropDown(id: string, optionUI: Options.DropdownOption)
 	{
 		//populate the list
-		let data = optionUI.getVal();
+		let data = optionUI.getVal(DLGPop);
 		let itemList = data.list;
 		let selectedItem = data.selected;
 	

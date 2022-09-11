@@ -1,17 +1,16 @@
-var DLGPop: DownloadGrabPopup;
-
-namespace Popup
+namespace VUtils
 {	
-	export var selectedDl: Download;
+	var DLGPop: DownloadGrabPopup;
 
 	/**
 	 * Gets the DLG instance from the background script and makes a copy of the needed data inside it
 	 */
-	export async function getBackgroundData()
+	export async function getBackgroundData(): Promise<DownloadGrabPopup>
 	{
 		let msg = new Messaging.MSGGetDLG();
 		let response = <Messaging.MSGDLGJSON> await Messaging.sendMessage(msg);
 		DLGPop = new DownloadGrabPopup(response.DLGJSON);
+		return DLGPop;
 	}
 	
 	/**
@@ -42,30 +41,5 @@ namespace Popup
 		let msg = new Messaging.MSGDownload(download.hash, selectedDM);
 		Messaging.sendMessage(msg);
 		window.close();
-	}
-	
-	export function continueWithBrowser()
-	{
-		PopupDownload.continueWithBrowser = true;
-		window.close();
-	}
-	
-	export function downloadWithFirefox(download: Download)
-	{
-		browser.downloads.download({
-			filename: download.filename,
-			saveAs: true,
-			url: download.url
-		});
-	}
-	
-	export function setActionEnabled(element: Element, enabled: boolean)
-	{
-		if(enabled){
-			element.classList.remove("disabled-action");
-		}
-		else{
-			element.classList.add("disabled-action");
-		}
 	}
 }

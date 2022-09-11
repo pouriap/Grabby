@@ -31,7 +31,7 @@ namespace Options
 		desc: string;
 		endsection?: boolean;
 		attrs?: pair[];
-		getVal: () => T;
+		getVal: (arg?: any) => T;
 		setVal: (e: V) => void;
 	}
 
@@ -202,12 +202,9 @@ namespace Options
 		defaultDM: DropdownOption = {
 			type: 'dropdown',
 			desc: "Default download manager: ",
-			getVal: () => {
-				let availableDMs: string[] = [];
-
-				if(typeof DLG != 'undefined') availableDMs = DLG.availableDMs;
-				else if(typeof DLGPop != 'undefined') availableDMs = DLGPop.availableDMs;
-				else log.err('could not grab DLG instance to populate DM list');
+			getVal: (DLGPop: DownloadGrabPopup) =>
+			{
+				let availableDMs = DLGPop.availableDMs;
 
 				let def: string;
 				if(this.opt.defaultDM) def = this.opt.defaultDM;

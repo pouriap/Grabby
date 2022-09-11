@@ -88,4 +88,11 @@ namespace ui
 		}
 	}
 
+	export async function fetchText(location: string)
+	{
+		let response = await fetch(location);
+		let html = await response.text();
+		return html;
+	}
+
 }

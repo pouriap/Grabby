@@ -1,12 +1,9 @@
 namespace PopupDownload
 {
+	var selectedDl: Download;
+	var DLGPop: DownloadGrabPopup;
 	// indicates whether we continue with browser after download dialog is closed or not
-	export var continueWithBrowser = false;
-
-	/**
-	 * id of this download dialog
-	 * used for closing blank tabs after a download dialog is closed
-	 */
+	var continueWithBrowser = false;
 
 	document.addEventListener("DOMContentLoaded", (event) => {
 
@@ -16,12 +13,14 @@ namespace PopupDownload
 			});
 		});
 
-		Popup.getBackgroundData().then(async function(){
+		VUtils.getBackgroundData().then(async function(dlg)
+		{
+			DLGPop = dlg;
 			let window = await browser.windows.getCurrent({populate: true});
 			let url = window.tabs[0].url;
 			//get the hash of the download which was added to the URL when this windows was created
 			let hash = url.substring(url.indexOf("?dlHash=") + 8);
-			Popup.selectedDl = DLGPop.allDownloads.get(hash)!;
+			selectedDl = DLGPop.allDownloads.get(hash)!;
 			renderDownloadDialog();
 		});
 
@@ -34,7 +33,6 @@ namespace PopupDownload
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
-		let selectedDl = Popup.selectedDl;
 
 		if(disabled){
 			return;
@@ -43,11 +41,12 @@ namespace PopupDownload
 		switch(id)
 		{	
 			case "action-continue":
-				Popup.continueWithBrowser();
+				continueWithBrowser = true;
+				window.close();		
 				break;
 
 			case "action-download":
-				Popup.downloadWithSelectedDM(selectedDl);
+				VUtils.downloadWithSelectedDM(selectedDl);
 				break;
 			
 			case "action-cancel":
@@ -64,7 +63,7 @@ namespace PopupDownload
 	 */
 	window.addEventListener("beforeunload", function()
 	{
-		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, Popup.selectedDl.hash);
+		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, selectedDl.hash);
 		Messaging.sendMessage(msg);
 	});
 
@@ -73,13 +72,13 @@ namespace PopupDownload
 	 */
 	function renderDownloadDialog()
 	{
-		let download = Popup.selectedDl;
+		let download = selectedDl;
 		let classReason = (log.DEBUG)? ' (' + download.classReason + ')' : '';
 		ui.get("#filename")!.innerHTML = download.filename + classReason;
 		ui.get("#filename")!.setAttribute("title", download.filename);
 		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
 		ui.get("#host")!.innerHTML = download.host;
-		Popup.populateDMs();
+		VUtils.populateDMs();
 	}
 
 }
