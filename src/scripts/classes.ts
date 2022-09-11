@@ -63,41 +63,6 @@ class DownloadGrab
 		this.allDownloads.set(hash, download);
 	}
 
-	/**
-	 * opens the download dialog
-	 * here's how things happen because WebExtensions suck:
-	 * we open the download dialog window
-	 * we store the windowId along with the associated download's hash in app.downloadDialogs
-	 * after the dialog loads it sends a message to the background script requesting the download hash
-	 * background script gives download dialogs the hash based on the windowId 
-	 * download dialog gets the Download object from the hash and populates the dialog
-	 * before the dialog is closed it sends a message to the background script telling it to delete the hash to free memory
-	 */
-	showDlDialog(dl: Download)
-	{
-		var download = dl;
-		let screenW = window.screen.width;
-		let screenH = window.screen.height;
-		let windowW = 480;
-		let windowH = 350;
-		let leftMargin = (screenW/2) - (windowW/2);
-		let topMargin = (screenH/2) - (windowH/2);
-
-		let createData = {
-			type: "detached_panel",
-			titlePreface: download.filename,
-			//add the hash of the download to the URL of this window
-			//when the window is loaded our code will use the hash to get the download from DLGPop
-			url: "popup/download.html?dlHash=" + download.hash,
-			allowScriptsToClose : true,
-			width: windowW,
-			height: windowH,
-			left: leftMargin,
-			top: topMargin
-		};
-		browser.windows.create(createData);
-	}
-
 	doDownloadJob(job: DownloadJob)
 	{
 		log.d("doing job", job);

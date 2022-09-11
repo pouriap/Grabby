@@ -70,13 +70,30 @@ interface webx_browser
 	};
 	webRequest: any;
 	runtime: any;
-	windows: any;
+	windows: {
+		create: (arg: any) => Promise<webx_window>;
+		getCurrent: (arg: any) => Promise<webx_window>;
+	};
 	downloads: any;
 	notifications: any;
 	cookies: any;
 	storage: any;
 	browserAction: any;
 	menus: any;
+}
+
+type webx_window = 
+{
+	focused: boolean;
+	height?: number;
+	id?: number;
+	incognito: boolean;
+	left?: number;
+	sessionId: string;
+	tabs: webx_tab[];
+	title: string;
+	top?: number;
+	width?: number;
 }
 
 type ytdl_format =

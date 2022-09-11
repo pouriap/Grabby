@@ -74,6 +74,7 @@
 			"scripts/options.js",
 			"scripts/messaging.js",
 			"scripts/browser_dms.js",
+			"scripts/views/views.js",
 			"background.js"
 		]
 	}

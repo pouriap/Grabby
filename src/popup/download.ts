@@ -17,7 +17,7 @@ namespace PopupDownload
 		});
 
 		Popup.getBackgroundData().then(async function(){
-			let window = (await browser.windows.getCurrent({populate: true}));
+			let window = await browser.windows.getCurrent({populate: true});
 			let url = window.tabs[0].url;
 			//get the hash of the download which was added to the URL when this windows was created
 			let hash = url.substring(url.indexOf("?dlHash=") + 8);
