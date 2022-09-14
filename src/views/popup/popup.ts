@@ -32,13 +32,16 @@ abstract class PopupView
 	protected abstract onActionClicked(actionId: string, e: Element): void;
 }
 
-//the defaul view for popup is the downloads list
-VUtils.renderDownloadsList();
+//wait until everything is loaded
+document.addEventListener("DOMContentLoaded", (e) => {
+	//the defaul view for popup is the downloads list
+	VUtils.renderDownloadsList();
+});
 
 //download progress is sent to background via the native app, and then 
 //sent here using messaging
 browser.runtime.onMessage.addListener((msg: Messaging.MSGYTDLProg) => 
-{ 
+{
 	if(msg.type === Messaging.TYP_YTDL_PROGRESS)
 	{
 		let percent = msg.percent;

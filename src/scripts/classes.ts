@@ -18,10 +18,10 @@ class DownloadGrabPopup
 
 	constructor(dlgJSON: DLGJSON)
 	{
-		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
 		this.tabs = new SureMap(dlgJSON.tabs);
 		this.availableDMs = dlgJSON.availableDMs;
 		this.options = dlgJSON.options;
+		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
 	}
 
 	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
@@ -33,7 +33,9 @@ class DownloadGrabPopup
 			let hash = pair[0];
 			let downloadJSON = pair[1] as Download;
 			let download = new Download(downloadJSON.httpDetails, this.tabs);
-			//copy everything from downloadJSON to the new download object
+			//copy all JSON-like properties from downloadJSON to the new download object
+			//@ts-ignore
+			delete downloadJSON._tabs;
 			Object.assign(download, downloadJSON);
 			newDownloads.set(hash, download);
 		};
@@ -214,7 +216,7 @@ class Download
 	{
 		if(typeof this._ownerTabUrl === 'undefined')
 		{
-			let tab =this._tabs.getsure(this.ownerTabId);
+			let tab = this._tabs.getsure(this.ownerTabId);
 			this._ownerTabUrl = tab.url;
 		}
 
@@ -856,9 +858,7 @@ class ReqFilter
 			}
 			else
 			{
-				//todo: maybe only check with request URL not owner tab url
-				let url = this.download.ownerTabUrl;
-				let domain = Utils.getDomain(url);
+				let domain = Utils.getDomain(this.download.url);
 				this._specialHandler = (typeof constants.specialSites[domain] != 'undefined')?
 					constants.specialSites[domain] : '';
 			}
