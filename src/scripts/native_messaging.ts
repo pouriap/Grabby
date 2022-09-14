@@ -90,8 +90,7 @@ namespace NativeMessaging
 	export class MSG_YTDLManifest implements NativeMessage
 	{
 		type = MSGTYP_YTDL_GET;
-		constructor(public url: string, public filename: string, public dlHash: string, 
-			public formatId: string){};
+		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
 	export class MSG_YTDLVideo implements NativeMessage

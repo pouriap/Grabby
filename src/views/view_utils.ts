@@ -42,4 +42,10 @@ namespace VUtils
 		Messaging.sendMessage(msg);
 		window.close();
 	}
+
+	export async function renderDownloadsList()
+	{
+		let dlgPop = await VUtils.getBackgroundData();
+		(new ViewDownloadsList(dlgPop)).render();
+	}
 }

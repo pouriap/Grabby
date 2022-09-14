@@ -1261,14 +1261,12 @@ class YTFormatData implements FormatData
 
 class StreamDataUI
 {
-	type: 'manifest'|'ytdl';
 	title: string;
 	duration: number;
 	formats: FormatData[];
 
-	constructor(type: 'manifest'|'ytdl', title: string, duration: number, formats: FormatData[])
+	constructor(title: string, duration: number, formats: FormatData[])
 	{
-		this.type = type;
 		this.title = title;
 		this.duration = duration;
 		this.formats = formats;
@@ -1277,7 +1275,7 @@ class StreamDataUI
 	static getFromManifest(manifest: MainManifest)
 	{
 		let duration = manifest.formats[0].duration;
-		return new StreamDataUI('manifest', manifest.title, duration, manifest.formats);
+		return new StreamDataUI(manifest.title, duration, manifest.formats);
 	}
 
 	static getFromYTDLInfo(info: ytdlinfo)
@@ -1294,7 +1292,7 @@ class StreamDataUI
 			}
 		}
 
-		return new StreamDataUI('ytdl', info.title, info.duration, formats);
+		return new StreamDataUI(info.title, info.duration, formats);
 	}
 }
 

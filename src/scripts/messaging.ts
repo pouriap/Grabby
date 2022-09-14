@@ -10,8 +10,6 @@ namespace Messaging
 	const TYP_DLGJSON = 'dlg-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 	const TYP_DOWNLOAD = 'download';
-	const TYP_DL_REPORTED = 'dl-reported';
-	const TYP_GET_OPTS_DATA = 'get-options-data';
 	const TYP_YTDL_MANIFEST = 'ytdl-manifest';
 	const TYP_YTDL_VIDEO = 'ytdl-video';
 	const TYP_YTDL_AUDIO = 'ytdl-audio';
@@ -61,7 +59,7 @@ namespace Messaging
 	export class MSGYTDLManifest
 	{
 		type = TYP_YTDL_MANIFEST;
-		constructor(public url: string, public dlHash: string, public formatId: string){};
+		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
 	export class MSGYTDLVideo
@@ -239,9 +237,7 @@ namespace Messaging
 
 	function handleYTDLManif(msg: MSGYTDLManifest)
 	{
-		let download = DLG.allDownloads.get(msg.dlHash)!;
-		let manifest = download.manifest!;
-		let nmsg = new NativeMessaging.MSG_YTDLManifest(msg.url, manifest.title, msg.dlHash, msg.formatId);
+		let nmsg = new NativeMessaging.MSG_YTDLManifest(msg.url, msg.filename, msg.dlHash);
 		NativeMessaging.sendMessage(nmsg);
 	}
 

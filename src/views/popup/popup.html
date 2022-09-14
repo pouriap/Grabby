@@ -10,72 +10,6 @@
 <body>
 
 	<div id="content">
-
-		<!-- HTML for list of downloads -->
-		<div id="popup-downloads" class='unique-display'>
-			<div id="list-title">
-				<img id="action-clearList" class="action" src="/icons/clear.svg" title="Clear List"/>
-				Grabbed Downloads
-			</div>
-			<ul id="downloads-list">
-				<li id="no-dl" style="display:none;">No Downloads</li>
-			</ul>
-		</div>
-
-		<!-- HTML for details of a file download -->
-		<div id="download-details" class="hidden unique-display">
-
-			<div class="action button" id="action-back">Back To Downloads List</div>
-
-			<ul id="info">
-				<li class="desc" id="filename"></li>
-				<li class="desc desc-name">
-					Size: <span class="desc" id="size"></span>
-				</li>
-				<li class="desc desc-name">
-					URL: <span class="desc" id="url"></span>
-				</li>
-			</ul>
-
-			<div id="downloader-choice">
-				<div style="padding:6px;">Download With:</div>
-				<input type="radio" name="downloader" id="dl-with-firefox">
-				<label for="dl-with-firefox">Firefox</label>
-				<br>
-				<input type="radio" name="downloader" id="dl-with-dlgrab">
-				<label for="dl-with-dlgrab">Download Grab</label>
-				<div id="dm-list-container" style="padding:10px 6px; display: flex;">
-					<span style="padding-right: 15px;">Using: </span>
-					<select id="available-dms" style="width: 100%;"></select>
-				</div>
-			</div>
-
-			<ul id="actions">
-				<li class="action button" id="action-download">Download</li>
-				<br>
-				<img src="spinner.gif" id="spinner">
-				<a class="action button" id="action-report" title="Click this if Download Grab has mistakenly detected this request as a download">Report falsely detected download</a>
-			</ul>
-
-		</div>
-
-		<!-- HTML for details of a stream download -->
-		<div id="stream-details" class="hidden unique-display">
-
-			<div class="action button" id="action-back">Back To Downloads List</div>
-
-			<ul id="info">
-				<li class="desc" id="filename"></li>
-				<li class="desc desc-name">
-					Duration: <span class="desc" id="duration"></span>
-				</li>
-			</ul>
-
-			<div class="desc desc-name available">Available formats:</div>
-			<ul id="formats-list">
-			</ul>
-			
-		</div>
 		
 	</div>
 
@@ -88,7 +22,7 @@
 	<script src="/scripts/native_messaging.js"></script>
 	<script src="/scripts/messaging.js"></script>
 	<script src="../view_utils.js"></script>
-	<script src="popup.js"></script>
+	<script src="views.js"></script>
 
 </body>
 

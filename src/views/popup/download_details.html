@@ -1,0 +1,33 @@
+<!-- HTML for details of a file download -->
+<div id="download-details" class="unique-display">
+
+	<div class="action button" id="action-back">Back To Downloads List</div>
+
+	<ul id="info">
+		<li class="desc" id="filename"></li>
+		<li class="desc desc-name">
+			Size: <span class="desc" id="size"></span>
+		</li>
+		<li class="desc desc-name">
+			URL: <span class="desc" id="url"></span>
+		</li>
+	</ul>
+
+	<div id="downloader-choice">
+		<div style="padding:6px;">Download With:</div>
+		<input type="radio" name="downloader" id="dl-with-firefox">
+		<label for="dl-with-firefox">Firefox</label>
+		<br>
+		<input type="radio" name="downloader" id="dl-with-dlgrab" checked="checked">
+		<label for="dl-with-dlgrab">Download Grab</label>
+		<div id="dm-list-container" style="padding:10px 6px; display: flex;">
+			<span style="padding-right: 15px;">Using: </span>
+			<select id="available-dms" style="width: 100%;"></select>
+		</div>
+	</div>
+
+	<ul id="actions">
+		<li class="action button" id="action-download">Download</li>
+	</ul>
+
+</div>
