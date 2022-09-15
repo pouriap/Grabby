@@ -1,3 +1,4 @@
+//todo: use JSX and react?
 abstract class PopupView
 {
 	protected abstract htmlFile: string;

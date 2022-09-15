@@ -375,6 +375,38 @@ class Download
 		return this._fileExtension;
 	}
 
+	get requestBody(): webx_requestBody | undefined
+	{
+		return this.httpDetails.requestBody;
+	}
+
+	//todo: test this
+	getPostData(): string | undefined
+	{
+		if(typeof this.requestBody === 'undefined'){
+			return undefined;
+		}
+
+		if(typeof this.requestBody.formData === 'undefined'){
+			return undefined;
+		}
+		
+		let postData = '';
+		for(let key in this.requestBody.formData)
+		{
+			let values = this.requestBody.formData[key];
+			for(let value of values)
+			{
+				postData = postData + `${key}=${value}&`;
+			}
+		}
+
+		//remove last '&'
+		postData = postData.slice(0, -1);
+
+		return postData;
+	}
+
 	/**
 	 * gets a header associated with this reqeust
 	 * @param headerName name of the header
@@ -1032,11 +1064,12 @@ class DownloadJob
 			catch(e){}
 		}
 
-		let downloadInfo: DownloadInfo = {
+		let downloadInfo: DownloadInfo = 
+		{
 			url: download.url,
 			filename: download.filename,
 			cookies: download.getHeader('cookie', 'request') || '',
-			postData: download.httpDetails.postData,
+			postData: download.getPostData() || '',
 			desc: download.filename,
 			extension: download.fileExtension
 		};

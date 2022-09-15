@@ -20,9 +20,13 @@ type webx_reqCommon = {
 	type: "beacon" | "csp_report" | "font" | "image" | "imageset" | "main_frame" | "media" | "object" | "object_subrequest" | "ping" | "script" | "speculative" | "stylesheet" | "sub_frame" | "web_manifest" | "websocket" | "xbl" | "xml_dtd" | "xmlhttprequest" | "xslt" | "other";
 }
 
+type webx_formData = {[index: string]: string[]};
+type webx_uploadData = {bytes?: any, file?: string};
+type webx_requestBody = {error?: string, formData?: webx_formData, raw?: webx_uploadData[]};
+
 type webx_beforeRequest = webx_reqCommon & {
 	incognito: boolean;
-	requestBody: {error?: string, formData?: {[index: string]: string[]}, raw?: [{bytes?: any, file?: string}]};
+	requestBody?: webx_requestBody;
 }
 
 type webx_beforeSendHeaders = webx_reqCommon & {
@@ -36,9 +40,7 @@ type webx_headersReceived = webx_reqCommon & {
 	fromCache: boolean;
 }
 
-type HTTPDetails = webx_beforeRequest & webx_beforeSendHeaders & webx_headersReceived & {
-	postData: string;
-}
+type HTTPDetails = webx_beforeRequest & webx_beforeSendHeaders & webx_headersReceived;
 
 type webx_tab = 
 {
