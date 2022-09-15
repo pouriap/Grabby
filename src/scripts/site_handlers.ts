@@ -33,6 +33,7 @@ class SpecialSiteHandler implements RequestHandler
 
 		let videoPage = new RegExp(`^https:\\/\\/${domainReg}\\/watch\\?v=.*`, 'm');
 		let ajaxPage = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
+		let embed = new RegExp(`^https:\\/\\/${domainReg}\\/embed\\/([\\w\\-_]{11})`, 'm');
 
 		if(url.match(videoPage))
 		{
@@ -73,6 +74,14 @@ class SpecialSiteHandler implements RequestHandler
 			{
 				log.err('youtube ajax page could not be parsed', this.download);
 			}
+		}
+
+		else if(url.match(embed))
+		{
+			log.d('handling youtube embed');
+
+			let videoId = url.match(embed)![1];
+			this.youtubeSingle(videoId, domain);
 		}
 	}
 

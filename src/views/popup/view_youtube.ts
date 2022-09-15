@@ -38,7 +38,7 @@ class ViewYoutubeDetails extends PopupView
 			let res = format.res;
 			let size = filesize(format.fileSize, {round: 0});
 	
-			li.innerHTML = `${name} [ ${res}px / ~${size} ]`;
+			li.innerHTML = `${name} [ ${res}px / ${size} ]`;
 		}
 	}
 
