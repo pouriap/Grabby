@@ -32,11 +32,25 @@ class SpecialSiteHandler implements RequestHandler
 		if(url.match(videoPage))
 		{
 			log.d('handling youtube video page');
-			let msg = new NativeMessaging.MSG_YTDLInfo(url, this.download.hash);
+
+			//make a new download with a clean video page URL so that requests with extra
+			//parameters don't get added as duplicates
+
+			let u = new URL(url);
+			let videoId = u.searchParams.get('v');
+			let videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+			let details = this.download.httpDetails;
+			details.url = videoUrl;
+			let newDL = new Download(details, DLG.tabs);
+
+			//don't request ytdlinfo if we already got this download
+			if(DLG.allDownloads.get(newDL.hash))	return;
+
+			let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
 			NativeMessaging.sendMessage(msg);
-			this.download.specialHandler = 'youtube-video';
-			this.download.hidden = true;
-			DLG.addToAllDownloads(this.download);
+			newDL.specialHandler = 'youtube-video';
+			newDL.hidden = true;
+			DLG.addToAllDownloads(newDL);
 		}
 		
 		else if(url.match(ajaxPage))
@@ -67,6 +81,9 @@ class SpecialSiteHandler implements RequestHandler
 				let details = this.download.httpDetails;
 				details.url = videoUrl;
 				let newDL = new Download(details, DLG.tabs);
+
+				//don't request ytdlinfo if we already got this download
+				if(DLG.allDownloads.get(newDL.hash))	return;
 
 				let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
 				NativeMessaging.sendMessage(msg);
