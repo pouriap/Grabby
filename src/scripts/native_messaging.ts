@@ -307,6 +307,7 @@ namespace NativeMessaging
 			let dl = DLG.allDownloads.get(msg.dlHash)!;
 			dl.ytdlinfo = msg.info;
 			dl.hidden = false;
+			browser.pageAction.show(dl.ownerTabId);
 		}
 		else
 		{

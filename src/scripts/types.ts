@@ -70,6 +70,9 @@ interface webx_browser
 		onUpdated: any;
 		onRemoved: any;
 	};
+	pageAction: {
+		show: (tabId: number) => void;
+	};
 	webRequest: any;
 	runtime: any;
 	windows: {

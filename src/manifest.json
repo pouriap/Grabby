@@ -48,6 +48,17 @@
 		}
 	},
 
+	"page_action": {
+		"browser_style": true,
+		"default_icon": {
+			"16": "icons/icon.svg",
+			"32": "icons/icon.svg",
+			"48": "icons/icon.svg",
+			"64": "icons/icon.svg",
+			"96": "icons/icon.svg"
+		}
+	},
+
 	"options_ui": {
 		"page": "views/options_page/options.html",
 		"browser_style": true
