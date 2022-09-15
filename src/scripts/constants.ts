@@ -3,8 +3,9 @@ const constants =
 	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
 	specialSites: {
-		'www.youtube.com': 'youtube', 
-		'youtu.be': 'youtube'
+		'www.youtube.com': 'youtube',
+		'youtu.be': 'youtube',
+		'www.youtube-nocookie.com': 'youtube',
 	} as {[index: string]: string},
 
 	specialHandlers: ['youtube-video'] as const,

@@ -23,34 +23,24 @@ class SpecialSiteHandler implements RequestHandler
 		return Promise.resolve({cancel: false});
 	}
 
+	//todo: add cookies, user-agent, etc. to ytdl
 	handleYoutube()
 	{
 		let url = this.download.url;
-		let videoPage = /^https:\/\/www\.youtube\.com\/watch\?v=.*/gm;
-		let ajaxPage = /^https:\/\/www\.youtube\.com\/youtubei\/v1\/player\?key=.*/gm;
+
+		let domain = Utils.getDomain(url);
+		let domainReg = domain.replace(/\./g, '\\.');
+
+		let videoPage = new RegExp(`^https:\\/\\/${domainReg}\\/watch\\?v=.*`, 'm');
+		let ajaxPage = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
 
 		if(url.match(videoPage))
 		{
 			log.d('handling youtube video page');
 
-			//make a new download with a clean video page URL so that requests with extra
-			//parameters don't get added as duplicates
-
 			let u = new URL(url);
-			let videoId = u.searchParams.get('v');
-			let videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-			let details = this.download.httpDetails;
-			details.url = videoUrl;
-			let newDL = new Download(details, DLG.tabs);
-
-			//don't request ytdlinfo if we already got this download
-			if(DLG.allDownloads.get(newDL.hash))	return;
-
-			let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
-			NativeMessaging.sendMessage(msg);
-			newDL.specialHandler = 'youtube-video';
-			newDL.hidden = true;
-			DLG.addToAllDownloads(newDL);
+			let videoId = u.searchParams.get('v')!;
+			this.youtubeSingle(videoId, domain);
 		}
 		
 		else if(url.match(ajaxPage))
@@ -77,24 +67,35 @@ class SpecialSiteHandler implements RequestHandler
 
 				//create a new Download object with its URL set to the would-be video URL of this request
 				let videoId = json.videoId;
-				let videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-				let details = this.download.httpDetails;
-				details.url = videoUrl;
-				let newDL = new Download(details, DLG.tabs);
-
-				//don't request ytdlinfo if we already got this download
-				if(DLG.allDownloads.get(newDL.hash))	return;
-
-				let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
-				NativeMessaging.sendMessage(msg);
-				newDL.specialHandler = 'youtube-video';
-				newDL.hidden = true;
-				DLG.addToAllDownloads(newDL);
+				this.youtubeSingle(videoId, domain);
 			}
 			catch(e)
 			{
 				log.err('youtube ajax page could not be parsed', this.download);
 			}
 		}
+	}
+
+	youtubeSingle(videoId: string, domain: string)
+	{
+		//make a new download with a clean video page URL so that requests with extra
+		//parameters don't get added as duplicates
+
+		let videoUrl = `https://${domain}/watch?v=${videoId}`;
+
+		log.d('getting video', videoUrl);
+
+		let details = this.download.httpDetails;
+		details.url = videoUrl;
+		let newDL = new Download(details, DLG.tabs);
+
+		//don't request ytdlinfo if we already got this download
+		if(DLG.allDownloads.get(newDL.hash))	return;
+
+		let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
+		NativeMessaging.sendMessage(msg);
+		newDL.specialHandler = 'youtube-video';
+		newDL.hidden = true;
+		DLG.addToAllDownloads(newDL);
 	}
 }
