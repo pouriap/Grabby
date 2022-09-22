@@ -28,8 +28,10 @@ class ViewYoutubeDetails extends PopupView
 	
 		for(let format of this.data.formats)
 		{
+			//todo: convert these to ui.create()
 			let li = document.createElement('li');
 			li.setAttribute('class', 'format action');
+			//todo: use 'data-action' instead of 'id' to specify action
 			li.setAttribute('id', 'action-ytdl-video');
 			li.setAttribute('data-format-id', format.id.toString());
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
@@ -41,6 +43,13 @@ class ViewYoutubeDetails extends PopupView
 	
 			li.innerHTML = `${name} [ ${res} / ${size} ]`;
 		}
+
+		let li = ui.create('li', {
+			'class': 'format action',
+			'id': 'action-ytdl-audio',
+		});
+		ui.get('#stream-details #formats-list')!.appendChild(li);
+		li.innerHTML = 'Download as MP3';
 	}
 
 	protected onActionClicked(id: string, e: Element)
@@ -72,8 +81,10 @@ class ViewYoutubeDetails extends PopupView
 		Messaging.sendMessage(msg);
 	}
 
+	//todo: add music tag
 	private ytdlAudio()
 	{
-
+		let msg = new Messaging.MSGYTDLAudio(this.download.url, this.download.filename, this.download.hash);
+		Messaging.sendMessage(msg);		
 	}
 }

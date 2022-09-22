@@ -157,6 +157,7 @@ class StreamHandler implements RequestHandler
 			{
 				log.d('got all manifests for: ', download);
 				download.hidden = false;
+				browser.pageAction.show(download.ownerTabId);
 			}
 
 			return;
@@ -184,6 +185,7 @@ class StreamHandler implements RequestHandler
 		let m = new MainManifest(bManifest.rawManifest, formats, bManifest.title);
 		this.download.manifest = m;
 		this.download.hidden = false;
+		browser.pageAction.show(this.download.ownerTabId);
 		DLG.addToAllDownloads(this.download);
 	}
 

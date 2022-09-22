@@ -1,6 +1,6 @@
 namespace ui
 {	
-	export function create(type: string, attrs: {[index:string]: string})
+	export function create(type: string, attrs?: {[index:string]: string})
 	{
 		let el = document.createElement(type);
 		for(let attr in attrs)
