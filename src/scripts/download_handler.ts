@@ -14,11 +14,6 @@ class DownloadHandler implements RequestHandler
 		this.filter = filter;
 	}
 
-	/**
-	 * Handles a download
-	 * @param download 
-	 * @param filter 
-	 */
 	handle()
 	{
 		//first determine its category

@@ -6,6 +6,53 @@ type num_und = number | undefined;
 
 type pair = {name: string, value: string};
 
+type hlsRawPlaylist = 
+{
+	attributes: 
+	{
+		NAME: string;
+		RESOLUTION: {width: number, height: number};
+		BANDWIDTH: number;
+	};
+	uri: string;
+}
+
+type hlsRawManifest = 
+{
+	segments: any[];
+	playlists: hlsRawPlaylist[];
+}
+
+type dashRawPlaylist = 
+{
+	attributes:
+	{
+		NAME: string;
+		RESOLUTION: {width: number, height: number};
+		BANDWIDTH: number;
+	};
+	sidx:
+	{
+		uri: string;
+		resolvedUri: string;
+	};
+}
+
+type dashRawManifest = 
+{
+	segments: any[];
+	"duration": number;
+	"playlists": dashRawPlaylist[];
+}
+
+function isHlsPlaylist(obj: any): obj is hlsRawPlaylist {
+	return typeof obj.sidx === 'undefined';
+}
+
+function isDashPlaylist(obj: any): obj is dashRawPlaylist {
+	return typeof obj.sidx != 'undefined';
+}
+
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];

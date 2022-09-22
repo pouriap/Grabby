@@ -34,11 +34,12 @@ class ViewStreamDetails extends PopupView
 			li.setAttribute('data-format-id', format.id.toString());
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
 	
-			let name = format.nickName;
-			let res = format.res;
-			let size = filesize(format.fileSize, {round: 0});
+			let uiData = new FormatDataUI(format);
+			let name = uiData.name;
+			let res = uiData.resString;
+			let size = uiData.fileSizeString;
 	
-			li.innerHTML = `${name} [ ${res}px / ~${size} ]`;
+			li.innerHTML = `${name} [ ${res} / ~${size} ]`;
 		}
 	}
 

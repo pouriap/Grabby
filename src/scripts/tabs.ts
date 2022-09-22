@@ -28,12 +28,11 @@ namespace Tabs
 
 	function doOnUpdated(tabId:number, changeInfo: any, tab: webx_tab)
 	{
-		DLG.tabs.set(tabId, new tabinfo(tab));
+		DLG.tabs.getsure(tabId).update(tab);
 	}
 
 	function doOnRemoved(tabId: number)
 	{
-		let tab = DLG.tabs.getsure(tabId);
-		tab.closed = true;
+		DLG.tabs.getsure(tabId).closed = true;
 	}
 }

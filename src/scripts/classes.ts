@@ -115,6 +115,7 @@ class DownloadWindow implements DLGWindow
 			titlePreface: this.download.filename,
 			//add the hash of the download to the URL of this window
 			//when the window is loaded our code will use the hash to get the download from DLGPop
+			//todo: make this like popup like a class
 			url: "views/download_window/download.html?dlHash=" + this.download.hash,
 			allowScriptsToClose : true,
 			width: windowW,
@@ -1131,22 +1132,17 @@ class DownloadJob
 
 class StreamManifest
 {
-	constructor(public url: string, public title: string, 
-		public streamFormat: string, public fullManifest: any)
-	{
-		this.url = url;
-		this.title = title;
-		this.streamFormat = streamFormat;
-		this.fullManifest = fullManifest;
-	}
+	constructor(public url: string, public title: string, public streamFormat: 'hls' | 'dash',
+		public rawManifest: hlsRawManifest | dashRawManifest)
+	{}
 
 	getType()
 	{
-		if(this.fullManifest.playlists && this.fullManifest.playlists.length > 0)
+		if(this.rawManifest.playlists && this.rawManifest.playlists.length > 0)
 		{
 			return 'main';
 		}
-		else if(this.fullManifest.segments && this.fullManifest.segments.length > 0)
+		else if(this.rawManifest.segments && this.rawManifest.segments.length > 0)
 		{
 			return 'format';
 		}
@@ -1160,33 +1156,23 @@ class StreamManifest
 
 class MainManifest
 {
-	/**
-	 * 
-	 * @param fullManifest 
-	 * @param formats 
-	 */
-	constructor(public fullManifest: StreamManifest, public formats: ManifestFormatData[], 
-		public title: string)
+	constructor(public rawManifest: hlsRawManifest | dashRawManifest, 
+		public formats: ManifestFormatData[], public title: string)
 	{}
 
-	/**
-	 * 	Gets a new instance from a StreamManifest object	
-	 * @param manifest 
-	 * @returns 
-	 */
 	static getFromBase(manifest: StreamManifest)
 	{
 		let formats: ManifestFormatData[] = [];
 
 		let id = 0;
-		for(let playlist of manifest.fullManifest.playlists)
+		for(let playlist of manifest.rawManifest.playlists)
 		{
 			let p = ManifestFormatData.getFromRawPlaylist(playlist, manifest.url, id);
 			formats.push(p);
 			id++;
 		}
 
-		return new MainManifest(manifest.fullManifest, formats, manifest.title);
+		return new MainManifest(manifest.rawManifest, formats, manifest.title);
 	}
 }
 
@@ -1203,33 +1189,40 @@ class FormatManifest
 	static getFromBase(manifest: StreamManifest): FormatManifest
 	{
 		let duration = 0;
-		for(let seg of manifest.fullManifest.segments)
+		for(let seg of manifest.rawManifest.segments)
 		{
 			duration += seg.duration;
 		}
-		return new FormatManifest(duration, manifest.fullManifest, manifest.title);
+		return new FormatManifest(duration, manifest.rawManifest, manifest.title);
 	}
 }
 
-interface FormatData
+abstract class FormatData
 {
-	id: number;
-	nickName: string;
-	res: string;
-	pictureSize: number;
-	fileSize: number;
+	abstract id: number;
+	abstract name: string;
+	abstract width: number;
+	abstract height: number;
+	abstract fileSize: number;
+
+	get pictureSize(): number
+	{
+		return this.width * this.height;
+	}
 }
 
-class ManifestFormatData implements FormatData
+class ManifestFormatData extends FormatData
 {
+	//these are specific to ManifestFormatData
 	url: string;
 	bitrate: number;
 	duration: number;
 
-	constructor(public id: number, public nickName: string, url: string, 
-		public res: string, bitrate: number, public pictureSize: number, 
+	constructor(public id: number, public name: string, url: string, 
+		public width: number, public height: number, bitrate: number,
 		public fileSize = -1, duration = -1)
 	{
+		super();
 		this.url = url;
 		this.bitrate = bitrate;
 		this.duration = duration;
@@ -1248,7 +1241,8 @@ class ManifestFormatData implements FormatData
 		}
 	}
 
-	static getFromRawPlaylist(playlist: any, manifestURL: string, id: number)
+	static getFromRawPlaylist(playlist: hlsRawPlaylist | dashRawPlaylist, manifestURL: string, 
+		id: number)
 	{
 		let bitrate = 0;
 		if(playlist.attributes.BANDWIDTH){
@@ -1261,34 +1255,77 @@ class ManifestFormatData implements FormatData
 			w = playlist.attributes.RESOLUTION.width || 0;
 			h = playlist.attributes.RESOLUTION.height || 0;
 		}
-		let pictureSize = w * h;
-		let res = (w && h)? w.toString() + 'x' + h.toString() : 'unknown';
-		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : ((h)? h + 'p' : 'Format-#' + (id + 1));
+		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : '';
+
+		let url: string;
+
+		if(isDashPlaylist(playlist))
+		{
+			url = playlist.sidx.resolvedUri;
+		}
+		else{
+			url = playlist.uri;
+		}
+
 		//if the links to the sub-manifests(playlists) are not absolute paths then there might
 		//be issues later because we are in the addon context and not the web page context
 		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
 		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
 		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
-		let url = (new URL(playlist.uri, manifestURL)).toString();
-		return new ManifestFormatData(id, name, url, res, bitrate, pictureSize);
+		url = (new URL(url, manifestURL)).toString();
+
+		return new ManifestFormatData(id, name, url, w, h, bitrate);
 	}
 }
 
-class YTFormatData implements FormatData
+class YTFormatData extends FormatData
 {
-	constructor(public id: number, public nickName: string, public res: string, 
-		public pictureSize: number, public fileSize: number)
-	{}
+
+	constructor(public id: number, public name: string, public width: number, 
+		public height: number, public fileSize: number)
+	{
+		super();
+	}
 
 	static getFromYTDLFormat(format: ytdl_format)
 	{
 		let id = format.format_id;
-		let nickName = format.height + 'p';
-		let res = format.resolution;
-		let pictureSize = format.width! * format.height!;
 		let fileSize = format.filesize;
 
-		return new YTFormatData(Number(id), nickName, res, pictureSize, fileSize);
+		return new YTFormatData(Number(id), '', format.width!, format.height!, fileSize);
+	}
+}
+
+class FormatDataUI
+{
+	formatData: FormatData;
+
+	constructor(data: FormatData)
+	{
+		this.formatData = data;
+	}
+
+	get name(): string
+	{
+		if(this.formatData.name) return this.formatData.name;
+		if(this.formatData.height) return this.formatData.height.toString() + 'p';
+		return 'Format #' + (this.formatData.id + 1).toString();
+	}
+
+	get resString(): string
+	{
+		if(this.formatData.width && this.formatData.height){
+			return this.formatData.width.toString() + 'x' + this.formatData.height.toString();
+		}
+		else{
+			return 'unknown';
+		}
+	}
+
+	get fileSizeString(): string
+	{
+		let size = this.formatData.fileSize;
+		return (size > 0)? filesize(size, {round: 0}) : 'unknown';
 	}
 }
 
@@ -1335,10 +1372,18 @@ class tabinfo
 	url: string;
 	title: string;
 	openerId: number | undefined;
-	knownFormatUrls: string[] = [];
+	hasMainManifest = false;
 	closed: boolean = false;
 
 	constructor(tab: webx_tab)
+	{
+		this.id = tab.id;
+		this.url = tab.url;
+		this.title = tab.title;
+		this.openerId = tab.openerTabId;
+	}
+
+	update(tab: webx_tab)
 	{
 		this.id = tab.id;
 		this.url = tab.url;

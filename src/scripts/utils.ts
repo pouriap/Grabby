@@ -129,4 +129,30 @@ namespace Utils
 		return arr;
 	}
 
+	export function removeSitenameFromTitle(title: string, domain: string): string
+	{
+		let siteNames = [
+			domain,
+			domain.replace('www', ''),
+			domain.substring(0, domain.lastIndexOf('.'))
+		];
+
+		let regStrings = [
+			'(.*)\\s*\\|\\s*{{host}}', 
+			'(.*)\\s*-\\s*{{host}}', 
+			'{{host}}\\s*\\|\\s*(.*)', 
+			'{{host}}\\s*-\\s*(.*)'
+		];
+
+		for(let regStr of regStrings)
+		{
+			for(let siteName of siteNames){
+				let r = new RegExp(regStr.replace('{{host}}', siteName), 'gi');
+				title = title.replace(r, '$1');
+			}
+		}
+
+		return title;
+	}
+
 }
