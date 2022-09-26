@@ -319,7 +319,7 @@ namespace NativeMessaging
 	{
 		let options = {
 			type: "basic", 
-			title: "Download Grab", 
+			title: "Grabby", 
 			message: "Download Failed"
 		};
 		browser.notifications.create(options);
@@ -337,7 +337,7 @@ namespace NativeMessaging
 	{
 		let options = {
 			type: "basic", 
-			title: "Download Grab", 
+			title: "Grabby", 
 			message: "Download Complete"
 		};
 		browser.notifications.create(options);
@@ -351,7 +351,7 @@ namespace NativeMessaging
 	{
 		let message = {
 			type: "basic", 
-			title: "Download Grab", 
+			title: "Grabby", 
 			message: msg.content
 		};
 		browser.notifications.create(message);

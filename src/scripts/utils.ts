@@ -109,7 +109,7 @@ namespace Utils
 	{
 		let options = {
 			type: "basic", 
-			title: "Download Grab", 
+			title: "Grabby", 
 			message: msg,
 		};
 		browser.notifications.create(options);

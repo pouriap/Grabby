@@ -99,7 +99,7 @@ var DLG = new DownloadGrab();
 		//todo: remove notifications or make them look good
 		let options = {
 			type: "basic", 
-			title: "Download Grab", 
+			title: "Grabby", 
 			message: "Error: initialization failed\nReason: " + e.toString(),
 		};
 		browser.notifications.create(options);

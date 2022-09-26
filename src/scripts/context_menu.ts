@@ -60,7 +60,7 @@ namespace ContextMenu
 		if(!defaultDM){
 			let options = {
 				type: "basic", 
-				title: "Download Grab", 
+				title: "Grabby", 
 				message: "ERROR: No download managers found on the system"
 			};
 			browser.notifications.create(options);

@@ -1,8 +1,8 @@
-# Download Grab - A WebExtension Addon For Firefox 
+# Grabby - A Firefox Addon
 
-Download Grab is an addon that lets you download files with external download managers. (In the future it will also support grabbing media).
+Grabby is a Firefox addon that lets you download files using external download managers. It also lets you download videos from streaming sites. It aims to provide the same functionality that the **FlashGot** addon provided.
 
-It override's Firefox's default download dialog and lets you choose which download manager you want to download your file with, or if you want to download with the browser's built-in downloader.
+It override's Firefox's default download dialog and lets you choose which download manager you want to download your file with.
 
 There's also a list that holds a history of recently "grabbed" downloads which can be accessed by clicking on the addons toolbar button.
 
@@ -14,33 +14,25 @@ There is also an options page where you can customize the addon's behavior.
 
 ![https://i.imgur.com/85m99Z3.png](https://i.imgur.com/85m99Z3.png)
 
-## The native host
+## The native application
 
-In order for WebExtensions to be able to communicate with other programs they need a "Native Host" to be installed on the system. The native host acts as a bridge between the addon and the operating system. 
-
-Download Grab's native host is (currently) based on Node.js. You have to install this native host in order for the addon to be able to communicate with download managers installed on your system.
+In order for WebExtensions to be able to communicate with other programs they need a "Native App" to be installed on the system. It's a simple program that is responsible for doing things that the addon itself is not able to do due to WebExtensions limitations. 
 
 ## Notes:
- - The addon is currently unsigned, so you'll need to do one of these things in order to use it:
- 
-1. Use Firefox Developer Edition or Nightly edition and set `xpinstall.signatures.required` to `false` in `about:config`. After you do this you'll be able to install unsigned addons.
-2. Go to addons then click the cog icon and then choose `Debug Add-ons` and then choose `Load Temporary Add-on...`. This will load the addon into your browser until you exit.
 
-- The addon is in alpha stage which means the UI is not the prettiest UI and there are features that are yet to be implemented and there are bugs.
+- This addon is currently in pre-alpha stage which means it is not finished yet. I'm releasing it in order to get feedback from people so if you have any ideas or if you encountered any bugs feel free to open an issue.
 
 - The native host actually uses an updated version of `FlashGot.exe`, the program inside the FlashGot addon that was responsible for communicating with download managers. This program is maintained in a separate repository here: https://github.com/pouriap/FlashGot-For-DownloadGrab
 
 
 ## How to report issues?
 
-If the issue is about a false positive (i.e. something is detected as a download that shouldn't have) then please use the report button provided in the download dialog and in the popup dialog to report the problem.
-
-If the issue is a bug or something else then open an issue on github.
+Please feel free to report any bugs/issues/ideas by opening an issue in the repository.
 
 
 ## Installation instructions
-1. Go to the [latest release](https://github.com/pouriap/Firefox-DownloadGrab/releases/latest) page and download and install the native host
-2. Download and install the addon from the same page (using one of the methods suggested in the `notes` section).
+1. Go to the [latest release](https://github.com/pouriap/Firefox-DownloadGrab/releases/latest) page and download and install the native bundle
+2. Download and install the addon from the same page
 
 
 ## Browser support

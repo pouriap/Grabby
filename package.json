@@ -1,7 +1,7 @@
 {
-  "name": "download-grab",
+  "name": "grabby",
   "version": "0.0.1",
-  "description": "Download Grab is an addon that lets you download files with external download managers. (In the future it will also support grabbing media).",
+  "description": "A browser extension for downloading files and media with external download managers.",
   "main": "gulpfile.js",
   "directories": {
     "test": "tests"
