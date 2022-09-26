@@ -1,7 +1,0 @@
-{
-	"name": "download.grab.pouriap",
-	"description": "Download Grab Native Host",
-	"type": "stdio",
-	"allowed_extensions": ["download_grab@pouria.p"],
-	"path": "run.bat"
-}
