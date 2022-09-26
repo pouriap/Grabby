@@ -10,9 +10,9 @@ class StreamHandler implements RequestHandler
 	{
 		this.download = download;
 		this.filter = filter;
-		//requests for formats that DLG sends do not have a tab id
+		//requests for formats that grabby sends do not have a tab id
 		if(typeof download.tabId != 'undefined'){
-			this.streamTab = DLG.tabs.getsure(download.tabId);
+			this.streamTab = GRB.tabs.getsure(download.tabId);
 		}
 	}
 
@@ -120,14 +120,14 @@ class StreamHandler implements RequestHandler
 
 		this.download.manifest = manifest;
 
-		DLG.addToAllDownloads(this.download);
+		GRB.addToAllDownloads(this.download);
 
 		for(let format of manifest.formats)
 		{
 			//todo: change this to request ID because we are sending referer URL basically maybe some user doesn't want this
 			let headers = {
-				'X-DLG-MFSTHASH': this.download.hash,
-				'X-DLG-MFSTID': format.id.toString()
+				'X-GRB-MFSTHASH': this.download.hash,
+				'X-GRB-MFSTID': format.id.toString()
 			};
 			fetch(format.url, {headers: headers});
 		}
@@ -138,13 +138,13 @@ class StreamHandler implements RequestHandler
 		log.d('we got a format HLS manifest: ', this.download.url, bManifest);
 
 		let manifest = FormatManifest.getFromBase(bManifest);
-		let hash = this.download.getHeader('X-DLG-MFSTHASH', 'request');
-		let id = Number(this.download.getHeader('X-DLG-MFSTID', 'request'));
+		let hash = this.download.getHeader('X-GRB-MFSTHASH', 'request');
+		let id = Number(this.download.getHeader('X-GRB-MFSTID', 'request'));
 
 		//if it has a hash header it means it's a format we reqested
 		if(hash)
 		{
-			let download = DLG.allDownloads.get(hash)!;
+			let download = GRB.allDownloads.get(hash)!;
 
 			if(!download.manifest){
 				log.err('Download does not have a manifest', download);
@@ -186,7 +186,7 @@ class StreamHandler implements RequestHandler
 		this.download.manifest = m;
 		this.download.hidden = false;
 		browser.pageAction.show(this.download.ownerTabId);
-		DLG.addToAllDownloads(this.download);
+		GRB.addToAllDownloads(this.download);
 	}
 
 	private handleMainDASH(bManifest: StreamManifest)

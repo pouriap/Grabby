@@ -58,7 +58,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: do private window or new window tabs start from 0 or are they unique?
 //todo: show preview of media in download details
 
-var DLG = new DownloadGrab();
+var GRB = new Grabby();
 
 (async () => {
 
@@ -78,9 +78,9 @@ var DLG = new DownloadGrab();
 			throw "No download managers found on system";
 		}
 
-		DLG.availableDMs = availableDMs;
-		DLG.availBrowserDMs = browserDms;
-		DLG.availExtDMs = externalDMs;
+		GRB.availableDMs = availableDMs;
+		GRB.availBrowserDMs = browserDms;
+		GRB.availExtDMs = externalDMs;
 
 		await Options.load();
 

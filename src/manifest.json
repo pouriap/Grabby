@@ -23,8 +23,7 @@
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "download_grab@pouria.p",
-			"strict_min_version": "56.0",
-			"update_url": "https://dlgrab.my.to/updates.json"
+			"strict_min_version": "56.0"
 		}
 	},
 

@@ -1,6 +1,6 @@
 namespace Options
 {
-	export class DLGOptions
+	export class GRBOptions
 	{
 		[index: string]: unknown;
 		overrideDlDialog: boolean = true;
@@ -22,7 +22,7 @@ namespace Options
 
 	export type OptionNames<T> = 
 	{
-		[Property in keyof DLGOptions]: T;
+		[Property in keyof GRBOptions]: T;
 	}
 
 	export type OptionUI<T, V> =
@@ -71,16 +71,16 @@ namespace Options
 		return obj.type === 'deferred';
 	}
 
-	export let opt = new DLGOptions();
+	export let opt = new GRBOptions();
 
-	export async function load(): Promise<DLGOptions>
+	export async function load(): Promise<GRBOptions>
 	{
-		let defaults = new DLGOptions();
+		let defaults = new GRBOptions();
 		opt = await browser.storage.local.get(defaults);
 		return opt;
 	}
 
-	export function save(options?: DLGOptions): Promise<undefined|string>
+	export function save(options?: GRBOptions): Promise<undefined|string>
 	{
 		if(options) opt = options;
 		return browser.storage.local.set(opt);
@@ -90,9 +90,9 @@ namespace Options
 	{
 		[index: string]: unknown;
 
-		opt = new DLGOptions();
+		opt = new GRBOptions();
 
-		constructor(opt: DLGOptions)
+		constructor(opt: GRBOptions)
 		{
 			this.opt = opt;
 		}
@@ -202,9 +202,9 @@ namespace Options
 		defaultDM: DropdownOption = {
 			type: 'dropdown',
 			desc: "Default download manager: ",
-			getVal: (DLGPop: DownloadGrabPopup) =>
+			getVal: (GRBPop: GrabbyPopup) =>
 			{
-				let availableDMs = DLGPop.availableDMs;
+				let availableDMs = GRBPop.availableDMs;
 
 				let def: string;
 				if(this.opt.defaultDM) def = this.opt.defaultDM;

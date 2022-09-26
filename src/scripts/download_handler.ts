@@ -236,12 +236,12 @@ class DownloadHandler implements RequestHandler
 		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
 		//warning: example is porn
 
-		DLG.addToAllDownloads(download);
+		GRB.addToAllDownloads(download);
 
 		if(act === this.ACT_FORCE_DL){
 			let dmName = Options.opt.defaultDM;
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
-				DLG.doDownloadJob(job);
+				GRB.doDownloadJob(job);
 			});
 			return Promise.resolve({cancel: true});
 		}

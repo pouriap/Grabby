@@ -1,33 +1,33 @@
 class ViewDownloadsList extends PopupView
 {
 	protected htmlFile = 'downloads_list.html';
-	private DLGPop: DownloadGrabPopup;
+	private GRBPop: GrabbyPopup;
 
-	constructor(dlg: DownloadGrabPopup)
+	constructor(grb: GrabbyPopup)
 	{
 		super();
-		this.DLGPop = dlg;
+		this.GRBPop = grb;
 	}
 
 	protected async doRender()
 	{
 		let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
-		let currTab = this.DLGPop.tabs.getsure(tab.id);
+		let currTab = this.GRBPop.tabs.getsure(tab.id);
 	
 		//populate list of downloads
-		let keys = Array.from(this.DLGPop.allDownloads.keys());
+		let keys = Array.from(this.GRBPop.allDownloads.keys());
 		//reverse to show latest downloads on top
 		keys.reverse();
 		
 		for(const key of keys)
 		{
-			let download = this.DLGPop.allDownloads.get(key)!;
+			let download = this.GRBPop.allDownloads.get(key)!;
 	
 			if(download.hidden){
 				continue;
 			}
 	
-			if(this.DLGPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
+			if(this.GRBPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
 				continue;
 			}
 	
@@ -65,7 +65,7 @@ class ViewDownloadsList extends PopupView
 	private renderListItem(listItem: Element)
 	{
 		let hash = listItem.getAttribute("data-hash")!;
-		let selectedDl = this.DLGPop.allDownloads.get(hash)!;
+		let selectedDl = this.GRBPop.allDownloads.get(hash)!;
 
 		log.d('item clicked: ', selectedDl);
 

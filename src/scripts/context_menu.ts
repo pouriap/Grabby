@@ -103,7 +103,7 @@ namespace ContextMenu
 		function downloadLinks(result: ContextMenu.result)
 		{
 			DownloadJob.getFromContext(defaultDM, result).then((job)=>{
-				DLG.doDownloadJob(job);
+				GRB.doDownloadJob(job);
 			});
 		}
 	}

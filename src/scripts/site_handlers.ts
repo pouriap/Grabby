@@ -87,15 +87,15 @@ class SpecialSiteHandler implements RequestHandler
 
 		let details = this.download.httpDetails;
 		details.url = videoUrl;
-		let newDL = new Download(details, DLG.tabs);
+		let newDL = new Download(details, GRB.tabs);
 
 		//don't request ytdlinfo if we already got this download
-		if(DLG.allDownloads.get(newDL.hash))	return;
+		if(GRB.allDownloads.get(newDL.hash))	return;
 
 		let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
 		NativeMessaging.sendMessage(msg);
 		newDL.specialHandler = 'youtube-video';
 		newDL.hidden = true;
-		DLG.addToAllDownloads(newDL);
+		GRB.addToAllDownloads(newDL);
 	}
 }

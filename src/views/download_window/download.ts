@@ -1,7 +1,7 @@
 namespace PopupDownload
 {
 	var selectedDl: Download;
-	var DLGPop: DownloadGrabPopup;
+	var GRBPop: GrabbyPopup;
 	// indicates whether we continue with browser after download dialog is closed or not
 	var continueWithBrowser = false;
 
@@ -13,14 +13,14 @@ namespace PopupDownload
 			});
 		});
 
-		VUtils.getBackgroundData().then(async function(dlg)
+		VUtils.getBackgroundData().then(async function(grb)
 		{
-			DLGPop = dlg;
+			GRBPop = grb;
 			let window = await browser.windows.getCurrent({populate: true});
 			let url = window.tabs[0].url;
 			//get the hash of the download which was added to the URL when this windows was created
 			let hash = url.substring(url.indexOf("?dlHash=") + 8);
-			selectedDl = DLGPop.allDownloads.get(hash)!;
+			selectedDl = GRBPop.allDownloads.get(hash)!;
 			renderDownloadDialog();
 		});
 
@@ -68,7 +68,7 @@ namespace PopupDownload
 	});
 
 	/**
-	 * This is called when background data (DLG) is received via messaging
+	 * This is called when background data (GRB) is received via messaging
 	 */
 	function renderDownloadDialog()
 	{

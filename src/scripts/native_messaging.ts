@@ -14,7 +14,7 @@ namespace NativeMessaging
 		{
 			try
 			{
-				this._port = browser.runtime.connectNative(DLG_ADDON_ID);
+				this._port = browser.runtime.connectNative(GRB_ADDON_ID);
 				this._port.onDisconnect.addListener((port: any) => {
 					this._onDisconnect(port);
 				});
@@ -154,7 +154,7 @@ namespace NativeMessaging
 
 	/* now the real stuff */
 
-	const DLG_ADDON_ID = "download.grab.pouriap";
+	const GRB_ADDON_ID = "download.grab.pouriap";
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
@@ -304,7 +304,7 @@ namespace NativeMessaging
 		
 		if(typeof msg.info === 'object')
 		{
-			let dl = DLG.allDownloads.get(msg.dlHash)!;
+			let dl = GRB.allDownloads.get(msg.dlHash)!;
 			dl.ytdlinfo = msg.info;
 			dl.hidden = false;
 			browser.pageAction.show(dl.ownerTabId);

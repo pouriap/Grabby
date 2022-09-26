@@ -26,7 +26,7 @@ class ViewDownloadDetails extends PopupView
 		switch(id)
 		{
 			case "action-download":
-				if( (ui.get("#dl-with-dlgrab") as HTMLInputElement).checked){
+				if( (ui.get("#dl-with-grabby") as HTMLInputElement).checked){
 					VUtils.downloadWithSelectedDM(this.download);
 				}
 				else{

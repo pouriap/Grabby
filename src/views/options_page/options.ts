@@ -7,7 +7,7 @@ namespace PopupOptions
 		optionUI: Options.OptionUI<unknown, unknown>;
 	}
 
-	var DLGPop: DownloadGrabPopup;
+	var GRBop: GrabbyPopup;
 		
 	// load current options when page is loaded
 	document.addEventListener("DOMContentLoaded", loadOptions);
@@ -20,7 +20,7 @@ namespace PopupOptions
 	{
 		evt.preventDefault();
 	
-		let defaultOpts = new Options.DLGOptions();
+		let defaultOpts = new Options.GRBOptions();
 		let optionsUI = new Options.OptionsUI(defaultOpts);
 	
 		//populate real options first and then do the deferred options
@@ -51,7 +51,7 @@ namespace PopupOptions
 	// loads options from browser storage and processes them to create a form
 	async function loadOptions()
 	{	
-		DLGPop = await VUtils.getBackgroundData();
+		GRBop = await VUtils.getBackgroundData();
 
 		//get the currently saved options
 		let options = await Options.load();
@@ -165,7 +165,7 @@ namespace PopupOptions
 	function createDropDown(id: string, optionUI: Options.DropdownOption)
 	{
 		//populate the list
-		let data = optionUI.getVal(DLGPop);
+		let data = optionUI.getVal(GRBop);
 		let itemList = data.list;
 		let selectedItem = data.selected;
 	

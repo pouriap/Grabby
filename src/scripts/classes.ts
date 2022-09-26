@@ -1,27 +1,27 @@
-type DLGJSON =
+type GRBJSON =
 {
 	allDownloads: [key: string, value: object][];
 	tabs: [key: number, value: any][];
-	options: Options.DLGOptions;
+	options: Options.GRBOptions;
 	availableDMs: string[];
 }
 
 /**
- * Class for the popup DLG instance (DLGPopup)
+ * Class for the popup GRB instance (GRBPopup)
  */
-class DownloadGrabPopup
+class GrabbyPopup
 {
 	allDownloads: Map<string, Download>;
 	tabs: SureMap<number, tabinfo>;
-	options: Options.DLGOptions;
+	options: Options.GRBOptions;
 	availableDMs: string[];
 
-	constructor(dlgJSON: DLGJSON)
+	constructor(grbJSON: GRBJSON)
 	{
-		this.tabs = new SureMap(dlgJSON.tabs);
-		this.availableDMs = dlgJSON.availableDMs;
-		this.options = dlgJSON.options;
-		this.allDownloads = this.recreateDownloads(dlgJSON.allDownloads);
+		this.tabs = new SureMap(grbJSON.tabs);
+		this.availableDMs = grbJSON.availableDMs;
+		this.options = grbJSON.options;
+		this.allDownloads = this.recreateDownloads(grbJSON.allDownloads);
 	}
 
 	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
@@ -45,9 +45,9 @@ class DownloadGrabPopup
 }
 
 /**
- * Class for the main DLG instance
+ * Class for the main grabby instance
  */
-class DownloadGrab
+class Grabby
 {
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, Download>();
@@ -80,12 +80,12 @@ class DownloadGrab
 	}
 }
 
-interface DLGWindow
+interface GRBWindow
 {
 	display(): Promise<webx_window>;
 }
 
-class DownloadWindow implements DLGWindow
+class DownloadWindow implements GRBWindow
 {
 	download: Download;
 
@@ -97,7 +97,7 @@ class DownloadWindow implements DLGWindow
 	/**
 	 * Displays the download override window
 	 * we put the download hash into the URL of the window
-	 * when the window is created we retreive this hash and get the corresponding download from DLGpop
+	 * when the window is created we retreive this hash and get the corresponding download from GRBPop
 	 * when the dialog is closed it sends a message to the background script telling it whether to continue or block the request
 	 */
 	display()
@@ -114,7 +114,7 @@ class DownloadWindow implements DLGWindow
 			type: "detached_panel",
 			titlePreface: this.download.filename,
 			//add the hash of the download to the URL of this window
-			//when the window is loaded our code will use the hash to get the download from DLGPop
+			//when the window is loaded our code will use the hash to get the download from GRBPop
 			//todo: make this like popup like a class
 			url: "views/download_window/download.html?dlHash=" + this.download.hash,
 			allowScriptsToClose : true,
@@ -493,7 +493,7 @@ class ReqFilter
 
 	/* constructor */
 
-	constructor(public download: Download, public options: Options.DLGOptions){}
+	constructor(public download: Download, public options: Options.GRBOptions){}
 
 	/* private methods */
 

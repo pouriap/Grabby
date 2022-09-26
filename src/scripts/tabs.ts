@@ -13,26 +13,26 @@ namespace Tabs
 
 		browser.tabs.onRemoved.addListener(doOnRemoved);
 
-		//put already open tabs in DLG.tabs
+		//put already open tabs in GRB.tabs
 		let tabs = await browser.tabs.query({});
 		for(const tab of tabs)
 		{
-			DLG.tabs.set(tab.id, new tabinfo(tab));
+			GRB.tabs.set(tab.id, new tabinfo(tab));
 		}
 	}
 
 	function doOnCreated(tab: webx_tab)
 	{
-		DLG.tabs.set(tab.id, new tabinfo(tab));
+		GRB.tabs.set(tab.id, new tabinfo(tab));
 	}
 
 	function doOnUpdated(tabId:number, changeInfo: any, tab: webx_tab)
 	{
-		DLG.tabs.getsure(tabId).update(tab);
+		GRB.tabs.getsure(tabId).update(tab);
 	}
 
 	function doOnRemoved(tabId: number)
 	{
-		DLG.tabs.getsure(tabId).closed = true;
+		GRB.tabs.getsure(tabId).closed = true;
 	}
 }
