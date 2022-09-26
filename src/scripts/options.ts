@@ -1,5 +1,9 @@
 namespace Options
 {
+	//how to add a new option
+	//add it here first
+	//then to the OptionsUI class
+	//the order in which options will be shown in the options page is the below order
 	export class GRBOptions
 	{
 		[index: string]: unknown;
@@ -17,6 +21,7 @@ namespace Options
 		forcedMimes: string[] = [];
 		blacklistDomains: string[] = [];
 		blacklistURLs: string[] = [];
+		ytdlProxy: string = '';
 		defaultDM: string = '';
 	}
 
@@ -198,6 +203,14 @@ namespace Options
 			getVal: () => {return this.opt.blacklistDomains.join(', ')},
 			setVal: (e) => {this.opt.blacklistDomains = this.getValuesFromList(e.value)},
 		};
+
+		ytdlProxy: TextboxOption = {
+			type: 'textbox',
+			desc: 'Youtube-DL proxy address',
+			endsection: true,
+			getVal: () => {return this.opt.ytdlProxy},
+			setVal: (e) => {this.opt.ytdlProxy = e.value}
+		};
 	
 		defaultDM: DropdownOption = {
 			type: 'dropdown',
@@ -243,7 +256,7 @@ namespace Options
 			desc: '',
 			getVal: () => {},
 			setVal: () => {},
-		}
+		};
 		
 	}
 

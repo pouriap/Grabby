@@ -80,24 +80,39 @@ namespace NativeMessaging
 		constructor(public job: DownloadJob){};
 	}
 
-	export class MSG_YTDLInfo implements NativeMessage
+	abstract class MSG_YTDLBase implements NativeMessage
+	{
+		abstract type: string;
+		proxy?: string;
+		constructor(){
+			if(Options.opt.ytdlProxy) this.proxy = Options.opt.ytdlProxy;
+		}
+	}
+
+	export class MSG_YTDLInfo extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_INFO;
-		constructor(public url: string, public dlHash: string){};
+		constructor(public url: string, public dlHash: string){
+			super();
+		};
 	}
 
 	//the 'type' property of the following 3 is the same, only the contents of the message is different
-	export class MSG_YTDLManifest implements NativeMessage
+	export class MSG_YTDLManifest extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
-		constructor(public url: string, public filename: string, public dlHash: string){};
+		constructor(public url: string, public filename: string, public dlHash: string){
+			super();
+		};
 	}
 
-	export class MSG_YTDLVideo implements NativeMessage
+	export class MSG_YTDLVideo extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
 		constructor(public url: string, public filename: string, public dlHash: string,
-			public formatId: string){};
+			public formatId: string){
+				super();
+			};
 	}
 
 	export class MSG_YTDLAudio implements NativeMessage
@@ -195,6 +210,7 @@ namespace NativeMessaging
 	}
 		
 	export function sendMessage(msg: NativeMessage){
+		log.d('sending', msg);
 		port.postMessage(msg);
 	}
 
