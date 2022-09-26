@@ -154,7 +154,7 @@ namespace NativeMessaging
 
 	/* now the real stuff */
 
-	const GRB_ADDON_ID = "download.grab.pouriap";
+	const GRB_ADDON_ID = "grabby.pouriap";
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";

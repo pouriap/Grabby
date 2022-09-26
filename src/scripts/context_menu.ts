@@ -13,10 +13,10 @@ namespace ContextMenu
 		originPageReferer: string
 	};
 	
-	const MENU_ID_PARENT = 'download.grab.menu.parent';
-	const MENU_ID_GRAB_ALL = 'download.grab.menu.graball';
-	const MENU_ID_GRAB_SELECTION = 'download.grab.menu.grabselection';
-	const MENU_ID_GRAB_LINK = 'download.grab.menu.grablink';
+	const MENU_ID_PARENT = 'grabby.menu.parent';
+	const MENU_ID_GRAB_ALL = 'grabby.menu.graball';
+	const MENU_ID_GRAB_SELECTION = 'grabby.menu.grabselection';
+	const MENU_ID_GRAB_LINK = 'grabby.menu.grablink';
 	const SCRIPT_GET_ALL = '../content_scripts/get_all_links.js';
 	const SCRIPT_GET_SELECTION = '../content_scripts/get_selection_links.js';
 

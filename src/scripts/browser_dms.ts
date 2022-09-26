@@ -97,7 +97,7 @@ class BrowserDMs
 					descriptions += dlInfo.desc + "\r\n";
 				}
 				data.append('autostart', '0');
-				data.append('package', 'DownloadGrab');
+				data.append('package', 'Grabby');
 				data.append('referer', job.referer);
 				data.append('urls', urls);
 				data.append('descriptions', descriptions);
