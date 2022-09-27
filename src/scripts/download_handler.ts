@@ -1,7 +1,7 @@
 class DownloadHandler implements RequestHandler
 {
-	download: Download;
-	filter: ReqFilter;
+	private download: Download;
+	private filter: ReqFilter;
 
 	private readonly ACT_GRAB = 'grab';
 	private readonly ACT_IGNORE = 'ignore';

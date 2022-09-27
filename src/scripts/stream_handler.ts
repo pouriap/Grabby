@@ -2,9 +2,9 @@
 //todo: show percent and download speed
 class StreamHandler implements RequestHandler
 {
-	download: Download;
-	filter: ReqFilter;
-	streamTab: tabinfo | undefined = undefined;
+	private download: Download;
+	private filter: ReqFilter;
+	private streamTab: tabinfo | undefined = undefined;
 
 	constructor(download: Download, filter: ReqFilter)
 	{

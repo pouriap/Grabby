@@ -1010,9 +1010,12 @@ class ReqFilter
 
 interface RequestHandler
 {
-	download: Download;
-	filter: ReqFilter;
 	handle(): Promise<webx_BlockingResponse>;
+}
+
+interface SpecialHandler
+{
+	handle(): void;
 }
 
 /**

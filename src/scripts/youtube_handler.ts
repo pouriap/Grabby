@@ -1,41 +1,14 @@
-class SpecialSiteHandler implements RequestHandler
+class YoutubeHandler implements SpecialHandler
 {
-	download: Download;
-	filter: ReqFilter;
+	private download: Download;
 
-	static readonly specialHandlers = ['youtube'] as const;
-
-	static readonly specialDomains: {[index: string]: typeof SpecialSiteHandler.specialHandlers[number]} = 
-	{
-		'www.youtube.com': 'youtube',
-		'youtu.be': 'youtube',
-		'www.youtube-nocookie.com': 'youtube',
-	};
-
-	static readonly specialTypes = ['youtube-video'] as const;
-
-	constructor(download: Download, filter: ReqFilter)
+	constructor(download: Download)
 	{
 		this.download = download;
-		this.filter = filter;
-	}
-
-	handle(): Promise<webx_BlockingResponse>
-	{
-		switch(this.filter.getSpecialHandler())
-		{
-			case 'youtube':
-				this.handleYoutube();
-				break;
-			default:
-				break;
-		}
-
-		return Promise.resolve({cancel: false});
 	}
 
 	//todo: add cookies, user-agent, etc. to ytdl
-	handleYoutube()
+	handle(): void
 	{
 		let url = this.download.url;
 
@@ -98,7 +71,7 @@ class SpecialSiteHandler implements RequestHandler
 		}
 	}
 
-	youtubeSingle(videoId: string, domain: string)
+	private youtubeSingle(videoId: string, domain: string)
 	{
 		//make a new download with a clean video page URL so that requests with extra
 		//parameters don't get added as duplicates
@@ -121,7 +94,7 @@ class SpecialSiteHandler implements RequestHandler
 		GRB.addToAllDownloads(newDL);
 	}
 
-	youtubeList(videoId: string, listId: string, domain: string)
+	private youtubeList(videoId: string, listId: string, domain: string)
 	{
 		log.warn('playlist handling not implemented');
 	}
