@@ -73,9 +73,9 @@ class ViewDownloadsList extends PopupView
 		{
 			(new ViewStreamDetails(selectedDl)).render();
 		}
-		else if(typeof selectedDl.specialHandler != 'undefined')
+		else if(typeof selectedDl.specialHandlerID != 'undefined')
 		{
-			switch(selectedDl.specialHandler)
+			switch(selectedDl.specialHandlerID)
 			{
 				case 'youtube-video':
 					(new ViewYoutubeDetails(selectedDl)).render();

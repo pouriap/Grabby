@@ -3,6 +3,15 @@ class SpecialSiteHandler implements RequestHandler
 	download: Download;
 	filter: ReqFilter;
 
+	static readonly specialSites: {[index: string]: string} = 
+	{
+		'www.youtube.com': 'youtube',
+		'youtu.be': 'youtube',
+		'www.youtube-nocookie.com': 'youtube',
+	};
+
+	static readonly handlerIDs = ['youtube-video'];
+
 	constructor(download: Download, filter: ReqFilter)
 	{
 		this.download = download;
@@ -105,7 +114,7 @@ class SpecialSiteHandler implements RequestHandler
 
 		let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
 		NativeMessaging.sendMessage(msg);
-		newDL.specialHandler = 'youtube-video';
+		newDL.specialHandlerID = 'youtube-video';
 		newDL.hidden = true;
 		GRB.addToAllDownloads(newDL);
 	}

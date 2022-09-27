@@ -147,7 +147,7 @@ class Download
 	isStream = false;
 	manifest: MainManifest | undefined = undefined;
 	fetchedFormats = 0;
-	specialHandler: typeof constants.specialHandlers[number] | undefined = undefined;
+	specialHandlerID: typeof SpecialSiteHandler.handlerIDs[number] | undefined = undefined;
 	ytdlinfo: ytdlinfo | undefined = undefined;
 	hidden = false;
 	cat = '';
@@ -271,7 +271,7 @@ class Download
 			return (this.manifest as MainManifest).title || "unknown";
 		}
 
-		if(typeof this.specialHandler != 'undefined')
+		if(typeof this.specialHandlerID != 'undefined')
 		{
 			return (this.ytdlinfo!.title);
 		}
@@ -892,8 +892,8 @@ class ReqFilter
 			else
 			{
 				let domain = Utils.getDomain(this.download.url);
-				this._specialHandler = (typeof constants.specialSites[domain] != 'undefined')?
-					constants.specialSites[domain] : '';
+				this._specialHandler = (typeof SpecialSiteHandler.specialSites[domain] != 'undefined')?
+					SpecialSiteHandler.specialSites[domain] : '';
 			}
 		}
 

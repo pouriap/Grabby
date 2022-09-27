@@ -57,6 +57,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: make download list look like firefox download list
 //todo: do private window or new window tabs start from 0 or are they unique?
 //todo: show preview of media in download details
+//todo: don't make job files for flashgot, send everything with input stream
 
 var GRB = new Grabby();
 
