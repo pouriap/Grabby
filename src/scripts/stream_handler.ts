@@ -21,35 +21,13 @@ class StreamHandler implements RequestHandler
 		this.download.isStream = true;
 		this.download.hidden = true;
 
-		this.receiveManifest().then((manifText) => 
-		{
-			let manifest = this.parseManifest(manifText);
-	
-			if(typeof manifest === 'undefined'){
-				return Promise.resolve({cancel: false});
-			}
-	
-			if(manifest.getType() === 'main')
-			{
-				if(typeof this.streamTab === 'undefined'){
-					log.err('this main stream does not have a tab', this.download);
-				}
-	
-				this.streamTab.hasMainManifest = true;
-				if(manifest.streamFormat === 'hls')	this.handleMainHLS(manifest);
-				else if(manifest.streamFormat === 'dash') this.handleMainDASH(manifest);
-			}
-			else if(manifest.getType() === 'format')
-			{
-				if(manifest.streamFormat === 'hls')	this.handleFormatHLS(manifest);
-				else if(manifest.streamFormat === 'dash') this.handleFormatDASH(manifest);
-			}
-		});
+		this.receiveManifest().then(this.processManifest);
 
 		//we must continue the request so the manifest data can be read in our receiveManifest function
 		return Promise.resolve({cancel: false});
 	}
 
+	//reads the manifest text from the request
 	private receiveManifest(): Promise<string>
 	{
 		return new Promise((resolve) => 
@@ -70,6 +48,7 @@ class StreamHandler implements RequestHandler
 		});
 	}
 
+	//parses the manifest text into an object
 	private parseManifest(rawManifest: string): StreamManifest | undefined
 	{
 		let title = (this.download.tabTitle)? this.download.tabTitle : 'Unknown Title';
@@ -109,6 +88,34 @@ class StreamHandler implements RequestHandler
 		{
 			log.warn("There was an error parsing the manifest:", rawManifest);
 			return undefined;
+		}
+	}
+
+	//takes the manifest text and creates a base manifest object from it and gives it to the 
+	//corresponding handler
+	private processManifest(manifText: string)
+	{
+		let manifest = this.parseManifest(manifText);
+	
+		if(typeof manifest === 'undefined'){
+			log.err('could not parse manifest', manifText);
+		}
+
+		if(manifest.getType() === 'main')
+		{
+			if(typeof this.streamTab === 'undefined'){
+				log.err('this main stream does not have a tab', this.download);
+			}
+
+			this.streamTab.hasMainManifest = true;
+
+			if(manifest.streamFormat === 'hls') this.handleMainHLS(manifest);
+			else if(manifest.streamFormat === 'dash') this.handleMainDASH(manifest);
+		}
+		else if(manifest.getType() === 'format')
+		{
+			if(manifest.streamFormat === 'hls')	this.handleFormatHLS(manifest);
+			else if(manifest.streamFormat === 'dash') this.handleFormatDASH(manifest);
 		}
 	}
 
@@ -163,8 +170,6 @@ class StreamHandler implements RequestHandler
 			return;
 		}
 
-		//for cases when the page only has a sub-manifest without a main manifest
-		//example of this: https://videoshub.com/videos/25312764
 		if(typeof this.streamTab === 'undefined')
 		{
 			log.err('this format stream does not have a tab', this.download);
@@ -175,6 +180,8 @@ class StreamHandler implements RequestHandler
 		}
 	}
 
+	//for cases when the page only has a sub-manifest without a main manifest
+	//example of this: https://videoshub.com/videos/25312764
 	private handleSingleFormatHLS(bManifest: StreamManifest, fManifest: FormatManifest)
 	{
 		log.d('we got a single HLS manifest: ', this.download.url, bManifest);
