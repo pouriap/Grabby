@@ -31,16 +31,27 @@ class SpecialSiteHandler implements RequestHandler
 		let domain = Utils.getDomain(url);
 		let domainReg = domain.replace(/\./g, '\\.');
 
-		let videoPage = new RegExp(`^https:\\/\\/${domainReg}\\/watch\\?v=.*`, 'm');
+		let directPage = new RegExp(`^https:\\/\\/${domainReg}\\/watch`, 'm');
 		let ajaxPage = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
 
-		if(url.match(videoPage))
+		if(url.match(directPage))
 		{
-			log.d('handling youtube video page');
+			log.d('handling youtube direct page');
 
 			let u = new URL(url);
-			let videoId = u.searchParams.get('v')!;
-			this.youtubeSingle(videoId, domain);
+			let videoId = u.searchParams.get('v');
+			let listId = u.searchParams.get('list');
+
+			if(!videoId){
+				log.err('video URL does not have "v" query');
+			}
+
+			if(listId){
+				this.youtubeList(videoId, listId, domain);
+			}
+			else{
+				this.youtubeSingle(videoId, domain);
+			}
 		}
 		
 		else if(url.match(ajaxPage))
@@ -97,5 +108,10 @@ class SpecialSiteHandler implements RequestHandler
 		newDL.specialHandler = 'youtube-video';
 		newDL.hidden = true;
 		GRB.addToAllDownloads(newDL);
+	}
+
+	youtubeList(videoId: string, listId: string, domain: string)
+	{
+		log.warn('playlist handling not implemented');
 	}
 }
