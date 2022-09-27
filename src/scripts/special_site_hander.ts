@@ -3,7 +3,9 @@ class SpecialSiteHandler implements RequestHandler
 	download: Download;
 	filter: ReqFilter;
 
-	static readonly specialSites: {[index: string]: string} = 
+	static readonly specialHandlers = ['youtube'] as const;
+
+	static readonly specialDomains: {[index: string]: typeof SpecialSiteHandler.specialHandlers[number]} = 
 	{
 		'www.youtube.com': 'youtube',
 		'youtu.be': 'youtube',

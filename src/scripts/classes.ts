@@ -494,7 +494,7 @@ class ReqFilter
 	private _isTypWebRes: bool_und = undefined;
 	private _isTypWebOther: bool_und = undefined;
 	private _isTypMedia: bool_und = undefined;
-	private _specialHandler: str_und = undefined;
+	private _specialHandler: typeof SpecialSiteHandler.specialHandlers[number] | '' | undefined = undefined;
 	private _isAddonRequest: bool_und = undefined;
 
 	/* constructor */
@@ -898,8 +898,8 @@ class ReqFilter
 			else
 			{
 				let domain = Utils.getDomain(this.download.url);
-				this._specialHandler = (typeof SpecialSiteHandler.specialSites[domain] != 'undefined')?
-					SpecialSiteHandler.specialSites[domain] : '';
+				this._specialHandler = (typeof SpecialSiteHandler.specialDomains[domain] != 'undefined')?
+					SpecialSiteHandler.specialDomains[domain] : '';
 			}
 		}
 
