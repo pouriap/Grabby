@@ -10,7 +10,7 @@ class SpecialSiteHandler implements RequestHandler
 		'www.youtube-nocookie.com': 'youtube',
 	};
 
-	static readonly handlerIDs = ['youtube-video'];
+	static readonly specialTypes = ['youtube-video'] as const;
 
 	constructor(download: Download, filter: ReqFilter)
 	{
@@ -114,7 +114,7 @@ class SpecialSiteHandler implements RequestHandler
 
 		let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
 		NativeMessaging.sendMessage(msg);
-		newDL.specialHandlerID = 'youtube-video';
+		newDL.specialType = 'youtube-video';
 		newDL.hidden = true;
 		GRB.addToAllDownloads(newDL);
 	}

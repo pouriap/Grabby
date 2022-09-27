@@ -147,7 +147,7 @@ class Download
 	isStream = false;
 	manifest: MainManifest | undefined = undefined;
 	fetchedFormats = 0;
-	specialHandlerID: typeof SpecialSiteHandler.handlerIDs[number] | undefined = undefined;
+	specialType: typeof SpecialSiteHandler.specialTypes[number] | undefined = undefined;
 	ytdlinfo: ytdlinfo | undefined = undefined;
 	hidden = false;
 	cat = '';
@@ -271,9 +271,15 @@ class Download
 			return (this.manifest as MainManifest).title || "unknown";
 		}
 
-		if(typeof this.specialHandlerID != 'undefined')
+		if(typeof this.specialType != 'undefined')
 		{
-			return (this.ytdlinfo!.title);
+			if(this.specialType === "youtube-video"){
+				return (this.ytdlinfo!.title);
+			}
+			else
+			{
+				return 'special filename not implemented';
+			}
 		}
 
 		if(typeof this._filename === "undefined"){
