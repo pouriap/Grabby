@@ -69,7 +69,7 @@ class ViewStreamDetails extends PopupView
 			if(format.id === formatId)
 			{
 				let url = format.url;
-				let msg = new Messaging.MSGYTDLManifest(url, this.download.filename, this.download.hash);
+				let msg = new Messaging.MSGYTDLURL(url, this.download.filename, this.download.hash);
 				Messaging.sendMessage(msg);
 				return;
 			}

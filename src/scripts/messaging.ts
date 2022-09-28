@@ -10,8 +10,8 @@ namespace Messaging
 	const TYP_GRBJSON = 'grb-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 	const TYP_DOWNLOAD = 'download';
-	const TYP_YTDL_MANIFEST = 'ytdl-manifest';
-	const TYP_YTDL_VIDEO = 'ytdl-video';
+	const TYP_YTDL_URL = 'ytdl-url';
+	const TYP_YTDL_FORMAT = 'ytdl-format';
 	const TYP_YTDL_AUDIO = 'ytdl-audio';
 	export const TYP_YTDL_PROGRESS = 'ytdl-progress';
 
@@ -56,15 +56,15 @@ namespace Messaging
 		constructor(public dlHash: string, public dmName: string){};
 	}
 	
-	export class MSGYTDLManifest
+	export class MSGYTDLURL
 	{
-		type = TYP_YTDL_MANIFEST;
+		type = TYP_YTDL_URL;
 		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
-	export class MSGYTDLVideo
+	export class MSGYTDLFormat
 	{
-		type = TYP_YTDL_VIDEO;
+		type = TYP_YTDL_FORMAT;
 		constructor(public url: string, public filename: string, public dlHash: string,
 			public formatId: string){};
 	}
@@ -148,15 +148,15 @@ namespace Messaging
 		}
 
 		//downloads a stream manifest
-		else if(msg.type === TYP_YTDL_MANIFEST)
+		else if(msg.type === TYP_YTDL_URL)
 		{
-			handleYTDLManif(msg as MSGYTDLManifest)
+			handleYTDLURL(msg as MSGYTDLURL)
 		}
 
 		//downloads a video url
-		else if(msg.type === TYP_YTDL_VIDEO)
+		else if(msg.type === TYP_YTDL_FORMAT)
 		{
-			handleYTDLVid(msg as MSGYTDLVideo);
+			handleYTDLFormat(msg as MSGYTDLFormat);
 		}
 
 		else if(msg.type === TYP_YTDL_AUDIO)
@@ -235,15 +235,15 @@ namespace Messaging
 		});
 	}
 
-	function handleYTDLManif(msg: MSGYTDLManifest)
+	function handleYTDLURL(msg: MSGYTDLURL)
 	{
-		let nmsg = new NativeMessaging.MSG_YTDLManifest(msg.url, msg.filename, msg.dlHash);
+		let nmsg = new NativeMessaging.MSG_YTDLURL(msg.url, msg.filename, msg.dlHash);
 		NativeMessaging.sendMessage(nmsg);
 	}
 
-	function handleYTDLVid(msg: MSGYTDLVideo)
+	function handleYTDLFormat(msg: MSGYTDLFormat)
 	{
-		let nmsg = new NativeMessaging.MSG_YTDLVideo(msg.url, msg.filename, msg.dlHash, msg.formatId);
+		let nmsg = new NativeMessaging.MSG_YTDLFormat(msg.url, msg.filename, msg.dlHash, msg.formatId);
 		NativeMessaging.sendMessage(nmsg);
 	}
 

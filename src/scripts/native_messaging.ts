@@ -98,7 +98,7 @@ namespace NativeMessaging
 	}
 
 	//the 'type' property of the following 3 is the same, only the contents of the message is different
-	export class MSG_YTDLManifest extends MSG_YTDLBase
+	export class MSG_YTDLURL extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
 		constructor(public url: string, public filename: string, public dlHash: string){
@@ -106,7 +106,7 @@ namespace NativeMessaging
 		};
 	}
 
-	export class MSG_YTDLVideo extends MSG_YTDLBase
+	export class MSG_YTDLFormat extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
 		constructor(public url: string, public filename: string, public dlHash: string,
