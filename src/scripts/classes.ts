@@ -145,7 +145,7 @@ class Download
 
 	//these are set later
 	isStream = false;
-	manifest: MainManifest | undefined = undefined;
+	manifest: HLSMainManifest | DASHMainManifest | undefined = undefined;
 	fetchedFormats = 0;
 	specialType: typeof SpecialSiteHandler.specialTypes[number] | undefined = undefined;
 	ytdlinfo: ytdlinfo | undefined = undefined;
@@ -268,7 +268,15 @@ class Download
 	{
 		if(this.isStream)
 		{
-			return (this.manifest as MainManifest).title || "unknown";
+			let title = (this.tabTitle)? this.tabTitle : 'Unknown Title';
+
+			if(title != 'Unknown Title')
+			{
+				let domain = Utils.getDomain(this.ownerTabUrl);
+				title = Utils.removeSitenameFromTitle(title, domain);
+			}
+	
+			return title;
 		}
 
 		if(typeof this.specialType != 'undefined')
@@ -1139,13 +1147,13 @@ class DownloadJob
 
 }
 
-class StreamManifest
+abstract class StreamManifest
 {
-	constructor(public url: string, public title: string, public streamFormat: 'hls' | 'dash',
-		public rawManifest: hlsRawManifest | dashRawManifest)
-	{}
+	abstract url: string;
+	abstract spec: 'hls' | 'dash';
+	abstract rawManifest: hlsRawManifest | dashRawManifest;
 
-	getType()
+	get type()
 	{
 		if(this.rawManifest.playlists && this.rawManifest.playlists.length > 0)
 		{
@@ -1160,50 +1168,112 @@ class StreamManifest
 			return undefined;
 		}
 	}
-
 }
 
-class MainManifest
+class HLSManifest extends StreamManifest
 {
-	constructor(public rawManifest: hlsRawManifest | dashRawManifest, 
-		public formats: ManifestFormatData[], public title: string)
-	{}
+	readonly spec = 'hls';
 
-	static getFromBase(manifest: StreamManifest)
-	{
-		let formats: ManifestFormatData[] = [];
-
-		let id = 0;
-		for(let playlist of manifest.rawManifest.playlists)
-		{
-			let p = ManifestFormatData.getFromRawPlaylist(playlist, manifest.url, id);
-			formats.push(p);
-			id++;
-		}
-
-		return new MainManifest(manifest.rawManifest, formats, manifest.title);
+	constructor
+	(
+		public url: string, 
+		public rawManifest: hlsRawManifest
+	){
+		super();
 	}
 }
 
-class FormatManifest
+class DASHManifest extends StreamManifest
 {
-	constructor(public duration: number, public fullManifest: any, public title: string)
-	{}
+	readonly spec = 'dash';
 
-	/**
-	 * 
-	 * @param manifest 
-	 * @returns 	 
-	*/
-	static getFromBase(manifest: StreamManifest): FormatManifest
+	constructor
+	(
+		public url: string, 
+		public rawManifest: dashRawManifest
+	){
+		super();
+	}
+}
+
+abstract class MainManifest
+{
+	baseManifest: HLSManifest | DASHManifest;
+	private _formats: ManifestFormatData[] = [];
+
+	constructor(bManifest: HLSManifest | DASHManifest)
+	{
+		this.baseManifest = bManifest;
+	}
+
+	get formats(): ManifestFormatData[]
+	{
+		if(this._formats.length === 0)
+		{
+			let id = 0;
+			for(let playlist of this.baseManifest.rawManifest.playlists)
+			{
+				let p = ManifestFormatData.getFromRawPlaylist(playlist, this.baseManifest.url, id);
+				this._formats.push(p);
+				id++;
+			}
+		}
+
+		return this._formats;
+	}
+}
+
+class HLSMainManifest extends MainManifest
+{
+	constructor(baseManifest: HLSManifest)
+	{
+		super(baseManifest);
+	}
+
+	static getFromBase(manifest: HLSManifest): HLSMainManifest
+	{
+		return new HLSMainManifest(manifest);
+	}
+}
+
+class DASHMainManifest extends MainManifest
+{	
+	duration: number;
+
+	constructor(baseManifest: DASHManifest, duration: number)
+	{
+		super(baseManifest);
+		this.duration = duration;
+	}
+
+	static getFromBase(manifest: DASHManifest): DASHMainManifest
+	{
+		return new DASHMainManifest(manifest, manifest.rawManifest.duration);
+	}
+}
+
+class HLSFormatManifest
+{
+	constructor
+	(
+		public duration: number, 
+		public fullManifest: any, 
+	){}
+
+	static getFromBase(manifest: HLSManifest): HLSFormatManifest
 	{
 		let duration = 0;
 		for(let seg of manifest.rawManifest.segments)
 		{
 			duration += seg.duration;
 		}
-		return new FormatManifest(duration, manifest.rawManifest, manifest.title);
+		return new HLSFormatManifest(duration, manifest.rawManifest);
 	}
+}
+
+class DASHFormatManifest
+{
+	//todo: not implemented
 }
 
 abstract class FormatData
@@ -1227,10 +1297,17 @@ class ManifestFormatData extends FormatData
 	bitrate: number;
 	duration: number;
 
-	constructor(public id: number, public name: string, url: string, 
-		public width: number, public height: number, bitrate: number,
-		public fileSize = -1, duration = -1)
-	{
+	constructor
+	(
+		public id: number, 
+		public name: string, 
+		url: string, 
+		public width: number, 
+		public height: number, 
+		bitrate: number,
+		public fileSize = -1, 
+		duration = -1
+	){
 		super();
 		this.url = url;
 		this.bitrate = bitrate;
@@ -1238,10 +1315,11 @@ class ManifestFormatData extends FormatData
 	}
 
 	/**
-	 * Updates duration and filesize data
-	 * @param manifest
+	 * Used for HLS manifests because they don't have the duration in the main manifest
+	 * The filesize is also calculated here because we need the duration*bitrate for that
+	 * @param manifest the updated manifest
 	 */
-	update(manifest: FormatManifest)
+	update(manifest: HLSFormatManifest)
 	{
 		if(manifest.duration)
 		{
@@ -1340,13 +1418,11 @@ class FormatDataUI
 
 class StreamDataUI
 {
-	title: string;
 	duration: number;
 	formats: FormatData[];
 
-	constructor(title: string, duration: number, formats: FormatData[])
+	constructor(duration: number, formats: FormatData[])
 	{
-		this.title = title;
 		this.duration = duration;
 		this.formats = formats;
 	}
@@ -1354,7 +1430,7 @@ class StreamDataUI
 	static getFromManifest(manifest: MainManifest)
 	{
 		let duration = manifest.formats[0].duration;
-		return new StreamDataUI(manifest.title, duration, manifest.formats);
+		return new StreamDataUI(duration, manifest.formats);
 	}
 
 	static getFromYTDLInfo(info: ytdlinfo)
@@ -1371,7 +1447,7 @@ class StreamDataUI
 			}
 		}
 
-		return new StreamDataUI(info.title, info.duration, formats);
+		return new StreamDataUI(info.duration, formats);
 	}
 }
 

@@ -21,7 +21,7 @@ class StreamHandler implements RequestHandler
 		this.download.isStream = true;
 		this.download.hidden = true;
 
-		this.receiveManifest().then(this.processManifest);
+		this.receiveManifest().then(this.processManifest.bind(this));
 
 		//we must continue the request so the manifest data can be read in our receiveManifest function
 		return Promise.resolve({cancel: false});
@@ -51,16 +51,6 @@ class StreamHandler implements RequestHandler
 	//parses the manifest text into an object
 	private parseManifest(rawManifest: string): StreamManifest | undefined
 	{
-		let title = (this.download.tabTitle)? this.download.tabTitle : 'Unknown Title';
-
-		if(title != 'Unknown Title')
-		{
-			let domain = Utils.getDomain(this.download.ownerTabUrl);
-			title = Utils.removeSitenameFromTitle(title, domain);
-		}
-
-		let streamTitle = title;
-
 		try
 		{
 			if(this.filter.isHlsManifest())
@@ -69,14 +59,14 @@ class StreamHandler implements RequestHandler
 				let parser = new m3u8Parser.Parser();
 				parser.push(rawManifest);
 				parser.end();
-				let pManifest = parser.manifest as hlsRawManifest;
-				return new StreamManifest(this.download.url, streamTitle, 'hls', pManifest);
+				let rManifest = parser.manifest as hlsRawManifest;
+				return new HLSManifest(this.download.url, rManifest);
 			}
 			else if(this.filter.isDashManifest())
 			{
 				//@ts-ignore
-				let pManifest = mpdParser.parse(rawManifest, {manifestUri: this.download.url}) as dashRawManifest;
-				return new StreamManifest(this.download.url, streamTitle, 'dash', pManifest);
+				let rManifest = mpdParser.parse(rawManifest, {manifestUri: this.download.url}) as dashRawManifest;
+				return new DASHManifest(this.download.url, rManifest);
 			}
 			else
 			{
@@ -101,7 +91,7 @@ class StreamHandler implements RequestHandler
 			log.err('could not parse manifest', manifText);
 		}
 
-		if(manifest.getType() === 'main')
+		if(manifest.type === 'main')
 		{
 			if(typeof this.streamTab === 'undefined'){
 				log.err('this main stream does not have a tab', this.download);
@@ -109,21 +99,21 @@ class StreamHandler implements RequestHandler
 
 			this.streamTab.hasMainManifest = true;
 
-			if(manifest.streamFormat === 'hls') this.handleMainHLS(manifest);
-			else if(manifest.streamFormat === 'dash') this.handleMainDASH(manifest);
+			if(isHLSManifest(manifest)) this.handleMainHLS(manifest);
+			else if(isDASHManifest(manifest)) this.handleMainDASH(manifest);
 		}
-		else if(manifest.getType() === 'format')
+		else if(manifest.type === 'format')
 		{
-			if(manifest.streamFormat === 'hls')	this.handleFormatHLS(manifest);
-			else if(manifest.streamFormat === 'dash') this.handleFormatDASH(manifest);
+			if(isHLSManifest(manifest))	this.handleFormatHLS(manifest);
+			else if(isDASHManifest(manifest)) this.handleFormatDASH(manifest);
 		}
 	}
 
-	private handleMainHLS(bManifest: StreamManifest)
+	private handleMainHLS(bManifest: HLSManifest)
 	{
 		log.d('we got a main HLS manifest: ', this.download.url, bManifest);
 
-		let manifest = MainManifest.getFromBase(bManifest);
+		let manifest = HLSMainManifest.getFromBase(bManifest);
 
 		this.download.manifest = manifest;
 
@@ -140,11 +130,11 @@ class StreamHandler implements RequestHandler
 		}
 	}
 
-	private handleFormatHLS(bManifest: StreamManifest)
+	private handleFormatHLS(bManifest: HLSManifest)
 	{
 		log.d('we got a format HLS manifest: ', this.download.url, bManifest);
 
-		let manifest = FormatManifest.getFromBase(bManifest);
+		let manifest = HLSFormatManifest.getFromBase(bManifest);
 		let hash = this.download.getHeader('X-GRB-MFSTHASH', 'request');
 		let id = Number(this.download.getHeader('X-GRB-MFSTID', 'request'));
 
@@ -182,26 +172,27 @@ class StreamHandler implements RequestHandler
 
 	//for cases when the page only has a sub-manifest without a main manifest
 	//example of this: https://videoshub.com/videos/25312764
-	private handleSingleFormatHLS(bManifest: StreamManifest, fManifest: FormatManifest)
+	private handleSingleFormatHLS(bManifest: HLSManifest, fManifest: HLSFormatManifest)
 	{
 		log.d('we got a single HLS manifest: ', this.download.url, bManifest);
-		//we have to manually create a proper MainManifest for this download here
-		let format = new ManifestFormatData(0, '', bManifest.url, 0, 0, 0, 0);
-		format.update(fManifest);
-		let formats = [format];
-		let m = new MainManifest(bManifest.rawManifest, formats, bManifest.title);
+		let m = new HLSMainManifest(bManifest);
 		this.download.manifest = m;
 		this.download.hidden = false;
 		browser.pageAction.show(this.download.ownerTabId);
 		GRB.addToAllDownloads(this.download);
 	}
 
-	private handleMainDASH(bManifest: StreamManifest)
+	private handleMainDASH(bManifest: DASHManifest)
 	{
-		log.warn('main DASH manifest not implemented');
+		log.warn('main DASH manifest not implemented', bManifest);
+		let manifest = DASHMainManifest.getFromBase(bManifest);
+
+		this.download.manifest = manifest;
+
+		GRB.addToAllDownloads(this.download);
 	}
 
-	private handleFormatDASH(bManifest: StreamManifest)
+	private handleFormatDASH(bManifest: DASHManifest)
 	{
 		log.warn('format DASH manifest not implemented');
 	}

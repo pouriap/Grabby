@@ -53,6 +53,14 @@ function isDashPlaylist(obj: any): obj is dashRawPlaylist {
 	return typeof obj.sidx != 'undefined';
 }
 
+function isHLSManifest(manifest: StreamManifest): manifest is HLSManifest {
+	return manifest.spec === 'hls';
+}
+
+function isDASHManifest(manifest: StreamManifest): manifest is DASHManifest {
+	return manifest.spec === 'dash';
+}
+
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];

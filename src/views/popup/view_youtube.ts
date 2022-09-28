@@ -16,8 +16,8 @@ class ViewYoutubeDetails extends PopupView
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 	
 		let duration = Utils.formatSeconds(this.data.duration);
-		ui.get("#stream-details #filename")!.innerHTML = this.data.title;
-		ui.get("#stream-details #filename")!.setAttribute("title", this.data.title);
+		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;
+		ui.get("#stream-details #filename")!.setAttribute("title", this.download.filename);
 		ui.get("#stream-details #duration")!.innerHTML = duration;
 		ui.get("#stream-details #duration")!.setAttribute("title", duration);
 	
