@@ -10,7 +10,6 @@ namespace Messaging
 	const TYP_GRBJSON = 'grb-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 	const TYP_DOWNLOAD = 'download';
-	const TYP_YTDL_URL = 'ytdl-url';
 	const TYP_YTDL_FORMAT = 'ytdl-format';
 	const TYP_YTDL_AUDIO = 'ytdl-audio';
 	export const TYP_YTDL_PROGRESS = 'ytdl-progress';
@@ -55,13 +54,11 @@ namespace Messaging
 		type = TYP_DOWNLOAD;
 		constructor(public dlHash: string, public dmName: string){};
 	}
-	
-	export class MSGYTDLURL
-	{
-		type = TYP_YTDL_URL;
-		constructor(public url: string, public filename: string, public dlHash: string){};
-	}
 
+	/**
+	 * calls YTDL and gives it a URL and a format ID to download
+	 * the format ID is retrieved from a YTDL info data
+	 */
 	export class MSGYTDLFormat
 	{
 		type = TYP_YTDL_FORMAT;
@@ -147,12 +144,6 @@ namespace Messaging
 			handleDownload(msg as MSGDownload);
 		}
 
-		//downloads a stream manifest
-		else if(msg.type === TYP_YTDL_URL)
-		{
-			handleYTDLURL(msg as MSGYTDLURL)
-		}
-
 		//downloads a video url
 		else if(msg.type === TYP_YTDL_FORMAT)
 		{
@@ -233,12 +224,6 @@ namespace Messaging
 		DownloadJob.getFromDownload(msg.dmName, download).then((job)=>{
 			GRB.doDownloadJob(job);
 		});
-	}
-
-	function handleYTDLURL(msg: MSGYTDLURL)
-	{
-		let nmsg = new NativeMessaging.MSG_YTDLURL(msg.url, msg.filename, msg.dlHash);
-		NativeMessaging.sendMessage(nmsg);
 	}
 
 	function handleYTDLFormat(msg: MSGYTDLFormat)

@@ -145,11 +145,9 @@ class Download
 
 	//these are set later
 	isStream = false;
-	manifest: HLSMainManifest | DASHMainManifest | undefined = undefined;
-	fetchedFormats = 0;
-	specialType: typeof SpecialSiteHandler.specialTypes[number] | undefined = undefined;
-	ytdlinfo: ytdlinfo | undefined = undefined;
 	hidden = false;
+	streamData: StreamData | undefined = undefined;
+	specialType: typeof SpecialSiteHandler.specialTypes[number] | undefined = undefined;
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
@@ -199,10 +197,15 @@ class Download
 
 				if(typeof tab.openerId === 'undefined')
 				{
-					log.err('blank tab does not have an opener id', tab);
+					//this happens when we open a blank tab directly
+					//for example a bookmark to here: https://www.st.com/resource/en/datasheet/lm317.pdf
+					log.warn('blank tab does not have an opener id', tab);
+					this._ownerTabId = this.tabId;
 				}
-
-				this._ownerTabId = tab.openerId;
+				else
+				{
+					this._ownerTabId = tab.openerId;
+				}
 			}
 			else
 			{
@@ -266,36 +269,18 @@ class Download
 	 */
 	get filename(): string
 	{
-		if(this.isStream)
+		if(typeof this.streamData != 'undefined')
 		{
-			let title = (this.tabTitle)? this.tabTitle : 'Unknown Title';
-
-			if(title != 'Unknown Title')
-			{
-				let domain = Utils.getDomain(this.ownerTabUrl);
-				title = Utils.removeSitenameFromTitle(title, domain);
-			}
-	
-			return title;
+			return this.streamData.title;
 		}
 
-		if(typeof this.specialType != 'undefined')
+		if(typeof this._filename === "undefined")
 		{
-			if(this.specialType === "youtube-video"){
-				return (this.ytdlinfo!.title);
-			}
-			else
-			{
-				return 'special filename not implemented';
-			}
-		}
-
-		if(typeof this._filename === "undefined"){
-
 			this._filename = "unknown";
 
 			let disposition = this.getHeader('content-disposition', 'response');
-			if(disposition){
+			if(disposition)
+			{
 				const regex1 = /filename\*=["']?(.*?\'\')?(.*?)["']?(;|$)/im;
 				const regex2 = /filename=["']?(.*?)["']?(;|$)/im;
 				//first try filename*= because it takes precedence according to docs
@@ -313,7 +298,8 @@ class Download
 
 			}
 			//use URL if content-disposition didn't provide a file name
-			if(this._filename === "unknown"){
+			if(this._filename === "unknown")
+			{
 				let filename = Utils.getFileName(this.url);
 				if(filename){
 					this._filename = filename;
@@ -322,7 +308,8 @@ class Download
 			//if the url has no file extension give it a serial number
 			//useful for urls like 'media.tenor.com/videos/9dd6603af0ac712c6a38dde9255746cd/mp4'
 			//where lots of resources have the same path and hence the same filename
-			if(this._filename !== "unknown" && this._filename.indexOf(".") === -1){
+			if(this._filename !== "unknown" && this._filename.indexOf(".") === -1)
+			{
 				this._filename = this._filename + "_" + this.requestId;
 				//try to guess the file extension based on mime type
 				let mimeType = this.getHeader('content-type', 'response') || '';
@@ -398,11 +385,11 @@ class Download
 	//todo: test this
 	getPostData(): string | undefined
 	{
-		if(typeof this.requestBody === 'undefined'){
+		if(!this.requestBody){
 			return undefined;
 		}
 
-		if(typeof this.requestBody.formData === 'undefined'){
+		if(!this.requestBody.formData){
 			return undefined;
 		}
 		
@@ -1147,239 +1134,103 @@ class DownloadJob
 
 }
 
-abstract class StreamManifest
+class FormatData 
 {
-	abstract url: string;
-	abstract spec: 'hls' | 'dash';
-	abstract rawManifest: hlsRawManifest | dashRawManifest;
+	id: string;
+	width: number;
+	height: number;
+	filesize: number;
 
-	get type()
+	constructor(id: string, width: number, height: number, fileSize: number)
 	{
-		if(this.rawManifest.playlists && this.rawManifest.playlists.length > 0)
-		{
-			return 'main';
-		}
-		else if(this.rawManifest.segments && this.rawManifest.segments.length > 0)
-		{
-			return 'format';
-		}
-		else
-		{
-			return undefined;
-		}
+		this.id = id;
+		this.width = width;
+		this.height = height;
+		this.filesize = fileSize;
 	}
-}
-
-class HLSManifest extends StreamManifest
-{
-	readonly spec = 'hls';
-
-	constructor
-	(
-		public url: string, 
-		public rawManifest: hlsRawManifest
-	){
-		super();
-	}
-}
-
-class DASHManifest extends StreamManifest
-{
-	readonly spec = 'dash';
-
-	constructor
-	(
-		public url: string, 
-		public rawManifest: dashRawManifest
-	){
-		super();
-	}
-}
-
-abstract class MainManifest
-{
-	baseManifest: HLSManifest | DASHManifest;
-	private _formats: ManifestFormatData[] = [];
-
-	constructor(bManifest: HLSManifest | DASHManifest)
-	{
-		this.baseManifest = bManifest;
-	}
-
-	get formats(): ManifestFormatData[]
-	{
-		if(this._formats.length === 0)
-		{
-			let id = 0;
-			for(let playlist of this.baseManifest.rawManifest.playlists)
-			{
-				let p = ManifestFormatData.getFromRawPlaylist(playlist, this.baseManifest.url, id);
-				this._formats.push(p);
-				id++;
-			}
-		}
-
-		return this._formats;
-	}
-}
-
-class HLSMainManifest extends MainManifest
-{
-	constructor(baseManifest: HLSManifest)
-	{
-		super(baseManifest);
-	}
-
-	static getFromBase(manifest: HLSManifest): HLSMainManifest
-	{
-		return new HLSMainManifest(manifest);
-	}
-}
-
-class DASHMainManifest extends MainManifest
-{	
-	duration: number;
-
-	constructor(baseManifest: DASHManifest, duration: number)
-	{
-		super(baseManifest);
-		this.duration = duration;
-	}
-
-	static getFromBase(manifest: DASHManifest): DASHMainManifest
-	{
-		return new DASHMainManifest(manifest, manifest.rawManifest.duration);
-	}
-}
-
-class HLSFormatManifest
-{
-	constructor
-	(
-		public duration: number, 
-		public fullManifest: any, 
-	){}
-
-	static getFromBase(manifest: HLSManifest): HLSFormatManifest
-	{
-		let duration = 0;
-		for(let seg of manifest.rawManifest.segments)
-		{
-			duration += seg.duration;
-		}
-		return new HLSFormatManifest(duration, manifest.rawManifest);
-	}
-}
-
-class DASHFormatManifest
-{
-	//todo: not implemented
-}
-
-abstract class FormatData
-{
-	abstract id: number;
-	abstract name: string;
-	abstract width: number;
-	abstract height: number;
-	abstract fileSize: number;
 
 	get pictureSize(): number
 	{
 		return this.width * this.height;
 	}
-}
-
-class ManifestFormatData extends FormatData
-{
-	//these are specific to ManifestFormatData
-	url: string;
-	bitrate: number;
-	duration: number;
-
-	constructor
-	(
-		public id: number, 
-		public name: string, 
-		url: string, 
-		public width: number, 
-		public height: number, 
-		bitrate: number,
-		public fileSize = -1, 
-		duration = -1
-	){
-		super();
-		this.url = url;
-		this.bitrate = bitrate;
-		this.duration = duration;
-	}
-
-	/**
-	 * Used for HLS manifests because they don't have the duration in the main manifest
-	 * The filesize is also calculated here because we need the duration*bitrate for that
-	 * @param manifest the updated manifest
-	 */
-	update(manifest: HLSFormatManifest)
-	{
-		if(manifest.duration)
-		{
-			this.duration = manifest.duration;
-			this.fileSize = manifest.duration * this.bitrate / 8;
-		}
-	}
-
-	static getFromRawPlaylist(playlist: hlsRawPlaylist | dashRawPlaylist, manifestURL: string, 
-		id: number)
-	{
-		let bitrate = 0;
-		if(playlist.attributes.BANDWIDTH){
-			bitrate = playlist.attributes.BANDWIDTH;
-		}
-		let w = 0;
-		let h = 0;
-		if(playlist.attributes.RESOLUTION)
-		{
-			w = playlist.attributes.RESOLUTION.width || 0;
-			h = playlist.attributes.RESOLUTION.height || 0;
-		}
-		let name = (playlist.attributes.NAME)? playlist.attributes.NAME : '';
-
-		let url: string;
-
-		if(isDashPlaylist(playlist))
-		{
-			url = playlist.sidx.resolvedUri;
-		}
-		else{
-			url = playlist.uri;
-		}
-
-		//if the links to the sub-manifests(playlists) are not absolute paths then there might
-		//be issues later because we are in the addon context and not the web page context
-		//so for example a playlist with the link 'playlist-720p.hls' should become https://videosite.com/playlist-720p.hls
-		//but instead it becomes moz-extension://6286c73d-d783-40a8-8a2c-14571704f45d/playlist-720p.hls
-		//the issue was resolved after using fetch() instead of XMLHttpRequest() but I kept this just to be safe
-		url = (new URL(url, manifestURL)).toString();
-
-		return new ManifestFormatData(id, name, url, w, h, bitrate);
-	}
-}
-
-class YTFormatData extends FormatData
-{
-
-	constructor(public id: number, public name: string, public width: number, 
-		public height: number, public fileSize: number)
-	{
-		super();
-	}
 
 	static getFromYTDLFormat(format: ytdl_format)
 	{
 		let id = format.format_id;
-		let fileSize = format.filesize;
+		let filesize = 0;
 
-		return new YTFormatData(Number(id), '', format.width!, format.height!, fileSize);
+		if(format.filesize)
+		{
+			filesize = format.filesize;
+		}
+		else if(format.filesize_approx)
+		{
+			filesize = format.filesize_approx;
+		}
+
+		let width = (format.width)? format.width : 0;
+		let height = (format.height)? format.height : 0;
+
+		return new FormatData(id, width, height, filesize);
+	}
+}
+
+class StreamData
+{
+	title: string;
+	duration: number;
+	formats: FormatData[];
+
+	constructor(title: string, duration: number, formats: FormatData[])
+	{
+		this.title = title;
+		this.duration = duration;
+		this.formats = formats;
+	}
+
+	static getFromYTDLYoutube(info: ytdlinfo)
+	{
+		let formats: FormatData[] = [];
+
+		for(let format of info.formats)
+		{
+			if(typeof format.format_note != 'string') continue; 
+			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
+			if(!format.vcodec.startsWith('avc')) continue;
+			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
+			{
+				formats.push(FormatData.getFromYTDLFormat(format));
+			}
+		}
+
+		return new StreamData(info.title, info.duration, formats);
+	}
+
+	static getFromYTDLGeneral(info: ytdlinfo, download: Download)
+	{
+		let formats: FormatData[] = [];
+
+		for(let format of info.formats)
+		{
+			if(format.protocol === 'https') continue;
+			formats.push(FormatData.getFromYTDLFormat(format));
+		}
+
+		let title = info.title;
+
+		if(typeof title === 'undefined' || !title)
+		{
+			title = (download.tabTitle)? download.tabTitle : 'Unknown Title';
+			if(title != 'Unknown Title')
+			{
+				let domain = Utils.getDomain(download.ownerTabUrl);
+				title = Utils.removeSitenameFromTitle(title, domain);
+			}
+		}
+
+		let x = new StreamData(title, info.duration, formats);
+		log.d('stream data be', x);
+		return x;
 	}
 }
 
@@ -1392,9 +1243,13 @@ class FormatDataUI
 		this.formatData = data;
 	}
 
+	get id(): string
+	{
+		return this.formatData.id.toString();
+	}
+
 	get name(): string
 	{
-		if(this.formatData.name) return this.formatData.name;
 		if(this.formatData.height) return this.formatData.height.toString() + 'p';
 		return 'Format #' + (this.formatData.id + 1).toString();
 	}
@@ -1411,44 +1266,40 @@ class FormatDataUI
 
 	get fileSizeString(): string
 	{
-		let size = this.formatData.fileSize;
+		let size = this.formatData.filesize;
 		return (size > 0)? filesize(size, {round: 0}) : 'unknown';
 	}
 }
 
 class StreamDataUI
 {
-	duration: number;
-	formats: FormatData[];
+	streamData: StreamData;
+	formats: FormatDataUI[] = [];
 
-	constructor(duration: number, formats: FormatData[])
+	constructor(data: StreamData)
 	{
-		this.duration = duration;
-		this.formats = formats;
-	}
+		this.streamData = data;
 
-	static getFromManifest(manifest: MainManifest)
-	{
-		let duration = manifest.formats[0].duration;
-		return new StreamDataUI(duration, manifest.formats);
-	}
+		//sort
+		data.formats.sort((a, b) => {return a.pictureSize - b.pictureSize;});
 
-	static getFromYTDLInfo(info: ytdlinfo)
-	{
-		let formats: YTFormatData[] = [];
-		for(let format of info.formats)
+		for(let format of data.formats)
 		{
-			if(typeof format.format_note != 'string') continue; 
-			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
-			if(!format.vcodec.startsWith('avc')) continue;
-			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
-			{
-				formats.push(YTFormatData.getFromYTDLFormat(format));
-			}
+			this.formats.push(new FormatDataUI(format));
 		}
-
-		return new StreamDataUI(info.duration, formats);
 	}
+
+	get title(): string
+	{
+		return this.streamData.title;
+	}
+
+	get duration(): string
+	{
+		return (this.streamData.duration > 0)? 
+			Utils.formatSeconds(this.streamData.duration) : 'unkown duration';
+	}
+
 }
 
 class tabinfo

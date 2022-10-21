@@ -92,20 +92,14 @@ namespace NativeMessaging
 	export class MSG_YTDLInfo extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_INFO;
-		constructor(public url: string, public dlHash: string){
+		handler: 'youtube' | 'general';
+		constructor(public url: string, public dlHash: string, handler: 'youtube' | 'general'){
 			super();
+			this.handler = handler;
 		};
 	}
 
-	//the 'type' property of the following 3 is the same, only the contents of the message is different
-	export class MSG_YTDLURL extends MSG_YTDLBase
-	{
-		type = MSGTYP_YTDL_GET;
-		constructor(public url: string, public filename: string, public dlHash: string){
-			super();
-		};
-	}
-
+	//the 'type' property of the following classes is the same, only the contents of the message is different
 	export class MSG_YTDLFormat extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
@@ -135,6 +129,7 @@ namespace NativeMessaging
 	type MSGRCV_YTDLInfo = {
 		type: string,
 		dlHash: string,
+		handler: string,
 		info: ytdlinfo,
 	};
 
@@ -321,7 +316,16 @@ namespace NativeMessaging
 		if(typeof msg.info === 'object')
 		{
 			let dl = GRB.allDownloads.get(msg.dlHash)!;
-			dl.ytdlinfo = msg.info;
+
+			if(msg.handler === 'youtube')
+			{
+				dl.streamData = StreamData.getFromYTDLYoutube(msg.info);
+			}
+			else if(msg.handler === 'general')
+			{
+				dl.streamData = StreamData.getFromYTDLGeneral(msg.info, dl);
+			}
+
 			dl.hidden = false;
 			browser.pageAction.show(dl.ownerTabId);
 		}

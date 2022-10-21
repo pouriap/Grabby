@@ -8,38 +8,39 @@ class ViewStreamDetails extends PopupView
 	{
 		super();
 		this.download = download;
-		this.data = StreamDataUI.getFromManifest(download.manifest!);
+		this.data = new StreamDataUI(this.download.streamData!);
 	}
 
 	protected async doRender()
 	{	
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 	
-		let duration = Utils.formatSeconds(this.data.duration);
 		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#stream-details #filename")!.setAttribute("title", this.download.filename);
-		ui.get("#stream-details #duration")!.innerHTML = duration;
-		ui.get("#stream-details #duration")!.setAttribute("title", duration);
-	
-		//sort
-		this.data.formats.sort((a, b)=>{
-			return a.pictureSize - b.pictureSize;
-		});
+		ui.get("#stream-details #duration")!.innerHTML = this.data.duration;
+		ui.get("#stream-details #duration")!.setAttribute("title", this.data.duration);
 	
 		for(let format of this.data.formats)
 		{
+			//todo: convert these to ui.create()
 			let li = document.createElement('li');
 			li.setAttribute('class', 'format action');
-			li.setAttribute('id', 'action-ytdl-manifest');
-			li.setAttribute('data-format-id', format.id.toString());
+			//todo: use 'data-action' instead of 'id' to specify action
+			li.setAttribute('id', 'action-ytdl-format');
+			li.setAttribute('data-format-id', format.id);
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
 	
-			let uiData = new FormatDataUI(format);
-			let name = uiData.name;
-			let res = uiData.resString;
-			let size = uiData.fileSizeString;
-	
-			li.innerHTML = `${name} [ ${res} / ~${size} ]`;
+			li.innerHTML = `${format.name} [ ${format.resString} / ~${format.fileSizeString} ]`;
+		}
+
+		if(this.download.specialType === 'youtube-video')
+		{
+			let li = ui.create('li', {
+				'class': 'format action',
+				'id': 'action-ytdl-audio',
+			});
+			ui.get('#stream-details #formats-list')!.appendChild(li);
+			li.innerHTML = 'Download as MP3';
 		}
 	}
 
@@ -48,8 +49,12 @@ class ViewStreamDetails extends PopupView
 		switch(id)
 		{
 
-			case "action-ytdl-manifest":
-				this.ytdlManifest(Number(e.getAttribute('data-format-id')));
+			case "action-ytdl-format":
+				this.ytdlFormat(e.getAttribute('data-format-id')!);
+				break;
+
+			case "action-ytdl-audio":
+				this.ytdlAudio();
 				break;
 	
 			case "action-back":
@@ -61,20 +66,17 @@ class ViewStreamDetails extends PopupView
 		}
 	}
 
-	private ytdlManifest(formatId: number)
+	private ytdlFormat(formatId: string)
 	{
-		let manifest = this.download.manifest!;
-		for(let format of manifest.formats)
-		{
-			if(format.id === formatId)
-			{
-				let url = format.url;
-				let msg = new Messaging.MSGYTDLURL(url, this.download.filename, this.download.hash);
-				Messaging.sendMessage(msg);
-				return;
-			}
-		}
+		let msg = new Messaging.MSGYTDLFormat(this.download.url, this.download.filename,
+			this.download.hash, formatId);
+		Messaging.sendMessage(msg);
+	}
 
-		log.err(`format with id ${formatId} not found`);
+	//todo: add music tag
+	private ytdlAudio()
+	{
+		let msg = new Messaging.MSGYTDLAudio(this.download.url, this.download.filename, this.download.hash);
+		Messaging.sendMessage(msg);		
 	}
 }

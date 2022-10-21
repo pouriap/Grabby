@@ -37,9 +37,12 @@ class ViewDownloadsList extends PopupView
 				'title': download.url,
 				'data-hash': key
 			});
-			let reason = (log.DEBUG)? " (" + download.classReason + ")" : "";
 	
-			listItem.innerHTML = download.filename + reason;
+			listItem.innerHTML = download.filename;
+
+			if(log.DEBUG){
+				listItem.innerHTML = listItem.innerHTML + " (" + download.classReason + ")";
+			};
 	
 			ui.get("#downloads-list")!.appendChild(listItem);
 		}
@@ -78,7 +81,7 @@ class ViewDownloadsList extends PopupView
 			switch(selectedDl.specialType)
 			{
 				case 'youtube-video':
-					(new ViewYoutubeDetails(selectedDl)).render();
+					(new ViewStreamDetails(selectedDl)).render();
 					break;
 				default:
 					break;

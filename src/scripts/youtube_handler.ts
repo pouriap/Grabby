@@ -78,8 +78,6 @@ class YoutubeHandler implements SpecialHandler
 
 		let videoUrl = `https://${domain}/watch?v=${videoId}`;
 
-		log.d('getting video', videoUrl);
-
 		let details = this.download.httpDetails;
 		details.url = videoUrl;
 		let newDL = new Download(details, GRB.tabs);
@@ -87,11 +85,15 @@ class YoutubeHandler implements SpecialHandler
 		//don't request ytdlinfo if we already got this download
 		if(GRB.allDownloads.get(newDL.hash))	return;
 
-		let msg = new NativeMessaging.MSG_YTDLInfo(videoUrl, newDL.hash);
-		NativeMessaging.sendMessage(msg);
 		newDL.specialType = 'youtube-video';
 		newDL.hidden = true;
+		newDL.isStream = true;
 		GRB.addToAllDownloads(newDL);
+
+		log.d('getting youtube video info', videoUrl);
+
+		let msg = new NativeMessaging.MSG_YTDLInfo(newDL.url, newDL.hash, 'youtube');
+		NativeMessaging.sendMessage(msg);
 	}
 
 	private youtubeList(videoId: string, listId: string, domain: string)

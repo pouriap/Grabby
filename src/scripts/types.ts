@@ -6,61 +6,6 @@ type num_und = number | undefined;
 
 type pair = {name: string, value: string};
 
-type hlsRawPlaylist = 
-{
-	attributes: 
-	{
-		NAME: string;
-		RESOLUTION: {width: number, height: number};
-		BANDWIDTH: number;
-	};
-	uri: string;
-}
-
-type hlsRawManifest = 
-{
-	segments: any[];
-	playlists: hlsRawPlaylist[];
-}
-
-type dashRawPlaylist = 
-{
-	attributes:
-	{
-		NAME: string;
-		RESOLUTION: {width: number, height: number};
-		BANDWIDTH: number;
-	};
-	sidx:
-	{
-		uri: string;
-		resolvedUri: string;
-	};
-}
-
-type dashRawManifest = 
-{
-	segments: any[];
-	"duration": number;
-	"playlists": dashRawPlaylist[];
-}
-
-function isHlsPlaylist(obj: any): obj is hlsRawPlaylist {
-	return typeof obj.sidx === 'undefined';
-}
-
-function isDashPlaylist(obj: any): obj is dashRawPlaylist {
-	return typeof obj.sidx != 'undefined';
-}
-
-function isHLSManifest(manifest: StreamManifest): manifest is HLSManifest {
-	return manifest.spec === 'hls';
-}
-
-function isDASHManifest(manifest: StreamManifest): manifest is DASHManifest {
-	return manifest.spec === 'dash';
-}
-
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];
@@ -159,7 +104,8 @@ type webx_window =
 type ytdl_format =
 {
 	asr: number;
-	filesize: number;
+	filesize: number | undefined;
+	filesize_approx: number | undefined;
 	format_id: string;
 	format_note: string | null;
 	height: number | null;
