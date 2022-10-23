@@ -1,10 +1,10 @@
 class ViewStreamDetails extends PopupView
 {
 	protected htmlFile = 'stream_details.html';
-	private download: Download;
+	private download: StreamDownload;
 	private data: StreamDataUI;
 
-	constructor(download: Download)
+	constructor(download: StreamDownload)
 	{
 		super();
 		this.download = download;
@@ -14,7 +14,11 @@ class ViewStreamDetails extends PopupView
 	protected async doRender()
 	{	
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
-	
+
+		
+	log.d('getting fukcing filename for', this.download);
+
+
 		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#stream-details #filename")!.setAttribute("title", this.download.filename);
 		ui.get("#stream-details #duration")!.innerHTML = this.data.duration;
@@ -33,7 +37,7 @@ class ViewStreamDetails extends PopupView
 			li.innerHTML = `${format.name} [ ${format.resString} / ~${format.fileSizeString} ]`;
 		}
 
-		if(this.download.specialType === 'youtube-video')
+		if(this.download.type === 'youtube-video')
 		{
 			let li = ui.create('li', {
 				'class': 'format action',

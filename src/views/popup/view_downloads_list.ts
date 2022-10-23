@@ -72,24 +72,19 @@ class ViewDownloadsList extends PopupView
 
 		log.d('item clicked: ', selectedDl);
 
-		if(selectedDl.isStream)
+		switch(selectedDl.type)
 		{
-			(new ViewStreamDetails(selectedDl)).render();
-		}
-		else if(typeof selectedDl.specialType != 'undefined')
-		{
-			switch(selectedDl.specialType)
-			{
-				case 'youtube-video':
-					(new ViewStreamDetails(selectedDl)).render();
-					break;
-				default:
-					break;
-			}
-		}
-		else
-		{
-			(new ViewDownloadDetails(selectedDl)).render();
+			case 'download':
+				(new ViewDownloadDetails(selectedDl)).render();
+				break;
+			
+			case 'stream':
+				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
+				break;
+
+			case 'youtube-video':
+				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
+				break;
 		}
 	}
 

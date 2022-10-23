@@ -13,8 +13,6 @@ class SpecialSiteHandler implements RequestHandler
 		'www.youtube-nocookie.com': 'youtube',
 	};
 
-	static readonly specialTypes = ['youtube-video'] as const;
-
 	constructor(download: Download, filter: ReqFilter)
 	{
 		this.download = download;

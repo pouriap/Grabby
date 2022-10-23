@@ -40,18 +40,17 @@ class StreamHandler implements RequestHandler
 
 				let details = this.download.httpDetails;
 				details.url = videoUrl;
-				let newDL = new Download(details, GRB.tabs);
+				let streamDL = new StreamDownload(details, GRB.tabs);
 		
 				//don't request ytdlinfo if we already got this download
-				if(GRB.allDownloads.get(newDL.hash))	return;
+				if(GRB.allDownloads.get(streamDL.hash))	return;
 		
-				newDL.hidden = true;
-				newDL.isStream = true;
-				GRB.addToAllDownloads(newDL);
+				streamDL.hidden = true;
+				GRB.addToAllDownloads(streamDL);
 
 				log.d('getting stream video info', videoUrl);
 		
-				let msg = new NativeMessaging.MSG_YTDLInfo(newDL.url, newDL.hash, 'general');
+				let msg = new NativeMessaging.MSG_YTDLInfo(streamDL.url, streamDL.hash);
 				NativeMessaging.sendMessage(msg);
 			}
 		});

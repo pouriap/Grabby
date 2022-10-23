@@ -32,7 +32,19 @@ class GrabbyPopup
 		{
 			let hash = pair[0];
 			let downloadJSON = pair[1] as Download;
-			let download = new Download(downloadJSON.httpDetails, this.tabs);
+			let download: Download;
+			switch(downloadJSON.type)
+			{
+				case 'download':
+					download = new Download(downloadJSON.httpDetails, this.tabs);
+					break;
+				case 'stream':
+					download = new StreamDownload(downloadJSON.httpDetails, this.tabs);
+					break;
+				case 'youtube-video':
+					download = new YoutubeDownload(downloadJSON.httpDetails, this.tabs);
+					break;
+			}
 			//copy all JSON-like properties from downloadJSON to the new download object
 			//@ts-ignore
 			delete downloadJSON._tabs;
@@ -134,6 +146,7 @@ class DownloadWindow implements GRBWindow
  */
 class Download
 {
+	type: download_type = 'download';
 	requestId: string;
 	url: string;
 	statusCode: number;
@@ -144,10 +157,7 @@ class Download
 	httpDetails: HTTPDetails;
 
 	//these are set later
-	isStream = false;
 	hidden = false;
-	streamData: StreamData | undefined = undefined;
-	specialType: typeof SpecialSiteHandler.specialTypes[number] | undefined = undefined;
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
@@ -269,11 +279,6 @@ class Download
 	 */
 	get filename(): string
 	{
-		if(typeof this.streamData != 'undefined')
-		{
-			return this.streamData.title;
-		}
-
 		if(typeof this._filename === "undefined")
 		{
 			this._filename = "unknown";
@@ -437,6 +442,65 @@ class Download
 		}
 	}
 
+}
+
+class StreamDownload extends Download
+{
+	type: download_type = 'stream';
+	streamData: StreamData | undefined = undefined;
+	
+	get filename(): string
+	{
+		return (typeof this.streamData != 'undefined')? this.streamData.title : 'no-video-data';
+	}
+
+	updateData(info: ytdlinfo)
+	{
+		let formats: FormatData[] = [];
+
+		for(let format of info.formats)
+		{
+			if(format.protocol === 'https') continue;
+			formats.push(FormatData.getFromYTDLFormat(format));
+		}
+
+		let title = info.title;
+
+		if(typeof title === 'undefined' || !title)
+		{
+			title = (this.tabTitle)? this.tabTitle : 'Unknown Title';
+			if(title != 'Unknown Title')
+			{
+				let domain = Utils.getDomain(this.ownerTabUrl);
+				title = Utils.removeSitenameFromTitle(title, domain);
+			}
+		}
+
+		this.streamData = new StreamData(title, info.duration, formats);
+	}
+}
+
+class YoutubeDownload extends StreamDownload
+{
+	type: download_type = 'youtube-video';
+
+	updateData(info: ytdlinfo)
+	{
+		let formats: FormatData[] = [];
+
+		for(let format of info.formats)
+		{
+			if(typeof format.format_note != 'string') continue; 
+			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
+			if(!format.vcodec.startsWith('avc')) continue;
+			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
+			{
+				formats.push(FormatData.getFromYTDLFormat(format));
+			}
+		}
+
+		this.streamData = new StreamData(info.title, info.duration, formats);
+	}
 }
 
 /**
@@ -1186,51 +1250,6 @@ class StreamData
 		this.title = title;
 		this.duration = duration;
 		this.formats = formats;
-	}
-
-	static getFromYTDLYoutube(info: ytdlinfo)
-	{
-		let formats: FormatData[] = [];
-
-		for(let format of info.formats)
-		{
-			if(typeof format.format_note != 'string') continue; 
-			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
-			if(!format.vcodec.startsWith('avc')) continue;
-			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
-			{
-				formats.push(FormatData.getFromYTDLFormat(format));
-			}
-		}
-
-		return new StreamData(info.title, info.duration, formats);
-	}
-
-	static getFromYTDLGeneral(info: ytdlinfo, download: Download)
-	{
-		let formats: FormatData[] = [];
-
-		for(let format of info.formats)
-		{
-			if(format.protocol === 'https') continue;
-			formats.push(FormatData.getFromYTDLFormat(format));
-		}
-
-		let title = info.title;
-
-		if(typeof title === 'undefined' || !title)
-		{
-			title = (download.tabTitle)? download.tabTitle : 'Unknown Title';
-			if(title != 'Unknown Title')
-			{
-				let domain = Utils.getDomain(download.ownerTabUrl);
-				title = Utils.removeSitenameFromTitle(title, domain);
-			}
-		}
-
-		let x = new StreamData(title, info.duration, formats);
-		log.d('stream data be', x);
-		return x;
 	}
 }
 

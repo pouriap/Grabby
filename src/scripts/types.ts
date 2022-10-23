@@ -6,6 +6,8 @@ type num_und = number | undefined;
 
 type pair = {name: string, value: string};
 
+type download_type = 'download' | 'stream' | 'youtube-video';
+
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];
