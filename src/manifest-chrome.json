@@ -2,7 +2,8 @@
 	"manifest_version": 2,
 	"name": "Grabby",
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.12.0a",
+	"version": "0.50.0",
+	"version_name": "0.50.0 alpha",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Grabby",
 
@@ -20,13 +21,6 @@
 		"<all_urls>"
 	],
 
-	"browser_specific_settings": {
-		"gecko": {
-			"id": "grabby@pouria.p",
-			"strict_min_version": "56.0"
-		}
-	},
-
 	"icons": {
 		"16": "icons/icon.svg",
 		"32": "icons/icon.svg",
@@ -37,17 +31,6 @@
 
 	"browser_action": {
 		"default_popup": "views/popup/popup.html",
-		"browser_style": true,
-		"default_icon": {
-			"16": "icons/icon.svg",
-			"32": "icons/icon.svg",
-			"48": "icons/icon.svg",
-			"64": "icons/icon.svg",
-			"96": "icons/icon.svg"
-		}
-	},
-
-	"page_action": {
 		"browser_style": true,
 		"default_icon": {
 			"16": "icons/icon.svg",

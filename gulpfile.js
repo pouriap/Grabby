@@ -4,17 +4,24 @@ var less = require('gulp-less');
 var replace = require('gulp-replace');
 var del = require('del');
 var sourcemaps = require('gulp-sourcemaps');
+var rename = require('gulp-rename');
 
 task('copy-statics', function(){
 	return src([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
-		'./src/**/*.json',
 		'./src/**/*.jpg',
 		'./src/**/*.png',
 		'./src/**/*.gif',
 		'./src/**/*.html',
+		'./src/**/manifest.json',
 	], {"base" : "./src"}).pipe(dest('dist'));
+});
+
+task('copy-chrome-manifest', function(){
+	return src(['./src/**/manifest-chrome.json'], {"base" : "./src"})
+		.pipe(rename('manifest.json'))
+		.pipe(dest('dist'));
 });
 
 task('less', function(){
@@ -61,9 +68,21 @@ task('ts-prod', function(){
 	return tsProject.src().pipe(tsProject()).js.pipe(dest("dist"));
 });
 
-task('default', series(parallel('copy-statics', 'less', 'ts-debug'), parallel('remove-size-limit', 'remove-browser-dms')));
+task('default', series(
+	parallel('copy-statics', 'less', 'ts-debug'), 
+	parallel('remove-size-limit', 'remove-browser-dms')
+));
 
-task('production', series('clean', parallel('copy-statics', 'less', 'ts-prod'), 'remove-debug'));
+task('chrome', series('default', 'copy-chrome-manifest'));
+
+task('production', series(
+	'clean', 
+	parallel('copy-statics', 'less', 'ts-prod'), 
+	'remove-debug'
+));
+
+task('production-chrome', series('production', 'copy-chrome-manifest'));
+
 
 task('watch', function(){       
 	watch('./src/**/*.less', series('less'));
@@ -71,10 +90,24 @@ task('watch', function(){
 	watch([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
-		'./src/**/*.json',
 		'./src/**/*.jpg',
 		'./src/**/*.png',
 		'./src/**/*.gif',
 		'./src/**/*.html',
+		'./src/**/manifest.json',
 	], series('copy-statics'));
+});
+
+task('watch-chrome', function(){       
+	watch('./src/**/*.less', series('less'));
+	watch('./src/**/*.ts', series('ts-debug', parallel('remove-size-limit', 'remove-browser-dms')));
+	watch([
+		'./src/icons/**/*',
+		'./src/libs/**/*',
+		'./src/**/*.jpg',
+		'./src/**/*.png',
+		'./src/**/*.gif',
+		'./src/**/*.html',
+		'./src/**/*.json',
+	], series('copy-statics', 'copy-chrome-manifest'));
 });
