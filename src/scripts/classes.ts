@@ -460,6 +460,8 @@ class StreamDownload extends Download
 
 		for(let format of info.formats)
 		{
+			//todo: include the https as well and let user know it's downloadable with DM
+			//also some sites this doesn't work : https://www.eporner.com/hd-porn/rhGx3hF80zs/Extreme-double-anal-gangbang-Back-at-Bruno-s-hideout/
 			if(format.protocol === 'https') continue;
 			formats.push(FormatData.getFromYTDLFormat(format));
 		}

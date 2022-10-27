@@ -4,7 +4,7 @@
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
 	"version": "0.12.0a",
 	"author": "Pouria Pirhadi",
-	"homepage_url": "https://github.com/pouriap/Firefox-DownloadGrab",
+	"homepage_url": "https://github.com/pouriap/Grabby",
 
 	"permissions": [
 		"webRequest",

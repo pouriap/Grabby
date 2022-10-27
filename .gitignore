@@ -1,7 +1,7 @@
 *.xpi
 *.code-workspace
 _extras/
-_release/
+_installer/
 /_Native Client/win/_installer/*.exe
 node_modules/
 dist/

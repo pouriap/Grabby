@@ -26,6 +26,7 @@ class StreamHandler implements RequestHandler
 				let tab = GRB.tabs.getsure(tabid);
 				if(tab.hasMainManifest)
 				{
+					//todo: if you refresh a tab you will get this 
 					log.err('this tab already has a main manifest');
 				}
 
