@@ -156,7 +156,7 @@ namespace Utils
 		return title;
 	}
 
-	export async function browserInfo(): Promise<{name: string, version: number}>
+	export async function browserInfo(): Promise<browser_info>
 	{
 		try
 		{
@@ -166,7 +166,19 @@ namespace Utils
 		}
 		catch(e)
 		{
-			return {name: 'not-firefox', version: -1};
+			let userAgent = navigator.userAgent;
+			let browserName: browser_name = 'unknown';
+
+			if(userAgent.match(/firefox|fxios/i))
+			{
+				browserName = "firefox";
+			}
+			if(userAgent.match(/chrome|chromium|crios/i))
+			{
+				browserName = "chrome";
+			}
+
+			return {name: browserName, version: undefined};
 		}
 	}
 

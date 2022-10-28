@@ -183,6 +183,7 @@ namespace Messaging
 				tabs: Utils.mapToArray(GRB.tabs),
 				options: Options.opt,
 				availableDMs: GRB.availableDMs,
+				browser: GRB.browser,
 			}
 			resolve(new MSGGRBJSON((json)));
 		});

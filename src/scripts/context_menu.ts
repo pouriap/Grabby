@@ -20,10 +20,10 @@ namespace ContextMenu
 	const SCRIPT_GET_ALL = '../content_scripts/get_all_links.js';
 	const SCRIPT_GET_SELECTION = '../content_scripts/get_selection_links.js';
 
-	var menus = (navigator.userAgent.indexOf('Chrome') != -1)? chrome.contextMenus : browser.menus;
-
 	export function startListeners()
 	{
+		let menus = (GRB.browser.name === 'firefox')? browser.menus : chrome.contextMenus;
+
 		//add grab all menu
 		menus.create({
 			id: MENU_ID_GRAB_ALL,

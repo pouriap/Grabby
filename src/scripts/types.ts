@@ -6,6 +6,10 @@ type num_und = number | undefined;
 
 type pair = {name: string, value: string};
 
+type browser_name = 'firefox' | 'chrome' | 'unknown';
+
+type browser_info = {name: browser_name, version: number | undefined};
+
 type download_type = 'download' | 'stream' | 'youtube-video';
 
 type webx_BlockingResponse = {cancel: boolean};

@@ -69,6 +69,10 @@ var GRB = new Grabby();
 
 	try
 	{
+		//get browser info
+		let info = await Utils.browserInfo();
+		GRB.browser = info;
+
 		//get available DMs from flashgot
 		let externalDMs = await NativeMessaging.startListeners();
 

@@ -4,6 +4,7 @@ type GRBJSON =
 	tabs: [key: number, value: any][];
 	options: Options.GRBOptions;
 	availableDMs: string[];
+	browser: browser_info;
 }
 
 /**
@@ -15,6 +16,7 @@ class GrabbyPopup
 	tabs: SureMap<number, tabinfo>;
 	options: Options.GRBOptions;
 	availableDMs: string[];
+	browser: browser_info;
 
 	constructor(grbJSON: GRBJSON)
 	{
@@ -22,6 +24,7 @@ class GrabbyPopup
 		this.availableDMs = grbJSON.availableDMs;
 		this.options = grbJSON.options;
 		this.allDownloads = this.recreateDownloads(grbJSON.allDownloads);
+		this.browser = grbJSON.browser;
 	}
 
 	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
@@ -67,6 +70,8 @@ class Grabby
 	availableDMs: string[] = [];
 	availExtDMs: string[] = [];
 	availBrowserDMs: string[] = [];
+	//@ts-ignore
+	browser: browser_info;
 
 	addToAllDownloads(download: Download)
 	{
