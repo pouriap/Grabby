@@ -107,11 +107,13 @@ namespace NativeMessaging
 			};
 	}
 
-	export class MSG_YTDLAudio implements NativeMessage
+	export class MSG_YTDLAudio extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
 		audioOnly = true;
-		constructor(public url: string, public filename: string, public dlHash: string){};
+		constructor(public url: string, public filename: string, public dlHash: string){
+			super();
+		};
 	}
 
 	/* recived messages */
