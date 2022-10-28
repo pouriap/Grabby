@@ -3,13 +3,8 @@ namespace Tabs
 	export async function startListeners()
 	{
 		browser.tabs.onCreated.addListener(doOnCreated);
-
-		//'url' is only supported in FF88+
-		let info = await browser.runtime.getBrowserInfo();
-		let version = info.version.split('.')[0];
-		let props = (version < 88)? ["status", "title"] :  ["status", "title", "url"];
 		
-		browser.tabs.onUpdated.addListener(doOnUpdated, {properties: props});
+		browser.tabs.onUpdated.addListener(doOnUpdated);
 
 		browser.tabs.onRemoved.addListener(doOnRemoved);
 

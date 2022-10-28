@@ -1,4 +1,5 @@
 declare var browser: webx_browser;
+declare var chrome: webx_chrome;
 declare var filesize: any;
 declare var md5: any;
 
@@ -99,12 +100,7 @@ var GRB = new Grabby();
 	catch(e)
 	{
 		//todo: remove notifications or make them look good
-		let options = {
-			type: "basic", 
-			title: "Grabby", 
-			message: "Error: initialization failed\nReason: " + e.toString(),
-		};
-		browser.notifications.create(options);
+		Utils.notification("Error: initialization failed\nReason: " + e.toString());
 		log.err('Addon could not be initialized:', e);
 	}
 

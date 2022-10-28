@@ -20,31 +20,33 @@ namespace ContextMenu
 	const SCRIPT_GET_ALL = '../content_scripts/get_all_links.js';
 	const SCRIPT_GET_SELECTION = '../content_scripts/get_selection_links.js';
 
+	var menus = (navigator.userAgent.indexOf('Chrome') != -1)? chrome.contextMenus : browser.menus;
+
 	export function startListeners()
 	{
 		//add grab all menu
-		browser.menus.create({
+		menus.create({
 			id: MENU_ID_GRAB_ALL,
 			title: "Grab All",
 			contexts: ["page"],
 		});
 
 		//add grab selection menu
-		browser.menus.create({
+		menus.create({
 			id: MENU_ID_GRAB_SELECTION,
 			title: "Grab Selection",
 			contexts: ["selection"],
 		});
 
 		//add grab link mneu
-		browser.menus.create({
+		menus.create({
 			id: MENU_ID_GRAB_LINK,
 			title: "Grab Link",
 			contexts: ["link"],
 		});
 
 		//menu click listener
-		browser.menus.onClicked.addListener((info: any, tab: any) => {
+		menus.onClicked.addListener((info: any, tab: webx_tab) => {
 			return doOnMenuClicked(info, tab, Options.opt.defaultDM);
 		});
 	}
@@ -53,17 +55,12 @@ namespace ContextMenu
 	 * Runs every time a menu item is clicked
 	 * Links in selection are extracted using code by: https://github.com/c-yan/open-selected-links
 	 */
-	async function doOnMenuClicked(info: any, tab: any, defaultDM: string)
+	async function doOnMenuClicked(info: any, tab: webx_tab, defaultDM: string)
 	{
 		log.d('menu clicked: ', info, '\ntab: ', tab);
 
 		if(!defaultDM){
-			let options = {
-				type: "basic", 
-				title: "Grabby", 
-				message: "ERROR: No download managers found on the system"
-			};
-			browser.notifications.create(options);
+			Utils.notification("ERROR: No download managers found on the system");
 			log.err('no download managers are available');
 		}
 

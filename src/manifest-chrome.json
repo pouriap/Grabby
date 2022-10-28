@@ -15,7 +15,7 @@
 		"clipboardWrite",
 		"storage",
 		"tabs",
-		"menus",
+		"contextMenus",
 		"cookies",
 		"notifications",
 		"<all_urls>"

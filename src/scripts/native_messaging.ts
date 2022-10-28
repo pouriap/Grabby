@@ -325,12 +325,7 @@ namespace NativeMessaging
 
 	function handleYTDLFail(msg: MSGRCV_YTDLFail)
 	{
-		let options = {
-			type: "basic", 
-			title: "Grabby", 
-			message: "Download Failed"
-		};
-		browser.notifications.create(options);
+		Utils.notification("Download Failed");
 	}
 
 	function handleYTDLProg(msg: MSGRCV_YTDLProg)
@@ -343,13 +338,8 @@ namespace NativeMessaging
 
 	function handleYTDLComp(msg: MSGRCV_YTDLComp)
 	{
-		let options = {
-			type: "basic", 
-			title: "Grabby", 
-			message: "Download Complete"
-		};
-		browser.notifications.create(options);
-
+		Utils.notification("Download Complete");
+		
 		let specifier = (typeof msg.dlHash != 'undefined')? msg.dlHash : msg.tabId!;
 		let message = new Messaging.MSGYTDLProg('100', specifier);
 		Messaging.sendMessage(message);
@@ -357,12 +347,7 @@ namespace NativeMessaging
 
 	function handleGeneral(msg: MSGRCV_General)
 	{
-		let message = {
-			type: "basic", 
-			title: "Grabby", 
-			message: msg.content
-		};
-		browser.notifications.create(message);
+		Utils.notification(msg.content);
 	}
 
 	function handleError(msg: MSGRCV_Error)

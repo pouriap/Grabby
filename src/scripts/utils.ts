@@ -110,6 +110,7 @@ namespace Utils
 		let options = {
 			type: "basic", 
 			title: "Grabby", 
+			iconUrl: "icons/icon.svg",
 			message: msg,
 		};
 		browser.notifications.create(options);
@@ -153,6 +154,20 @@ namespace Utils
 		}
 
 		return title;
+	}
+
+	export async function browserInfo(): Promise<{name: string, version: number}>
+	{
+		try
+		{
+			let info = await browser.runtime.getBrowserInfo();
+			let version = info.version.split('.')[0];
+			return {name: 'firefox', version: Number(version)};
+		}
+		catch(e)
+		{
+			return {name: 'not-firefox', version: -1};
+		}
 	}
 
 }

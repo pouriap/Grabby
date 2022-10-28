@@ -89,6 +89,11 @@ interface webx_browser
 	menus: any;
 }
 
+interface webx_chrome
+{
+	contextMenus: any
+}
+
 type webx_window = 
 {
 	focused: boolean;
