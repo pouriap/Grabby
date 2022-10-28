@@ -315,7 +315,10 @@ namespace NativeMessaging
 			let dl = GRB.allDownloads.get(msg.dlHash) as StreamDownload;
 			dl.updateData(msg.info);
 			dl.hidden = false;
-			browser.pageAction.show(dl.ownerTabId);
+			if(GRB.browser.name === 'firefox')
+			{
+				browser.pageAction.show(dl.ownerTabId);
+			}
 		}
 		else
 		{

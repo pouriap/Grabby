@@ -30,7 +30,7 @@ class ViewDownloadDetails extends PopupView
 					VUtils.downloadWithSelectedDM(this.download);
 				}
 				else{
-					this.downloadWithFirefox();
+					this.downloadWithBrowser();
 				}
 				break;
 	
@@ -43,7 +43,7 @@ class ViewDownloadDetails extends PopupView
 		}
 	}
 
-	private downloadWithFirefox()
+	private downloadWithBrowser()
 	{
 		browser.downloads.download({
 			filename: this.download.filename,
