@@ -253,7 +253,7 @@ class Download
 			}
 	
 			let tab = this._tabs.getsure(this.tabId);
-			this._isFromBlankTab = (tab.url === 'about:blank');
+			this._isFromBlankTab = (tab.url === 'about:blank') || (tab.url === '');
 		}
 
 		return this._isFromBlankTab;

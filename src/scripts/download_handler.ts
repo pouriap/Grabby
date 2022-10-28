@@ -246,7 +246,14 @@ class DownloadHandler implements RequestHandler
 			return Promise.resolve({cancel: true});
 		}
 
-		if(act === this.ACT_GRAB && Options.opt.overrideDlDialog){
+		if(act === this.ACT_GRAB && Options.opt.overrideDlDialog)
+		{
+			//only firefox supports this
+			if(GRB.browser.name !== 'firefox')
+			{
+				return Promise.resolve({cancel: false});
+			}
+
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve)
 			{
