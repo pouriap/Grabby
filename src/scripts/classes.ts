@@ -3,7 +3,7 @@ type GRBJSON =
 	allDownloads: [key: string, value: object][];
 	tabs: [key: number, value: any][];
 	options: Options.GRBOptions;
-	availableDMs: string[];
+	availableDMs: string[] | undefined;
 	browser: browser_info;
 }
 
@@ -15,7 +15,7 @@ class GrabbyPopup
 	allDownloads: Map<string, Download>;
 	tabs: SureMap<number, tabinfo>;
 	options: Options.GRBOptions;
-	availableDMs: string[];
+	availableDMs: string[] | undefined;
 	browser: browser_info;
 
 	constructor(grbJSON: GRBJSON)
@@ -67,9 +67,9 @@ class Grabby
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, Download>();
 	tabs = new SureMap<number, tabinfo>();
-	availableDMs: string[] = [];
-	availExtDMs: string[] = [];
-	availBrowserDMs: string[] = [];
+	availableDMs: string[] | undefined = undefined;
+	availExtDMs: string[] | undefined = undefined;
+	availBrowserDMs: string[] | undefined = undefined;
 	//@ts-ignore
 	browser: browser_info;
 
@@ -85,7 +85,7 @@ class Grabby
 	doDownloadJob(job: DownloadJob)
 	{
 		log.d("doing job", job);
-		if(this.availBrowserDMs.includes(job.dmName))
+		if(this.availBrowserDMs && this.availBrowserDMs.includes(job.dmName))
 		{
 			BrowserDMs.dms[job.dmName].download(job);
 		}

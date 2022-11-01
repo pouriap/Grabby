@@ -81,13 +81,12 @@ var GRB = new Grabby();
 
 		let availableDMs: string[] = externalDMs.concat(browserDms);
 
-		if(availableDMs.length == 0){
-			throw "No download managers found on system";
+		//todo: stop forcing people to have DMs
+		if(availableDMs.length > 0){
+			GRB.availableDMs = availableDMs;
+			GRB.availBrowserDMs = browserDms;
+			GRB.availExtDMs = externalDMs;
 		}
-
-		GRB.availableDMs = availableDMs;
-		GRB.availBrowserDMs = browserDms;
-		GRB.availExtDMs = externalDMs;
 
 		await Options.load();
 

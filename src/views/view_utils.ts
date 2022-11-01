@@ -20,17 +20,30 @@ namespace VUtils
 	{
 		let availableDMs = GRBPop.availableDMs;
 		let dmsDropDown = document.getElementById('available-dms')!;
-		for(let dmName of availableDMs){
+
+		if(typeof availableDMs === 'undefined')
+		{
 			let option = document.createElement('option');
-			option.value = dmName;
-			option.innerHTML = dmName;
-			option.id = dmName;
+			option.value = 'N/A';
+			option.innerHTML = 'N/A';
+			option.id = 'N/A';
 			dmsDropDown.appendChild(option);
 		}
-		let defaultDM = GRBPop.options.defaultDM || availableDMs[0];
-		if(defaultDM){
-			//log('setting default dm: ', defaultDM);
-			document.getElementById(defaultDM)!.setAttribute('selected', 'selected');
+		else
+		{
+			for(let dmName of availableDMs)
+			{
+				let option = document.createElement('option');
+				option.value = dmName;
+				option.innerHTML = dmName;
+				option.id = dmName;
+				dmsDropDown.appendChild(option);
+				let defaultDM = GRBPop.options.defaultDM || availableDMs[0];
+				if(defaultDM){
+					//log('setting default dm: ', defaultDM);
+					document.getElementById(defaultDM)!.setAttribute('selected', 'selected');
+				}
+			}
 		}
 	}
 	

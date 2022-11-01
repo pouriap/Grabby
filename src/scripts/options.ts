@@ -219,10 +219,15 @@ namespace Options
 			{
 				let availableDMs = GRBPop.availableDMs;
 
-				let def: string;
-				if(this.opt.defaultDM) def = this.opt.defaultDM;
-				else if(availableDMs.length) def = availableDMs[0];
-				else def = '';
+				if(typeof availableDMs === 'undefined' || availableDMs.length == 0)
+				{
+					return {
+						selected: '',
+						list: []
+					}
+				}
+
+				let def = (this.opt.defaultDM)? this.opt.defaultDM : availableDMs[0];
 
 				return {
 					selected: def,

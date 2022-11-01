@@ -7,7 +7,6 @@
 		"strict": true,
 		"noEmitOnError": false,
 		"noEmit": false,
-		"useUnknownInCatchVariables": false,
     },
 
     "include": [
