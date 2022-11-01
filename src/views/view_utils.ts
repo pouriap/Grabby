@@ -24,10 +24,15 @@ namespace VUtils
 		if(typeof availableDMs === 'undefined')
 		{
 			let option = document.createElement('option');
-			option.value = 'N/A';
-			option.innerHTML = 'N/A';
-			option.id = 'N/A';
+			option.value = '';
+			option.innerHTML = '';
+			option.id = '';
 			dmsDropDown.appendChild(option);
+			ui.get('#dl-with-grabby')?.removeAttribute('checked');
+			ui.get('#dl-with-browser')?.setAttribute('checked', 'checked');
+			ui.get('#dl-with-grabby')?.classList.add('disabled');
+			ui.get('label[for=dl-with-grabby]')?.classList.add('disabled');
+			ui.get('div#dm-list-container')?.classList.add('disabled');
 		}
 		else
 		{

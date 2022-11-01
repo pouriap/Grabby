@@ -249,7 +249,8 @@ class DownloadHandler implements RequestHandler
 		if(act === this.ACT_GRAB && Options.opt.overrideDlDialog)
 		{
 			//only firefox supports this
-			if(GRB.browser.name !== 'firefox')
+			//if we don't have a download manager installed no point in asking what to do
+			if(GRB.browser.name !== 'firefox' || typeof GRB.availableDMs === 'undefined')
 			{
 				return Promise.resolve({cancel: false});
 			}
