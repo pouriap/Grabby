@@ -40,14 +40,14 @@ class BrowserDMs
 				var xdmHost = this.host;
 	
 				let data = '';
-				for(let dlInfo of job.downloadsInfo){
+				for(let dlInfo of job.links){
 					data += 'url=' + dlInfo.url + "\r\n";
 					data += "res=realUA:" + navigator.userAgent + "\r\n";
 					data += "cookie=" + dlInfo.cookies + "\r\n";
 					data += "\r\n\r\n";
 				}
 	
-				if(job.downloadsInfo.length === 1){
+				if(job.links.length === 1){
 					var xhr = new XMLHttpRequest();
 					xhr.open('POST', xdmHost + "/download", true);
 					xhr.send(data);
@@ -91,7 +91,7 @@ class BrowserDMs
 				let urls = '';
 				let cookies = '';
 				let descriptions = '';
-				for(let dlInfo of job.downloadsInfo){
+				for(let dlInfo of job.links){
 					urls += dlInfo.url + "\r\n";
 					cookies += dlInfo.cookies + "\r\n";
 					descriptions += dlInfo.desc + "\r\n";
@@ -102,7 +102,7 @@ class BrowserDMs
 				data.append('urls', urls);
 				data.append('descriptions', descriptions);
 				data.append('cookies', cookies);
-				let emptyLine = Array(job.downloadsInfo.length).fill('').join("\r\n")
+				let emptyLine = Array(job.links.length).fill('').join("\r\n")
 				data.append('fnames', emptyLine);
 				data.append('httpauth', emptyLine);
 				data.append('source', browser.runtime.getURL(''));

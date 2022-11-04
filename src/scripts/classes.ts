@@ -1092,7 +1092,7 @@ type DownloadInfo = {
 	url: string,
 	desc: string,
 	cookies: string,
-	postData: string,
+	postdata: string,
 	filename: string,
 	extension: string
 }
@@ -1105,12 +1105,18 @@ type DownloadInfo = {
  */
 class DownloadJob
 {	
-	useragent: string = navigator.userAgent;
+	useragent: string;
+	dlcount: number;
+	optype: number;
 
-	constructor(public downloadsInfo: DownloadInfo[], public referer: string, 
-		public originPageReferer: string, public originPageCookies: string, 
+	constructor(public links: DownloadInfo[], public referer: string, 
+		public dlpageReferer: string, public dlpageCookies: string, 
 		public dmName:string)
-	{}
+	{
+		this.dlcount = links.length;
+		this.useragent = navigator.userAgent;
+		this.optype = 0;
+	}
 
 	/**
 	 * Creates a job from a Download object
@@ -1145,7 +1151,7 @@ class DownloadJob
 			url: download.url,
 			filename: download.filename,
 			cookies: download.getHeader('cookie', 'request') || '',
-			postData: download.getPostData() || '',
+			postdata: download.getPostData() || '',
 			desc: download.filename,
 			extension: download.fileExtension
 		};
@@ -1191,7 +1197,7 @@ class DownloadJob
 				url: href,
 				desc: desc,
 				cookies: linkCookies,
-				postData: '',
+				postdata: '',
 				filename: filename,
 				extension: extension,
 			}
