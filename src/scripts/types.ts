@@ -84,6 +84,7 @@ interface webx_browser
 	windows: {
 		create: (arg: any) => Promise<webx_window>;
 		getCurrent: (arg: any) => Promise<webx_window>;
+		onRemoved: any;
 	};
 	downloads: any;
 	notifications: any;

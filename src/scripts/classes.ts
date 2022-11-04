@@ -1339,6 +1339,7 @@ class tabinfo
 	id: number;
 	url: string;
 	title: string;
+	isPrivate: boolean;
 	openerId: number | undefined;
 	hasMainManifest = false;
 	closed: boolean = false;
@@ -1349,6 +1350,7 @@ class tabinfo
 		this.url = tab.url;
 		this.title = tab.title;
 		this.openerId = tab.openerTabId;
+		this.isPrivate = tab.incognito;
 	}
 
 	update(tab: webx_tab)

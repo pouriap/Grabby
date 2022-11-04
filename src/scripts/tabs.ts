@@ -28,6 +28,18 @@ namespace Tabs
 
 	function doOnRemoved(tabId: number)
 	{
-		GRB.tabs.getsure(tabId).closed = true;
+		let tab = GRB.tabs.getsure(tabId);
+		tab.closed = true;
+		
+		//delete all downloads associated with this private tab
+		if(tab.isPrivate)
+		{
+			GRB.allDownloads.forEach((dl) => {
+				if(dl.tabId === tabId)
+				{
+					GRB.allDownloads.delete(dl.hash);
+				}
+			})
+		}
 	}
 }
