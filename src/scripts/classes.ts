@@ -47,6 +47,9 @@ class GrabbyPopup
 				case 'youtube-video':
 					download = new YoutubeDownload(downloadJSON.httpDetails, this.tabs);
 					break;
+				case 'reddit-video':
+					download = new RedditDownload(downloadJSON.httpDetails, this.tabs);
+					break;
 			}
 			//copy all JSON-like properties from downloadJSON to the new download object
 			//@ts-ignore
@@ -501,6 +504,27 @@ class YoutubeDownload extends StreamDownload
 			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
 			if(!format.vcodec.startsWith('avc')) continue;
 			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
+			{
+				formats.push(FormatData.getFromYTDLFormat(format));
+			}
+		}
+
+		this.streamData = new StreamData(info.title, info.duration, formats);
+	}
+}
+
+class RedditDownload extends StreamDownload
+{
+	type: download_type = 'reddit-video';
+
+	updateData(info: ytdlinfo)
+	{
+		let formats: FormatData[] = [];
+
+		for(let format of info.formats)
+		{
+			if(!format.vcodec.startsWith('avc')) continue;
+			if(typeof format.protocol != 'undefined' && format.protocol === 'https')
 			{
 				formats.push(FormatData.getFromYTDLFormat(format));
 			}

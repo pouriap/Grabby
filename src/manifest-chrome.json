@@ -60,6 +60,7 @@
 			"scripts/download_handler.js",
 			"scripts/stream_handler.js",
 			"scripts/youtube_handler.js",
+			"scripts/reddit_handler.js",
 			"scripts/special_site_handler.js",
 			"scripts/tabs.js",
 			"scripts/types.js",

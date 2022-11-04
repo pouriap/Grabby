@@ -14,11 +14,6 @@ class ViewStreamDetails extends PopupView
 	protected async doRender()
 	{	
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
-
-		
-	log.d('getting fukcing filename for', this.download);
-
-
 		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#stream-details #filename")!.setAttribute("title", this.download.filename);
 		ui.get("#stream-details #duration")!.innerHTML = this.data.duration;

@@ -85,6 +85,12 @@ class ViewDownloadsList extends PopupView
 			case 'youtube-video':
 				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
 				break;
+			case 'reddit-video':
+				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
+				break;
+			default:
+				console.warn('no view handler assigned for this download type', selectedDl);
+				break;
 		}
 	}
 
