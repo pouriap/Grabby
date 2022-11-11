@@ -12,6 +12,8 @@ type browser_info = {name: browser_name, version: number | undefined};
 
 type download_type = 'download' | 'stream' | 'youtube-video' | 'reddit-video';
 
+type page_link = {href: string, text: string};
+
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];
@@ -65,13 +67,15 @@ type webx_tab =
 	windowId: number;
 }
 
+type webx_execScriptDetails = {code?: string, file?: string};
+
 interface webx_browser
 {
 	tabs: {
 		query: (arg: any) => Promise<webx_tab[]>;
 		get: (arg: number) => Promise<webx_tab>;
 		remove: (arg: number | number[]) => Promise<any>;
-		executeScript: (tabId: number, details: {code?: string, file?: string}) => Promise<any[]>;
+		executeScript: (tabId: number, details: webx_execScriptDetails) => Promise<any[]>;
 		onCreated: any;
 		onUpdated: any;
 		onRemoved: any;

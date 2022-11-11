@@ -1,14 +1,8 @@
 namespace ContextMenu
-{
-	export type link = 
-	{
-		href: string,
-		desc: string
-	};
-	
+{	
 	export type result = 
 	{
-		links: ContextMenu.link[],
+		links: page_link[],
 		originPageUrl: string,
 		originPageReferer: string
 	};
@@ -17,8 +11,9 @@ namespace ContextMenu
 	const MENU_ID_GRAB_ALL = 'grabby.menu.graball';
 	const MENU_ID_GRAB_SELECTION = 'grabby.menu.grabselection';
 	const MENU_ID_GRAB_LINK = 'grabby.menu.grablink';
-	const SCRIPT_GET_ALL = '../content_scripts/get_all_links.js';
-	const SCRIPT_GET_SELECTION = '../content_scripts/get_selection_links.js';
+	const SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
+	const SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
+	const SCRIPT_UTILS = '/scripts/utils.js';
 
 	export function startListeners()
 	{
@@ -69,7 +64,7 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_ALL});
+			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_ALL}, [{file: SCRIPT_UTILS}]);
 			downloadLinks(res);
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_SELECTION){
@@ -77,14 +72,14 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_SELECTION});
+			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_SELECTION}, [{file: SCRIPT_UTILS}]);
 			downloadLinks(res);
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_LINK)
 		{
 			let result: ContextMenu.result = 
 			{
-				links: [{href: info.linkUrl, desc: info.linkText}],
+				links: [{href: info.linkUrl, text: info.linkText}],
 				originPageUrl: '',
 				originPageReferer: ''
 			};

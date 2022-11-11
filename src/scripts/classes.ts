@@ -1213,7 +1213,7 @@ class DownloadJob
 				continue
 			}
 			let href = link.href;
-			let desc = link.desc;
+			let desc = link.text;
 			let linkCookies = await Utils.getCookies(href);
 			let filename = Utils.getFileName(href);
 			let extension = Utils.getExtFromFileName(filename);

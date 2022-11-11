@@ -70,18 +70,29 @@ namespace Utils
 	/**
 	 * Performs an executeScript on a tab
 	 * @param tabId 
-	 * @param data 
+	 * @param details 
 	 */
-	export async function executeScript(tabId: number, data: object): Promise<any | undefined>
+	export async function executeScript(tabId: number, details: webx_execScriptDetails, 
+		preqs?: webx_execScriptDetails[]): Promise<any | undefined>
 	{
 		try
 		{
-			let res = await browser.tabs.executeScript(tabId, data);
+			//inject the prerequisites
+			if(preqs && preqs.length)
+			{
+				for(let i=0; i<preqs.length; i++)
+				{
+					await browser.tabs.executeScript(tabId, preqs[i]);
+				}
+			}
+			//inject the script
+			let res = await browser.tabs.executeScript(tabId, details);
 			if(res.length === 0) return undefined;
 			if(res.length === 1) return (res[0] != 'undefined')? res[0] : '';
 			return res;
 		}
-		catch(e){
+		catch(e)
+		{
 			log.err('Error executing script: ', e);
 		}
 	}
@@ -180,6 +191,15 @@ namespace Utils
 
 			return {name: browserName, version: undefined};
 		}
+	}
+
+	export function parseLink(e: HTMLAnchorElement | HTMLAreaElement): page_link
+	{
+		let isAnchor = (e instanceof HTMLAnchorElement);
+		//@ts-ignore
+		let desc = (isAnchor)? (e.title || e.textContent) : (e.alt || e.title);
+		let href = e.href;
+		return {href: href, text: desc};
 	}
 
 }
