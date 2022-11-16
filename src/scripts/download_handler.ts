@@ -1,14 +1,14 @@
 class DownloadHandler implements RequestHandler
 {
 	private download: Download;
-	private filter: ReqFilter;
+	private filter: RequestFilter;
 
 	private readonly ACT_GRAB = 'grab';
 	private readonly ACT_IGNORE = 'ignore';
 	private readonly ACT_FORCE_DL = 'force dl';
 	private readonly ACT_GRAB_SILENT = 'grab silent';
 
-	constructor(download: Download, filter: ReqFilter)
+	constructor(download: Download, filter: RequestFilter)
 	{
 		this.download = download;
 		this.filter = filter;
@@ -31,21 +31,21 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineCategory(download: Download, filter: ReqFilter)
+	private determineCategory(download: Download, filter: RequestFilter)
 	{
 		/**
 		 * use types to determine category first, because they are the most certain
 		 */
 		if(filter.isTypeWebRes()){
-			download.cat = ReqFilter.CAT_WEBRES_API;
+			download.cat = RequestFilter.CAT_WEBRES_API;
 			return;
 		}
 		if(filter.isTypeMedia()){
-			download.cat = ReqFilter.CAT_MEDIA_API;
+			download.cat = RequestFilter.CAT_MEDIA_API;
 			return;
 		}
 		if(filter.isTypeWebOther()){
-			download.cat = ReqFilter.CAT_OTHERWEB_API;
+			download.cat = RequestFilter.CAT_OTHERWEB_API;
 			return;
 		}
 
@@ -53,23 +53,23 @@ class DownloadHandler implements RequestHandler
 		 * then use mimes because mime is more certain than extension except binary mimes
 		 */
 		if(filter.isMimeWebRes()){
-			download.cat = ReqFilter.CAT_WEB_RES;
+			download.cat = RequestFilter.CAT_WEB_RES;
 			return;
 		}
 		if(filter.isMimeWebOther()){
-			download.cat = ReqFilter.CAT_OTHER_WEB;
+			download.cat = RequestFilter.CAT_OTHER_WEB;
 			return;
 		}
 		if(filter.isMimeMedia()){
-			download.cat = ReqFilter.CAT_FILE_MEDIA;
+			download.cat = RequestFilter.CAT_FILE_MEDIA;
 			return;
 		}
 		if(filter.isMimeCompressed()){
-			download.cat = ReqFilter.CAT_FILE_COMP;
+			download.cat = RequestFilter.CAT_FILE_COMP;
 			return;
 		}
 		if(filter.isMimeDocument()){
-			download.cat = ReqFilter.CAT_FILE_DOC;
+			download.cat = RequestFilter.CAT_FILE_DOC;
 			return;
 		}
 
@@ -77,38 +77,38 @@ class DownloadHandler implements RequestHandler
 		 * use extension to determine what category this request is
 		 */
 		if(filter.isExtWebRes()){
-			download.cat = ReqFilter.CAT_WEB_RES;
+			download.cat = RequestFilter.CAT_WEB_RES;
 			return;
 		}
 		if(filter.isExtWebOther()){
-			download.cat = ReqFilter.CAT_OTHER_WEB;
+			download.cat = RequestFilter.CAT_OTHER_WEB;
 			return;
 		}
 		if(filter.isExtMedia()){
-			download.cat = ReqFilter.CAT_FILE_MEDIA;
+			download.cat = RequestFilter.CAT_FILE_MEDIA;
 			return;
 		}
 		if(filter.isExtCompressed()){
-			download.cat = ReqFilter.CAT_FILE_COMP;
+			download.cat = RequestFilter.CAT_FILE_COMP;
 			return;
 		}
 		if(filter.isExtDocument()){
-			download.cat = ReqFilter.CAT_FILE_DOC;
+			download.cat = RequestFilter.CAT_FILE_DOC;
 			return;
 		}
 		if(filter.isExtBinary()){
-			download.cat = ReqFilter.CAT_FILE_BIN;
+			download.cat = RequestFilter.CAT_FILE_BIN;
 			return;
 		}
 
 		//this is 'application/octet-steam' and 'application/binary'
 		//this is vague and the extension takes precedence to it so we put it at the end
 		if(filter.isMimeGeneralBinary()){
-			download.cat = ReqFilter.CAT_FILE_BIN;
+			download.cat = RequestFilter.CAT_FILE_BIN;
 			return;
 		}
 
-		download.cat = ReqFilter.CAT_UKNOWN;
+		download.cat = RequestFilter.CAT_UKNOWN;
 		return;
 
 	}
@@ -118,42 +118,42 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineClass(download: Download, filter: ReqFilter)
+	private determineClass(download: Download, filter: RequestFilter)
 	{
-		if(download.cat === ReqFilter.CAT_WEBRES_API){
+		if(download.cat === RequestFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
-			download.class = ReqFilter.CLS_INLINE_WEB_RES;
+			download.class = RequestFilter.CLS_INLINE_WEB_RES;
 		}
-		else if(download.cat === ReqFilter.CAT_OTHERWEB_API){
+		else if(download.cat === RequestFilter.CAT_OTHERWEB_API){
 			download.classReason = 'other web api';
-			download.class = ReqFilter.CLS_WEB_OTHER;
+			download.class = RequestFilter.CLS_WEB_OTHER;
 		}
-		else if(download.cat === ReqFilter.CAT_MEDIA_API){
+		else if(download.cat === RequestFilter.CAT_MEDIA_API){
 			download.classReason = 'media api';
-			download.class = ReqFilter.CLS_INLINE_MEDIA;
+			download.class = RequestFilter.CLS_INLINE_MEDIA;
 		}
 
 		//these aren't from API so we aren't so sure about them
-		else if(download.cat === ReqFilter.CAT_OTHER_WEB){
+		else if(download.cat === RequestFilter.CAT_OTHER_WEB){
 			download.classReason = 'other web';
-			download.class = ReqFilter.CLS_WEB_OTHER;
+			download.class = RequestFilter.CLS_WEB_OTHER;
 		}
 		else if(filter.hasAttachment()){
 			download.classReason = 'attachment';
-			download.class = ReqFilter.CLS_DOWNLOAD;
+			download.class = RequestFilter.CLS_DOWNLOAD;
 		}
-		else if(download.cat === ReqFilter.CAT_WEB_RES){
+		else if(download.cat === RequestFilter.CAT_WEB_RES){
 			download.classReason = 'web res';
-			download.class = ReqFilter.CLS_INLINE_WEB_RES;
+			download.class = RequestFilter.CLS_INLINE_WEB_RES;
 		}
 		else if(
-			download.cat === ReqFilter.CAT_FILE_MEDIA ||
-			download.cat === ReqFilter.CAT_FILE_COMP ||
-			download.cat === ReqFilter.CAT_FILE_DOC ||
-			download.cat === ReqFilter.CAT_FILE_BIN
+			download.cat === RequestFilter.CAT_FILE_MEDIA ||
+			download.cat === RequestFilter.CAT_FILE_COMP ||
+			download.cat === RequestFilter.CAT_FILE_DOC ||
+			download.cat === RequestFilter.CAT_FILE_BIN
 		){
 			download.classReason = 'known file type';
-			download.class = ReqFilter.CLS_DOWNLOAD;
+			download.class = RequestFilter.CLS_DOWNLOAD;
 		}
 
 		//as a last resort if the request does not have documentUrl or originUrl and 
@@ -165,7 +165,7 @@ class DownloadHandler implements RequestHandler
 			download.fileExtension !== 'unknown'
 		){
 			download.classReason = 'extension with no document/origin'
-			download.class = ReqFilter.CLS_DOWNLOAD;
+			download.class = RequestFilter.CLS_DOWNLOAD;
 		}
 
 	}
@@ -175,15 +175,15 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineAction(download: Download, filter: ReqFilter): string
+	private determineAction(download: Download, filter: RequestFilter): string
 	{
 		let act = this.ACT_IGNORE;
 
-		if(download.class === ReqFilter.CLS_WEB_OTHER){
+		if(download.class === RequestFilter.CLS_WEB_OTHER){
 			act = this.ACT_IGNORE;
 		}
 
-		if(download.class === ReqFilter.CLS_INLINE_WEB_RES){
+		if(download.class === RequestFilter.CLS_INLINE_WEB_RES){
 			if(Options.opt.excludeWebFiles){
 				act = this.ACT_IGNORE;
 			}
@@ -192,11 +192,11 @@ class DownloadHandler implements RequestHandler
 			}
 		}
 
-		else if(download.class === ReqFilter.CLS_INLINE_MEDIA){
+		else if(download.class === RequestFilter.CLS_INLINE_MEDIA){
 			act = this.ACT_GRAB_SILENT;
 		}
 
-		else if(download.class === ReqFilter.CLS_DOWNLOAD){
+		else if(download.class === RequestFilter.CLS_DOWNLOAD){
 			if( !filter.hasAttachment() && filter.isDisplayedInBrowser() ){
 				act = this.ACT_GRAB_SILENT;
 			}
@@ -206,12 +206,12 @@ class DownloadHandler implements RequestHandler
 		}
 
 		//overrides
-		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isForcedInOpts()){
+		if(download.class === RequestFilter.CLS_DOWNLOAD && filter.isForcedInOpts()){
 			download.classReason = 'opts-force';
 			return this.ACT_FORCE_DL;
 		}
 
-		if(download.class === ReqFilter.CLS_DOWNLOAD && filter.isIncludedInOpts()){
+		if(download.class === RequestFilter.CLS_DOWNLOAD && filter.isIncludedInOpts()){
 			download.classReason = 'opts-include';
 			return this.ACT_GRAB;
 		}

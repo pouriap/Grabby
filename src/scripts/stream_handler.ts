@@ -3,9 +3,9 @@
 class StreamHandler implements RequestHandler
 {
 	private download: Download;
-	private filter: ReqFilter;
+	private filter: RequestFilter;
 
-	constructor(download: Download, filter: ReqFilter)
+	constructor(download: Download, filter: RequestFilter)
 	{
 		this.download = download;
 		this.filter = filter;

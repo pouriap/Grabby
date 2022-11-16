@@ -538,7 +538,7 @@ class RedditDownload extends StreamDownload
  * A class containing all sorts of functions to determine if a request is an 
  * actual download we are interested in
  */
-class ReqFilter
+class RequestFilter
 {
 	//todo: change these to numbers
 	//categories of file types

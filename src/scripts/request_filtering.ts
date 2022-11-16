@@ -88,7 +88,7 @@ namespace RequestFiltering
 		//in doOnCompleted() after the request is completed or when GRB.allDownloads is full
 		let download = new Download(httpDetails, GRB.tabs);
 
-		let filter = new ReqFilter(download, Options.opt);
+		let filter = new RequestFilter(download, Options.opt);
 
 		if(isIgnored(filter)){
 			return Promise.resolve({cancel: false});
@@ -143,7 +143,7 @@ namespace RequestFiltering
 	 * then this function sets it
 	 * @param filter 
 	 */
-	function isIgnored(filter: ReqFilter)
+	function isIgnored(filter: RequestFilter)
 	{
 		if(!filter.isStatusOK()) return true;
 

@@ -1,7 +1,7 @@
 class SpecialSiteHandler implements RequestHandler
 {
 	private download: Download;
-	private filter: ReqFilter;
+	private filter: RequestFilter;
 
 	static readonly specialHandlers = ['youtube', 'reddit'] as const;
 
@@ -15,7 +15,7 @@ class SpecialSiteHandler implements RequestHandler
 		'v.redd.it': 'reddit'
 	};
 
-	constructor(download: Download, filter: ReqFilter)
+	constructor(download: Download, filter: RequestFilter)
 	{
 		this.download = download;
 		this.filter = filter;
