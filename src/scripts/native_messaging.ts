@@ -14,7 +14,7 @@ namespace NativeMessaging
 		{
 			try
 			{
-				this._port = browser.runtime.connectNative(GRB_ADDON_ID);
+				this._port = browser.runtime.connectNative(GB_ADDON_ID);
 				this._port.onDisconnect.addListener((port: any) => {
 					this._onDisconnect(port);
 				});
@@ -163,7 +163,7 @@ namespace NativeMessaging
 
 	/* now the real stuff */
 
-	const GRB_ADDON_ID = "grabby.pouriap";
+	const GB_ADDON_ID = "grabby.pouriap";
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
@@ -314,10 +314,10 @@ namespace NativeMessaging
 		
 		if(typeof msg.info === 'object')
 		{
-			let dl = GRB.allDownloads.get(msg.dlHash) as StreamDownload;
+			let dl = GB.allDownloads.get(msg.dlHash) as StreamDownload;
 			dl.updateData(msg.info);
 			dl.hidden = false;
-			if(GRB.browser.name === 'firefox')
+			if(GB.browser.name === 'firefox')
 			{
 				browser.pageAction.show(dl.ownerTabId);
 			}

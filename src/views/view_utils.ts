@@ -1,16 +1,16 @@
 namespace VUtils
 {	
-	var GRBPop: GrabbyPopup;
+	var GBPop: GrabbyPopup;
 
 	/**
-	 * Gets the GRB instance from the background script and makes a copy of the needed data inside it
+	 * Gets the GB instance from the background script and makes a copy of the needed data inside it
 	 */
 	export async function getBackgroundData(): Promise<GrabbyPopup>
 	{
-		let msg = new Messaging.MSGGetGRB();
-		let response = <Messaging.MSGGRBJSON> await Messaging.sendMessage(msg);
-		GRBPop = new GrabbyPopup(response.GRBJSON);
-		return GRBPop;
+		let msg = new Messaging.MSGGetGB();
+		let response = <Messaging.MSGGBJSON> await Messaging.sendMessage(msg);
+		GBPop = new GrabbyPopup(response.GBJSON);
+		return GBPop;
 	}
 	
 	/**
@@ -18,7 +18,7 @@ namespace VUtils
 	 */
 	export function populateDMs()
 	{
-		let availableDMs = GRBPop.availableDMs;
+		let availableDMs = GBPop.availableDMs;
 		let dmsDropDown = document.getElementById('available-dms')!;
 
 		if(typeof availableDMs === 'undefined')
@@ -43,7 +43,7 @@ namespace VUtils
 				option.innerHTML = dmName;
 				option.id = dmName;
 				dmsDropDown.appendChild(option);
-				let defaultDM = GRBPop.options.defaultDM;
+				let defaultDM = GBPop.options.defaultDM;
 				if(defaultDM){
 					//log('setting default dm: ', defaultDM);
 					document.getElementById(defaultDM)!.setAttribute('selected', 'selected');
@@ -63,7 +63,7 @@ namespace VUtils
 
 	export async function renderDownloadsList()
 	{
-		let grbPop = await VUtils.getBackgroundData();
-		(new ViewDownloadsList(grbPop)).render();
+		let GBPop = await VUtils.getBackgroundData();
+		(new ViewDownloadsList(GBPop)).render();
 	}
 }

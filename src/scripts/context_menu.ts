@@ -17,7 +17,7 @@ namespace ContextMenu
 
 	export function startListeners()
 	{
-		let menus = (GRB.browser.name === 'firefox')? browser.menus : chrome.contextMenus;
+		let menus = (GB.browser.name === 'firefox')? browser.menus : chrome.contextMenus;
 
 		//add grab all menu
 		menus.create({
@@ -95,7 +95,7 @@ namespace ContextMenu
 		function downloadLinks(result: ContextMenu.result)
 		{
 			DownloadJob.getFromContext(defaultDM, result).then((job)=>{
-				GRB.doDownloadJob(job);
+				GB.doDownloadJob(job);
 			});
 		}
 	}

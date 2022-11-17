@@ -80,13 +80,13 @@ class YoutubeHandler implements SpecialHandler
 
 		let details = this.download.httpDetails;
 		details.url = videoUrl;
-		let youtubeDL = new YoutubeDownload(details, GRB.tabs);
+		let youtubeDL = new YoutubeDownload(details, GB.tabs);
 
 		//don't request ytdlinfo if we already got this download
-		if(GRB.allDownloads.get(youtubeDL.hash))	return;
+		if(GB.allDownloads.get(youtubeDL.hash))	return;
 
 		youtubeDL.hidden = true;
-		GRB.addToAllDownloads(youtubeDL);
+		GB.addToAllDownloads(youtubeDL);
 
 		log.d('getting youtube video info', videoUrl);
 

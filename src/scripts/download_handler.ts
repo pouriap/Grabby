@@ -236,12 +236,12 @@ class DownloadHandler implements RequestHandler
 		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
 		//warning: example is porn
 
-		GRB.addToAllDownloads(download);
+		GB.addToAllDownloads(download);
 
 		if(act === this.ACT_FORCE_DL){
 			let dmName = Options.opt.defaultDM;
 			DownloadJob.getFromDownload(dmName, download).then((job)=>{
-				GRB.doDownloadJob(job);
+				GB.doDownloadJob(job);
 			});
 			return Promise.resolve({cancel: true});
 		}
@@ -250,7 +250,7 @@ class DownloadHandler implements RequestHandler
 		{
 			//only firefox supports this
 			//if we don't have a download manager installed no point in asking what to do
-			if(GRB.browser.name !== 'firefox' || typeof GRB.availableDMs === 'undefined')
+			if(GB.browser.name !== 'firefox' || typeof GB.availableDMs === 'undefined')
 			{
 				return Promise.resolve({cancel: false});
 			}

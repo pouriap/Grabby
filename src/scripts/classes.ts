@@ -1,30 +1,30 @@
-type GRBJSON =
+type GBJSON =
 {
 	allDownloads: [key: string, value: object][];
 	tabs: [key: number, value: any][];
-	options: Options.GRBOptions;
+	options: Options.GBOptions;
 	availableDMs: string[] | undefined;
 	browser: browser_info;
 }
 
 /**
- * Class for the popup GRB instance (GRBPopup)
+ * Class for the popup GB instance (GBPop)
  */
 class GrabbyPopup
 {
 	allDownloads: Map<string, Download>;
 	tabs: SureMap<number, tabinfo>;
-	options: Options.GRBOptions;
+	options: Options.GBOptions;
 	availableDMs: string[] | undefined;
 	browser: browser_info;
 
-	constructor(grbJSON: GRBJSON)
+	constructor(gbJSON: GBJSON)
 	{
-		this.tabs = new SureMap(grbJSON.tabs);
-		this.availableDMs = grbJSON.availableDMs;
-		this.options = grbJSON.options;
-		this.allDownloads = this.recreateDownloads(grbJSON.allDownloads);
-		this.browser = grbJSON.browser;
+		this.tabs = new SureMap(gbJSON.tabs);
+		this.availableDMs = gbJSON.availableDMs;
+		this.options = gbJSON.options;
+		this.allDownloads = this.recreateDownloads(gbJSON.allDownloads);
+		this.browser = gbJSON.browser;
 	}
 
 	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
@@ -100,12 +100,12 @@ class Grabby
 	}
 }
 
-interface GRBWindow
+interface GBWindow
 {
 	display(): Promise<webx_window>;
 }
 
-class DownloadWindow implements GRBWindow
+class DownloadWindow implements GBWindow
 {
 	download: Download;
 
@@ -117,7 +117,7 @@ class DownloadWindow implements GRBWindow
 	/**
 	 * Displays the download override window
 	 * we put the download hash into the URL of the window
-	 * when the window is created we retreive this hash and get the corresponding download from GRBPop
+	 * when the window is created we retreive this hash and get the corresponding download from GBPop
 	 * when the dialog is closed it sends a message to the background script telling it whether to continue or block the request
 	 */
 	display()
@@ -134,7 +134,7 @@ class DownloadWindow implements GRBWindow
 			type: "detached_panel",
 			titlePreface: this.download.filename,
 			//add the hash of the download to the URL of this window
-			//when the window is loaded our code will use the hash to get the download from GRBPop
+			//when the window is loaded our code will use the hash to get the download from GBPop
 			//todo: make this like popup like a class
 			url: "views/download_window/download.html?dlHash=" + this.download.hash,
 			allowScriptsToClose : true,
@@ -589,7 +589,7 @@ class RequestFilter
 
 	/* constructor */
 
-	constructor(public download: Download, public options: Options.GRBOptions){}
+	constructor(public download: Download, public options: Options.GBOptions){}
 
 	/* private methods */
 

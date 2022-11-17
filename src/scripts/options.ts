@@ -4,7 +4,7 @@ namespace Options
 	//add it here first
 	//then to the OptionsUI class
 	//the order in which options will be shown in the options page is the below order
-	export class GRBOptions
+	export class GBOptions
 	{
 		[index: string]: unknown;
 		overrideDlDialog: boolean = true;
@@ -27,7 +27,7 @@ namespace Options
 
 	export type OptionNames<T> = 
 	{
-		[Property in keyof GRBOptions]: T;
+		[Property in keyof GBOptions]: T;
 	}
 
 	export type OptionUI<T, V> =
@@ -76,11 +76,11 @@ namespace Options
 		return obj.type === 'deferred';
 	}
 
-	export let opt = new GRBOptions();
+	export let opt = new GBOptions();
 
-	export async function load(availableDMs: string[] | undefined): Promise<GRBOptions>
+	export async function load(availableDMs: string[] | undefined): Promise<GBOptions>
 	{
-		let defaults = new GRBOptions();
+		let defaults = new GBOptions();
 		opt = await browser.storage.local.get(defaults);
 		//todo: can we do something about this disgusting mess?
 		if(!opt.defaulDM && availableDMs && availableDMs.length)
@@ -90,7 +90,7 @@ namespace Options
 		return opt;
 	}
 
-	export function save(options?: GRBOptions): Promise<undefined|string>
+	export function save(options?: GBOptions): Promise<undefined|string>
 	{
 		if(options) opt = options;
 		return browser.storage.local.set(opt);
@@ -100,9 +100,9 @@ namespace Options
 	{
 		[index: string]: unknown;
 
-		opt = new GRBOptions();
+		opt = new GBOptions();
 
-		constructor(opt: GRBOptions)
+		constructor(opt: GBOptions)
 		{
 			this.opt = opt;
 		}
@@ -220,9 +220,9 @@ namespace Options
 		defaultDM: DropdownOption = {
 			type: 'dropdown',
 			desc: "Default download manager: ",
-			getVal: (GRBPop: GrabbyPopup) =>
+			getVal: (GBPop: GrabbyPopup) =>
 			{
-				let availableDMs = GRBPop.availableDMs;
+				let availableDMs = GBPop.availableDMs;
 
 				if(typeof availableDMs === 'undefined' || availableDMs.length == 0)
 				{

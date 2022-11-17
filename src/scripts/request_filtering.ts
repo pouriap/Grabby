@@ -33,14 +33,14 @@ namespace RequestFiltering
 
 	/**
 	 * Runs before a request is sent
-	 * Is used to store POST data and to put the request details in GRB.allRequests
+	 * Is used to store POST data and to put the request details in GB.allRequests
 	 * If we don't store a request here it will be ignored by other callback functions below
 	 */
 	//todo: we can do some of our ignores here to be more efficient
 	function doOnBeforeRequest(details: webx_beforeRequest): webx_BlockingResponse
 	{
-		//store the request details in GRB.allRequests
-		GRB.allRequests.set(details.requestId, <HTTPDetails>details);
+		//store the request details in GB.allRequests
+		GB.allRequests.set(details.requestId, <HTTPDetails>details);
 
 		return {cancel: false};
 	}
@@ -52,7 +52,7 @@ namespace RequestFiltering
 	function doOnBeforeSendHeaders(details: webx_beforeSendHeaders): webx_BlockingResponse
 	{
 		//update http details
-		let httpDetails = GRB.allRequests.get(details.requestId);
+		let httpDetails = GB.allRequests.get(details.requestId);
 
 		if(typeof httpDetails === 'undefined'){
 			return {cancel: false};
@@ -76,7 +76,7 @@ namespace RequestFiltering
 		//console.time(details.requestId);
 
 		//update http details
-		let httpDetails = GRB.allRequests.get(details.requestId);
+		let httpDetails = GB.allRequests.get(details.requestId);
 		
 		if(typeof httpDetails === 'undefined'){
 			return Promise.resolve({cancel: false});
@@ -85,8 +85,8 @@ namespace RequestFiltering
 		Object.assign(httpDetails, details);
 
 		//creating a new download object because the original will be deleted from allRequests
-		//in doOnCompleted() after the request is completed or when GRB.allDownloads is full
-		let download = new Download(httpDetails, GRB.tabs);
+		//in doOnCompleted() after the request is completed or when GB.allDownloads is full
+		let download = new Download(httpDetails, GB.tabs);
 
 		let filter = new RequestFilter(download, Options.opt);
 
@@ -133,7 +133,7 @@ namespace RequestFiltering
 	 */
 	function doOnCompleted(details: webx_reqCommon): webx_BlockingResponse
 	{
-		GRB.allRequests.delete(details.requestId);
+		GB.allRequests.delete(details.requestId);
 		return {cancel: false};
 	}
 

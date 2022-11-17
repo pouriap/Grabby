@@ -23,7 +23,7 @@ class StreamHandler implements RequestHandler
 					log.err('this main manifest does not have a tab id');
 				}
 
-				let tab = GRB.tabs.getsure(tabid);
+				let tab = GB.tabs.getsure(tabid);
 				if(tab.hasMainManifest)
 				{
 					//todo: if you refresh a tab you will get this 
@@ -41,13 +41,13 @@ class StreamHandler implements RequestHandler
 
 				let details = this.download.httpDetails;
 				details.url = videoUrl;
-				let streamDL = new StreamDownload(details, GRB.tabs);
+				let streamDL = new StreamDownload(details, GB.tabs);
 		
 				//don't request ytdlinfo if we already got this download
-				if(GRB.allDownloads.get(streamDL.hash))	return;
+				if(GB.allDownloads.get(streamDL.hash))	return;
 		
 				streamDL.hidden = true;
-				GRB.addToAllDownloads(streamDL);
+				GB.addToAllDownloads(streamDL);
 
 				log.d('getting stream video info', videoUrl);
 		

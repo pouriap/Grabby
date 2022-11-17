@@ -6,8 +6,8 @@ namespace Messaging
 {
 	const TYP_SAVE_OPTIONS = 'save-options';
 	const TYP_CLEAR_LIST = 'clear-list';
-	const TYP_GET_GRB = 'get-bg';
-	const TYP_GRBJSON = 'grb-json';
+	const TYP_GET_GB = 'get-bg';
+	const TYP_GBJSON = 'gb-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
 	const TYP_DOWNLOAD = 'download';
 	const TYP_YTDL_FORMAT = 'ytdl-format';
@@ -23,7 +23,7 @@ namespace Messaging
 	export class MSGSaveOptions implements Message
 	{
 		type = TYP_SAVE_OPTIONS;
-		constructor(public options: Options.GRBOptions){};
+		constructor(public options: Options.GBOptions){};
 	}
 	
 	export class MSGClearlist implements Message
@@ -31,15 +31,15 @@ namespace Messaging
 		type = TYP_CLEAR_LIST;
 	}
 	
-	export class MSGGetGRB implements Message
+	export class MSGGetGB implements Message
 	{
-		type = TYP_GET_GRB;
+		type = TYP_GET_GB;
 	}
 
-	export class MSGGRBJSON implements Message
+	export class MSGGBJSON implements Message
 	{
-		type = TYP_GRBJSON;
-		constructor(public GRBJSON: GRBJSON){};
+		type = TYP_GBJSON;
+		constructor(public GBJSON: GBJSON){};
 	}
 	
 	export class MSGDlDialogClosing implements Message
@@ -124,10 +124,10 @@ namespace Messaging
 			handleClearList(msg as MSGClearlist);
 		}
 
-		//gets a copy of GRB global variable
-		else if(msg.type === TYP_GET_GRB)
+		//gets a copy of GB global variable
+		else if(msg.type === TYP_GET_GB)
 		{
-			return handleGetGRB(msg as MSGGetGRB);
+			return handleGetGB(msg as MSGGetGB);
 		}
 
 		//called when download dialog is closing
@@ -172,27 +172,27 @@ namespace Messaging
 
 	function handleClearList(msg: MSGClearlist)
 	{
-		GRB.allDownloads.clear();
+		GB.allDownloads.clear();
 	}
 
-	function handleGetGRB(msg: MSGGetGRB): Promise<MSGGRBJSON>
+	function handleGetGB(msg: MSGGetGB): Promise<MSGGBJSON>
 	{
 		return new Promise((resolve) => {
-			let json: GRBJSON = {
-				allDownloads: Utils.mapToArray(GRB.allDownloads),
-				tabs: Utils.mapToArray(GRB.tabs),
+			let json: GBJSON = {
+				allDownloads: Utils.mapToArray(GB.allDownloads),
+				tabs: Utils.mapToArray(GB.tabs),
 				options: Options.opt,
-				availableDMs: GRB.availableDMs,
-				browser: GRB.browser,
+				availableDMs: GB.availableDMs,
+				browser: GB.browser,
 			}
-			resolve(new MSGGRBJSON((json)));
+			resolve(new MSGGBJSON((json)));
 		});
 	}
 
 	//this message is received when download dialog is closing
 	function handleDLDialog(msg: MSGDlDialogClosing)
 	{
-		let download = GRB.allDownloads.get(msg.dlHash)!;
+		let download = GB.allDownloads.get(msg.dlHash)!;
 
 		if(typeof download.resolveRequest === 'undefined'){
 			log.err('download does not have resolve', download);
@@ -210,7 +210,7 @@ namespace Messaging
 		//todo: new tabs that are not blank do not get closed: https://jdownloader.org/download/index
 		if(typeof download.tabId != 'undefined')
 		{
-			let dlTab = GRB.tabs.getsure(download.tabId);
+			let dlTab = GB.tabs.getsure(download.tabId);
 			if(dlTab.url === "about:blank")
 			{
 				log.d('closing blank tab: ', dlTab);
@@ -221,9 +221,9 @@ namespace Messaging
 
 	function handleDownload(msg: MSGDownload)
 	{
-		let download = GRB.allDownloads.get(msg.dlHash)!;
+		let download = GB.allDownloads.get(msg.dlHash)!;
 		DownloadJob.getFromDownload(msg.dmName, download).then((job)=>{
-			GRB.doDownloadJob(job);
+			GB.doDownloadJob(job);
 		});
 	}
 

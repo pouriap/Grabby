@@ -26,13 +26,13 @@ class RedditHandler implements SpecialHandler
 			//parameters don't get added as duplicates
 			let details = this.download.httpDetails;
 			details.url = videoUrl;
-			let redditDL = new RedditDownload(details, GRB.tabs);
+			let redditDL = new RedditDownload(details, GB.tabs);
 
 			//don't request ytdlinfo if we already got this download
-			if(GRB.allDownloads.get(redditDL.hash))	return;
+			if(GB.allDownloads.get(redditDL.hash))	return;
 
 			redditDL.hidden = true;
-			GRB.addToAllDownloads(redditDL);
+			GB.addToAllDownloads(redditDL);
 
 			log.d('getting reddit video info', videoUrl);
 

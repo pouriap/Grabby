@@ -8,36 +8,36 @@ namespace Tabs
 
 		browser.tabs.onRemoved.addListener(doOnRemoved);
 
-		//put already open tabs in GRB.tabs
+		//put already open tabs in GB.tabs
 		let tabs = await browser.tabs.query({});
 		for(const tab of tabs)
 		{
-			GRB.tabs.set(tab.id, new tabinfo(tab));
+			GB.tabs.set(tab.id, new tabinfo(tab));
 		}
 	}
 
 	function doOnCreated(tab: webx_tab)
 	{
-		GRB.tabs.set(tab.id, new tabinfo(tab));
+		GB.tabs.set(tab.id, new tabinfo(tab));
 	}
 
 	function doOnUpdated(tabId:number, changeInfo: any, tab: webx_tab)
 	{
-		GRB.tabs.getsure(tabId).update(tab);
+		GB.tabs.getsure(tabId).update(tab);
 	}
 
 	function doOnRemoved(tabId: number)
 	{
-		let tab = GRB.tabs.getsure(tabId);
+		let tab = GB.tabs.getsure(tabId);
 		tab.closed = true;
 		
 		//delete all downloads associated with this private tab
 		if(tab.isPrivate)
 		{
-			GRB.allDownloads.forEach((dl) => {
+			GB.allDownloads.forEach((dl) => {
 				if(dl.tabId === tabId)
 				{
-					GRB.allDownloads.delete(dl.hash);
+					GB.allDownloads.delete(dl.hash);
 				}
 			})
 		}

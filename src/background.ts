@@ -61,7 +61,7 @@ native application must be in accordance with our No Surprises policy.
 //todo: don't make job files for flashgot, send everything with input stream
 //todo: use --progress-template for ytdl
 
-var GRB = new Grabby();
+var GB = new Grabby();
 
 (async () => {
 
@@ -71,7 +71,7 @@ var GRB = new Grabby();
 	{
 		//get browser info
 		let info = await Utils.browserInfo();
-		GRB.browser = info;
+		GB.browser = info;
 
 		//get available DMs from flashgot
 		let externalDMs = await NativeMessaging.startListeners();
@@ -83,9 +83,9 @@ var GRB = new Grabby();
 
 		if(availableDMs.length > 0)
 		{
-			GRB.availableDMs = availableDMs;
-			GRB.availBrowserDMs = browserDms;
-			GRB.availExtDMs = externalDMs;
+			GB.availableDMs = availableDMs;
+			GB.availBrowserDMs = browserDms;
+			GB.availExtDMs = externalDMs;
 		}
 
 		await Options.load(availableDMs);
