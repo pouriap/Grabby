@@ -78,10 +78,15 @@ namespace Options
 
 	export let opt = new GRBOptions();
 
-	export async function load(): Promise<GRBOptions>
+	export async function load(availableDMs: string[] | undefined): Promise<GRBOptions>
 	{
 		let defaults = new GRBOptions();
 		opt = await browser.storage.local.get(defaults);
+		//todo: can we do something about this disgusting mess?
+		if(!opt.defaulDM && availableDMs && availableDMs.length)
+		{
+			opt.defaultDM = availableDMs[0];
+		}
 		return opt;
 	}
 
@@ -227,10 +232,8 @@ namespace Options
 					}
 				}
 
-				let def = (this.opt.defaultDM)? this.opt.defaultDM : availableDMs[0];
-
 				return {
-					selected: def,
+					selected: this.opt.defaultDM,
 					list: availableDMs,
 				}
 			},

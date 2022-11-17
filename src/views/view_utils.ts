@@ -43,7 +43,7 @@ namespace VUtils
 				option.innerHTML = dmName;
 				option.id = dmName;
 				dmsDropDown.appendChild(option);
-				let defaultDM = GRBPop.options.defaultDM || availableDMs[0];
+				let defaultDM = GRBPop.options.defaultDM;
 				if(defaultDM){
 					//log('setting default dm: ', defaultDM);
 					document.getElementById(defaultDM)!.setAttribute('selected', 'selected');

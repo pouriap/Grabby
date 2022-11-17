@@ -81,14 +81,14 @@ var GRB = new Grabby();
 
 		let availableDMs: string[] = externalDMs.concat(browserDms);
 
-		//todo: stop forcing people to have DMs
-		if(availableDMs.length > 0){
+		if(availableDMs.length > 0)
+		{
 			GRB.availableDMs = availableDMs;
 			GRB.availBrowserDMs = browserDms;
 			GRB.availExtDMs = externalDMs;
 		}
 
-		await Options.load();
+		await Options.load(availableDMs);
 
 		Tabs.startListeners();
 

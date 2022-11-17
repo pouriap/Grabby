@@ -7,7 +7,7 @@ namespace PopupOptions
 		optionUI: Options.OptionUI<unknown, unknown>;
 	}
 
-	var GRBop: GrabbyPopup;
+	var GRBpop: GrabbyPopup;
 		
 	// load current options when page is loaded
 	document.addEventListener("DOMContentLoaded", loadOptions);
@@ -51,10 +51,10 @@ namespace PopupOptions
 	// loads options from browser storage and processes them to create a form
 	async function loadOptions()
 	{	
-		GRBop = await VUtils.getBackgroundData();
+		GRBpop = await VUtils.getBackgroundData();
 
 		//get the currently saved options
-		let options = await Options.load();
+		let options = await Options.load(GRBpop.availableDMs);
 	
 		let optionsUI = new Options.OptionsUI(options);
 	
@@ -165,7 +165,7 @@ namespace PopupOptions
 	function createDropDown(id: string, optionUI: Options.DropdownOption)
 	{
 		//populate the list
-		let data = optionUI.getVal(GRBop);
+		let data = optionUI.getVal(GRBpop);
 		let itemList = data.list;
 		let selectedItem = data.selected;
 	
