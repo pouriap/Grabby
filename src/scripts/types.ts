@@ -14,11 +14,19 @@ type download_type = 'download' | 'stream' | 'youtube-video' | 'reddit-video';
 
 type page_link = {href: string, text: string};
 
+type extracted_links = 
+{
+	links: page_link[],
+	originPageUrl: string,
+	originPageReferer: string
+};
+
 type webx_BlockingResponse = {cancel: boolean};
 
 type webx_HTTPHeaders = pair[];
 
-type webx_reqCommon = {
+type webx_reqCommon = 
+{
 	requestId: string;
 	tabId: number;
 	url: string;

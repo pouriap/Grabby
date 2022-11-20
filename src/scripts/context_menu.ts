@@ -1,12 +1,5 @@
 namespace ContextMenu
-{	
-	export type result = 
-	{
-		links: page_link[],
-		originPageUrl: string,
-		originPageReferer: string
-	};
-	
+{		
 	const MENU_ID_PARENT = 'grabby.menu.parent';
 	const MENU_ID_GRAB_ALL = 'grabby.menu.graball';
 	const MENU_ID_GRAB_SELECTION = 'grabby.menu.grabselection';
@@ -64,8 +57,8 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_ALL}, [{file: SCRIPT_UTILS}]);
-			downloadLinks(res);
+			let w = new LinkListWindow(tab.id);
+			w.display();
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_SELECTION){
 			//if tab is undefined it means we are in forbidden urls where we can't inject scripts
@@ -77,7 +70,7 @@ namespace ContextMenu
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_LINK)
 		{
-			let result: ContextMenu.result = 
+			let result: extracted_links = 
 			{
 				links: [{href: info.linkUrl, text: info.linkText}],
 				originPageUrl: '',
@@ -92,7 +85,7 @@ namespace ContextMenu
 			downloadLinks(result);
 		}
 
-		function downloadLinks(result: ContextMenu.result)
+		function downloadLinks(result: extracted_links)
 		{
 			DownloadJob.getFromContext(defaultDM, result).then((job)=>{
 				GB.doDownloadJob(job);

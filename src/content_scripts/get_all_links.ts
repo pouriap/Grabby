@@ -13,7 +13,7 @@
 
 	var originPageUrl = window.location.href;
 	var originPageReferer = document.referrer;
-	var result: ContextMenu.result = {
+	var result: extracted_links = {
 		links: links,
 		originPageUrl: originPageUrl,
 		originPageReferer: originPageReferer,

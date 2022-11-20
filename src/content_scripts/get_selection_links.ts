@@ -15,7 +15,7 @@
 	
 	let originPageUrl = window.location.href;
 	let originPageReferer = document.referrer;
-	let result: ContextMenu.result = {
+	let result: extracted_links = {
 		links: links,
 		originPageUrl: originPageUrl,
 		originPageReferer: originPageReferer,

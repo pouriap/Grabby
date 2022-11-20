@@ -148,6 +148,44 @@ class DownloadWindow implements GBWindow
 	}
 }
 
+class LinkListWindow implements GBWindow
+{
+	tabId: number;
+
+	constructor(tabId: number)
+	{
+		this.tabId = tabId;
+	}
+
+	display()
+	{
+		let screenW = window.screen.width;
+		let screenH = window.screen.height;
+		let windowW = Math.floor(screenW/2);
+		let windowH = Math.floor(screenH * 0.7);
+		let leftMargin = Math.floor( (screenW/2) - (windowW/2) );
+		let topMargin = Math.floor( (screenH/2) - (windowH/2) );
+
+		let createData = 
+		{
+			type: "detached_panel",
+			titlePreface: 'Grab all links',
+			//add the hash of the download to the URL of this window
+			//when the window is loaded our code will use the hash to get the download from GBPop
+			url: "views/link_list_window/link_list.html?tabId=" + this.tabId,
+			allowScriptsToClose : true,
+			width: windowW,
+			height: windowH,
+			left: leftMargin,
+			top: topMargin
+		};
+
+		log.d('create ', createData);
+
+		return browser.windows.create(createData);
+	}
+}
+
 /**
  * Class representing a download
  * Basically any web request is a download
@@ -1200,7 +1238,7 @@ class DownloadJob
 	 * @param originPageReferer 
 	 * @returns A DownloadJob object created from provided data
 	 */
-	static async getFromContext(dmName: string, result: ContextMenu.result)
+	static async getFromContext(dmName: string, result: extracted_links)
 	{
 		let originPageUrl = result.originPageUrl;
 		let originPageReferer = result.originPageReferer;
