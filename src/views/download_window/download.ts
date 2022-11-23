@@ -46,7 +46,11 @@ namespace PopupDownload
 				break;
 
 			case "action-download":
-				VUtils.downloadWithSelectedDM(selectedDl);
+				DownloadJob.getFromDownload(VUtils.getSelectedDM(), selectedDl).then((job) => {
+					let msg = new Messaging.MSGDownload(job);
+					Messaging.sendMessage(msg);
+					window.close();
+				});
 				break;
 			
 			case "action-cancel":
@@ -78,7 +82,16 @@ namespace PopupDownload
 		ui.get("#filename")!.setAttribute("title", download.filename);
 		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
 		ui.get("#host")!.innerHTML = download.host;
-		VUtils.populateDMs();
+		let selector = VUtils.getDMSelector();
+		ui.get('#dm-list-container')?.appendChild(selector);
+		if(selector.classList.contains('disabled'))
+		{
+			ui.get('#dl-with-grabby')?.removeAttribute('checked');
+			ui.get('#dl-with-browser')?.setAttribute('checked', 'checked');
+			ui.get('#dl-with-grabby')?.classList.add('disabled');
+			ui.get('label[for=dl-with-grabby]')?.classList.add('disabled');
+			ui.get('div#dm-list-container')?.classList.add('disabled');
+		}
 	}
 
 }

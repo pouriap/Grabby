@@ -18,7 +18,18 @@ class ViewDownloadDetails extends PopupView
 		ui.get("#download-details #url")!.innerHTML = this.download.url;
 		ui.get("#download-details #url")!.setAttribute("title", this.download.url);
 	
-		VUtils.populateDMs();
+		let selector = VUtils.getDMSelector();
+		ui.get('#dm-list-container')?.appendChild(selector);
+
+		if(selector.classList.contains('disabled'))
+		{
+			ui.get('#dl-with-grabby')?.removeAttribute('checked');
+			ui.get('#dl-with-browser')?.setAttribute('checked', 'checked');
+			ui.get('#dl-with-grabby')?.classList.add('disabled');
+			ui.get('label[for=dl-with-grabby]')?.classList.add('disabled');
+			ui.get('div#dm-list-container')?.classList.add('disabled');
+		}
+
 	}
 
 	onActionClicked(id: string)
@@ -26,8 +37,12 @@ class ViewDownloadDetails extends PopupView
 		switch(id)
 		{
 			case "action-download":
-				if( (ui.get("#dl-with-grabby") as HTMLInputElement).checked){
-					VUtils.downloadWithSelectedDM(this.download);
+				if( (ui.get("#dl-with-grabby") as HTMLInputElement).checked)
+				{
+					DownloadJob.getFromDownload(VUtils.getSelectedDM(), this.download).then((job) => {
+						let msg = new Messaging.MSGDownload(job);
+						Messaging.sendMessage(msg);
+					});
 				}
 				else{
 					this.downloadWithBrowser();

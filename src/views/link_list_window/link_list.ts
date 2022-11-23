@@ -2,12 +2,14 @@ declare var List: any;
 
 namespace WindowLinkList
 {
+	var GBPop: GrabbyPopup;
+
 	const SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
 	const SCRIPT_UTILS = '/scripts/utils.js';
 
-	let links: extracted_links;
+	let linksData: extracted_links;
 
-	document.addEventListener("DOMContentLoaded", async (e) => 
+	document.addEventListener("DOMContentLoaded", (event) => 
 	{
 		document.querySelectorAll(".action").forEach(function(action){
 			action.addEventListener('click', (evt)=>{
@@ -15,23 +17,34 @@ namespace WindowLinkList
 			});
 		});
 
-		let window = await browser.windows.getCurrent({populate: true});
-		let url = window.tabs[0].url;
-		let tabId = Number (url.substring(url.indexOf("?tabId=") + 7) );
-		Utils.executeScript(tabId, {file: SCRIPT_GET_ALL}, [{file: SCRIPT_UTILS}])
-			.then(populateList);
+		VUtils.getBackgroundData().then(async function(gb)
+		{
+			GBPop = gb;
+			let window = await browser.windows.getCurrent({populate: true});
+			let url = window.tabs[0].url;
+			let tabId = Number (url.substring(url.indexOf("?tabId=") + 7) );
+			let data = await Utils.executeScript(tabId, 
+				{file: SCRIPT_GET_ALL}, [{file: SCRIPT_UTILS}]);
+			renderDialog(data);
+		});
+
 	});
 
-	function populateList(data: extracted_links)
+	function renderDialog(data: extracted_links)
 	{
-		links = data;
+		linksData = data;
+		populateList();
+		let selector = VUtils.getDMSelector();
+		ui.get('#dm-list-container')?.appendChild(selector);
+	}
+
+	function populateList()
+	{
 		let i = 0;
 
-		//todo: remove duplicate hrefs
-
-		for(let link of data.links)
+		for(let link of linksData.links)
 		{
-			let id = "link_" + i++;
+			let id = "link_" + i;
 			let chkbox = ui.create('input', {type: 'checkbox', id: id, 'data-index': i.toString()}) as HTMLInputElement;
 			let text = ui.create('span', {class: 'text'});
 			text.innerHTML = link.text;
@@ -48,6 +61,7 @@ namespace WindowLinkList
 			label.appendChild(div);
 			li.appendChild(label);
 			ui.get('.list')!.appendChild(li);
+			i++;
 		}
 
 		let options = { valueNames: ['href', 'text'] };
@@ -101,19 +115,31 @@ namespace WindowLinkList
 
 	function downloadSeleced()
 	{
+		let allLinks = linksData.links;
+
+		let linksToDownload: extracted_links = {
+			originPageReferer: linksData.originPageReferer,
+			originPageUrl: linksData.originPageUrl,
+			links: []
+		};
+
 		ui.getAll('.list input').forEach((e) => {
 			if( (e as HTMLInputElement).checked )
 			{
 				let index = Number( e.getAttribute('data-index')! );
-				//download
+				linksToDownload.links.push(allLinks[index]);
 			}
+		});
+
+		DownloadJob.getFromLinks(VUtils.getSelectedDM(), linksToDownload).then((job) => {
+			let msg = new Messaging.MSGDownload(job);
+			Messaging.sendMessage(msg);
+			window.close();
 		});
 	}
 
 	window.addEventListener("beforeunload", function()
 	{
-		//let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, selectedDl.hash);
-		//Messaging.sendMessage(msg);
 	});
 
 }

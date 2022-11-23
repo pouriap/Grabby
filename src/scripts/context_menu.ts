@@ -87,7 +87,7 @@ namespace ContextMenu
 
 		function downloadLinks(result: extracted_links)
 		{
-			DownloadJob.getFromContext(defaultDM, result).then((job)=>{
+			DownloadJob.getFromLinks(defaultDM, result).then((job)=>{
 				GB.doDownloadJob(job);
 			});
 		}

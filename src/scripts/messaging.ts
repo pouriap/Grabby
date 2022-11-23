@@ -52,7 +52,7 @@ namespace Messaging
 	export class MSGDownload
 	{
 		type = TYP_DOWNLOAD;
-		constructor(public dlHash: string, public dmName: string){};
+		constructor(public job: DownloadJob){};
 	}
 
 	/**
@@ -221,10 +221,7 @@ namespace Messaging
 
 	function handleDownload(msg: MSGDownload)
 	{
-		let download = GB.allDownloads.get(msg.dlHash)!;
-		DownloadJob.getFromDownload(msg.dmName, download).then((job)=>{
-			GB.doDownloadJob(job);
-		});
+		GB.doDownloadJob(msg.job);
 	}
 
 	function handleYTDLFormat(msg: MSGYTDLFormat)

@@ -4,11 +4,18 @@
 {
 	var linkNodes = document.links;
 	var links: page_link[] = [];
+	var len = linkNodes.length;
+	var addedHrefs: string[] = [];
 
-	for(let i=0; i<linkNodes.length; i++)
+	for(let i=0; i<len; i++)
 	{
 		let link = Utils.parseLink(linkNodes[i]);
+
+		//don't get duplicate links
+		if(addedHrefs.includes(link.href)) continue;
+
 		links.push(link);
+		addedHrefs.push(link.href);
 	}
 
 	var originPageUrl = window.location.href;

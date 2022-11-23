@@ -16,10 +16,10 @@ namespace VUtils
 	/**
 	 * Populates the drop down list of download managers
 	 */
-	export function populateDMs()
+	export function getDMSelector(): HTMLSelectElement
 	{
 		let availableDMs = GBPop.availableDMs;
-		let dmsDropDown = document.getElementById('available-dms')!;
+		let dmsDropDown = ui.create('select', {id: 'available-dms'}) as HTMLSelectElement;
 
 		if(typeof availableDMs === 'undefined')
 		{
@@ -28,37 +28,33 @@ namespace VUtils
 			option.innerHTML = '';
 			option.id = '';
 			dmsDropDown.appendChild(option);
-			ui.get('#dl-with-grabby')?.removeAttribute('checked');
-			ui.get('#dl-with-browser')?.setAttribute('checked', 'checked');
-			ui.get('#dl-with-grabby')?.classList.add('disabled');
-			ui.get('label[for=dl-with-grabby]')?.classList.add('disabled');
-			ui.get('div#dm-list-container')?.classList.add('disabled');
+			dmsDropDown.classList.add('disabled');
 		}
 		else
 		{
+			let defaultDM = GBPop.options.defaultDM;
+
 			for(let dmName of availableDMs)
 			{
 				let option = document.createElement('option');
 				option.value = dmName;
 				option.innerHTML = dmName;
-				option.id = dmName;
-				dmsDropDown.appendChild(option);
-				let defaultDM = GBPop.options.defaultDM;
+				option.id = dmName;			
 				if(defaultDM){
-					//log('setting default dm: ', defaultDM);
-					document.getElementById(defaultDM)!.setAttribute('selected', 'selected');
+					option.setAttribute('selected', 'selected');
 				}
+				dmsDropDown.appendChild(option);
 			}
 		}
+
+		return dmsDropDown;
 	}
-	
-	export function downloadWithSelectedDM(download: Download)
+
+	export function getSelectedDM(): string
 	{
 		let DMs = document.getElementById('available-dms')! as HTMLSelectElement;
-		let selectedDM = DMs.options[DMs.selectedIndex].value;	
-		let msg = new Messaging.MSGDownload(download.hash, selectedDM);
-		Messaging.sendMessage(msg);
-		window.close();
+		log.d('thing be', DMs.options[DMs.selectedIndex]);
+		return DMs.options[DMs.selectedIndex].value;
 	}
 
 	export async function renderDownloadsList()
