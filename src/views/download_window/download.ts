@@ -1,35 +1,33 @@
-namespace PopupDownload
+class DownloadView extends View
 {
-	var selectedDl: Download;
-	var GBPop: GrabbyPopup;
+	//@ts-ignore
+	selectedDl: Download;
 	// indicates whether we continue with browser after download dialog is closed or not
-	var continueWithBrowser = false;
+	continueWithBrowser = false;
 
-	document.addEventListener("DOMContentLoaded", (event) => {
-
-		document.querySelectorAll(".action").forEach(function(action){
-			action.addEventListener('click', (evt)=>{
-				actionClicked(action);
-			});
-		});
-
-		VUtils.getBackgroundData().then(async function(gb)
+	async doRender()
+	{
+		/**
+		 * Sends a message to background to tell it the download dialog is closing
+		 */
+		window.addEventListener("beforeunload", () =>
 		{
-			GBPop = gb;
-			let window = await browser.windows.getCurrent({populate: true});
-			let url = window.tabs[0].url;
-			//get the hash of the download which was added to the URL when this windows was created
-			let hash = url.substring(url.indexOf("?dlHash=") + 8);
-			selectedDl = GBPop.allDownloads.get(hash)!;
-			renderDownloadDialog();
+			let msg = new Messaging.MSGDlDialogClosing(this.continueWithBrowser, this.selectedDl.hash);
+			Messaging.sendMessage(msg);
 		});
 
-	});
+		let _window = await browser.windows.getCurrent({populate: true});
+		let url = _window.tabs[0].url;
+		//get the hash of the download which was added to the URL when this windows was created
+		let hash = url.substring(url.indexOf("?dlHash=") + 8);
+		this.selectedDl = this.GBPop.allDownloads.get(hash)!;
+		this.renderDownloadDialog();
+	}
 
 	/**
 	 * This is called every time something with '.action' class is clicked in a popup dialog
 	 */
-	function actionClicked(clickedAction: Element)
+	onActionClicked(clickedAction: Element)
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
@@ -41,12 +39,12 @@ namespace PopupDownload
 		switch(id)
 		{	
 			case "action-continue":
-				continueWithBrowser = true;
+				this.continueWithBrowser = true;
 				window.close();		
 				break;
 
 			case "action-download":
-				DownloadJob.getFromDownload(VUtils.getSelectedDM(), selectedDl).then((job) => {
+				DownloadJob.getFromDownload(this.getSelectedDM(), this.selectedDl).then((job) => {
 					let msg = new Messaging.MSGDownload(job);
 					Messaging.sendMessage(msg);
 					window.close();
@@ -63,26 +61,17 @@ namespace PopupDownload
 	}
 
 	/**
-	 * Sends a message to background to tell it the download dialog is closing
-	 */
-	window.addEventListener("beforeunload", function()
-	{
-		let msg = new Messaging.MSGDlDialogClosing(continueWithBrowser, selectedDl.hash);
-		Messaging.sendMessage(msg);
-	});
-
-	/**
 	 * This is called when background data (GB) is received via messaging
 	 */
-	function renderDownloadDialog()
+	renderDownloadDialog()
 	{
-		let download = selectedDl;
+		let download = this.selectedDl;
 		let classReason = (log.DEBUG)? ' (' + download.classReason + ')' : '';
 		ui.get("#filename")!.innerHTML = download.filename + classReason;
 		ui.get("#filename")!.setAttribute("title", download.filename);
 		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
 		ui.get("#host")!.innerHTML = download.host;
-		let selector = VUtils.getDMSelector();
+		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
 		if(selector.classList.contains('disabled'))
 		{
@@ -95,3 +84,7 @@ namespace PopupDownload
 	}
 
 }
+
+document.addEventListener("DOMContentLoaded", (e) => {
+	(new DownloadView()).render();
+});

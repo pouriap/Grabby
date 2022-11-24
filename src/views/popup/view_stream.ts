@@ -11,7 +11,7 @@ class ViewStreamDetails extends PopupView
 		this.data = new StreamDataUI(this.download.streamData!);
 	}
 
-	protected async doRender()
+	protected async doRenderPopup()
 	{	
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;
@@ -43,13 +43,15 @@ class ViewStreamDetails extends PopupView
 		}
 	}
 
-	protected onActionClicked(id: string, e: Element)
+	protected onActionClicked(clickedAction: Element)
 	{
+		let id = clickedAction.id;
+
 		switch(id)
 		{
 
 			case "action-ytdl-format":
-				this.ytdlFormat(e.getAttribute('data-format-id')!);
+				this.ytdlFormat(clickedAction.getAttribute('data-format-id')!);
 				break;
 
 			case "action-ytdl-audio":
@@ -57,7 +59,7 @@ class ViewStreamDetails extends PopupView
 				break;
 	
 			case "action-back":
-				VUtils.renderDownloadsList();
+				(new ViewDownloadsList()).render();
 				break;
 	
 			default:

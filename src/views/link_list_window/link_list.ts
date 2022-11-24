@@ -1,48 +1,36 @@
 declare var List: any;
 
-namespace WindowLinkList
+class LinkListView extends View
 {
-	var GBPop: GrabbyPopup;
+	readonly SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
+	readonly SCRIPT_UTILS = '/scripts/utils.js';
 
-	const SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
-	const SCRIPT_UTILS = '/scripts/utils.js';
+	//@ts-ignore
+	linksData: extracted_links;
 
-	let linksData: extracted_links;
-
-	document.addEventListener("DOMContentLoaded", (event) => 
+	async doRender()
 	{
-		document.querySelectorAll(".action").forEach(function(action){
-			action.addEventListener('click', (evt)=>{
-				actionClicked(action);
-			});
-		});
+		let window = await browser.windows.getCurrent({populate: true});
+		let url = window.tabs[0].url;
+		let tabId = Number (url.substring(url.indexOf("?tabId=") + 7) );
+		let data = await Utils.executeScript(tabId, 
+			{file: this.SCRIPT_GET_ALL}, [{file: this.SCRIPT_UTILS}]);
+		this.renderDialog(data);
+	}
 
-		VUtils.getBackgroundData().then(async function(gb)
-		{
-			GBPop = gb;
-			let window = await browser.windows.getCurrent({populate: true});
-			let url = window.tabs[0].url;
-			let tabId = Number (url.substring(url.indexOf("?tabId=") + 7) );
-			let data = await Utils.executeScript(tabId, 
-				{file: SCRIPT_GET_ALL}, [{file: SCRIPT_UTILS}]);
-			renderDialog(data);
-		});
-
-	});
-
-	function renderDialog(data: extracted_links)
+	renderDialog(data: extracted_links)
 	{
-		linksData = data;
-		populateList();
-		let selector = VUtils.getDMSelector();
+		this.linksData = data;
+		this.populateList();
+		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
 	}
 
-	function populateList()
+	populateList()
 	{
 		let i = 0;
 
-		for(let link of linksData.links)
+		for(let link of this.linksData.links)
 		{
 			let id = "link_" + i;
 			let chkbox = ui.create('input', {type: 'checkbox', id: id, 'data-index': i.toString()}) as HTMLInputElement;
@@ -71,7 +59,7 @@ namespace WindowLinkList
 	/**
 	 * This is called every time something with '.action' class is clicked in a popup dialog
 	 */
-	function actionClicked(clickedAction: Element)
+	onActionClicked(clickedAction: Element)
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
@@ -83,15 +71,15 @@ namespace WindowLinkList
 		switch(id)
 		{	
 			case "action-select":
-				selectVisible();
+				this.selectVisible();
 				break;
 
 			case "action-unselect":
-				unselectVisible();
+				this.unselectVisible();
 				break;
 			
 			case "action-download":
-				downloadSeleced();
+				this.downloadSeleced();
 				break;
 
 			default:
@@ -99,27 +87,27 @@ namespace WindowLinkList
 		}
 	}
 
-	function selectVisible()
+	selectVisible()
 	{
 		ui.getAll('.list input').forEach((input) => {
 			input.setAttribute('checked', 'checked');
 		});
 	}
 
-	function unselectVisible()
+	unselectVisible()
 	{
 		ui.getAll('.list input').forEach((input) => {
 			input.removeAttribute('checked');
 		});
 	}
 
-	function downloadSeleced()
+	downloadSeleced()
 	{
-		let allLinks = linksData.links;
+		let allLinks = this.linksData.links;
 
 		let linksToDownload: extracted_links = {
-			originPageReferer: linksData.originPageReferer,
-			originPageUrl: linksData.originPageUrl,
+			originPageReferer: this.linksData.originPageReferer,
+			originPageUrl: this.linksData.originPageUrl,
 			links: []
 		};
 
@@ -131,15 +119,15 @@ namespace WindowLinkList
 			}
 		});
 
-		DownloadJob.getFromLinks(VUtils.getSelectedDM(), linksToDownload).then((job) => {
+		DownloadJob.getFromLinks(this.getSelectedDM(), linksToDownload).then((job) => {
 			let msg = new Messaging.MSGDownload(job);
 			Messaging.sendMessage(msg);
 			window.close();
 		});
 	}
 
-	window.addEventListener("beforeunload", function()
-	{
-	});
-
 }
+
+document.addEventListener("DOMContentLoaded", (e) => {
+	(new LinkListView()).render();
+});

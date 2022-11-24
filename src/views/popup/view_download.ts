@@ -9,7 +9,7 @@ class ViewDownloadDetails extends PopupView
 		this.download = dl;
 	}
 
-	protected async doRender()
+	protected async doRenderPopup()
 	{	
 		ui.get("#download-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#download-details #filename")!.setAttribute("title", this.download.filename);
@@ -18,7 +18,7 @@ class ViewDownloadDetails extends PopupView
 		ui.get("#download-details #url")!.innerHTML = this.download.url;
 		ui.get("#download-details #url")!.setAttribute("title", this.download.url);
 	
-		let selector = VUtils.getDMSelector();
+		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
 
 		if(selector.classList.contains('disabled'))
@@ -32,14 +32,16 @@ class ViewDownloadDetails extends PopupView
 
 	}
 
-	onActionClicked(id: string)
+	onActionClicked(clickedAction: Element)
 	{
+		let id = clickedAction.id;
+		
 		switch(id)
 		{
 			case "action-download":
 				if( (ui.get("#dl-with-grabby") as HTMLInputElement).checked)
 				{
-					DownloadJob.getFromDownload(VUtils.getSelectedDM(), this.download).then((job) => {
+					DownloadJob.getFromDownload(this.getSelectedDM(), this.download).then((job) => {
 						let msg = new Messaging.MSGDownload(job);
 						Messaging.sendMessage(msg);
 					});
@@ -50,7 +52,7 @@ class ViewDownloadDetails extends PopupView
 				break;
 	
 			case "action-back":
-				VUtils.renderDownloadsList();
+				(new ViewDownloadsList()).render();
 				break;		
 	
 			default:

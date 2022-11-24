@@ -1,22 +1,28 @@
-//TODO: chekc all included scripts in htmls and see if we still need them
-namespace PopupOptions
+//TODO: check all included scripts in htmls and see if we still need them
+type DrawableOption = 
 {
-	type DrawableOption = 
+	name: string;
+	optionUI: Options.OptionUI<unknown, unknown>;
+}
+
+class OptionsView extends View
+{
+	async doRender()
 	{
-		name: string;
-		optionUI: Options.OptionUI<unknown, unknown>;
+		// load current options when page is loaded
+		this.loadOptions();
+		
+		// save options when save is clicked
+		document.querySelector("form")?.addEventListener("submit", this.saveOptions);
 	}
 
-	var GBPop: GrabbyPopup;
-		
-	// load current options when page is loaded
-	document.addEventListener("DOMContentLoaded", loadOptions);
-	
-	// save options when save is clicked
-	document.querySelector("form")?.addEventListener("submit", saveOptions);
+	onActionClicked(e: Element)
+	{
+		// nothin
+	}
 	
 	// saves the options in the HTML form into browser storage and then applies it in runtime too
-	async function saveOptions(evt: Event)
+	async saveOptions(evt: Event)
 	{
 		evt.preventDefault();
 	
@@ -49,12 +55,10 @@ namespace PopupOptions
 	}
 	
 	// loads options from browser storage and processes them to create a form
-	async function loadOptions()
+	async loadOptions()
 	{	
-		GBPop = await VUtils.getBackgroundData();
-
 		//get the currently saved options
-		let options = await Options.load(GBPop.availableDMs);
+		let options = await Options.load(this.GBPop.availableDMs);
 	
 		let optionsUI = new Options.OptionsUI(options);
 	
@@ -72,7 +76,7 @@ namespace PopupOptions
 				optionUI: optionUI,
 			};
 	
-			let optionDiv = createOptionDiv(d);
+			let optionDiv = this.createOptionDiv(d);
 			document.getElementById('options-form')?.appendChild(optionDiv);
 	
 			if(optionUI.endsection)
@@ -91,16 +95,16 @@ namespace PopupOptions
 		
 	}
 	
-	function createOptionDiv(optionData: DrawableOption)
+	createOptionDiv(optionData: DrawableOption)
 	{
 		let div = document.createElement('div');
 		div.setAttribute('class', 'panel-formElements-item');
-		div.appendChild(createLabel(optionData));
-		div.appendChild(createElement(optionData));
+		div.appendChild(this.createLabel(optionData));
+		div.appendChild(this.createElement(optionData));
 		return div;
 	}
 	
-	function createElement(optionData: DrawableOption)
+	createElement(optionData: DrawableOption)
 	{
 		let e: Element;
 	
@@ -109,15 +113,15 @@ namespace PopupOptions
 	
 		if(Options.isCheckbox(optionUI))
 		{
-			e = createCheckBox(name, optionUI);
+			e = this.createCheckBox(name, optionUI);
 		}
 		else if(Options.isTextbox(optionUI))
 		{
-			e = createTextBox(name, optionUI);
+			e = this.createTextBox(name, optionUI);
 		}
 		else if(Options.isDropdown(optionUI))
 		{
-			e = createDropDown(name, optionUI);
+			e = this.createDropDown(name, optionUI);
 		}
 		else
 		{
@@ -136,7 +140,7 @@ namespace PopupOptions
 		return e;
 	}
 	
-	function createLabel(optionData: DrawableOption)
+	createLabel(optionData: DrawableOption)
 	{
 		let label = document.createElement('label');
 		label.setAttribute("for", optionData.name);
@@ -144,7 +148,7 @@ namespace PopupOptions
 		return label;
 	}
 	
-	function createCheckBox(id: string, optionUI: Options.CheckboxOption)
+	createCheckBox(id: string, optionUI: Options.CheckboxOption)
 	{
 		let checkBox = document.createElement("input");
 		checkBox.setAttribute("type", "checkbox");
@@ -153,7 +157,7 @@ namespace PopupOptions
 		return checkBox;
 	}
 	
-	function createTextBox(id: string, optionUI: Options.TextboxOption)
+	createTextBox(id: string, optionUI: Options.TextboxOption)
 	{
 		let txtBox = document.createElement("input");
 		txtBox.setAttribute("type", "text");
@@ -162,10 +166,10 @@ namespace PopupOptions
 		return txtBox;
 	}
 	
-	function createDropDown(id: string, optionUI: Options.DropdownOption)
+	createDropDown(id: string, optionUI: Options.DropdownOption)
 	{
 		//populate the list
-		let data = optionUI.getVal(GBPop);
+		let data = optionUI.getVal(this.GBPop);
 		let itemList = data.list;
 		let selectedItem = data.selected;
 	
@@ -193,3 +197,7 @@ namespace PopupOptions
 		return dropDwn;
 	}
 }
+
+document.addEventListener("DOMContentLoaded", (e) => {
+	(new OptionsView()).render();
+});

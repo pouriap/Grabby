@@ -1,15 +1,8 @@
 class ViewDownloadsList extends PopupView
 {
 	protected htmlFile = 'downloads_list.html';
-	private GBPop: GrabbyPopup;
 
-	constructor(gb: GrabbyPopup)
-	{
-		super();
-		this.GBPop = gb;
-	}
-
-	protected async doRender()
+	protected async doRenderPopup()
 	{
 		let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
 		let currTab = this.GBPop.tabs.getsure(tab.id);
@@ -48,12 +41,14 @@ class ViewDownloadsList extends PopupView
 		}
 	}
 
-	protected onActionClicked(id: string, e: Element)
+	protected onActionClicked(clickedAction: Element)
 	{
+		let id = clickedAction.id;
+
 		switch(id)
 		{
 			case "action-showdl":
-				this.renderListItem(e);
+				this.renderListItem(clickedAction);
 				break;
 
 			case "action-clearList":
