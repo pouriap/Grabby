@@ -132,6 +132,12 @@ namespace NativeMessaging
 		info: ytdlinfo,
 	};
 
+	type MSGRCV_YTDLInfoYTPL = {
+		type: string,
+		dlHash: string,
+		info: ytdlinfo_ytplitem[];
+	}
+
 	type MSGRCV_YTDLFail = {
 		type: string,
 		dlHash: string
@@ -167,7 +173,8 @@ namespace NativeMessaging
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
-	const MSGTYP_YTDL_INFO = "ytdl_getinfo";
+	const MSGTYP_YTDL_INFO = "ytdl_info";
+	const MSGTYP_YTDL_INFO_YTPL = "ytdl_info_ytpl";
 	const MSGTYP_YTDL_GET = "ytdl_get";
 	const MSGTYP_YTDLPROG = "app_download_progress";
 	const MSGTYP_ERR = "app_error";
@@ -276,6 +283,11 @@ namespace NativeMessaging
 			handleYTDLInfo(msg as MSGRCV_YTDLInfo);
 		}
 
+		else if(msg.type === MSGTYP_YTDL_INFO_YTPL)
+		{
+			handleYTDLInfoYTPL(msg as MSGRCV_YTDLInfoYTPL);
+		}
+
 		else if(msg.type === MSGTYP_YTDL_COMP)
 		{
 			handleYTDLComp(msg as MSGRCV_YTDLComp);
@@ -317,6 +329,28 @@ namespace NativeMessaging
 			let dl = GB.allDownloads.get(msg.dlHash) as StreamDownload;
 			dl.updateData(msg.info);
 			dl.hidden = false;
+
+			if(GB.browser.name === 'firefox')
+			{
+				browser.pageAction.show(dl.ownerTabId);
+			}
+		}
+		else
+		{
+			log.err("Bad response from YTDL:", msg.info);
+		}
+	}
+
+	function handleYTDLInfoYTPL(msg: MSGRCV_YTDLInfoYTPL)
+	{
+		log.d('received ytdl info', msg.info);
+		
+		if(typeof msg.info === 'object')
+		{
+			let dl = GB.allDownloads.get(msg.dlHash) as YTPlaylistDownload;
+			dl.updateData(msg.info);
+			dl.hidden = false;
+
 			if(GB.browser.name === 'firefox')
 			{
 				browser.pageAction.show(dl.ownerTabId);

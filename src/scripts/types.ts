@@ -10,7 +10,7 @@ type browser_name = 'firefox' | 'chrome' | 'unknown';
 
 type browser_info = {name: browser_name, version: number | undefined};
 
-type download_type = 'download' | 'stream' | 'youtube-video' | 'reddit-video';
+type download_type = 'download' | 'stream' | 'youtube-video' | 'youtube-playlist' | 'reddit-video';
 
 type page_link = {href: string, text: string};
 
@@ -172,8 +172,32 @@ type ytdlinfo =
 	like_count: number;
 	channel: string
 	original_url: string;
-	playlist: null;
-	playlist_index: null;
 	display_id: string;
 	fulltitle: string;
+}
+
+type ytdlinfo_ytplitem = ytdlinfo &
+{
+	url: string;
+	playlist_id: string;
+	playlist: string;
+	playlist_title: string;
+	playlist_index: number;
+	playlist_count: number;
+}
+
+type yt_playlist_item =
+{
+	index: number;
+	title: string;
+	video_id: string;
+	video_url: string;
+}
+
+type yt_playlist_data =
+{
+	id: string;
+	title: string;
+	size: number;
+	items: yt_playlist_item[];
 }

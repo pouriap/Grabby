@@ -47,6 +47,9 @@ class GrabbyPopup
 				case 'youtube-video':
 					download = new YoutubeDownload(downloadJSON.httpDetails, this.tabs);
 					break;
+				case 'youtube-playlist':
+					download = new YTPlaylistDownload(downloadJSON.httpDetails, this.tabs);
+					break;
 				case 'reddit-video':
 					download = new RedditDownload(downloadJSON.httpDetails, this.tabs);
 					break;
@@ -548,6 +551,39 @@ class YoutubeDownload extends StreamDownload
 		}
 
 		this.streamData = new StreamData(info.title, info.duration, formats);
+	}
+}
+
+class YTPlaylistDownload extends Download
+{
+	type: download_type = 'youtube-playlist';
+	listData: yt_playlist_data | undefined = undefined;
+
+	get filename(): string
+	{
+		return (typeof this.listData != 'undefined')? this.listData.title : 'no-video-data';
+	}
+
+	updateData(infos: ytdlinfo_ytplitem[])
+	{
+		let items: yt_playlist_item[] = [];
+
+		for(let info of infos)
+		{
+			items.push({
+				index: info.playlist_index,
+				title: info.title,
+				video_id: info.id,
+				video_url: info.url
+			});
+		}
+
+		this.listData = {
+			id: infos[0].playlist_id, 
+			size: infos[0].playlist_count,
+			title: infos[0].playlist_title,
+			items: items
+		};
 	}
 }
 

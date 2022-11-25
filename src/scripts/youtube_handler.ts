@@ -96,6 +96,24 @@ class YoutubeHandler implements SpecialHandler
 
 	private youtubeList(videoId: string, listId: string, domain: string)
 	{
-		log.warn('playlist handling not implemented');
+		//make a new download with a clean video page URL so that requests with extra
+		//parameters don't get added as duplicates
+
+		let playlistUrl = `https://${domain}/watch?v=${videoId}&list=${listId}`;
+
+		let details = this.download.httpDetails;
+		details.url = playlistUrl;
+		let playlistDL = new YTPlaylistDownload(details, GB.tabs);
+
+		//don't request ytdlinfo if we already got this download
+		if(GB.allDownloads.get(playlistDL.hash))	return;
+
+		playlistDL.hidden = true;
+		GB.addToAllDownloads(playlistDL);
+
+		log.d('getting youtube playlist info', playlistUrl);
+
+		let msg = new NativeMessaging.MSG_YTDLInfo(playlistDL.url, playlistDL.hash);
+		NativeMessaging.sendMessage(msg);
 	}
 }
