@@ -3,6 +3,7 @@ declare var List: any;
 class LinkListView extends View
 {
 	readonly SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
+	readonly SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
 	readonly SCRIPT_UTILS = '/scripts/utils.js';
 
 	//@ts-ignore
@@ -12,9 +13,11 @@ class LinkListView extends View
 	{
 		let window = await browser.windows.getCurrent({populate: true});
 		let url = window.tabs[0].url;
-		let tabId = Number (url.substring(url.indexOf("?tabId=") + 7) );
+		let tabId = Number(Utils.getURLParam(url, 'tabId'));
+		let listType = Utils.getURLParam(url, 'listType');
+		let script = (listType === 'all')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
 		let data = await Utils.executeScript(tabId, 
-			{file: this.SCRIPT_GET_ALL}, [{file: this.SCRIPT_UTILS}]);
+			{file: script}, [{file: this.SCRIPT_UTILS}]);
 		this.renderDialog(data);
 	}
 

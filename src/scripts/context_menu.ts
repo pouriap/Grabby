@@ -4,9 +4,6 @@ namespace ContextMenu
 	const MENU_ID_GRAB_ALL = 'grabby.menu.graball';
 	const MENU_ID_GRAB_SELECTION = 'grabby.menu.grabselection';
 	const MENU_ID_GRAB_LINK = 'grabby.menu.grablink';
-	const SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
-	const SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
-	const SCRIPT_UTILS = '/scripts/utils.js';
 
 	export function startListeners()
 	{
@@ -57,7 +54,7 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let w = new LinkListWindow(tab.id);
+			let w = new ListWindow(tab.id, 'all_links');
 			w.display();
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_SELECTION){
@@ -65,8 +62,8 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let res = await Utils.executeScript(tab.id, {file: SCRIPT_GET_SELECTION}, [{file: SCRIPT_UTILS}]);
-			downloadLinks(res);
+			let w = new ListWindow(tab.id, 'selection_links');
+			w.display();
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_LINK)
 		{

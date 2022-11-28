@@ -14,6 +14,8 @@ type download_type = 'download' | 'stream' | 'youtube-video' | 'youtube-playlist
 
 type page_link = {href: string, text: string};
 
+type list_window_type = 'all_links' | 'selection_links' | 'yt_playlist';
+
 type extracted_links = 
 {
 	links: page_link[],

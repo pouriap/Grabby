@@ -151,13 +151,15 @@ class DownloadWindow implements GBWindow
 	}
 }
 
-class LinkListWindow implements GBWindow
+class ListWindow implements GBWindow
 {
 	tabId: number;
+	listType: list_window_type;
 
-	constructor(tabId: number)
+	constructor(tabId: number, listType:  list_window_type)
 	{
 		this.tabId = tabId;
+		this.listType = listType;
 	}
 
 	display()
@@ -175,7 +177,7 @@ class LinkListWindow implements GBWindow
 			titlePreface: 'Grab all links',
 			//add the hash of the download to the URL of this window
 			//when the window is loaded our code will use the hash to get the download from GBPop
-			url: "views/link_list_window/link_list.html?tabId=" + this.tabId,
+			url: `views/link_list_window/link_list.html?tabId=${this.tabId}&listType=${this.listType}`,
 			allowScriptsToClose : true,
 			width: windowW,
 			height: windowH,

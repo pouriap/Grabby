@@ -202,4 +202,10 @@ namespace Utils
 		return {href: href, text: desc};
 	}
 
+	export function getURLParam(url: string, param: string)
+	{
+		let u = new URL(url);
+		return u.searchParams.get(param);
+	}
+
 }
