@@ -14,8 +14,8 @@ class LinkListView extends View
 		let window = await browser.windows.getCurrent({populate: true});
 		let url = window.tabs[0].url;
 		let tabId = Number(Utils.getURLParam(url, 'tabId'));
-		let listType = Utils.getURLParam(url, 'listType');
-		let script = (listType === 'all')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
+		let listType = Utils.getURLParam(url, 'listType') as list_window_type;
+		let script = (listType === 'all_links')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
 		let data = await Utils.executeScript(tabId, 
 			{file: script}, [{file: this.SCRIPT_UTILS}]);
 		this.renderDialog(data);
@@ -121,6 +121,12 @@ class LinkListView extends View
 				linksToDownload.links.push(allLinks[index]);
 			}
 		});
+
+		//don't do anything if no links are selected
+		if(linksToDownload.links.length === 0)
+		{
+			return;
+		}
 
 		DownloadJob.getFromLinks(this.getSelectedDM(), linksToDownload).then((job) => {
 			let msg = new Messaging.MSGDownload(job);
