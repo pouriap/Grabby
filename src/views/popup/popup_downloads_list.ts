@@ -1,6 +1,6 @@
 class ViewDownloadsList extends PopupView
 {
-	protected htmlFile = 'view_downloads_list.html';
+	protected htmlFile = 'popup_downloads_list.html';
 
 	protected async renderChildView()
 	{

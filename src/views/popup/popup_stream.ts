@@ -1,6 +1,6 @@
 class ViewStreamDetails extends PopupView
 {
-	protected htmlFile = 'view_stream.html';
+	protected htmlFile = 'popup_stream.html';
 	private download: StreamDownload;
 	private data: StreamDataUI;
 

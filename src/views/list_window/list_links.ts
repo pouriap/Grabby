@@ -6,7 +6,7 @@ class LinkListView extends ListView
 	private readonly SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
 	private readonly SCRIPT_UTILS = '/scripts/utils.js';
 
-	protected htmlFile = 'links_list.html';
+	protected htmlFile = 'list_links.html';
 	private script: string;
 	private windowURL: string;
 	//@ts-ignore

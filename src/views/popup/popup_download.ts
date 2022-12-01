@@ -1,6 +1,6 @@
 class ViewDownloadDetails extends PopupView
 {
-	protected htmlFile = 'view_download.html';
+	protected htmlFile = 'popup_download.html';
 	private download: Download;
 
 	constructor(dl: Download)
