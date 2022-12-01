@@ -145,15 +145,14 @@ namespace NativeMessaging
 
 	type MSGRCV_YTDLProg = {
 		type: string,
-		dlHash?: string,
-		tabId?: number,
-		percent: string
+		dlHash: string,
+		percent_str: string,
+		speed_str: string
 	}
 
 	type MSGRCV_YTDLComp = {
 		type: string,
-		dlHash?: string,
-		tabId?: number,
+		dlHash: string
 	}
 
 	type MSGRCV_General = {
@@ -170,19 +169,23 @@ namespace NativeMessaging
 	/* now the real stuff */
 
 	const GB_ADDON_ID = "grabby.pouriap";
+
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
+
 	const MSGTYP_YTDL_INFO = "ytdl_info";
 	const MSGTYP_YTDL_INFO_YTPL = "ytdl_info_ytpl";
 	const MSGTYP_YTDL_GET = "ytdl_get";
-	const MSGTYP_YTDLPROG = "app_download_progress";
-	const MSGTYP_ERR = "app_error";
-	const MSGTYP_MSG = "app_message";
+	const MSGTYP_YTDLPROG = "ytdl_progress";
 	const MSGTYP_YTDL_COMP = "ytdl_comp";
 	const MSGTYP_YTDL_FAIL = "ytdl_fail";
+
+	const MSGTYP_ERR = "app_error";
+	const MSGTYP_MSG = "app_message";
 	const MSGTYP_UNSUPP = "unsupported";
 
+	
 	let port: ProperPort;
 
 	export function startListeners(): Promise<string[]>
@@ -278,7 +281,12 @@ namespace NativeMessaging
 	/* listener */	
 	function doOnNativeMessage(msg: NativeMessage)
 	{
-		if(msg.type === MSGTYP_YTDL_INFO)
+		if(msg.type === MSGTYP_YTDLPROG)
+		{
+			handleYTDLProg(msg as MSGRCV_YTDLProg);
+		}
+
+		else if(msg.type === MSGTYP_YTDL_INFO)
 		{
 			handleYTDLInfo(msg as MSGRCV_YTDLInfo);
 		}
@@ -296,11 +304,6 @@ namespace NativeMessaging
 		else if(msg.type === MSGTYP_YTDL_FAIL)
 		{
 			handleYTDLFail(msg as MSGRCV_YTDLFail);
-		}
-
-		else if(msg.type === MSGTYP_YTDLPROG)
-		{
-			handleYTDLProg(msg as MSGRCV_YTDLProg);
 		}
 
 		else if(msg.type === MSGTYP_MSG)
@@ -369,19 +372,20 @@ namespace NativeMessaging
 
 	function handleYTDLProg(msg: MSGRCV_YTDLProg)
 	{
-		let percent = msg.percent.split('%')[0];
-		let specifier = (typeof msg.dlHash != 'undefined')? msg.dlHash : msg.tabId!;
-		let message = new Messaging.MSGYTDLProg(percent, specifier);
-		Messaging.sendMessage(message);
+		let dl = GB.allDownloads.get(msg.dlHash)!;
+		let percent = msg.percent_str.split('%')[0].trim();
+		//100% is only when ytdl has exited and we have received a MSG_YTDLComp
+		if(percent == '100') percent = '99';
+		let speed = msg.speed_str.trim();
+		dl.progress = {percent: Number(percent), speed: speed};
+		log.d('progress is: ', dl.progress);
 	}
 
 	function handleYTDLComp(msg: MSGRCV_YTDLComp)
 	{
 		Utils.notification("Download Complete");
-		
-		let specifier = (typeof msg.dlHash != 'undefined')? msg.dlHash : msg.tabId!;
-		let message = new Messaging.MSGYTDLProg('100', specifier);
-		Messaging.sendMessage(message);
+		let dl = GB.allDownloads.get(msg.dlHash)!;
+		dl.progress = {percent: 100, speed: 'n/a'};
 	}
 
 	function handleGeneral(msg: MSGRCV_General)

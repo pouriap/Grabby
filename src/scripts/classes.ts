@@ -209,6 +209,7 @@ class Download
 
 	//these are set later
 	hidden = false;
+	progress: dl_progress | undefined = undefined;
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';

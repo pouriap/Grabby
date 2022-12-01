@@ -34,9 +34,10 @@ task('remove-debug', function(){
     	.pipe(dest('dist/'));
 });
 
-task('remove-size-limit', function(){
+task('default-debug-options', function(){
 	return src(['./dist/**/*options.js'])
     	.pipe(replace('grabFilesLargerThanMB = 5', 'grabFilesLargerThanMB = 0'))
+		.pipe(replace("ytdlProxy = ''", "ytdlProxy = 'socks5://localhost:9090'"))
     	.pipe(dest('dist/'));
 });
 
@@ -70,7 +71,7 @@ task('ts-prod', function(){
 
 task('default', series(
 	parallel('copy-statics', 'less', 'ts-debug'), 
-	parallel('remove-size-limit', 'remove-browser-dms')
+	parallel('default-debug-options', 'remove-browser-dms')
 ));
 
 task('chrome', series('default', 'copy-chrome-manifest'));
@@ -86,7 +87,7 @@ task('production-chrome', series('production', 'copy-chrome-manifest'));
 
 task('watch', function(){       
 	watch('./src/**/*.less', series('less'));
-	watch('./src/**/*.ts', series('ts-debug', parallel('remove-size-limit', 'remove-browser-dms')));
+	watch('./src/**/*.ts', series('ts-debug', parallel('default-debug-options', 'remove-browser-dms')));
 	watch([
 		'./src/icons/**/*',
 		'./src/libs/**/*',
@@ -100,7 +101,7 @@ task('watch', function(){
 
 task('watch-chrome', function(){       
 	watch('./src/**/*.less', series('less'));
-	watch('./src/**/*.ts', series('ts-debug', parallel('remove-size-limit', 'remove-browser-dms')));
+	watch('./src/**/*.ts', series('ts-debug', parallel('default-debug-options', 'remove-browser-dms')));
 	watch([
 		'./src/icons/**/*',
 		'./src/libs/**/*',

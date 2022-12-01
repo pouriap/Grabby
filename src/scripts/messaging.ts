@@ -72,23 +72,6 @@ namespace Messaging
 		constructor(public url: string, public filename: string, public dlHash: string){};
 	}
 
-	export class MSGYTDLProg
-	{
-		type = TYP_YTDL_PROGRESS;
-		dlHash: string | undefined;
-		tabId: number | undefined;
-		
-		constructor(public percent: string, specifier: number | string)
-		{
-			if(typeof specifier === 'string'){
-				this.dlHash = specifier;
-			}
-			if(typeof specifier === 'number'){
-				this.tabId = specifier;
-			}
-		};
-	}
-
 
 	export function startListeners()
 	{
