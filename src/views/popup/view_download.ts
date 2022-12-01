@@ -32,7 +32,7 @@ class ViewDownloadDetails extends PopupView
 
 	}
 
-	onActionClicked(clickedAction: Element)
+	protected onActionClicked(clickedAction: Element)
 	{
 		let id = clickedAction.id;
 		

@@ -1,7 +1,7 @@
 abstract class View
 {
 	//@ts-ignore
-	GBPop: GrabbyPopup;
+	protected GBPop: GrabbyPopup;
 
 	async render()
 	{
@@ -36,7 +36,7 @@ abstract class View
 	/**
 	 * Populates the drop down list of download managers
 	 */
-	getDMSelector(): HTMLSelectElement
+	protected getDMSelector(): HTMLSelectElement
 	{
 		let availableDMs = this.GBPop.availableDMs;
 		let dmsDropDown = ui.create('select', {id: 'available-dms'}) as HTMLSelectElement;
@@ -70,7 +70,7 @@ abstract class View
 		return dmsDropDown;
 	}
 
-	getSelectedDM(): string
+	protected getSelectedDM(): string
 	{
 		let DMs = document.getElementById('available-dms')! as HTMLSelectElement;
 		log.d('thing be', DMs.options[DMs.selectedIndex]);

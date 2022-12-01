@@ -138,7 +138,6 @@ class DownloadWindow implements GBWindow
 			titlePreface: this.download.filename,
 			//add the hash of the download to the URL of this window
 			//when the window is loaded our code will use the hash to get the download from GBPop
-			//todo: make this like popup like a class
 			url: "views/download_window/download.html?dlHash=" + this.download.hash,
 			allowScriptsToClose : true,
 			width: windowW,
@@ -175,9 +174,7 @@ class ListWindow implements GBWindow
 		{
 			type: "detached_panel",
 			titlePreface: 'Grab all links',
-			//add the hash of the download to the URL of this window
-			//when the window is loaded our code will use the hash to get the download from GBPop
-			url: `views/link_list_window/link_list.html?tabId=${this.tabId}&listType=${this.listType}`,
+			url: `views/list_window/list.html?tabId=${this.tabId}&listType=${this.listType}`,
 			allowScriptsToClose : true,
 			width: windowW,
 			height: windowH,

@@ -1,5 +1,4 @@
-//todo: use JSX and react?
-abstract class PopupView extends View
+abstract class ListView extends View
 {
 	protected abstract htmlFile: string;
 
@@ -19,10 +18,3 @@ abstract class PopupView extends View
 
 	protected abstract renderChildView(): Promise<void>;
 }
-
-//todo show downlods progress
-
-document.addEventListener("DOMContentLoaded", (e) => {
-	//the defaul view for popup is the downloads list
-	(new ViewDownloadsList()).render();
-});

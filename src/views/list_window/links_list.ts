@@ -1,35 +1,36 @@
 declare var List: any;
 
-class LinkListView extends View
+class LinkListView extends ListView
 {
-	readonly SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
-	readonly SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
-	readonly SCRIPT_UTILS = '/scripts/utils.js';
+	private readonly SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
+	private readonly SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
+	private readonly SCRIPT_UTILS = '/scripts/utils.js';
 
+	protected htmlFile = 'links_list.html';
+	private script: string;
+	private windowURL: string;
 	//@ts-ignore
-	linksData: extracted_links;
+	private linksData: extracted_links;
 
-	async doRender()
+	constructor(type: list_window_type, windowURL: string)
 	{
-		let window = await browser.windows.getCurrent({populate: true});
-		let url = window.tabs[0].url;
-		let tabId = Number(Utils.getURLParam(url, 'tabId'));
-		let listType = Utils.getURLParam(url, 'listType') as list_window_type;
-		let script = (listType === 'all_links')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
-		let data = await Utils.executeScript(tabId, 
-			{file: script}, [{file: this.SCRIPT_UTILS}]);
-		this.renderDialog(data);
+		super();
+		this.script = (type === 'all_links')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
+		this.windowURL = windowURL;
 	}
 
-	renderDialog(data: extracted_links)
+	protected async renderChildView()
 	{
-		this.linksData = data;
+		let tabId = Number(Utils.getURLParam(this.windowURL, 'tabId'));
+		this.linksData = await Utils.executeScript(tabId, 
+			{file: this.script}, [{file: this.SCRIPT_UTILS}]);
+
 		this.populateList();
 		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
 	}
 
-	populateList()
+	private populateList()
 	{
 		let i = 0;
 
@@ -62,7 +63,7 @@ class LinkListView extends View
 	/**
 	 * This is called every time something with '.action' class is clicked in a popup dialog
 	 */
-	onActionClicked(clickedAction: Element)
+	protected onActionClicked(clickedAction: Element)
 	{
 		let id = clickedAction.id;
 		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
@@ -90,21 +91,21 @@ class LinkListView extends View
 		}
 	}
 
-	selectVisible()
+	private selectVisible()
 	{
 		ui.getAll('.list input').forEach((input) => {
 			input.setAttribute('checked', 'checked');
 		});
 	}
 
-	unselectVisible()
+	private unselectVisible()
 	{
 		ui.getAll('.list input').forEach((input) => {
 			input.removeAttribute('checked');
 		});
 	}
 
-	downloadSeleced()
+	private downloadSeleced()
 	{
 		let allLinks = this.linksData.links;
 
@@ -136,7 +137,3 @@ class LinkListView extends View
 	}
 
 }
-
-document.addEventListener("DOMContentLoaded", (e) => {
-	(new LinkListView()).render();
-});
