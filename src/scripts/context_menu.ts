@@ -54,7 +54,7 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let w = new ListWindow(tab.id, 'all_links');
+			let w = new ListWindow('all_links', tab.id);
 			w.display();
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_SELECTION){
@@ -62,7 +62,7 @@ namespace ContextMenu
 			if(!tab){
 				return;
 			}
-			let w = new ListWindow(tab.id, 'selection_links');
+			let w = new ListWindow('selection_links', tab.id);
 			w.display();
 		}
 		else if(info.menuItemId == MENU_ID_GRAB_LINK)

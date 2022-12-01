@@ -1,6 +1,4 @@
-declare var List: any;
-
-class LinkListView extends ListView
+class LinksListView extends ListView
 {
 	private readonly SCRIPT_GET_ALL = '/content_scripts/get_all_links.js';
 	private readonly SCRIPT_GET_SELECTION = '/content_scripts/get_selection_links.js';
@@ -8,21 +6,20 @@ class LinkListView extends ListView
 
 	protected htmlFile = 'list_links.html';
 	private script: string;
-	private windowURL: string;
+	private tabId: number;
 	//@ts-ignore
 	private linksData: extracted_links;
 
-	constructor(type: list_window_type, windowURL: string)
+	constructor(type: list_window_type, tabId: number)
 	{
 		super();
 		this.script = (type === 'all_links')? this.SCRIPT_GET_ALL : this.SCRIPT_GET_SELECTION;
-		this.windowURL = windowURL;
+		this.tabId = tabId;
 	}
 
 	protected async renderChildView()
 	{
-		let tabId = Number(Utils.getURLParam(this.windowURL, 'tabId'));
-		this.linksData = await Utils.executeScript(tabId, 
+		this.linksData = await Utils.executeScript(this.tabId, 
 			{file: this.script}, [{file: this.SCRIPT_UTILS}]);
 
 		this.populateList();
@@ -66,11 +63,6 @@ class LinkListView extends ListView
 	protected onActionClicked(clickedAction: Element)
 	{
 		let id = clickedAction.id;
-		let disabled = clickedAction.getAttribute("class")?.indexOf("disabled-action") !== -1;
-
-		if(disabled){
-			return;
-		}
 
 		switch(id)
 		{	
@@ -89,20 +81,6 @@ class LinkListView extends ListView
 			default:
 				break;
 		}
-	}
-
-	private selectVisible()
-	{
-		ui.getAll('.list input').forEach((input) => {
-			input.setAttribute('checked', 'checked');
-		});
-	}
-
-	private unselectVisible()
-	{
-		ui.getAll('.list input').forEach((input) => {
-			input.removeAttribute('checked');
-		});
 	}
 
 	private downloadSeleced()

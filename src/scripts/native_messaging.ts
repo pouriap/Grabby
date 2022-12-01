@@ -66,6 +66,28 @@ namespace NativeMessaging
 		}
 	}
 
+	/* constants */
+	const GB_ADDON_ID = "grabby.pouriap";
+
+	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
+	const MSGTYP_AVAIL_DMS = "available_dms";
+	const MSGTYP_DOWNLOAD = "download";
+
+	const MSGTYP_YTDL_INFO = "ytdl_info";
+	const MSGTYP_YTDL_INFO_YTPL = "ytdl_info_ytpl";
+	const MSGTYP_YTDL_GET = "ytdl_get";
+	const YTDLTYP_VID = "ytdl_video";
+	const YTDLTYP_AUD = "ytdl_audio";
+	const YTDLTYP_PLVID = "ytdl_video_playlist";
+	const YTDLTYP_PLAUD = "ytdl_audio_playlist";
+	const MSGTYP_YTDLPROG = "ytdl_progress";
+	const MSGTYP_YTDL_COMP = "ytdl_comp";
+	const MSGTYP_YTDL_FAIL = "ytdl_fail";
+
+	const MSGTYP_ERR = "app_error";
+	const MSGTYP_MSG = "app_message";
+	const MSGTYP_UNSUPP = "unsupported";
+
 
 	/* sent messages */
 	//these are the messsages we send to the native app
@@ -97,10 +119,10 @@ namespace NativeMessaging
 		};
 	}
 
-	//the 'type' property of the following classes is the same, only the contents of the message is different
-	export class MSG_YTDLFormat extends MSG_YTDLBase
+	export class MSG_YTDLVideo extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
+		subtype = YTDLTYP_VID;
 		constructor(public url: string, public filename: string, public dlHash: string,
 			public formatId: string){
 				super();
@@ -110,10 +132,29 @@ namespace NativeMessaging
 	export class MSG_YTDLAudio extends MSG_YTDLBase
 	{
 		type = MSGTYP_YTDL_GET;
-		audioOnly = true;
+		subtype = YTDLTYP_AUD;
 		constructor(public url: string, public filename: string, public dlHash: string){
 			super();
 		};
+	}
+
+	export class MSG_YTDLVideoPL extends MSG_YTDLBase
+	{
+		type = MSGTYP_YTDL_GET;
+		subtype = YTDLTYP_PLVID;
+		constructor(public url: string, public indexes: string, public dlHash: string,
+			public res: string){
+			super();
+		}
+	}
+
+	export class MSG_YTDLAudioPL extends MSG_YTDLBase
+	{
+		type = MSGTYP_YTDL_GET;
+		subtype = YTDLTYP_PLAUD;
+		constructor(public url: string, public indexes: string, public dlHash: string){
+			super();
+		}
 	}
 
 	/* recived messages */
@@ -167,24 +208,6 @@ namespace NativeMessaging
 
 
 	/* now the real stuff */
-
-	const GB_ADDON_ID = "grabby.pouriap";
-
-	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
-	const MSGTYP_AVAIL_DMS = "available_dms";
-	const MSGTYP_DOWNLOAD = "download";
-
-	const MSGTYP_YTDL_INFO = "ytdl_info";
-	const MSGTYP_YTDL_INFO_YTPL = "ytdl_info_ytpl";
-	const MSGTYP_YTDL_GET = "ytdl_get";
-	const MSGTYP_YTDLPROG = "ytdl_progress";
-	const MSGTYP_YTDL_COMP = "ytdl_comp";
-	const MSGTYP_YTDL_FAIL = "ytdl_fail";
-
-	const MSGTYP_ERR = "app_error";
-	const MSGTYP_MSG = "app_message";
-	const MSGTYP_UNSUPP = "unsupported";
-
 	
 	let port: ProperPort;
 

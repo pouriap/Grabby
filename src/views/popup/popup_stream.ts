@@ -69,7 +69,7 @@ class ViewStreamDetails extends PopupView
 
 	private ytdlFormat(formatId: string)
 	{
-		let msg = new Messaging.MSGYTDLFormat(this.download.url, this.download.filename,
+		let msg = new Messaging.MSGYTDLVideo(this.download.url, this.download.filename,
 			this.download.hash, formatId);
 		Messaging.sendMessage(msg);
 	}

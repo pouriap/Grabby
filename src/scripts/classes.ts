@@ -138,7 +138,7 @@ class DownloadWindow implements GBWindow
 			titlePreface: this.download.filename,
 			//add the hash of the download to the URL of this window
 			//when the window is loaded our code will use the hash to get the download from GBPop
-			url: "views/download_window/download.html?dlHash=" + this.download.hash,
+			url: "/views/download_window/download.html?dlHash=" + this.download.hash,
 			allowScriptsToClose : true,
 			width: windowW,
 			height: windowH,
@@ -152,13 +152,20 @@ class DownloadWindow implements GBWindow
 
 class ListWindow implements GBWindow
 {
-	tabId: number;
 	listType: list_window_type;
+	tabId: number | undefined = undefined;
+	dlHash: string | undefined = undefined;
 
-	constructor(tabId: number, listType:  list_window_type)
+	constructor(listType: list_window_type, data: number | string)
 	{
-		this.tabId = tabId;
 		this.listType = listType;
+		if(typeof data === 'number'){
+			this.tabId = data;
+		}
+		else if(typeof data === 'string')
+		{
+			this.dlHash = data;
+		}
 	}
 
 	display()
@@ -170,19 +177,27 @@ class ListWindow implements GBWindow
 		let leftMargin = Math.floor( (screenW/2) - (windowW/2) );
 		let topMargin = Math.floor( (screenH/2) - (windowH/2) );
 
+		let url = `/views/list_window/list.html?listType=${this.listType}`;
+		if(this.tabId)
+		{
+			url += `&tabId=${this.tabId}`;
+		}
+		if(this.dlHash)
+		{
+			url += `&dlHash=${this.dlHash}`;
+		}
+
 		let createData = 
 		{
 			type: "detached_panel",
-			titlePreface: 'Grab all links',
-			url: `views/list_window/list.html?tabId=${this.tabId}&listType=${this.listType}`,
+			titlePreface: 'Filter and select downloads',
+			url: url,
 			allowScriptsToClose : true,
 			width: windowW,
 			height: windowH,
 			left: leftMargin,
 			top: topMargin
 		};
-
-		log.d('create ', createData);
 
 		return browser.windows.create(createData);
 	}

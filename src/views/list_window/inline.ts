@@ -5,11 +5,13 @@ document.addEventListener("DOMContentLoaded", (e) => {
 		let listType = Utils.getURLParam(url, 'listType') as list_window_type;
 		if(listType === 'yt_playlist')
 		{
-			//(new YTPLaylistView()).render();
+			let dlHash = Utils.getURLParam(url, 'dlHash')!;
+			(new YTPLaylistView(dlHash)).render();
 		}
 		else
 		{
-			(new LinkListView(listType, url)).render();
+			let tabId = Number( Utils.getURLParam(url, 'tabId')! );
+			(new LinksListView(listType, tabId)).render();
 		}
 	});
 });

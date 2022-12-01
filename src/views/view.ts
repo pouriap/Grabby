@@ -72,8 +72,7 @@ abstract class View
 
 	protected getSelectedDM(): string
 	{
-		let DMs = document.getElementById('available-dms')! as HTMLSelectElement;
-		log.d('thing be', DMs.options[DMs.selectedIndex]);
+		let DMs = document.getElementById('available-dms') as HTMLSelectElement;
 		return DMs.options[DMs.selectedIndex].value;
 	}
 }

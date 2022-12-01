@@ -1,3 +1,5 @@
+declare var List: any;
+
 abstract class ListView extends View
 {
 	protected abstract htmlFile: string;
@@ -17,4 +19,18 @@ abstract class ListView extends View
 	}
 
 	protected abstract renderChildView(): Promise<void>;
+
+	protected selectVisible()
+	{
+		ui.getAll('.list input').forEach((input) => {
+			input.setAttribute('checked', 'checked');
+		});
+	}
+
+	protected unselectVisible()
+	{
+		ui.getAll('.list input').forEach((input) => {
+			input.removeAttribute('checked');
+		});
+	}
 }
