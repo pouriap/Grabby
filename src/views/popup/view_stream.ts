@@ -1,6 +1,6 @@
 class ViewStreamDetails extends PopupView
 {
-	protected htmlFile = 'stream_details.html';
+	protected htmlFile = 'view_stream.html';
 	private download: StreamDownload;
 	private data: StreamDataUI;
 
@@ -11,7 +11,7 @@ class ViewStreamDetails extends PopupView
 		this.data = new StreamDataUI(this.download.streamData!);
 	}
 
-	protected async doRenderPopup()
+	protected async renderChildView()
 	{	
 		ui.get("#stream-details #formats-list")!.innerHTML = "";
 		ui.get("#stream-details #filename")!.innerHTML = this.download.filename;

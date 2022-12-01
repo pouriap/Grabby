@@ -1,6 +1,6 @@
 class ViewDownloadDetails extends PopupView
 {
-	protected htmlFile = 'download_details.html';
+	protected htmlFile = 'view_download.html';
 	private download: Download;
 
 	constructor(dl: Download)
@@ -9,7 +9,7 @@ class ViewDownloadDetails extends PopupView
 		this.download = dl;
 	}
 
-	protected async doRenderPopup()
+	protected async renderChildView()
 	{	
 		ui.get("#download-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#download-details #filename")!.setAttribute("title", this.download.filename);

@@ -9,7 +9,7 @@ abstract class PopupView extends View
 		{
 			let html = await ui.fetchText(this.htmlFile);
 			ui.get('#content')!.innerHTML = html;
-			await this.doRenderPopup();
+			await this.renderChildView();
 		}
 		catch(e)
 		{
@@ -17,7 +17,7 @@ abstract class PopupView extends View
 		}
 	}
 
-	protected abstract doRenderPopup(): Promise<void>;
+	protected abstract renderChildView(): Promise<void>;
 }
 
 //todo show downlods progress
