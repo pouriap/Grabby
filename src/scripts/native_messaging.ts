@@ -188,7 +188,8 @@ namespace NativeMessaging
 		type: string,
 		dlHash: string,
 		percent_str: string,
-		speed_str: string
+		speed_str: string,
+		playlist_index: string
 	}
 
 	type MSGRCV_YTDLComp = {
@@ -395,13 +396,35 @@ namespace NativeMessaging
 
 	function handleYTDLProg(msg: MSGRCV_YTDLProg)
 	{
-		let dl = GB.allDownloads.get(msg.dlHash)!;
-		let percent = msg.percent_str.split('%')[0].trim();
+		let percent = Number( msg.percent_str.split('%')[0].trim() );
 		//100% is only when ytdl has exited and we have received a MSG_YTDLComp
-		if(percent == '100') percent = '99';
+		if(percent == 100) percent = 99;
 		let speed = msg.speed_str.trim();
-		dl.progress = {percent: Number(percent), speed: speed};
-		log.d('progress is: ', dl.progress);
+		let plIndex = msg.playlist_index.trim();
+
+		//if it's a single download
+		if(plIndex === 'NA')
+		{
+			let dl = GB.allDownloads.get(msg.dlHash) as Download;
+			dl.progress = {percent: percent, speed: speed};
+		}
+		//playlist download
+		else
+		{
+			let dl = GB.allDownloads.get(msg.dlHash) as YTPlaylistDownload;
+			for(let listItem of dl.listData!.items)
+			{
+				if(listItem.index == Number(plIndex))
+				{
+					listItem.progress = {percent: Number(percent), speed: speed};
+				}
+			}
+		}
+
+		//re-send the progress as an internal message so that any 
+		//popup/window can receive it and update itself
+		let internalMsg = new Messaging.MSGYTDLProg(msg.dlHash, percent, speed, Number(plIndex));
+		Messaging.sendMessage(internalMsg);
 	}
 
 	function handleYTDLComp(msg: MSGRCV_YTDLComp)

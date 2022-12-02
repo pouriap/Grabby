@@ -14,6 +14,7 @@ namespace Messaging
 	const TYP_YTDL_AUDIO = 'ytdl-audio';
 	const TYP_YTDL_VIDEOPL = 'ytdl-playlist-video';
 	const TYP_YTDL_AUDIOPL = 'ytdl-playlist-audio';
+	const TYP_YTDL_PROG = 'ytdl-progress';
 	export const TYP_YTDL_PROGRESS = 'ytdl-progress';
 
 
@@ -85,6 +86,13 @@ namespace Messaging
 	{
 		type = TYP_YTDL_AUDIOPL;
 		constructor(public url: string, public indexes: string[], public dlHash: string){};
+	}
+
+	export class MSGYTDLProg
+	{
+		type = TYP_YTDL_PROG;
+		constructor(public dlHash: string, public percent: number, public speed: string, 
+			public playlist_index: number){};
 	}
 
 

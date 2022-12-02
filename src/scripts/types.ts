@@ -196,6 +196,7 @@ type yt_playlist_item =
 	title: string;
 	video_id: string;
 	video_url: string;
+	progress: dl_progress | undefined;
 }
 
 type yt_playlist_data =

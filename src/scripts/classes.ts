@@ -589,7 +589,8 @@ class YTPlaylistDownload extends Download
 				index: info.playlist_index,
 				title: info.title,
 				video_id: info.id,
-				video_url: info.url
+				video_url: info.url,
+				progress: undefined
 			});
 		}
 
