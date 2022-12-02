@@ -24,7 +24,7 @@ class YTPLaylistView extends ListView
 			title.innerHTML = video.title;
 			let div = ui.create('div');
 			let label = ui.create('label', {for: id});
-			let li = ui.create('li');
+			let li = ui.create('li', {'data-index': video.index.toString()});
 			div.appendChild(title);
 			label.appendChild(chkbox);
 			label.appendChild(div);
@@ -34,6 +34,21 @@ class YTPLaylistView extends ListView
 
 		let options = { valueNames: ['title'] };
 		let list = new List('playlist', options);
+
+		this.onProgress(this.handleProgress.bind(this));
+	}
+
+	private handleProgress(prog: Messaging.MSGYTDLProg)
+	{
+		if(prog.dlHash != this.dlHash) return;
+
+		let index = prog.playlist_index;
+		let percent = prog.percent;
+		let el = ui.get(`.list li[data-index="${index}"]`);
+		if(typeof el != 'undefined')
+		{
+			el.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+		}
 	}
 
 	protected onActionClicked(clickedAction: Element)

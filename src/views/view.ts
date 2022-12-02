@@ -7,13 +7,15 @@ abstract class View
 	{
 		try
 		{
-			// Get a copy of the GB instance from the background script 
+			// Get a copy of the GB instance from the background script
 			let msg = new Messaging.MSGGetGB();
 			let response = await Messaging.sendMessage(msg) as Messaging.MSGGBJSON;
 			this.GBPop = new GrabbyPopup(response.GBJSON);
 	
 			await this.doRender();
+
 			//todo: check if we are assining listeners multiple times
+			// set click listener for all .action elements
 			ui.getAll(".action").forEach((e) => {
 				e.addEventListener('click', () => {
 					let disabled = e.getAttribute("class")?.indexOf("disabled-action") !== -1;
@@ -23,6 +25,9 @@ abstract class View
 					this.onActionClicked(e);
 				});
 			});
+
+			// set listener for progress update messages
+
 		}
 		catch(e)
 		{
@@ -74,5 +79,16 @@ abstract class View
 	{
 		let DMs = document.getElementById('available-dms') as HTMLSelectElement;
 		return DMs.options[DMs.selectedIndex].value;
+	}
+
+	protected onProgress(progressHandler: (msg: Messaging.MSGYTDLProg) => void)
+	{
+		browser.runtime.onMessage.addListener((msg: Messaging.Message) => 
+		{
+			if(msg.type === Messaging.TYP_YTDL_PROGRESS)
+			{
+				progressHandler(msg as Messaging.MSGYTDLProg);
+			}
+		});
 	}
 }

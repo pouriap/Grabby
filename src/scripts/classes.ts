@@ -506,6 +506,11 @@ class Download
 		}
 	}
 
+	updateProgress(percent: number, speed: string, plIndex: number)
+	{
+		this.progress = {percent: percent, speed: speed};
+	}
+
 }
 
 class StreamDownload extends Download
@@ -600,6 +605,20 @@ class YTPlaylistDownload extends Download
 			title: infos[0].playlist_title,
 			items: items
 		};
+	}
+
+	updateProgress(percent: number, speed: string, plIndex: number)
+	{
+		if(this.listData)
+		{
+			//set the progress for the current item
+			let currIndex = plIndex - 1; //plIndex starts from 1
+			this.listData.items[currIndex].progress = {percent: percent, speed: speed};
+			
+			//if we are receiving progress for an item it means the item before it was finished
+			if(currIndex < 1) return;
+			this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a'};
+		}
 	}
 }
 

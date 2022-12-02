@@ -103,7 +103,7 @@ var GB = new Grabby();
 	catch(e)
 	{
 		//todo: remove notifications or make them look good
-		Utils.notification("Error: initialization failed\nReason: " + e.toString());
+		Utils.notification("Error", "Initialization failed\nReason: " + e.toString());
 		log.err('Addon could not be initialized:', e);
 	}
 

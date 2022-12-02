@@ -116,11 +116,11 @@ namespace Utils
 		}
 	}
 
-	export function notification(msg: string)
+	export function notification(title: string, msg: string)
 	{
 		let options = {
 			type: "basic", 
-			title: "Grabby", 
+			title: title, 
 			iconUrl: "icons/icon.svg",
 			message: msg,
 		};

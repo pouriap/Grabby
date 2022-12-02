@@ -45,7 +45,7 @@ namespace ContextMenu
 		log.d('menu clicked: ', info, '\ntab: ', tab);
 
 		if(!defaultDM){
-			Utils.notification("ERROR: No download managers found on the system");
+			Utils.notification("ERROR", "No download managers found on the system");
 			log.err('no download managers are available');
 		}
 
