@@ -16,6 +16,8 @@ type page_link = {href: string, text: string};
 
 type list_window_type = 'all_links' | 'selection_links' | 'yt_playlist';
 
+type progress_data = {dlHash: string, plIndex: number, speed: string, percent: number};
+
 type dl_progress = {percent: number, speed: string};
 
 type extracted_links = 

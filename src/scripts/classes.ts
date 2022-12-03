@@ -506,9 +506,9 @@ class Download
 		}
 	}
 
-	updateProgress(percent: number, speed: string, plIndex: number)
+	updateProgress(prog: progress_data)
 	{
-		this.progress = {percent: percent, speed: speed};
+		this.progress = {percent: prog.percent, speed: prog.speed};
 	}
 
 }
@@ -607,18 +607,21 @@ class YTPlaylistDownload extends Download
 		};
 	}
 
-	updateProgress(percent: number, speed: string, plIndex: number)
+	updateProgress(prog: progress_data)
 	{
-		if(this.listData)
+		if(!this.listData || !prog.plIndex)
 		{
-			//set the progress for the current item
-			let currIndex = plIndex - 1; //plIndex starts from 1
-			this.listData.items[currIndex].progress = {percent: percent, speed: speed};
-			
-			//if we are receiving progress for an item it means the item before it was finished
-			if(currIndex < 1) return;
-			this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a'};
+			log.warn('cannot update playlist progress', this, prog);
+			return;
 		}
+
+		//set the progress for the current item
+		let currIndex = prog.plIndex - 1; //plIndex starts from 1
+		this.listData.items[currIndex].progress = {percent: prog.percent, speed: prog.speed};
+		
+		//if we are receiving progress for an item it means the item before it was finished
+		if(currIndex < 1) return;
+		this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a'};
 	}
 }
 

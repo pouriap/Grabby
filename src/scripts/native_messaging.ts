@@ -395,12 +395,19 @@ namespace NativeMessaging
 		let speed = msg.speed_str.trim();
 		let plIndex = Number (msg.playlist_index.trim() );
 
+		let prog: progress_data = {
+			dlHash: msg.dlHash,
+			plIndex: plIndex,
+			percent: percent,
+			speed: speed
+		};
+
 		let dl = GB.allDownloads.get(msg.dlHash)!;
-		dl.updateProgress(percent, speed, plIndex);
+		dl.updateProgress(prog);
 
 		//re-send the progress as an internal message so that any
 		//popup/window can receive it and update itself
-		let internalMsg = new Messaging.MSGYTDLProg(msg.dlHash, percent, speed, plIndex);
+		let internalMsg = new Messaging.MSGYTDLProg(prog);
 		Messaging.sendMessage(internalMsg).catch((e) => {log.warn('failed to send message', internalMsg, e)});
 	}
 
