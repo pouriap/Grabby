@@ -93,6 +93,7 @@ class YTPLaylistView extends ListView
 
 		let quality = ui.get('#quality') as HTMLSelectElement;
 		let res = quality.options[quality.selectedIndex].value;
+		if(res.endsWith('p')) res = res.substr(0, res.length - 1);
 
 		if(res != 'mp3')
 		{

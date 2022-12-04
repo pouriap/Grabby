@@ -25,7 +25,7 @@ declare var md5: any;
 //todo: grab selection doesn't work properly here -> https://dl1.filmiokgzr.site/Cartoon/3/Kobayashi-san%20Chi%20no%20Maid%20Dragon/S2/480/
 //todo: store options in sync, what's wrong with me?
 //todo: save downloads list
-//TODO: check licenses for all included files here and in the C++ code
+//todo: check licenses for all included files here and in the C++ code
 //todo: could be useful: https://github.com/streamlink/streamlink
 //todo: policies:
 /*
