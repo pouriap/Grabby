@@ -56,13 +56,22 @@ class YoutubeHandler implements SpecialHandler
 				let jsonStr = dec.decode(this.download.requestBody.raw[0].bytes);
 				let json = JSON.parse(jsonStr);
 
-				if(typeof json.videoId != 'string' || json.videoId.length === 0){
-					throw('bad json data');
+				log.d('youtube ajax json is', json);
+
+				if(!json.videoId){
+					throw('Unexpected JSON data from youtube AJAX page');
 				}
 
-				//create a new Download object with its URL set to the would-be video URL of this request
 				let videoId = json.videoId;
-				this.youtubeSingle(videoId, domain);
+
+				if(json.playlistId)
+				{
+					this.youtubeList(videoId, json.playlistId, domain);
+				}
+				else
+				{
+					this.youtubeSingle(videoId, domain);
+				}				
 			}
 			catch(e)
 			{
