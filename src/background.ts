@@ -60,6 +60,11 @@ native application must be in accordance with our No Surprises policy.
 //todo: show preview of media in download details
 //todo: don't make job files for flashgot, send everything with input stream
 //todo: use --progress-template for ytdl
+//todo: BUG: re-opening closed tabs grabby doesn't run
+//todo: BUG: re-opening closed tabs makes grabby give duplicate manifest erro
+//todo: BUG: progress messages are not sent
+//todo: limit progress message to 100ms or so
+//todo: in native app make sure we send the 100% message when limiting
 
 var GB = new Grabby();
 

@@ -391,9 +391,9 @@ namespace NativeMessaging
 
 	function handleYTDLProg(msg: MSGRCV_YTDLProg)
 	{
-		let percent = Number( msg.percent_str.split('%')[0].trim() );
-		let speed = msg.speed_str.trim();
-		let plIndex = Number (msg.playlist_index.trim() );
+		let percent = Number(msg.percent_str);
+		let speed = msg.speed_str;
+		let plIndex = Number(msg.playlist_index);
 
 		let prog: progress_data = {
 			dlHash: msg.dlHash,
@@ -408,7 +408,8 @@ namespace NativeMessaging
 		//re-send the progress as an internal message so that any
 		//popup/window can receive it and update itself
 		let internalMsg = new Messaging.MSGYTDLProg(prog);
-		Messaging.sendMessage(internalMsg).catch((e) => {log.warn('failed to send message', internalMsg, e)});
+		//exception happens when no listener is set for progress, we just ignore it
+		Messaging.sendMessage(internalMsg).catch((e) => {});
 	}
 
 	function handleYTDLComp(msg: MSGRCV_YTDLComp)

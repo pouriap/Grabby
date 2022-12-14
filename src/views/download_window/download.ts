@@ -66,8 +66,7 @@ class DownloadView extends View
 	renderDownloadDialog()
 	{
 		let download = this.selectedDl;
-		let classReason = (log.DEBUG)? ' (' + download.classReason + ')' : '';
-		ui.get("#filename")!.innerHTML = download.filename + classReason;
+		ui.get("#filename")!.innerHTML = download.filename;
 		ui.get("#filename")!.setAttribute("title", download.filename);
 		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
 		ui.get("#host")!.innerHTML = download.host;

@@ -32,12 +32,21 @@ class ViewDownloadsList extends PopupView
 			});
 	
 			listItem.innerHTML = download.filename;
-
-			if(log.DEBUG){
-				listItem.innerHTML = listItem.innerHTML + " (" + download.classReason + ")";
-			};
 	
 			ui.get("#downloads-list")!.appendChild(listItem);
+		}
+
+		this.onProgress(this.handleProgress.bind(this));
+	}
+
+	private handleProgress(prog: progress_data)
+	{
+		let hash = prog.dlHash;
+		let percent = prog.percent;
+		let el = ui.get(`#downloads-list li[data-hash="${hash}"]`);
+		if(typeof el != 'undefined')
+		{
+			el.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
 		}
 	}
 
