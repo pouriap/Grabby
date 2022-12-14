@@ -34,30 +34,32 @@ class GrabbyPopup
 		for(let pair of allDownloads)
 		{
 			let hash = pair[0];
-			let downloadJSON = pair[1] as Download;
+			let dlJSON = pair[1] as Download;
 			let download: Download;
-			switch(downloadJSON.type)
+			switch(dlJSON.type)
 			{
 				case 'download':
-					download = new Download(downloadJSON.httpDetails, this.tabs);
+					download = new Download(dlJSON.httpDetails, this.tabs);
 					break;
 				case 'stream':
-					download = new StreamDownload(downloadJSON.httpDetails, this.tabs);
+					download = new StreamDownload(dlJSON.httpDetails, this.tabs);
 					break;
 				case 'youtube-video':
-					download = new YoutubeDownload(downloadJSON.httpDetails, this.tabs);
+					download = new YoutubeDownload((dlJSON as YoutubeDownload).videoId, 
+						dlJSON.httpDetails, this.tabs);
 					break;
 				case 'youtube-playlist':
-					download = new YTPlaylistDownload(downloadJSON.httpDetails, this.tabs);
+					download = new YTPlaylistDownload((dlJSON as YTPlaylistDownload).listId, 
+						dlJSON.httpDetails, this.tabs);
 					break;
 				case 'reddit-video':
-					download = new RedditDownload(downloadJSON.httpDetails, this.tabs);
+					download = new RedditDownload(dlJSON.httpDetails, this.tabs);
 					break;
 			}
 			//copy all JSON-like properties from downloadJSON to the new download object
 			//@ts-ignore
-			delete downloadJSON._tabs;
-			Object.assign(download, downloadJSON);
+			delete dlJSON._tabs;
+			Object.assign(download, dlJSON);
 			newDownloads.set(hash, download);
 		};
 
@@ -554,6 +556,18 @@ class StreamDownload extends Download
 class YoutubeDownload extends StreamDownload
 {
 	type: download_type = 'youtube-video';
+	videoId: string;
+
+	constructor(videoId: string, details: HTTPDetails, tabs: SureMap<number, tabinfo>)
+	{
+		super(details, tabs);
+		this.videoId = videoId;
+	}
+
+	get hash()
+	{
+		return "ytvideo_" + this.videoId;
+	}
 
 	updateData(info: ytdlinfo)
 	{
@@ -578,6 +592,18 @@ class YTPlaylistDownload extends Download
 {
 	type: download_type = 'youtube-playlist';
 	listData: yt_playlist_data | undefined = undefined;
+	listId: string;
+
+	constructor(listId: string, details: HTTPDetails, tabs: SureMap<number, tabinfo>)
+	{
+		super(details, tabs);
+		this.listId = listId;
+	}
+
+	get hash()
+	{
+		return "ytplaylist_" + this.listId;
+	}
 
 	get filename(): string
 	{
