@@ -25,6 +25,13 @@ class YTPLaylistView extends ListView
 			let div = ui.create('div');
 			let label = ui.create('label', {for: id});
 			let li = ui.create('li', {'data-index': video.index.toString()});
+
+			if(video.progress?.percent)
+			{
+				let percent = video.progress.percent;
+				li.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+			}
+			
 			div.appendChild(title);
 			label.appendChild(chkbox);
 			label.appendChild(div);

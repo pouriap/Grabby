@@ -30,6 +30,12 @@ class ViewDownloadsList extends PopupView
 				'title': download.url,
 				'data-hash': key
 			});
+
+			if(download.progress?.percent)
+			{
+				let percent = download.progress.percent;
+				listItem.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+			}
 	
 			listItem.innerHTML = download.filename;
 	
