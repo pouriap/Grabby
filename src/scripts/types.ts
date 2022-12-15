@@ -151,6 +151,7 @@ type ytdl_format =
 	video_ext: "none" | string;
 	format: string;
 	resolution: string;
+	fps: number;
 }
 
 type ytdlinfo =

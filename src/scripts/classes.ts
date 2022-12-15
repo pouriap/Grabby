@@ -572,17 +572,70 @@ class YoutubeDownload extends StreamDownload
 	updateData(info: ytdlinfo)
 	{
 		let formats: FormatData[] = [];
+		let resolutions = new Map<string, ytdl_format[]>();
 
+		resolutions.set('144p', []);
+		resolutions.set('240p', []);
+		resolutions.set('360p', []);
+		resolutions.set('480p', []);
+		resolutions.set('720p', []);
+		resolutions.set('720p60', []);
+		resolutions.set('1080p', []);
+		resolutions.set('1080p60', []);
+		resolutions.set('1440p', []);
+		resolutions.set('1440p60', []);
+		resolutions.set('2160p', []);
+		resolutions.set('2160p60', []);
+
+		//we store all formats of each resolution to a separate array
+		//and then we iterate through each resolution and if there is more than one format in it
+		//we choose the best one 
 		for(let format of info.formats)
 		{
-			if(typeof format.format_note != 'string') continue; 
-			if(!constants.ytStandardFormats.includes(format.format_note)) continue;
-			if(!format.vcodec.startsWith('avc')) continue;
-			if(typeof format.container != 'undefined' && format.container === 'mp4_dash')
-			{
-				formats.push(FormatData.getFromYTDLFormat(format));
-			}
+			if(typeof format.format_note != 'string') continue;
+			resolutions.get(format.format_note)?.push(format);
 		}
+
+		resolutions.forEach((resFormats) => 
+		{
+			let bestFormat: ytdl_format;
+
+			if(resFormats.length === 0) return;
+
+			if(resFormats.length === 1)
+			{
+				bestFormat = resFormats[0];
+			}
+			
+			else
+			{
+				let found = resFormats.find((format) => {
+					return (format.vcodec.startsWith('avc') && 
+						format.container && format.container === 'mp4_dash');
+				});
+
+				if(!found)
+				{
+					found = resFormats.find((format) => {
+						return (format.vcodec.startsWith('av') && 
+							format.container && format.container === 'mp4_dash');
+					});
+				}
+
+				if(!found)
+				{
+					found = resFormats.find((format) => {
+						return (format.vcodec.startsWith('vp') && 
+							format.container && format.container === 'webm_dash');
+					});
+				}
+
+				bestFormat = (found)? found : resFormats[0];
+			}
+
+			formats.push(FormatData.getFromYTDLFormat(bestFormat));
+
+		});
 
 		this.streamData = new StreamData(info.title, info.duration, formats);
 	}
@@ -1378,13 +1431,15 @@ class FormatData
 	id: string;
 	width: number;
 	height: number;
+	fps: number;
 	filesize: number;
 
-	constructor(id: string, width: number, height: number, fileSize: number)
+	constructor(id: string, width: number, height: number, fps: number, fileSize: number)
 	{
 		this.id = id;
 		this.width = width;
 		this.height = height;
+		this.fps = fps;
 		this.filesize = fileSize;
 	}
 
@@ -1409,8 +1464,9 @@ class FormatData
 
 		let width = (format.width)? format.width : 0;
 		let height = (format.height)? format.height : 0;
+		let fps = (format.fps)? format.fps : 0;
 
-		return new FormatData(id, width, height, filesize);
+		return new FormatData(id, width, height, fps, filesize);
 	}
 }
 
@@ -1444,7 +1500,13 @@ class FormatDataUI
 
 	get name(): string
 	{
-		if(this.formatData.height) return this.formatData.height.toString() + 'p';
+		if(this.formatData.height)
+		{
+			let name = this.formatData.height.toString() + 'p';
+			if(this.formatData.fps == 60) name += ' @60fps';
+			return name;
+		}
+
 		return 'Format #' + (this.formatData.id + 1).toString();
 	}
 
