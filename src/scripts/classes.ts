@@ -592,8 +592,11 @@ class YoutubeDownload extends StreamDownload
 		//we choose the best one 
 		for(let format of info.formats)
 		{
-			if(typeof format.format_note != 'string') continue;
-			resolutions.get(format.format_note)?.push(format);
+			if(!format.width || !format.height) continue;
+			let pSize = (format.width > format.height)? format.height : format.width;
+			let formatName = pSize.toString() + 'p';
+			if(format.fps == 60) formatName += '60';
+			resolutions.get(formatName)?.push(format);
 		}
 
 		resolutions.forEach((resFormats) => 
@@ -1511,9 +1514,11 @@ class FormatDataUI
 
 	get name(): string
 	{
-		if(this.formatData.height)
+		if(this.formatData.width && this.formatData.height)
 		{
-			let name = this.formatData.height.toString() + 'p';
+			let pSize = (this.formatData.width > this.formatData.height)? 
+				this.formatData.height : this.formatData.width;
+			let name = pSize.toString() + 'p';
 			if(this.formatData.fps == 60) name += ' @60fps';
 			return name;
 		}
