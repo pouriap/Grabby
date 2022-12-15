@@ -83,6 +83,7 @@ namespace NativeMessaging
 	const MSGTYP_YTDLPROG = "ytdl_progress";
 	const MSGTYP_YTDL_COMP = "ytdl_comp";
 	const MSGTYP_YTDL_FAIL = "ytdl_fail";
+	const MSGTYP_YTDL_KILL = "ytdl_kill";
 
 	const MSGTYP_ERR = "app_error";
 	const MSGTYP_MSG = "app_message";
@@ -157,6 +158,12 @@ namespace NativeMessaging
 		}
 	}
 
+	export class MSG_YTDLKill implements NativeMessage
+	{
+		type = MSGTYP_YTDL_KILL;
+		constructor(public dlHash: string){};
+	}
+
 	/* recived messages */
 	//these are messages we receive from the native app and never send outself
 	//so just a type will suffice becasue we never want to create a new object
@@ -179,10 +186,14 @@ namespace NativeMessaging
 		info: ytdlinfo_ytplitem[];
 	}
 
-	type MSGRCV_YTDLFail = {
+	type MSGRCV_YTDLComp = {
 		type: string,
 		dlHash: string
 	}
+
+	type MSGRCV_YTDLFail = MSGRCV_YTDLComp;
+
+	type MSGRCV_YTDLKill = MSGRCV_YTDLComp;
 
 	type MSGRCV_YTDLProg = {
 		type: string,
@@ -190,11 +201,6 @@ namespace NativeMessaging
 		percent_str: string,
 		speed_str: string,
 		playlist_index: string
-	}
-
-	type MSGRCV_YTDLComp = {
-		type: string,
-		dlHash: string
 	}
 
 	type MSGRCV_General = {
@@ -330,6 +336,11 @@ namespace NativeMessaging
 			handleYTDLFail(msg as MSGRCV_YTDLFail);
 		}
 
+		else if(msg.type === MSGTYP_YTDL_KILL)
+		{
+			handleYTDLKill(msg as MSGRCV_YTDLKill);
+		}
+
 		else if(msg.type === MSGTYP_MSG)
 		{
 			handleGeneral(msg as MSGRCV_General);
@@ -422,6 +433,12 @@ namespace NativeMessaging
 	{
 		let dl = GB.allDownloads.get(msg.dlHash)!;
 		Utils.notification("Download Failed", dl.filename);
+	}
+
+	function handleYTDLKill(msg: MSGRCV_YTDLKill)
+	{
+		let dl = GB.allDownloads.get(msg.dlHash)!;
+		Utils.notification("Download Canceled", dl.filename);
 	}
 
 	function handleGeneral(msg: MSGRCV_General)
