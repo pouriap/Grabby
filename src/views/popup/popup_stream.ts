@@ -27,6 +27,10 @@ class ViewStreamDetails extends PopupView
 			//todo: use 'data-action' instead of 'id' to specify action
 			li.setAttribute('id', 'action-ytdl-format');
 			li.setAttribute('data-format-id', format.id);
+			if(format.vcodec === 'av' || format.vcodec === 'vp9')
+			{
+				li.style.backgroundColor = '#eb5406';
+			}
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
 	
 			li.innerHTML = `${format.name} [ ${format.resString} / ~${format.fileSizeString} ]`;

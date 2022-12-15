@@ -1432,14 +1432,17 @@ class FormatData
 	width: number;
 	height: number;
 	fps: number;
+	vcodec: vcodec;
 	filesize: number;
 
-	constructor(id: string, width: number, height: number, fps: number, fileSize: number)
+	constructor(id: string, width: number, height: number, fps: number, 
+		codec: vcodec, fileSize: number)
 	{
 		this.id = id;
 		this.width = width;
 		this.height = height;
 		this.fps = fps;
+		this.vcodec = codec;
 		this.filesize = fileSize;
 	}
 
@@ -1452,6 +1455,7 @@ class FormatData
 	{
 		let id = format.format_id;
 		let filesize = 0;
+		let codec: vcodec = 'unknown';
 
 		if(format.filesize)
 		{
@@ -1462,11 +1466,18 @@ class FormatData
 			filesize = format.filesize_approx;
 		}
 
+		if(format.vcodec)
+		{
+			if(format.vcodec.startsWith('avc')) codec = 'avc';
+			else if(format.vcodec.startsWith('av')) codec = 'av';
+			else if(format.vcodec.startsWith('vp')) codec ='vp9';
+		}
+
 		let width = (format.width)? format.width : 0;
 		let height = (format.height)? format.height : 0;
 		let fps = (format.fps)? format.fps : 0;
 
-		return new FormatData(id, width, height, fps, filesize);
+		return new FormatData(id, width, height, fps, codec, filesize);
 	}
 }
 
@@ -1524,6 +1535,11 @@ class FormatDataUI
 	{
 		let size = this.formatData.filesize;
 		return (size > 0)? filesize(size, {round: 0}) : 'unknown';
+	}
+
+	get vcodec(): vcodec
+	{
+		return this.formatData.vcodec;
 	}
 }
 

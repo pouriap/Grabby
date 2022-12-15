@@ -12,6 +12,8 @@ type browser_info = {name: browser_name, version: number | undefined};
 
 type download_type = 'download' | 'stream' | 'youtube-video' | 'youtube-playlist' | 'reddit-video';
 
+type vcodec = 'avc' | 'av' | 'vp9' | 'unknown';
+
 type page_link = {href: string, text: string};
 
 type list_window_type = 'all_links' | 'selection_links' | 'yt_playlist';
