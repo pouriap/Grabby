@@ -44,8 +44,14 @@ class StreamHandler implements RequestHandler
 				let streamDL = new StreamDownload(details, GB.tabs);
 		
 				//don't request ytdlinfo if we already got this download
-				if(GB.allDownloads.get(streamDL.hash))	return;
-		
+				let duplicate = GB.allDownloads.get(streamDL.hash);
+				if(duplicate)
+				{
+					streamDL.copyData(duplicate as StreamDownload);
+					GB.addToAllDownloads(streamDL);
+					return;
+				}		
+				
 				streamDL.hidden = true;
 				GB.addToAllDownloads(streamDL);
 

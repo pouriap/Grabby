@@ -29,7 +29,13 @@ class RedditHandler implements SpecialHandler
 			let redditDL = new RedditDownload(details, GB.tabs);
 
 			//don't request ytdlinfo if we already got this download
-			if(GB.allDownloads.get(redditDL.hash))	return;
+			let duplicate = GB.allDownloads.get(redditDL.hash);
+			if(duplicate)
+			{
+				redditDL.copyData(duplicate as RedditDownload);
+				GB.addToAllDownloads(redditDL);
+				return;
+			}	
 
 			redditDL.hidden = true;
 			GB.addToAllDownloads(redditDL);

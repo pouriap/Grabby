@@ -84,10 +84,37 @@ class Grabby
 	addToAllDownloads(download: Download)
 	{
 		log.d('adding to all downloads: ', download);
-		//we do this here because we don't want to run hash on requests we will not use
-		let hash = download.hash;
-		//we put hash of URL as key to prevent the same URL being added by different requests
-		this.allDownloads.set(hash, download);
+
+		let duplicate = this.allDownloads.get(download.hash);
+
+		if(typeof duplicate === 'undefined')
+		{
+			this.allDownloads.set(download.hash, download);
+			return;
+		}
+
+		log.warn('download is duplicate of', duplicate);
+
+
+		//if the duplicate is from the same tab as the previous download do not add it
+		if(duplicate.tabId === download.tabId)
+		{
+			log.d('ignoring because same tab id');
+			return;
+		}
+
+		if(!download.tabId)
+		{
+			log.err('duplicate download does not have a tab id', download);
+		}
+
+		//if there is a duplicate but it's from another tab then add a salt to it
+		//make its hash unique again, and then add it to all downloads
+		download.setSalt(download.tabId.toString());
+		
+		this.allDownloads.set(download.hash, download);
+
+		log.d('added duplicate download with salted hash', download);
 	}
 
 	doDownloadJob(job: DownloadJob)
@@ -231,7 +258,9 @@ class Download
 	//calling resolve() on this download will continue the request
 	resolveRequest: ((value: webx_BlockingResponse) => void) | undefined = undefined;
 
+	protected _hash_src: string;
 	private _hash = '';
+	private _salt = '';
 	private _filename: str_und = undefined;
 	private _host: str_und = undefined;
 	private _filesize: num_und = -1;
@@ -255,6 +284,7 @@ class Download
 		this.initiatorUrl = (details.originUrl)? details.originUrl : details.documentUrl;
 		this.httpDetails = details;
 		this._tabs = tabs;
+		this._hash_src = details.url;
 	}
 
 	get ownerTabId(): number
@@ -334,7 +364,7 @@ class Download
 	get hash()
 	{
 		if(this._hash === ''){
-			this._hash = md5(this.url);
+			this._hash = md5(this._hash_src + this._salt);
 		}
 		return this._hash;
 	}
@@ -513,9 +543,21 @@ class Download
 		this.progress = {percent: prog.percent, speed: prog.speed};
 	}
 
+	setSalt(salt: string)
+	{
+		this._hash = '';
+		this._salt = salt;
+	}
+
 }
 
-class StreamDownload extends Download
+interface ytdlable<T, V>
+{
+	updateData(info: T): void;
+	copyData(download: V): void;
+}
+
+class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownload>
 {
 	type: download_type = 'stream';
 	streamData: StreamData | undefined = undefined;
@@ -551,9 +593,14 @@ class StreamDownload extends Download
 
 		this.streamData = new StreamData(title, info.duration, formats);
 	}
+
+	copyData(download: StreamDownload)
+	{
+		this.streamData = download.streamData;
+	}
 }
 
-class YoutubeDownload extends StreamDownload
+class YoutubeDownload extends StreamDownload implements ytdlable<ytdlinfo, YoutubeDownload>
 {
 	type: download_type = 'youtube-video';
 	videoId: string;
@@ -562,11 +609,7 @@ class YoutubeDownload extends StreamDownload
 	{
 		super(details, tabs);
 		this.videoId = videoId;
-	}
-
-	get hash()
-	{
-		return "ytvideo_" + this.videoId;
+		this._hash_src = "ytvideo_" + videoId;
 	}
 
 	updateData(info: ytdlinfo)
@@ -644,7 +687,7 @@ class YoutubeDownload extends StreamDownload
 	}
 }
 
-class YTPlaylistDownload extends Download
+class YTPlaylistDownload extends Download implements ytdlable<ytdlinfo_ytplitem[], YTPlaylistDownload>
 {
 	type: download_type = 'youtube-playlist';
 	listData: yt_playlist_data | undefined = undefined;
@@ -654,11 +697,7 @@ class YTPlaylistDownload extends Download
 	{
 		super(details, tabs);
 		this.listId = listId;
-	}
-
-	get hash()
-	{
-		return "ytplaylist_" + this.listId;
+		this._hash_src = "ytplaylist_" + listId;
 	}
 
 	get filename(): string
@@ -705,9 +744,14 @@ class YTPlaylistDownload extends Download
 		if(currIndex < 1) return;
 		this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a'};
 	}
+
+	copyData(download: YTPlaylistDownload)
+	{
+		this.listData = download.listData;
+	}
 }
 
-class RedditDownload extends StreamDownload
+class RedditDownload extends StreamDownload implements ytdlable<ytdlinfo, RedditDownload>
 {
 	type: download_type = 'reddit-video';
 

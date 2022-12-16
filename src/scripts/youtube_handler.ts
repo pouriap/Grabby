@@ -92,7 +92,13 @@ class YoutubeHandler implements SpecialHandler
 		let youtubeDL = new YoutubeDownload(videoId, details, GB.tabs);
 
 		//don't request ytdlinfo if we already got this download
-		if(GB.allDownloads.get(youtubeDL.hash))	return;
+		let duplicate = GB.allDownloads.get(youtubeDL.hash);
+		if(duplicate)
+		{
+			youtubeDL.copyData(duplicate as YoutubeDownload);
+			GB.addToAllDownloads(youtubeDL);
+			return;
+		}
 
 		youtubeDL.hidden = true;
 		GB.addToAllDownloads(youtubeDL);
@@ -115,7 +121,13 @@ class YoutubeHandler implements SpecialHandler
 		let playlistDL = new YTPlaylistDownload(listId, details, GB.tabs);
 
 		//don't request ytdlinfo if we already got this download
-		if(GB.allDownloads.get(playlistDL.hash))	return;
+		let duplicate = GB.allDownloads.get(playlistDL.hash);
+		if(duplicate)
+		{
+			playlistDL.copyData(duplicate as YTPlaylistDownload);
+			GB.addToAllDownloads(playlistDL);
+			return;
+		}
 
 		playlistDL.hidden = true;
 		GB.addToAllDownloads(playlistDL);
