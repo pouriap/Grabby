@@ -31,14 +31,25 @@ class ViewDownloadsList extends PopupView
 				'data-hash': key
 			});
 
+			let icon = ui.create('img', {
+				'src': `/icons/${download.filetype}.png`,
+				'class': 'dl-icon'
+			});
+
+			let name = ui.create('span', {
+				'class': 'dl-name'
+			});
+			name.innerHTML = download.filename
+
+			listItem.appendChild(icon);
+			listItem.appendChild(name);
+
 			if(download.progress?.percent)
 			{
 				let percent = download.progress.percent;
 				listItem.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
 			}
-	
-			listItem.innerHTML = download.filename;
-	
+		
 			ui.get("#downloads-list")!.appendChild(listItem);
 		}
 

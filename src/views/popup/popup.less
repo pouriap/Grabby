@@ -68,6 +68,22 @@ ul, li
 	#downloads-list
 	{
 		width: 100%;
+
+		li
+		{
+			display: flex;
+
+			.dl-icon
+			{
+				width: 32px;
+				margin-right: 10px;
+			}
+
+			.dl-name
+			{
+				margin: auto;
+			}
+		}
 	}
 
 	.dl-item
@@ -197,7 +213,7 @@ ul, li
 
 	#action-back
 	{
-		background-image: url('../icons/back.svg');
+		background-image: url('/icons/back.png');
 		background-position:  5px 7px;
 		background-repeat:  no-repeat;
 		background-size: 12px;
@@ -207,7 +223,7 @@ ul, li
 		padding-right: 10px;
 
 		&:hover{
-			background-image: url('../icons/back-white.svg');
+			background-image: url('/icons/back-white.png');
 		}
 	}
 
