@@ -52,6 +52,7 @@ const constants =
 		'font'
 	],
 
+
 	// Texty things
 	textualExts : [
 		//static content
@@ -69,14 +70,6 @@ const constants =
 	textualTypes: ['stylesheet', 'script', 'xbl', 'xml_dtd', 'xslt', 'web_manifest'],
 
 
-	// These are types as defined by Mozilla associated with web requests
-	otherWebTypes: ['object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative'],
-
-
-	// AJAX obviously
-	ajaxTypes: ['xmlhttprequest'],
-
-
 	// Compresses things
 	compressedExts: [
 		'zip', 'gzip', 'gz', 'bz', 'bz2', '7z', 'tar', 'tgz', 'rar', 'jar', 'xpi', 'apk',
@@ -88,25 +81,26 @@ const constants =
 	],
 
 
-	// Media things
-	mediaExts: [
-		//audio 
-		'wav', 'wave', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
-		//video 
+	// Video things
+	videoExts: [
 		'avi', 'flv', 'swf', 'wmv', 'mov', 'qt', 'ts', 'mp4', 'm4p', 'm4v', 'mkv', 'mpg', 'mpeg',
 		'mp2', 'mpv', 'mpe', 'avchd', 'webm',
 	],
-	mediaMimes: [
-		//audio
-		'audio/wav', 'audio/aiff', 'audio/x-aiff', 'audio/flac', 'audio/mpeg', 'audio/mpeg3', 
-		'audio/x-mpeg-3', 'audio/mp3', 'audio/ogg', 'audio/aac', 'audio/x-aac', 'audio/webm',
-		//video
+	videoMimes: [
 		'application/x-troff-msvideo', 'video/avi', 'video/msvideo', 'video/x-msvideo', 
 		'application/x-shockwave-flash', 'video/quicktime', 'video/mp2t', 'video/mpeg', 
 		'video/mp4', 'video/webm',
 	],
-	mediaTypes : [
-		'media'
+
+
+	// Audio things
+	audioExts: [
+		'wav', 'wave', 'aiff', 'flac', 'alac', 'wma', 'mp3', 'ogg', 'aac', 'wma', 'weba',
+	],
+	audioMimes: [
+		//audio
+		'audio/wav', 'audio/aiff', 'audio/x-aiff', 'audio/flac', 'audio/mpeg', 'audio/mpeg3', 
+		'audio/x-mpeg-3', 'audio/mp3', 'audio/ogg', 'audio/aac', 'audio/x-aac', 'audio/webm',
 	],
 
 
@@ -143,10 +137,23 @@ const constants =
 		//other
 		'bin', 'iso',
 	],
-	generalBinaryMimes : [
+	binaryMimes : [
 		//other
 		'application/octet-stream', 'application/binary',
 	],
+
+
+	// Audio and video that the browser decides is media
+	mediaTypes : [
+		'media'
+	],
+
+	// These are types as defined by Mozilla associated with web requests
+	otherWebTypes: ['object', 'beacon', 'csp_report', 'object_subrequest', 'ping', 'speculative'],
+
+
+	// AJAX obviously
+	ajaxTypes: ['xmlhttprequest'],
 
 
 	// Things that are displayable in the browser

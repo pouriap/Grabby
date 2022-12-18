@@ -906,90 +906,65 @@ class RequestFilter
 		return this._isImage;
 	}
 
-	isWebImage()
+	isVideo()
 	{
-		if(typeof this._isWebImage === 'undefined'){
-			this._isWebImage = this._isInTypeList(constants.imageTypes);
+		if(typeof this._isImage === 'undefined'){
+			this._isImage = 
+			this._isInExtensionList(constants.videoExts) ||
+			this._isInMimeList(constants.videoMimes);
 		}
-		return this._isWebImage;
+		return this._isImage;
 	}
 
-	isFont()
+	isAudio()
 	{
-		if(typeof this._isFont === 'undefined'){
-			this._isFont = 
-				this._isInTypeList(constants.fontTypes) ||
-				this._isInExtensionList(constants.fontExts) ||
-				this._isInMimeList(constants.fontMimes);
+		if(typeof this._isImage === 'undefined'){
+			this._isImage = 
+			this._isInExtensionList(constants.audioExts) ||
+			this._isInMimeList(constants.audioMimes);
 		}
-		return this._isFont;
+		return this._isImage;
 	}
 
-	isWebFont()
+	isCompressed()
 	{
-		if(typeof this._isWebFont === 'undefined'){
-			this._isWebFont = this._isInTypeList(constants.fontTypes);
+		if(typeof this._isCompressed === 'undefined'){
+			this._isCompressed = 
+				this._isInExtensionList(constants.compressedExts) ||
+				this._isInMimeList(constants.compressedMimes);
 		}
-		return this._isWebFont;
+		return this._isCompressed;
 	}
 
-	isTextual()
+	isDocument()
 	{
-		if(typeof this._isTextual === 'undefined'){
-			this._isTextual = 
-				this._isInTypeList(constants.textualTypes) ||
-				this._isInExtensionList(constants.textualExts) ||
-				this._isInMimeList(constants.textualMimes);
+		if(typeof this._isDocument === 'undefined'){
+			this._isDocument = 
+				this._isInExtensionList(constants.documentExts) ||
+				this._isInMimeList(constants.documentMimes);
 		}
-		return this._isTextual;
+		return this._isDocument;
 	}
 
-	isWebTextual()
+	isText()
 	{
-		if(typeof this._isWebTextual === 'undefined'){
-			this._isWebTextual = false;
-			if(this._isInTypeList(constants.textualTypes)){
-				this._isWebTextual = true;
-			}
-			//if its content-type is text/plain then it'll be shown in browser
-			//for example seeing a .js file in github raw
-			else if(this._isInMimeList(['text/plain'])){
-				this._isWebTextual = false;
-			}
-			else if(
-				this._isInExtensionList(constants.textualExts) ||
-				this._isInMimeList(constants.textualMimes)
-			){
-				this._isWebTextual = true;
-			}
+		if(typeof this._isImage === 'undefined'){
+			this._isImage = 
+			this._isInTypeList(constants.textualTypes) ||
+			this._isInExtensionList(constants.textualExts) ||
+			this._isInMimeList(constants.textualMimes);
 		}
-		return this._isWebTextual;
+		return this._isImage;
 	}
 
-	isOtherWebResource()
+	isOtherBinary()
 	{
-		if(typeof this._isWebResource === 'undefined'){
-			this._isWebSocket = this._isInTypeList(constants.otherWebTypes);
+		if(typeof this._isOtherBinary === 'undefined'){
+			this._isOtherBinary = 
+				this._isInExtensionList(constants.binaryExts) ||
+				this._isInMimeList(constants.binaryMimes);
 		}
-		return this._isWebSocket;
-	}
-
-	isMedia()
-	{
-		if(typeof this._isMedia === 'undefined'){
-			this._isMedia = 
-				//media type is anything that is loaded from a <video> or <audio> tag
-				//the problem with them is that if they are cached, there is absolutely no way to re-create
-				//the request and trigger a grab
-				//i expected a request to be created with 'fromCache=true' but that is not the case
-				//i tried ctrl+f5 and disabling cache from network tool but they don't work
-				//the request doesn't even show up in the network tool
-				//proof: MDN or w3schools page on <video> and <audio> tag
-				//the only way is to open the page containing the resouce in a private window
-				this._isInExtensionList(constants.mediaExts) ||
-				this._isInMimeList(constants.mediaMimes);
-		}
-		return this._isMedia;
+		return this._isOtherBinary;
 	}
 
 	isHlsManifest()
@@ -1017,14 +992,6 @@ class RequestFilter
 		return this.isHlsManifest() || this.isDashManifest();
 	}
 
-	isBrowserMedia()
-	{
-		if(typeof this._isBrowserMedia === 'undefined'){
-			this._isBrowserMedia = this._isInTypeList(constants.mediaTypes);
-		}
-		return this._isBrowserMedia;
-	}
-
 	/**
 	 * media file that can be played inside Firefox
 	 * reference: https://support.mozilla.org/en-US/kb/html5-audio-and-video-firefox
@@ -1043,36 +1010,6 @@ class RequestFilter
 			}
 		}
 		return this._isDisplayedInBrowser;
-	}
-
-	isCompressed()
-	{
-		if(typeof this._isCompressed === 'undefined'){
-			this._isCompressed = 
-				this._isInExtensionList(constants.compressedExts) ||
-				this._isInMimeList(constants.compressedMimes);
-		}
-		return this._isCompressed;
-	}
-
-	isDocument()
-	{
-		if(typeof this._isDocument === 'undefined'){
-			this._isDocument = 
-				this._isInExtensionList(constants.documentExts) ||
-				this._isInMimeList(constants.documentMimes);
-		}
-		return this._isDocument;
-	}
-
-	isOtherBinary()
-	{
-		if(typeof this._isOtherBinary === 'undefined'){
-			this._isOtherBinary = 
-				this._isInExtensionList(constants.binaryExts) ||
-				this._isInMimeList(constants.generalBinaryMimes);
-		}
-		return this._isOtherBinary;
 	}
 
 	/**
@@ -1268,7 +1205,8 @@ class RequestFilter
 	}
 	isMimeMedia()
 	{
-		return this._isInMimeList(constants.mediaMimes);
+		return 	this._isInMimeList(constants.videoMimes) || 
+			this._isInMimeList(constants.audioMimes);
 	}
 	isMimeStreamManifest()
 	{
@@ -1285,7 +1223,7 @@ class RequestFilter
 	}
 	isMimeGeneralBinary()
 	{
-		return this._isInMimeList(constants.generalBinaryMimes);
+		return this._isInMimeList(constants.binaryMimes);
 	}
 
 	isExtWebRes()
@@ -1298,7 +1236,8 @@ class RequestFilter
 	}
 	isExtMedia()
 	{
-		return this._isInExtensionList(constants.mediaExts);
+		return 	this._isInMimeList(constants.videoExts) || 
+			this._isInMimeList(constants.audioExts);
 	}
 	isExtStreamManifest()
 	{

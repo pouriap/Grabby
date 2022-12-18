@@ -41,6 +41,15 @@ declare var md5: any;
 //todo: use --progress-template for ytdl
 //todo: BUG: re-opening closed tabs grabby doesn't run
 //todo: BUG: re-opening closed tabs makes grabby give duplicate manifest erro
+//todo: wtf is this?
+//media type is anything that is loaded from a <video> or <audio> tag
+//the problem with them is that if they are cached, there is absolutely no way to re-create
+//the request and trigger a grab
+//i expected a request to be created with 'fromCache=true' but that is not the case
+//i tried ctrl+f5 and disabling cache from network tool but they don't work
+//the request doesn't even show up in the network tool
+//proof: MDN or w3schools page on <video> and <audio> tag
+//the only way is to open the page containing the resouce in a private window
 
 var GB = new Grabby();
 
