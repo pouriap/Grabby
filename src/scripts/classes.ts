@@ -269,6 +269,8 @@ class Download
 	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
 	private _tabs: SureMap<number, tabinfo>;
+	private _filetype: filetype | undefined = undefined;
+
 
 	/**
 	 * Creates a new Download object
@@ -478,6 +480,16 @@ class Download
 		return this._fileExtension;
 	}
 
+	get filetype(): filetype | undefined
+	{
+		return this._filetype;
+	}
+
+	set filetype(type: filetype | undefined)
+	{
+		this._filetype = type;
+	}
+
 	get requestBody(): webx_requestBody | undefined
 	{
 		return this.httpDetails.requestBody;
@@ -565,6 +577,11 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 	get filename(): string
 	{
 		return (typeof this.streamData != 'undefined')? this.streamData.title : 'no-video-data';
+	}
+
+	get filetype(): filetype
+	{
+		return 'stream';
 	}
 
 	updateData(info: ytdlinfo)
@@ -705,6 +722,11 @@ class YTPlaylistDownload extends Download implements ytdlable<ytdlinfo_ytplitem[
 		return (typeof this.listData != 'undefined')? this.listData.title : 'no-video-data';
 	}
 
+	get filetype(): filetype
+	{
+		return 'playlist';
+	}
+
 	updateData(infos: ytdlinfo_ytplitem[])
 	{
 		let items: yt_playlist_item[] = [];
@@ -799,20 +821,15 @@ class RequestFilter
 
 	private _isWebSocket: bool_und = undefined;
 	private _isImage: bool_und = undefined;
-	private _isWebImage: bool_und = undefined;
-	private _isFont: bool_und = undefined;
-	private _isWebFont: bool_und = undefined;
-	private _isTextual: bool_und = undefined;
-	private _isWebTextual: bool_und = undefined;
-	private _isWebResource: bool_und = undefined;
-	private _isMedia: bool_und = undefined;
-	private _isHlsManifest: bool_und = undefined;
-	private _isDashManifest: bool_und = undefined;
-	private _isBrowserMedia: bool_und = undefined;
-	private _isDisplayedInBrowser: bool_und = undefined;
 	private _isCompressed: bool_und = undefined;
 	private _isDocument: bool_und = undefined;
-	private _isOtherBinary: bool_und = undefined;
+	private _isBinary: bool_und = undefined;
+	private _isAudio: bool_und = undefined;
+	private _isVideo: bool_und = undefined;
+	private _isText: bool_und = undefined;
+	private _isHlsManifest: bool_und = undefined;
+	private _isDashManifest: bool_und = undefined;
+	private _isDisplayedInBrowser: bool_und = undefined;
 	private _hasAttachment: bool_und = undefined;
 	private _isAJAX: bool_und = undefined;
 	private _isStatusOK: bool_und = undefined;
@@ -908,22 +925,22 @@ class RequestFilter
 
 	isVideo()
 	{
-		if(typeof this._isImage === 'undefined'){
-			this._isImage = 
+		if(typeof this._isVideo === 'undefined'){
+			this._isVideo = 
 			this._isInExtensionList(constants.videoExts) ||
 			this._isInMimeList(constants.videoMimes);
 		}
-		return this._isImage;
+		return this._isVideo;
 	}
 
 	isAudio()
 	{
-		if(typeof this._isImage === 'undefined'){
-			this._isImage = 
+		if(typeof this._isAudio === 'undefined'){
+			this._isAudio = 
 			this._isInExtensionList(constants.audioExts) ||
 			this._isInMimeList(constants.audioMimes);
 		}
-		return this._isImage;
+		return this._isAudio;
 	}
 
 	isCompressed()
@@ -948,23 +965,23 @@ class RequestFilter
 
 	isText()
 	{
-		if(typeof this._isImage === 'undefined'){
-			this._isImage = 
+		if(typeof this._isText === 'undefined'){
+			this._isText = 
 			this._isInTypeList(constants.textualTypes) ||
 			this._isInExtensionList(constants.textualExts) ||
 			this._isInMimeList(constants.textualMimes);
 		}
-		return this._isImage;
+		return this._isText;
 	}
 
-	isOtherBinary()
+	isBinary()
 	{
-		if(typeof this._isOtherBinary === 'undefined'){
-			this._isOtherBinary = 
+		if(typeof this._isBinary === 'undefined'){
+			this._isBinary = 
 				this._isInExtensionList(constants.binaryExts) ||
 				this._isInMimeList(constants.binaryMimes);
 		}
-		return this._isOtherBinary;
+		return this._isBinary;
 	}
 
 	isHlsManifest()

@@ -22,6 +22,9 @@ type progress_data = {dlHash: string, plIndex: number, speed: string, percent: n
 
 type dl_progress = {percent: number, speed: string};
 
+type filetype =  'audio' | 'binary' | 'compressed' | 'document' | 'image' | 'video' | 
+	'stream' | 'playlist' | 'text' | 'other';
+
 type extracted_links = 
 {
 	links: page_link[],

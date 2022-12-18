@@ -208,4 +208,16 @@ namespace Utils
 		return u.searchParams.get(param);
 	}
 
+	export function getFileType(filter: RequestFilter): filetype
+	{
+		if(filter.isImage()) return 'image';
+		if(filter.isText()) return 'text';
+		if(filter.isAudio()) return 'audio';
+		if(filter.isVideo()) return 'video';
+		if(filter.isCompressed()) return 'compressed';
+		if(filter.isBinary()) return 'binary';
+		if(filter.isDocument()) return 'document';
+		return 'other';
+	}
+
 }

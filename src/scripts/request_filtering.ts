@@ -94,6 +94,9 @@ namespace RequestFiltering
 			return Promise.resolve({cancel: false});
 		}
 
+		//todo: this doesn't belong here, or in utils
+		download.filetype = Utils.getFileType(filter);
+
 		let handler: RequestHandler;
 
 		if(filter.getSpecialHandler())
