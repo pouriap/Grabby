@@ -2,6 +2,8 @@ const constants =
 {
 	dateForamt : { hour: 'numeric', minute:'numeric', month: 'short', day:'numeric' },
 
+	iconsUrl: '/icons/',
+
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
 

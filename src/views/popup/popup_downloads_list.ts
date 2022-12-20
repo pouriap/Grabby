@@ -31,17 +31,33 @@ class ViewDownloadsList extends PopupView
 				'data-hash': key
 			});
 
-			let icon = ui.create('img', {
-				'src': `/icons/${download.filetype}.png`,
+			let iconCanvas = ui.create('canvas', {
+				'width': '64', 
+				'height': '64',
 				'class': 'dl-icon'
-			});
+			}) as HTMLCanvasElement;
+
+			let e: HTMLImageElement | HTMLVideoElement;
+			let src = download.icon;
+			if(download.filetype === 'video')
+			{
+				e = ui.create('video', {'src': src, 'width': '64', 'height': '64'}) as HTMLVideoElement;
+			}
+			else
+			{
+				e = ui.create('img', {'src': src, 'width': '64', 'height': '64'}) as HTMLImageElement;
+			}
+
+			log.d('setting canvas', e);
+			
+			iconCanvas.getContext('2d')!.drawImage(e, 0, 0, e.width, e.height);
 
 			let name = ui.create('span', {
 				'class': 'dl-name'
 			});
 			name.innerHTML = download.filename
 
-			listItem.appendChild(icon);
+			listItem.appendChild(iconCanvas);
 			listItem.appendChild(name);
 
 			if(download.progress?.percent)

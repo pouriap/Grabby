@@ -269,7 +269,7 @@ class Download
 	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
 	private _tabs: SureMap<number, tabinfo>;
-	private _filetype: filetype | undefined = undefined;
+	private _filetype: filetype = 'other';
 
 
 	/**
@@ -480,14 +480,19 @@ class Download
 		return this._fileExtension;
 	}
 
-	get filetype(): filetype | undefined
+	get filetype(): filetype
 	{
 		return this._filetype;
 	}
 
-	set filetype(type: filetype | undefined)
+	set filetype(type: filetype)
 	{
 		this._filetype = type;
+	}
+
+	get icon(): string
+	{
+		return constants.iconsUrl + this.filetype + '.png';
 	}
 
 	get requestBody(): webx_requestBody | undefined
@@ -584,6 +589,12 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 		return 'stream';
 	}
 
+	get icon()
+	{
+		return (this.streamData && this.streamData.thumbnail)? 
+			this.streamData.thumbnail : constants.iconsUrl + 'stream.png';
+	}
+
 	updateData(info: ytdlinfo)
 	{
 		let formats: FormatData[] = [];
@@ -608,7 +619,7 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 			}
 		}
 
-		this.streamData = new StreamData(title, info.duration, formats);
+		this.streamData = new StreamData(title, info.duration, info.thumbnail, formats);
 	}
 
 	copyData(download: StreamDownload)
@@ -700,7 +711,7 @@ class YoutubeDownload extends StreamDownload implements ytdlable<ytdlinfo, Youtu
 
 		});
 
-		this.streamData = new StreamData(info.title, info.duration, formats);
+		this.streamData = new StreamData(info.title, info.duration, info.thumbnail, formats);
 	}
 }
 
@@ -790,7 +801,7 @@ class RedditDownload extends StreamDownload implements ytdlable<ytdlinfo, Reddit
 			}
 		}
 
-		this.streamData = new StreamData(info.title, info.duration, formats);
+		this.streamData = new StreamData(info.title, info.duration, info.thumbnail, formats);
 	}
 }
 
@@ -1488,12 +1499,14 @@ class StreamData
 {
 	title: string;
 	duration: number;
+	thumbnail: string | undefined;
 	formats: FormatData[];
 
-	constructor(title: string, duration: number, formats: FormatData[])
+	constructor(title: string, duration: number, thumbnail: string, formats: FormatData[])
 	{
 		this.title = title;
 		this.duration = duration;
+		this.thumbnail = thumbnail;
 		this.formats = formats;
 	}
 }
@@ -1576,7 +1589,6 @@ class StreamDataUI
 		return (this.streamData.duration > 0)? 
 			Utils.formatSeconds(this.streamData.duration) : 'unkown duration';
 	}
-
 }
 
 class tabinfo
