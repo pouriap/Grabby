@@ -14,7 +14,7 @@ class ViewDownloadDetails extends PopupView
 		ui.get("#download-details #filename")!.innerHTML = this.download.filename;
 		ui.get("#download-details #filename")!.setAttribute("title", this.download.filename);
 		ui.get("#download-details #size")!.innerHTML = 
-			(this.download.size !== -1)? filesize(this.download.size) : this.download.size;
+			(this.download.size)? filesize(this.download.size) : 'unknown';
 		ui.get("#download-details #url")!.innerHTML = this.download.url;
 		ui.get("#download-details #url")!.setAttribute("title", this.download.url);
 	

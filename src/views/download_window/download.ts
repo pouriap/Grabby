@@ -68,7 +68,7 @@ class DownloadView extends View
 		let download = this.selectedDl;
 		ui.get("#filename")!.innerHTML = download.filename;
 		ui.get("#filename")!.setAttribute("title", download.filename);
-		ui.get("#size")!.innerHTML = (download.size !== -1)? filesize(download.size) : download.size;
+		ui.get("#size")!.innerHTML = (download.size)? filesize(download.size) : 'unknown';
 		ui.get("#host")!.innerHTML = download.host;
 		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
