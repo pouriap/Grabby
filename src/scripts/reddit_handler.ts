@@ -12,7 +12,7 @@ class RedditHandler implements SpecialHandler
 	{
 		let url = this.download.url;
 
-		let regex = /https:\/\/v\.redd\.it\/(.*)?\/DASHPlaylist/m;
+		let regex = /https:\/\/v\.redd\.it\/(.*)?\/(DASH|HLS)Playlist/m;
 
 		let match = url.match(regex);
 
