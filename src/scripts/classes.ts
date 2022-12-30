@@ -265,11 +265,11 @@ class Download
 	private _host: str_und = undefined;
 	private _filesize: num_und = -1;
 	private _fileExtension: str_und = undefined;
+	private _filetype: filetype = 'other';
 	private _ownerTabId: num_und = undefined;
 	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
 	private _tabs: SureMap<number, tabinfo>;
-	private _filetype: filetype = 'other';
 
 
 	/**
@@ -490,7 +490,7 @@ class Download
 		this._filetype = type;
 	}
 
-	get icon(): string
+	get iconURL(): string
 	{
 		return constants.iconsUrl + this.filetype + '.png';
 	}
@@ -589,7 +589,7 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 		return 'stream';
 	}
 
-	get icon()
+	get iconURL()
 	{
 		return (this.streamData && this.streamData.thumbnail)? 
 			this.streamData.thumbnail : constants.iconsUrl + 'stream.png';
