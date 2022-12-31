@@ -31,7 +31,26 @@ class ViewDownloadsList extends PopupView
 				'data-hash': key
 			});
 
-			let icon = ui.create('img', {'src': download.iconURL, 'class': 'dl-icon'});
+			let icon = ui.create('img', {'src': download.iconURL, 'class': 'dl-icon'}) as HTMLImageElement;
+			
+			if(isVideoDownload(download))
+			{
+				if(download.thumbData)
+				{
+					icon.src = download.thumbData;
+				}
+				else
+				{
+					download.getThumbnail().then((data) => 
+					{
+						icon.src = data;
+						//update the thumbnail in bg context so we won't have to load it every time in popup
+						let msg = new Messaging.MSGUpdateVideoThumb(download.hash, data);
+						Messaging.sendMessage(msg);
+					});
+				}
+			}
+
 			let name = ui.create('span', {'class': 'dl-name'});
 			name.innerHTML = download.filename;
 

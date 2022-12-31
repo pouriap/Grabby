@@ -671,12 +671,56 @@ class ImageDownload extends FileDownload
 class VideoDownload extends FileDownload
 {
 	type: download_type = 'video';
+	thumbData: string = '';
 	
 	get iconURL()
 	{
 		return constants.iconsUrl + 'video.png';
 	}
-	//todo: icon
+
+	getThumbnail(): Promise<string>
+	{
+		return new Promise((resolve, reject) => 
+		{
+			let canvas = document.createElement("canvas");
+			let video = document.createElement("video");
+	
+			video.preload = "metadata";
+			video.controls = false;
+			video.src = this.url;
+	
+			video.addEventListener('loadeddata', () => 
+			{
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+	
+				canvas.getContext("2d")!.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+	
+				let src = canvas.toDataURL();
+	
+				//remove video from DOM
+				video.remove();
+
+				this.thumbData = src;
+
+				if(!src)
+				{
+					log.warn('could not get video thumbnail for', this);
+					this.thumbData = this.iconURL;
+				}
+
+				resolve(src);
+
+			}, false);
+	
+			video.load();
+		});
+	}
+}
+
+function isVideoDownload(obj: any): obj is VideoDownload
+{
+	return obj.type === 'video';
 }
 
 class TextDownload extends FileDownload

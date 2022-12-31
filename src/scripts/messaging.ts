@@ -9,6 +9,7 @@ namespace Messaging
 	const TYP_GET_GB = 'get-bg';
 	const TYP_GBJSON = 'gb-json';
 	const TYP_DL_DIALOG_CLOSING = 'dl-gialog-closing';
+	const TYP_UPDATE_VID_THUMB = 'update-video-thumb';
 	const TYP_DOWNLOAD = 'download';
 	const TYP_YTDL_VIDEO = 'ytdl-video';
 	const TYP_YTDL_AUDIO = 'ytdl-audio';
@@ -50,6 +51,12 @@ namespace Messaging
 		type = TYP_DL_DIALOG_CLOSING;
 		constructor(public continueWithBrowser: boolean, 
 			public dlHash: string){};
+	}
+
+	export class MSGUpdateVideoThumb implements Message
+	{
+		type = TYP_UPDATE_VID_THUMB;
+		constructor(public dlHash: string, public data: string){};
 	}
 	
 	export class MSGDownload
@@ -141,6 +148,11 @@ namespace Messaging
 		else if(msg.type === TYP_DL_DIALOG_CLOSING)
 		{
 			handleDLDialog(msg as MSGDlDialogClosing);
+		}
+
+		else if(msg.type === TYP_UPDATE_VID_THUMB)
+		{
+			handleVideoThumb(msg as MSGUpdateVideoThumb);
 		}
 
 		//downloads a download with the specified DM
@@ -238,6 +250,12 @@ namespace Messaging
 				browser.tabs.remove(dlTab.id).catch((e) => {});
 			}
 		}
+	}
+
+	function handleVideoThumb(msg: MSGUpdateVideoThumb)
+	{
+		let dl = GB.allDownloads.get(msg.dlHash) as VideoDownload;
+		dl.thumbData = msg.data;
 	}
 
 	function handleDownload(msg: MSGDownload)
