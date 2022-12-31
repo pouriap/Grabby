@@ -12,7 +12,7 @@ type GBJSON =
  */
 class GrabbyPopup
 {
-	allDownloads: Map<string, Download>;
+	allDownloads = new Map<string, GrabbedDownload>();
 	tabs: SureMap<number, tabinfo>;
 	options: Options.GBOptions;
 	availableDMs: string[] | undefined;
@@ -23,47 +23,83 @@ class GrabbyPopup
 		this.tabs = new SureMap(gbJSON.tabs);
 		this.availableDMs = gbJSON.availableDMs;
 		this.options = gbJSON.options;
-		this.allDownloads = this.recreateDownloads(gbJSON.allDownloads);
 		this.browser = gbJSON.browser;
+		this.recreateDownloads(gbJSON.allDownloads);
 	}
 
-	private recreateDownloads(allDownloads: [key: string, value: object][]): Map<string, Download>
+	private recreateDownloads(allDownloads: [key: string, value: object][])
 	{
-		let newDownloads = new Map<string, Download>();
-
 		for(let pair of allDownloads)
 		{
 			let hash = pair[0];
-			let dlJSON = pair[1] as Download;
-			let download: Download;
-			switch(dlJSON.type)
-			{
-				case 'download':
-					download = new Download(dlJSON.httpDetails, this.tabs);
-					break;
-				case 'stream':
-					download = new StreamDownload(dlJSON.httpDetails, this.tabs);
-					break;
-				case 'youtube-video':
-					download = new YoutubeDownload((dlJSON as YoutubeDownload).videoId, 
-						dlJSON.httpDetails, this.tabs);
-					break;
-				case 'youtube-playlist':
-					download = new YTPlaylistDownload((dlJSON as YTPlaylistDownload).listId, 
-						dlJSON.httpDetails, this.tabs);
-					break;
-				case 'reddit-video':
-					download = new RedditDownload(dlJSON.httpDetails, this.tabs);
-					break;
-			}
-			//copy all JSON-like properties from downloadJSON to the new download object
-			//@ts-ignore
-			delete dlJSON._tabs;
-			Object.assign(download, dlJSON);
-			newDownloads.set(hash, download);
+			let dlJSON = pair[1] as GrabbedDownload;
+			this.addToAllDownloads(dlJSON, hash);
 		};
+	}
 
-		return newDownloads;
+	private addToAllDownloads(dlJSON: GrabbedDownload, hash: string)
+	{
+		let dl: GrabbedDownload;
+
+		switch(dlJSON.type)
+		{
+			case 'audio':
+				dl = new AudioDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'binary':
+				dl = new BinaryDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'compressed':
+				dl = new CompressedDownload(dlJSON.httpDetails, this.tabs);
+				break;
+			
+			case 'document':
+				dl = new DocumentDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'image':
+				dl = new ImageDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'text':
+				dl = new TextDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'video':
+				dl = new VideoDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'other':
+				dl = new OtherFileDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'stream':
+				dl = new StreamDownload(dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'youtube-video':
+				dl = new YoutubeDownload((dlJSON as YoutubeDownload).videoId, 
+					dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'youtube-playlist':
+				dl = new YTPlaylistDownload((dlJSON as YTPlaylistDownload).listId, 
+					dlJSON.httpDetails, this.tabs);
+				break;
+
+			case 'reddit-video':
+				dl = new RedditDownload(dlJSON.httpDetails, this.tabs);
+				break;
+		}
+
+		//@ts-ignore
+		delete dlJSON._tabs;
+
+		//copy all JSON-like properties from downloadJSON to the new download object
+		Object.assign(dl, dlJSON);
+		this.allDownloads.set(hash, dl);
 	}
 }
 
@@ -73,7 +109,7 @@ class GrabbyPopup
 class Grabby
 {
 	allRequests = new Map<string, HTTPDetails>();
-	allDownloads = new Map<string, Download>();
+	allDownloads = new Map<string, GrabbedDownload>();
 	tabs = new SureMap<number, tabinfo>();
 	availableDMs: string[] | undefined = undefined;
 	availExtDMs: string[] | undefined = undefined;
@@ -81,7 +117,7 @@ class Grabby
 	//@ts-ignore
 	browser: browser_info;
 
-	addToAllDownloads(download: Download)
+	addToAllDownloads(download: GrabbedDownload)
 	{
 		log.d('adding to all downloads: ', download);
 
@@ -139,9 +175,9 @@ interface GBWindow
 
 class DownloadWindow implements GBWindow
 {
-	download: Download;
+	download: GrabbedDownload;
 
-	constructor(download: Download)
+	constructor(download: GrabbedDownload)
 	{
 		this.download = download;
 	}
@@ -233,12 +269,12 @@ class ListWindow implements GBWindow
 }
 
 /**
- * Class representing a download
- * Basically any web request is a download
+ * Class representing a basic unknown download
+ * The type of this download is not known
+ * Basically any web request is a download before it's passed into a handler
  */
-class Download
+class BaseDownload
 {
-	type: download_type = 'download';
 	requestId: string;
 	url: string;
 	statusCode: number;
@@ -254,9 +290,6 @@ class Download
 	cat = '';
 	class = '';
 	classReason = 'no-class-yet';
-	//a Promise.resolve object is stored here for downloads that we intercept from the browser
-	//calling resolve() on this download will continue the request
-	resolveRequest: ((value: webx_BlockingResponse) => void) | undefined = undefined;
 
 	protected _hash_src: string;
 	private _hash = '';
@@ -265,7 +298,6 @@ class Download
 	private _host: str_und = undefined;
 	private _filesize: num_und = -1;
 	private _fileExtension: str_und = undefined;
-	private _filetype: filetype = 'other';
 	private _ownerTabId: num_und = undefined;
 	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
@@ -480,21 +512,6 @@ class Download
 		return this._fileExtension;
 	}
 
-	get filetype(): filetype
-	{
-		return this._filetype;
-	}
-
-	set filetype(type: filetype)
-	{
-		this._filetype = type;
-	}
-
-	get iconURL(): string
-	{
-		return constants.iconsUrl + this.filetype + '.png';
-	}
-
 	get requestBody(): webx_requestBody | undefined
 	{
 		return this.httpDetails.requestBody;
@@ -568,13 +585,127 @@ class Download
 
 }
 
-interface ytdlable<T, V>
+abstract class GrabbedDownload extends BaseDownload
+{
+	abstract type: download_type;
+	abstract get iconURL(): string;
+}
+
+/**
+ * This is the kind of download that returns a blocking webrequest and pauses the request
+ * Used for showing the download window to the user
+ */
+interface ResolvableDownload
+{
+	//a Promise.resolve object is stored here for downloads that we intercept from the browser
+	//calling resolve() on this download will continue the request
+	resolveRequest: ((value: webx_BlockingResponse) => void) | undefined;
+}
+
+function isResolvable(obj: any): obj is ResolvableDownload
+{
+	return typeof obj.resolveRequest != 'undefined';
+}
+
+abstract class FileDownload extends GrabbedDownload implements ResolvableDownload
+{
+	resolveRequest: ((value: webx_BlockingResponse) => void) | undefined = undefined;
+}
+
+function isFileDownload(obj: any): obj is FileDownload
+{
+	return constants.fileTypes.includes(obj.type);
+}
+
+class AudioDownload extends FileDownload
+{
+	type: download_type = 'audio';
+
+	get iconURL()
+	{
+		return constants.iconsUrl + 'audio.png';
+	}
+}
+
+class BinaryDownload extends FileDownload
+{
+	type: download_type = 'binary';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'binary.png';
+	}
+}
+
+class CompressedDownload extends FileDownload
+{
+	type: download_type = 'compressed';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'compressed.png';
+	}
+}
+
+class DocumentDownload extends FileDownload
+{
+	type: download_type = 'document';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'document.png';
+	}
+}
+
+class ImageDownload extends FileDownload
+{
+	type: download_type = 'image';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'image.png';
+	}
+	//todo: icon
+}
+
+class VideoDownload extends FileDownload
+{
+	type: download_type = 'video';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'video.png';
+	}
+	//todo: icon
+}
+
+class TextDownload extends FileDownload
+{
+	type: download_type = 'text';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'textual.png';
+	}
+}
+
+class OtherFileDownload extends FileDownload
+{
+	type: download_type = 'other';
+	
+	get iconURL()
+	{
+		return constants.iconsUrl + 'other.png';
+	}
+}
+
+interface YTDLableDownload<T, V>
 {
 	updateData(info: T): void;
 	copyData(download: V): void;
 }
 
-class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownload>
+class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinfo, StreamDownload>
 {
 	type: download_type = 'stream';
 	streamData: StreamData | undefined = undefined;
@@ -582,11 +713,6 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 	get filename(): string
 	{
 		return (typeof this.streamData != 'undefined')? this.streamData.title : 'no-video-data';
-	}
-
-	get filetype(): filetype
-	{
-		return 'stream';
 	}
 
 	get iconURL()
@@ -628,7 +754,7 @@ class StreamDownload extends Download implements ytdlable<ytdlinfo, StreamDownlo
 	}
 }
 
-class YoutubeDownload extends StreamDownload implements ytdlable<ytdlinfo, YoutubeDownload>
+class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinfo, YoutubeDownload>
 {
 	type: download_type = 'youtube-video';
 	videoId: string;
@@ -715,7 +841,7 @@ class YoutubeDownload extends StreamDownload implements ytdlable<ytdlinfo, Youtu
 	}
 }
 
-class YTPlaylistDownload extends Download implements ytdlable<ytdlinfo_ytplitem[], YTPlaylistDownload>
+class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytdlinfo_ytplitem[], YTPlaylistDownload>
 {
 	type: download_type = 'youtube-playlist';
 	listData: yt_playlist_data | undefined = undefined;
@@ -733,9 +859,9 @@ class YTPlaylistDownload extends Download implements ytdlable<ytdlinfo_ytplitem[
 		return (typeof this.listData != 'undefined')? this.listData.title : 'no-video-data';
 	}
 
-	get filetype(): filetype
+	get iconURL()
 	{
-		return 'playlist';
+		return constants.iconsUrl + 'playlist.png';
 	}
 
 	updateData(infos: ytdlinfo_ytplitem[])
@@ -784,7 +910,7 @@ class YTPlaylistDownload extends Download implements ytdlable<ytdlinfo_ytplitem[
 	}
 }
 
-class RedditDownload extends StreamDownload implements ytdlable<ytdlinfo, RedditDownload>
+class RedditDownload extends StreamDownload implements YTDLableDownload<ytdlinfo, RedditDownload>
 {
 	type: download_type = 'reddit-video';
 
@@ -855,7 +981,7 @@ class RequestFilter
 
 	/* constructor */
 
-	constructor(public download: Download, public options: Options.GBOptions){}
+	constructor(public download: BaseDownload, public options: Options.GBOptions){}
 
 	/* private methods */
 
@@ -1353,7 +1479,7 @@ class DownloadJob
 	 * @param download 
 	 * @returns A DownloadJob object created from provided data
 	 */
-	static async getFromDownload(dmName: string, download: Download)
+	static async getFromDownload(dmName: string, download: GrabbedDownload)
 	{
 		let originPageCookies = '';
 		let originPageReferer = '';

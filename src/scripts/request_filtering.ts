@@ -86,16 +86,13 @@ namespace RequestFiltering
 
 		//creating a new download object because the original will be deleted from allRequests
 		//in doOnCompleted() after the request is completed or when GB.allDownloads is full
-		let download = new Download(httpDetails, GB.tabs);
+		let download = new BaseDownload(httpDetails, GB.tabs);
 
 		let filter = new RequestFilter(download, Options.opt);
 
 		if(isIgnored(filter)){
 			return Promise.resolve({cancel: false});
 		}
-
-		//todo: this doesn't belong here, or in utils
-		download.filetype = Utils.getFileType(filter);
 
 		let handler: RequestHandler;
 

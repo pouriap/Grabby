@@ -1,6 +1,6 @@
 class DownloadHandler implements RequestHandler
 {
-	private download: Download;
+	private download: BaseDownload;
 	private filter: RequestFilter;
 
 	private readonly ACT_GRAB = 'grab';
@@ -8,7 +8,7 @@ class DownloadHandler implements RequestHandler
 	private readonly ACT_FORCE_DL = 'force dl';
 	private readonly ACT_GRAB_SILENT = 'grab silent';
 
-	constructor(download: Download, filter: RequestFilter)
+	constructor(download: BaseDownload, filter: RequestFilter)
 	{
 		this.download = download;
 		this.filter = filter;
@@ -31,7 +31,7 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineCategory(download: Download, filter: RequestFilter)
+	private determineCategory(download: BaseDownload, filter: RequestFilter)
 	{
 		/**
 		 * use types to determine category first, because they are the most certain
@@ -118,7 +118,7 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineClass(download: Download, filter: RequestFilter)
+	private determineClass(download: BaseDownload, filter: RequestFilter)
 	{
 		if(download.cat === RequestFilter.CAT_WEBRES_API){
 			download.classReason = 'web res api';
@@ -175,7 +175,7 @@ class DownloadHandler implements RequestHandler
 	 * @param download 
 	 * @param filter 
 	 */
-	private determineAction(download: Download, filter: RequestFilter): string
+	private determineAction(download: BaseDownload, filter: RequestFilter): string
 	{
 		let act = this.ACT_IGNORE;
 
@@ -223,7 +223,7 @@ class DownloadHandler implements RequestHandler
 	 * Performs the action that is assigned to a request in determineAction()
 	 * @param download 
 	 */
-	private performAction(download: Download, act: string): Promise<webx_BlockingResponse>
+	private performAction(download: BaseDownload, act: string): Promise<webx_BlockingResponse>
 	{
 		//console.timeEnd(download.reqDetails.requestId);
 
@@ -236,11 +236,49 @@ class DownloadHandler implements RequestHandler
 		//example: https://tporn.xxx/en/video/10035255/eben18-ich-wollte-unbedingt-mal-mit-einem-groben-schwanz-bumsen/
 		//warning: example is porn
 
-		GB.addToAllDownloads(download);
+		let newDL: FileDownload;
+		let fileType = Utils.getFileType(this.filter);
+		switch(fileType)
+		{
+			case 'audio':
+				newDL = new AudioDownload(download.httpDetails, GB.tabs);
+				break;
 
-		if(act === this.ACT_FORCE_DL){
+			case 'binary':
+				newDL = new BinaryDownload(download.httpDetails, GB.tabs);
+				break;
+
+			case 'compressed':
+				newDL = new CompressedDownload(download.httpDetails, GB.tabs);
+				break;
+			
+			case 'document':
+				newDL = new DocumentDownload(download.httpDetails, GB.tabs);
+				break;
+
+			case 'image':
+				newDL = new ImageDownload(download.httpDetails, GB.tabs);
+				break;
+
+			case 'text':
+				newDL = new TextDownload(download.httpDetails, GB.tabs);
+				break;
+
+			case 'video':
+				newDL = new VideoDownload(download.httpDetails, GB.tabs);
+				break;
+
+			case 'other':
+				newDL = new OtherFileDownload(download.httpDetails, GB.tabs);
+				break;
+		}
+
+		GB.addToAllDownloads(newDL);
+
+		if(act === this.ACT_FORCE_DL)
+		{
 			let dmName = Options.opt.defaultDM;
-			DownloadJob.getFromDownload(dmName, download).then((job)=>{
+			DownloadJob.getFromDownload(dmName, newDL).then((job)=>{
 				GB.doDownloadJob(job);
 			});
 			return Promise.resolve({cancel: true});
@@ -258,8 +296,8 @@ class DownloadHandler implements RequestHandler
 			//the request will be paused until this promise is resolved
 			return new Promise(function(resolve)
 			{
-				download.resolveRequest = resolve;
-				let dlWindow = new DownloadWindow(download);
+				newDL.resolveRequest = resolve;
+				let dlWindow = new DownloadWindow(newDL);
 				dlWindow.display();
 			});
 		}

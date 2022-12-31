@@ -7,6 +7,7 @@ const constants =
 	webSocketProtos : ["ws://", "wss://"],
 	webSocketTypes: ['websocket'],
 
+	fileTypes: ['audio', 'binary', 'compressed', 'document', 'image', 'video', 'text', 'other'] as const,
 
 	// These are things that are web resources such as images and css and we generally
 	// do not want to grab them

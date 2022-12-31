@@ -1,9 +1,9 @@
 class ViewDownloadDetails extends PopupView
 {
 	protected htmlFile = 'popup_download.html';
-	private download: Download;
+	private download: GrabbedDownload;
 
-	constructor(dl: Download)
+	constructor(dl: GrabbedDownload)
 	{
 		super();
 		this.download = dl;

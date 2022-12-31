@@ -1,8 +1,8 @@
 class YoutubeHandler implements SpecialHandler
 {
-	private download: Download;
+	private download: BaseDownload;
 
-	constructor(download: Download)
+	constructor(download: BaseDownload)
 	{
 		this.download = download;
 	}

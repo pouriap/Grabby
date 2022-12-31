@@ -87,12 +87,14 @@ class ViewDownloadsList extends PopupView
 
 		log.d('item clicked: ', selectedDl);
 
+		if(isFileDownload(selectedDl))
+		{
+			(new ViewDownloadDetails(selectedDl)).render();
+			return;
+		}
+
 		switch(selectedDl.type)
 		{
-			case 'download':
-				(new ViewDownloadDetails(selectedDl)).render();
-				break;
-			
 			case 'stream':
 				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
 				break;

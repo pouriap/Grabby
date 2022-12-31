@@ -2,10 +2,10 @@
 //todo: show percent and download speed
 class StreamHandler implements RequestHandler
 {
-	private download: Download;
+	private download: BaseDownload;
 	private filter: RequestFilter;
 
-	constructor(download: Download, filter: RequestFilter)
+	constructor(download: BaseDownload, filter: RequestFilter)
 	{
 		this.download = download;
 		this.filter = filter;

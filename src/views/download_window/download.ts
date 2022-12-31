@@ -1,7 +1,7 @@
 class DownloadView extends View
 {
 	//@ts-ignore
-	selectedDl: Download;
+	selectedDl: GrabbedDownload;
 	// indicates whether we continue with browser after download dialog is closed or not
 	continueWithBrowser = false;
 

@@ -214,7 +214,8 @@ namespace Messaging
 	{
 		let download = GB.allDownloads.get(msg.dlHash)!;
 
-		if(typeof download.resolveRequest === 'undefined'){
+		if(!isResolvable(download) || !download.resolveRequest)
+		{
 			log.err('download does not have resolve', download);
 		}
 

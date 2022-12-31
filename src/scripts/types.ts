@@ -10,7 +10,9 @@ type browser_name = 'firefox' | 'chrome' | 'unknown';
 
 type browser_info = {name: browser_name, version: number | undefined};
 
-type download_type = 'download' | 'stream' | 'youtube-video' | 'youtube-playlist' | 'reddit-video';
+type filetype =  typeof constants.fileTypes[number];
+
+type download_type = filetype | 'stream' | 'youtube-video' | 'youtube-playlist' | 'reddit-video';
 
 type vcodec = 'avc' | 'av' | 'vp9' | 'unknown';
 
@@ -21,9 +23,6 @@ type list_window_type = 'all_links' | 'selection_links' | 'yt_playlist';
 type progress_data = {dlHash: string, plIndex: number, speed: string, percent: number};
 
 type dl_progress = {percent: number, speed: string};
-
-type filetype =  'audio' | 'binary' | 'compressed' | 'document' | 'image' | 'video' | 
-	'stream' | 'playlist' | 'text' | 'other';
 
 type extracted_links = 
 {
