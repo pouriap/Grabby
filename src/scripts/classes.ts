@@ -589,6 +589,11 @@ abstract class GrabbedDownload extends BaseDownload
 {
 	abstract type: download_type;
 	abstract get iconURL(): string;
+	
+	get iconSize(): number
+	{
+		return 32;
+	}
 }
 
 /**
@@ -678,6 +683,11 @@ class VideoDownload extends FileDownload
 		return constants.iconsUrl + 'video.png';
 	}
 
+	get iconSize()
+	{
+		return (this.thumbData)? 64 : 32;
+	}
+
 	getThumbnail(): Promise<string>
 	{
 		return new Promise((resolve, reject) => 
@@ -701,15 +711,17 @@ class VideoDownload extends FileDownload
 				//remove video from DOM
 				video.remove();
 
-				this.thumbData = src;
-
-				if(!src)
+				if(src)
+				{
+					this.thumbData = src;
+				}
+				else
 				{
 					log.warn('could not get video thumbnail for', this);
 					this.thumbData = this.iconURL;
 				}
 
-				resolve(src);
+				resolve(this.thumbData);
 
 			}, false);
 	
@@ -763,6 +775,11 @@ class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinf
 	{
 		return (this.streamData && this.streamData.thumbnail)? 
 			this.streamData.thumbnail : constants.iconsUrl + 'stream.png';
+	}
+
+	get iconSize()
+	{
+		return 64;
 	}
 
 	updateData(info: ytdlinfo)

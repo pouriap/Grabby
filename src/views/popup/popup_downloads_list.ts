@@ -32,6 +32,7 @@ class ViewDownloadsList extends PopupView
 			});
 
 			let icon = ui.create('img', {'src': download.iconURL, 'class': 'dl-icon'}) as HTMLImageElement;
+			icon.classList.add(`icon-${download.iconSize}`);
 			
 			if(isVideoDownload(download))
 			{
@@ -44,6 +45,8 @@ class ViewDownloadsList extends PopupView
 					download.getThumbnail().then((data) => 
 					{
 						icon.src = data;
+						//update the size  cause thumbnails have bigger size
+						icon.classList.add(`icon-${download.iconSize}`);
 						//update the thumbnail in bg context so we won't have to load it every time in popup
 						let msg = new Messaging.MSGUpdateVideoThumb(download.hash, data);
 						Messaging.sendMessage(msg);
