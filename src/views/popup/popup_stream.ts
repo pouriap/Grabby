@@ -18,6 +18,9 @@ class ViewStreamDetails extends PopupView
 		ui.get("#stream-details #filename")!.setAttribute("title", this.download.filename);
 		ui.get("#stream-details #duration")!.innerHTML = this.data.duration;
 		ui.get("#stream-details #duration")!.setAttribute("title", this.data.duration);
+
+		let preview = ui.create('img', {'src': this.download.iconURL});
+		ui.get("#stream-details #preview")!.appendChild(preview);
 	
 		for(let format of this.data.formats)
 		{

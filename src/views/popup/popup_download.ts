@@ -17,7 +17,23 @@ class ViewDownloadDetails extends PopupView
 			(this.download.size)? filesize(this.download.size) : 'unknown';
 		ui.get("#download-details #url")!.innerHTML = this.download.url;
 		ui.get("#download-details #url")!.setAttribute("title", this.download.url);
-	
+
+		if(isVideoDownload(this.download))
+		{
+			let preview = document.createElement('video');
+			preview.controls = true;
+			if(this.download.thumbData)
+			{
+				preview.poster = this.download.thumbData;
+				preview.preload = 'none';
+			}
+			else
+			{
+				preview.preload = 'metadata';
+			}
+			preview.src = this.download.url;
+			ui.get('#download-details #preview')!.appendChild(preview);
+		}	
 		let selector = this.getDMSelector();
 		ui.get('#dm-list-container')?.appendChild(selector);
 
