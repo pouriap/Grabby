@@ -15,12 +15,13 @@ class YoutubeHandler implements SpecialHandler
 		let domain = Utils.getDomain(url);
 		let domainReg = domain.replace(/\./g, '\\.');
 
-		let directPage = new RegExp(`^https:\\/\\/${domainReg}\\/watch`, 'm');
-		let ajaxPage = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
+		let directVideo = new RegExp(`^https:\\/\\/${domainReg}\\/watch`, 'm');
+		let directShort = new RegExp(`^https:\\/\\/${domainReg}\\/shorts`, 'm');
+		let ajaxVideo = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
 
-		if(url.match(directPage))
+		if(url.match(directVideo))
 		{
-			log.d('handling youtube direct page');
+			log.d('handling youtube direct video');
 
 			let u = new URL(url);
 			let videoId = u.searchParams.get('v');
@@ -34,13 +35,23 @@ class YoutubeHandler implements SpecialHandler
 				this.youtubeList(videoId, listId, domain);
 			}
 			else{
-				this.youtubeSingle(videoId, domain);
+				this.youtubeVideo(videoId, domain);
 			}
 		}
-		
-		else if(url.match(ajaxPage))
+
+		else if(url.match(directShort))
 		{
-			log.d('handling youtube ajax page');
+			log.d('handling youtube direct short');
+
+			let u = Utils.getFullPath(url);
+			let videoId = u.substring(u.lastIndexOf('/') + 1);
+
+			this.youtubeShort(videoId, domain);
+		}
+		
+		else if(url.match(ajaxVideo))
+		{
+			log.d('handling youtube ajax video');
 
 			if(
 				typeof this.download.requestBody === 'undefined' ||
@@ -70,7 +81,7 @@ class YoutubeHandler implements SpecialHandler
 				}
 				else
 				{
-					this.youtubeSingle(videoId, domain);
+					this.youtubeVideo(videoId, domain);
 				}				
 			}
 			catch(e)
@@ -80,7 +91,7 @@ class YoutubeHandler implements SpecialHandler
 		}
 	}
 
-	private youtubeSingle(videoId: string, domain: string)
+	private youtubeVideo(videoId: string, domain: string)
 	{
 		//make a new download with a clean video page URL so that requests with extra
 		//parameters don't get added as duplicates
@@ -104,6 +115,35 @@ class YoutubeHandler implements SpecialHandler
 		GB.addToAllDownloads(youtubeDL);
 
 		log.d('getting youtube video info', videoUrl);
+
+		let msg = new NativeMessaging.MSG_YTDLInfo(youtubeDL.url, youtubeDL.hash);
+		NativeMessaging.sendMessage(msg);
+	}
+
+	private youtubeShort(videoId: string, domain: string)
+	{
+		//make a new download with a clean video page URL so that requests with extra
+		//parameters don't get added as duplicates
+
+		let videoUrl = `https://${domain}/shorts/${videoId}`;
+
+		let details = this.download.httpDetails;
+		details.url = videoUrl;
+		let youtubeDL = new YoutubeDownload(videoId, details, GB.tabs);
+
+		//don't request ytdlinfo if we already got this download
+		let duplicate = GB.allDownloads.get(youtubeDL.hash);
+		if(duplicate)
+		{
+			youtubeDL.copyData(duplicate as YoutubeDownload);
+			GB.addToAllDownloads(youtubeDL);
+			return;
+		}
+
+		youtubeDL.hidden = true;
+		GB.addToAllDownloads(youtubeDL);
+
+		log.d('getting youtube short info', videoUrl);
 
 		let msg = new NativeMessaging.MSG_YTDLInfo(youtubeDL.url, youtubeDL.hash);
 		NativeMessaging.sendMessage(msg);
