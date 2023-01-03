@@ -4,7 +4,7 @@ class ViewDownloadsList extends PopupView
 
 	protected async renderChildView()
 	{
-		let tab = (await browser.tabs.query({currentWindow: true, active: true}))[0];
+		let tab = await Utils.getCurrentTab();
 		let currTab = this.GBPop.tabs.getsure(tab.id);
 	
 		//populate list of downloads

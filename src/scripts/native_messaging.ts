@@ -368,10 +368,7 @@ namespace NativeMessaging
 			dl.updateData(msg.info);
 			dl.hidden = false;
 
-			if(GB.browser.name === 'firefox')
-			{
-				browser.pageAction.show(dl.ownerTabId);
-			}
+			Utils.showPageAction(dl.ownerTabId);
 		}
 		else
 		{
@@ -389,10 +386,7 @@ namespace NativeMessaging
 			dl.updateData(msg.info);
 			dl.hidden = false;
 
-			if(GB.browser.name === 'firefox')
-			{
-				browser.pageAction.show(dl.ownerTabId);
-			}
+			Utils.showPageAction(dl.ownerTabId);
 		}
 		else
 		{

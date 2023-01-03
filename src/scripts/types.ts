@@ -100,6 +100,7 @@ interface webx_browser
 	};
 	pageAction: {
 		show: (tabId: number) => void;
+		hide: (tabId: number) => void;
 	};
 	webRequest: any;
 	runtime: any;

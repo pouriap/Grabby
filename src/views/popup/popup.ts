@@ -20,9 +20,11 @@ abstract class PopupView extends View
 	protected abstract renderChildView(): Promise<void>;
 }
 
-//todo show downlods progress
+document.addEventListener("DOMContentLoaded", (e) => 
+{
+	//hide the address bar notificaiton icon
+	Utils.getCurrentTab().then((tab) => {Utils.hidePageAction(tab.id);});
 
-document.addEventListener("DOMContentLoaded", (e) => {
 	//the defaul view for popup is the downloads list
 	(new ViewDownloadsList()).render();
 });

@@ -127,6 +127,32 @@ namespace Utils
 		browser.notifications.create(options);
 	}
 
+	export function showPageAction(tabId: number)
+	{
+		//if(GB.browser.name === 'firefox')
+		//{
+			try{
+				browser.pageAction.show(tabId);
+			}catch(e){};
+		//}
+	}
+
+	export function hidePageAction(tabId: number)
+	{
+		//if(GB.browser.name === 'firefox')
+		//{
+			try{
+				browser.pageAction.hide(tabId);
+			}catch(e){};
+		//}
+	}
+
+	export async function getCurrentTab()
+	{
+		let tabs = await browser.tabs.query({currentWindow: true, active: true});
+		return tabs[0];
+	}
+
 	export function mapToArray<K, V>(map: Map<K, V>): [key: K, value: V][]
 	{
 		let arr: [key: K, value: V][] = [];
