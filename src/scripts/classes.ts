@@ -131,7 +131,6 @@ class Grabby
 
 		log.warn('download is duplicate of', duplicate);
 
-
 		//if the duplicate is from the same tab as the previous download do not add it
 		if(duplicate.tabId === download.tabId)
 		{
@@ -1785,7 +1784,6 @@ class tabinfo
 	title: string;
 	isPrivate: boolean;
 	openerId: number | undefined;
-	hasMainManifest = false;
 	closed: boolean = false;
 
 	constructor(tab: webx_tab)

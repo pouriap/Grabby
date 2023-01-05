@@ -13,15 +13,13 @@ declare var md5: any;
 //todo: add try/catch to all awaits
 //todo: script injection needed for grab selection/all doens't work on addon pages (Video Downloader Prime)
 //todo: add option to automatically download with default DM if size is bigger than X
-//todo: reduce duplicates in downloads history (find out if it's the same file using size? etc.)
 //todo: is blob and/or encrypted downloads possible to detect? Telegram/Mega/FF Send
 //todo: support wildcard in blacklisted domains
-//todo: add more info to dl history
 //todo: add keyboard shortcuts
 //todo: option to show only downloads of this page/all dls
 //todo: ability to grab a NoScript blocked media item? 'therube' post on forum
 //todo: grab selection doesn't work properly here -> https://dl1.filmiokgzr.site/Cartoon/3/Kobayashi-san%20Chi%20no%20Maid%20Dragon/S2/480/
-//todo: store options in sync, what's wrong with me?
+//todo: store options in sync
 //todo: save downloads list
 //todo: check licenses for all included files here and in the C++ code
 //todo: could be useful: https://github.com/streamlink/streamlink
@@ -33,14 +31,7 @@ declare var md5: any;
 //todo: config file for ytdl?
 //todo: ytdl -N, --concurrent-fragments N option
 //todo: ytdl --postprocessor-args NAME:ARGS option
-//todo: show tumbnails for streams and mp4s
-//todo: show file type thumbnails for downloads
 //todo: make download list look like firefox download list
-//todo: do private window or new window tabs start from 0 or are they unique?
-//todo: show preview of media in download details
-//todo: use --progress-template for ytdl
-//todo: BUG: re-opening closed tabs grabby doesn't run
-//todo: BUG: re-opening closed tabs makes grabby give duplicate manifest erro
 //todo: wtf is this?
 //media type is anything that is loaded from a <video> or <audio> tag
 //the problem with them is that if they are cached, there is absolutely no way to re-create

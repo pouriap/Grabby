@@ -23,15 +23,6 @@ class StreamHandler implements RequestHandler
 					log.err('this main manifest does not have a tab id');
 				}
 
-				let tab = GB.tabs.getsure(tabid);
-				if(tab.hasMainManifest)
-				{
-					//todo: if you refresh a tab you will get this 
-					log.err('this tab already has a main manifest');
-				}
-
-				tab.hasMainManifest = true;
-
 				// make a new download object with the tab URL as the url
 				// currently the download object represents the manifest file but we want a 
 				// download object that represents the page itself so the URL would be correct
@@ -50,7 +41,7 @@ class StreamHandler implements RequestHandler
 					streamDL.copyData(duplicate as StreamDownload);
 					GB.addToAllDownloads(streamDL);
 					return;
-				}		
+				}
 				
 				streamDL.hidden = true;
 				GB.addToAllDownloads(streamDL);
