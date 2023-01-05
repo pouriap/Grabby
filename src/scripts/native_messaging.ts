@@ -360,7 +360,7 @@ namespace NativeMessaging
 	/* handlers */
 	function handleYTDLInfo(msg: MSGRCV_YTDLInfo)
 	{
-		log.d('received ytdl info', msg.info);
+		log.d('received ytdl info:', msg.info);
 		
 		if(typeof msg.info === 'object')
 		{
@@ -372,7 +372,7 @@ namespace NativeMessaging
 		}
 		else
 		{
-			log.err("Bad response from YTDL:", msg.info);
+			log.warn("bad response from youtube-dl", msg.info);
 		}
 	}
 

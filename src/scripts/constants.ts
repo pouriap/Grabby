@@ -112,7 +112,7 @@ const constants =
 		'm3u8',
 	],
 	hlsMimes: [
-		'application/x-mpegURL', 'vnd.apple.mpegURL',
+		'application/x-mpegurl', 'vnd.apple.mpegurl',
 	],
 	dashExts: [
 		'mpd',
