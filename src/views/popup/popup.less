@@ -20,7 +20,7 @@
 html, body
 {
 	overflow-y: auto;
-	min-width: 350px;
+	//min-width: 350px;
 	font-size: 12px;
 	max-width: 350px;
 	margin: 0;
@@ -48,6 +48,16 @@ ul, li
 	width: 100%;
 	color: @color-text;
 	cursor: default;
+}
+
+#content > #download-details
+{
+	min-width: 310px;
+}
+
+#content > #popup-downloads
+{
+	min-width: 350px;
 }
 
 #popup-downloads
@@ -246,6 +256,11 @@ ul, li
 	{
 		width: 100%;
 	}
+}
+
+#download-details.popup-download #filename
+{
+	margin-top: 30px;
 }
 
 

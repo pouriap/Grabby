@@ -66,6 +66,14 @@ class ViewDownloadDetails extends PopupView
 					this.downloadWithBrowser();
 				}
 				break;
+
+			case 'dl-with-browser':
+				ui.get('#dm-list-container')!.classList.add('disabled');
+				break;
+			
+			case 'dl-with-grabby':
+				ui.get('#dm-list-container')!.classList.remove('disabled');
+				break;
 	
 			case "action-back":
 				(new ViewDownloadsList()).render();

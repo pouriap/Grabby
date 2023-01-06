@@ -274,6 +274,7 @@ class DownloadHandler implements RequestHandler
 		}
 
 		GB.addToAllDownloads(newDL);
+		Utils.showPageAction(newDL.ownerTabId);
 
 		if(act === this.ACT_FORCE_DL)
 		{
