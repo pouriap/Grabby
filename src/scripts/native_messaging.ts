@@ -183,7 +183,7 @@ namespace NativeMessaging
 	type MSGRCV_YTDLInfoYTPL = {
 		type: string,
 		dlHash: string,
-		info: ytdlinfo_ytplitem[];
+		info: string;
 	}
 
 	type MSGRCV_YTDLComp = {
@@ -311,57 +311,65 @@ namespace NativeMessaging
 	/* listener */	
 	function doOnNativeMessage(msg: NativeMessage)
 	{
-		if(msg.type === MSGTYP_YTDLPROG)
+		try
 		{
-			handleYTDLProg(msg as MSGRCV_YTDLProg);
+			if(msg.type === MSGTYP_YTDLPROG)
+			{
+				handleYTDLProg(msg as MSGRCV_YTDLProg);
+			}
+	
+			else if(msg.type === MSGTYP_YTDL_INFO)
+			{
+				handleYTDLInfo(msg as MSGRCV_YTDLInfo);
+			}
+	
+			else if(msg.type === MSGTYP_YTDL_INFO_YTPL)
+			{
+				handleYTDLInfoYTPL(msg as MSGRCV_YTDLInfoYTPL);
+			}
+	
+			else if(msg.type === MSGTYP_YTDL_COMP)
+			{
+				handleYTDLComp(msg as MSGRCV_YTDLComp);
+			}
+	
+			else if(msg.type === MSGTYP_YTDL_FAIL)
+			{
+				handleYTDLFail(msg as MSGRCV_YTDLFail);
+			}
+	
+			else if(msg.type === MSGTYP_YTDL_KILL)
+			{
+				handleYTDLKill(msg as MSGRCV_YTDLKill);
+			}
+	
+			else if(msg.type === MSGTYP_MSG)
+			{
+				handleGeneral(msg as MSGRCV_General);
+			}
+	
+			else if(msg.type === MSGTYP_ERR)
+			{
+				handleError(msg as MSGRCV_Error);
+			}
+	
+			else
+			{
+				log.err('Bad message from native app:', msg);
+			}
+		}
+		catch(e)
+		{
+			log.err('Error parsing received native message', e);
 		}
 
-		else if(msg.type === MSGTYP_YTDL_INFO)
-		{
-			handleYTDLInfo(msg as MSGRCV_YTDLInfo);
-		}
-
-		else if(msg.type === MSGTYP_YTDL_INFO_YTPL)
-		{
-			handleYTDLInfoYTPL(msg as MSGRCV_YTDLInfoYTPL);
-		}
-
-		else if(msg.type === MSGTYP_YTDL_COMP)
-		{
-			handleYTDLComp(msg as MSGRCV_YTDLComp);
-		}
-
-		else if(msg.type === MSGTYP_YTDL_FAIL)
-		{
-			handleYTDLFail(msg as MSGRCV_YTDLFail);
-		}
-
-		else if(msg.type === MSGTYP_YTDL_KILL)
-		{
-			handleYTDLKill(msg as MSGRCV_YTDLKill);
-		}
-
-		else if(msg.type === MSGTYP_MSG)
-		{
-			handleGeneral(msg as MSGRCV_General);
-		}
-
-		else if(msg.type === MSGTYP_ERR)
-		{
-			handleError(msg as MSGRCV_Error);
-		}
-
-		else
-		{
-			log.err('Bad message from native app:', msg);
-		}
 	}
 
 	/* handlers */
 	function handleYTDLInfo(msg: MSGRCV_YTDLInfo)
 	{
 		log.d('received ytdl info:', msg.info);
-		
+
 		if(typeof msg.info === 'object')
 		{
 			let dl = GB.allDownloads.get(msg.dlHash) as StreamDownload;
@@ -378,19 +386,23 @@ namespace NativeMessaging
 
 	function handleYTDLInfoYTPL(msg: MSGRCV_YTDLInfoYTPL)
 	{
-		log.d('received ytdl info', msg.info);
-		
-		if(typeof msg.info === 'object')
+		log.d('received ytdl playlist info', msg.info);
+
+		try
 		{
+			let infoStr = Utils.ungzip(msg.info);
+			let info = JSON.parse(infoStr);
+
 			let dl = GB.allDownloads.get(msg.dlHash) as YTPlaylistDownload;
-			dl.updateData(msg.info);
+			dl.updateData(info);
 			dl.hidden = false;
 
 			Utils.showPageAction(dl.ownerTabId);
+
 		}
-		else
+		catch(e)
 		{
-			log.err("Bad response from YTDL:", msg.info);
+			log.err('Could not parse YTDL info', e);
 		}
 	}
 

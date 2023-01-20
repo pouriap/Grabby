@@ -246,4 +246,32 @@ namespace Utils
 		return 'other';
 	}
 
+	export function ungzip(b64str: string): string
+	{
+		var startTime = performance.now();
+
+		// Decode base64 (convert ascii to binary)
+		var str = atob(b64str);
+
+		// Convert binary string to character-number array
+		var chars = [];
+		for (var i = 0; i < str.length; ++i){
+			chars.push(str.charCodeAt(i));
+		}
+
+		// Turn number array into byte-array
+		var compBytes = new Uint8Array(chars);
+
+		// Decompress the gzip data
+		var decompBytes = pako.ungzip(compBytes);
+
+		// Convert gunzipped byteArray back to ascii string:
+		var decompStr = new TextDecoder().decode(decompBytes);
+		
+		var endTime = performance.now();
+		log.d(`gzip took ${endTime - startTime} milliseconds`);
+
+		return decompStr;
+	}
+
 }
