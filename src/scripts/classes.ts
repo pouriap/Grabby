@@ -698,14 +698,30 @@ class VideoDownload extends FileDownload
 			video.controls = false;
 			video.src = this.url;
 	
+			//webp @256px @0.5 is the best combination i found
+			//here are the results from https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4
+			/*
+			64 png			9kb
+			64 webp			2kb
+			128 png			34kb
+			128 webp		7kb
+			128 webp@1.0	10kb
+			256 webp@0.5	9kb
+			1280 png		1950kb
+			*/
+
 			video.addEventListener('loadeddata', () => 
 			{
-				canvas.width = video.videoWidth;
-				canvas.height = video.videoHeight;
+				let ratio = 256 / video.videoWidth;
+				let canvW = video.videoWidth * ratio;
+				let canvH = video.videoHeight * ratio;
+
+				canvas.width = canvW;
+				canvas.height = canvH;
 	
-				canvas.getContext("2d")!.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+				canvas.getContext("2d")!.drawImage(video, 0, 0, canvW, canvH);
 	
-				let src = canvas.toDataURL();
+				let src = canvas.toDataURL('image/webp', 0.5);
 	
 				//remove video from DOM
 				video.remove();
