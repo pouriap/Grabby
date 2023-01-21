@@ -18,13 +18,22 @@ class YTPLaylistView extends ListView
 		for(let video of this.download.listData!.items)
 		{
 			let id = "video_" + video.index;
+
 			let chkbox = ui.create('input', 
 				{type: 'checkbox', id: id, 'data-index': video.index.toString()}) as HTMLInputElement;
+			
 			let title = ui.create('span', {class: 'title'});
 			title.innerHTML = video.title;
-			let div = ui.create('div');
+
+			let br = ui.create('br');
+
+			let duration = ui.create('span', {class: 'duration'});
+			duration.innerHTML = 'Duration: ' + Utils.formatSeconds(video.duration);
+
 			let thumb = ui.create('img', {class: 'thumbnail'}) as HTMLImageElement;
 			thumb.src = video.thumbnail;
+
+			let div = ui.create('div');
 			let label = ui.create('label', {for: id});
 			let li = ui.create('li', {'data-index': video.index.toString()});
 
@@ -35,10 +44,15 @@ class YTPLaylistView extends ListView
 			}
 			
 			div.appendChild(title);
+			div.appendChild(br);
+			div.appendChild(duration);
+
 			label.appendChild(chkbox);
 			label.appendChild(thumb);
 			label.appendChild(div);
+
 			li.appendChild(label);
+
 			ui.get('.list')!.appendChild(li);
 		}
 

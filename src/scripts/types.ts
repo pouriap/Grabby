@@ -202,6 +202,7 @@ type ytdlinfo_ytplitem = ytdlinfo &
 	thumbnails: {url: string, height: number, width: number}[];
 	playlist_id: string;
 	playlist: string;
+	duration: number;
 	playlist_title: string;
 	playlist_index: number;
 	playlist_count: number;
@@ -214,6 +215,7 @@ type yt_playlist_item =
 	video_id: string;
 	video_url: string;
 	thumbnail: string;
+	duration: number;
 	progress: dl_progress | undefined;
 }
 

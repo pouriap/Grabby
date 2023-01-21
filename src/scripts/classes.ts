@@ -985,6 +985,7 @@ class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytd
 			items.push({
 				index: info.playlist_index,
 				title: info.title,
+				duration: info.duration,
 				video_id: info.id,
 				video_url: info.url,
 				thumbnail: info.thumbnails[0].url,
