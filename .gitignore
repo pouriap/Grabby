@@ -5,3 +5,4 @@ _installer/
 /_Native Client/win/_installer/*.exe
 node_modules/
 dist/
+dogulp.bat

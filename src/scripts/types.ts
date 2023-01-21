@@ -159,13 +159,23 @@ type ytdl_format =
 	fps: number;
 }
 
+type ytdl_thumb =
+{
+	url: string,
+	preference: number,
+	id: string,
+	height?: number,
+	width?: number,
+	resolution?: string
+}
+
 type ytdlinfo =
 {
 	id: string;
 	title: string;
 	formats: ytdl_format[];
 	thumbnail: string;
-	description: string;
+	thumbnails: ytdl_thumb[];
 	uploader: string;
 	uploader_id: string;
 	uploader_url: string;
@@ -175,8 +185,6 @@ type ytdlinfo =
 	view_count: number;
 	age_limit: 0;
 	webpage_url: string;
-	categories: string[];
-	tags: string[];
 	playable_in_embed: boolean;
 	is_live: boolean;
 	was_live: boolean;

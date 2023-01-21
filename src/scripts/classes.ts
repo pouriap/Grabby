@@ -913,7 +913,43 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 
 		});
 
-		this.streamData = new StreamData(info.title, info.duration, info.thumbnail, formats);
+		//thumbnail
+		//sort thumbnails based on their preference value
+		info.thumbnails.sort((a, b) => {
+			return b.preference - a.preference;
+		});
+
+		let found: undefined | ytdl_thumb = undefined;
+		let thumbnail = info.thumbnail;
+
+		//search for mqdefault.webp
+		found = info.thumbnails.find((thumb) => {
+			return Utils.splitGetLast(thumb.url, '/') === 'mqdefault.webp';
+		});
+
+		//search for the first thing with 320 width
+		if(!found)
+		{
+			found = info.thumbnails.find((thumb) => {
+				return thumb.width && thumb.width === 320;
+			}); 
+		}
+
+		//search for the best thing that has at least 320*180 pixels
+		if(!found)
+		{
+			found = info.thumbnails.find((thumb) => {
+				if(thumb.width && thumb.height) {return thumb.width * thumb.height >= 320*180}
+				return false;
+			}); 
+		}
+
+		if(found)
+		{
+			thumbnail = found.url;
+		}
+
+		this.streamData = new StreamData(info.title, info.duration, thumbnail, formats);
 	}
 }
 

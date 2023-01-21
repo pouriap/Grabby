@@ -274,4 +274,10 @@ namespace Utils
 		return decompStr;
 	}
 
+	export function splitGetLast(str: string, separator: string)
+	{
+		let parts = str.split(separator);
+		return parts[parts.length - 1];
+	}
+
 }
