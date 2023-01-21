@@ -987,6 +987,7 @@ class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytd
 				title: info.title,
 				video_id: info.id,
 				video_url: info.url,
+				thumbnail: info.thumbnails[0].url,
 				progress: undefined
 			});
 		}

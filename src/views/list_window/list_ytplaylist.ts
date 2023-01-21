@@ -23,6 +23,8 @@ class YTPLaylistView extends ListView
 			let title = ui.create('span', {class: 'title'});
 			title.innerHTML = video.title;
 			let div = ui.create('div');
+			let thumb = ui.create('img', {class: 'thumbnail'}) as HTMLImageElement;
+			thumb.src = video.thumbnail;
 			let label = ui.create('label', {for: id});
 			let li = ui.create('li', {'data-index': video.index.toString()});
 
@@ -34,6 +36,7 @@ class YTPLaylistView extends ListView
 			
 			div.appendChild(title);
 			label.appendChild(chkbox);
+			label.appendChild(thumb);
 			label.appendChild(div);
 			li.appendChild(label);
 			ui.get('.list')!.appendChild(li);

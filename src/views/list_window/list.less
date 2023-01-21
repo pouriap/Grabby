@@ -56,13 +56,6 @@ html, body
 		box-sizing: border-box;
 		flex-grow: 1;;
 
-		label
-		{
-			padding: 5px 10px;
-			width: 100%;
-			display: inline-block;
-		}
-
 		li
 		{
 			text-align: left;
@@ -73,6 +66,27 @@ html, body
 			{
 				transition: all 0.1s ease;
 				background: @ink-verylight !important;
+			}
+
+			label
+			{
+				padding: 5px 10px;
+				width: 100%;
+				display: flex;
+
+				img.thumbnail
+				{
+					width: 96px;
+					padding-left: 10px;
+				}
+	
+				div
+				{
+					padding-left: 10px;
+					height: 100%;
+					margin: auto 0;
+					font-weight: bold;
+				}
 			}
 		}
 
@@ -91,13 +105,6 @@ html, body
 		.href
 		{
 			font-weight: bold;
-		}
-
-		li div
-		{
-			display: inline-block;
-			vertical-align: top;
-			padding-left: 10px;
 		}
 
 		#dm-list-container #available-dms
