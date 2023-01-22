@@ -2,7 +2,7 @@ declare var browser: webx_browser;
 declare var chrome: webx_chrome;
 declare var filesize: any;
 declare var md5: any;
-declare var pako: any;
+declare var fflate: any;
 
 //todo: unicode in headers (content-disposition) is not supported by firefox [is it added? https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/HttpHeaders]
 //todo: report:  If you send a file to FDM[3] then the filename will be empty, but it'll appear in comments, but that just how FlashGot worked, so I don't know if consider it as a bug or not.

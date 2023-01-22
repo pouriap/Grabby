@@ -246,7 +246,7 @@ namespace Utils
 		return 'other';
 	}
 
-	export function ungzip(b64str: string): string
+	export function gunzip(b64str: string): string
 	{
 		var startTime = performance.now();
 
@@ -263,7 +263,7 @@ namespace Utils
 		var compBytes = new Uint8Array(chars);
 
 		// Decompress the gzip data
-		var decompBytes = pako.ungzip(compBytes);
+		var decompBytes = fflate.gunzipSync(compBytes);
 
 		// Convert gunzipped byteArray back to ascii string:
 		var decompStr = new TextDecoder().decode(decompBytes);

@@ -390,7 +390,7 @@ namespace NativeMessaging
 
 		try
 		{
-			let infoStr = Utils.ungzip(msg.info);
+			let infoStr = Utils.gunzip(msg.info);
 			let info = JSON.parse(infoStr);
 
 			let dl = GB.allDownloads.get(msg.dlHash) as YTPlaylistDownload;
