@@ -17,6 +17,7 @@ class YoutubeHandler implements SpecialHandler
 
 		let directVideo = new RegExp(`^https:\\/\\/${domainReg}\\/watch`, 'm');
 		let directShort = new RegExp(`^https:\\/\\/${domainReg}\\/shorts`, 'm');
+		let directPlaylist = new RegExp(`^https:\\/\\/${domainReg}\\/playlist`, 'm');
 		let ajaxVideo = new RegExp(`^https:\\/\\/${domainReg}\\/youtubei\\/v1\\/player\\?key=.*`, 'm');
 
 		if(url.match(directVideo))
@@ -28,11 +29,11 @@ class YoutubeHandler implements SpecialHandler
 			let listId = u.searchParams.get('list');
 
 			if(!videoId){
-				log.err('video URL does not have "v" query');
+				log.err('video URL does not have "v" parameter');
 			}
 
 			if(listId){
-				this.youtubeList(videoId, listId, domain);
+				this.youtubeList(listId, domain, videoId);
 			}
 			else{
 				this.youtubeVideo(videoId, domain);
@@ -47,6 +48,20 @@ class YoutubeHandler implements SpecialHandler
 			let videoId = u.substring(u.lastIndexOf('/') + 1);
 
 			this.youtubeShort(videoId, domain);
+		}
+
+		else if(url.match(directPlaylist))
+		{
+			log.d('handling youtube direct playlist');
+
+			let u = new URL(url);
+			let listId = u.searchParams.get('list');
+
+			if(!listId){
+				log.err('playlist URL does not have "list" parameter');
+			}
+
+			this.youtubeList(listId, domain);
 		}
 		
 		else if(url.match(ajaxVideo))
@@ -77,7 +92,7 @@ class YoutubeHandler implements SpecialHandler
 
 				if(json.playlistId)
 				{
-					this.youtubeList(videoId, json.playlistId, domain);
+					this.youtubeList(json.playlistId, domain, videoId);
 				}
 				else
 				{
@@ -149,12 +164,23 @@ class YoutubeHandler implements SpecialHandler
 		NativeMessaging.sendMessage(msg);
 	}
 
-	private youtubeList(videoId: string, listId: string, domain: string)
+	private youtubeList(listId: string, domain: string, videoId?: string)
 	{
 		//make a new download with a clean video page URL so that requests with extra
 		//parameters don't get added as duplicates
 
-		let playlistUrl = `https://${domain}/watch?v=${videoId}&list=${listId}`;
+		let playlistUrl: string;
+
+		if(videoId)
+		{
+			playlistUrl = `https://${domain}/watch?v=${videoId}&list=${listId}`;
+		}
+		//direct playlist page, not all playlists support this
+		else
+		{
+			playlistUrl = `https://${domain}/playlist?list=${listId}`;
+		}
+		
 
 		let details = this.download.httpDetails;
 		details.url = playlistUrl;
