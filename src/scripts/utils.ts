@@ -121,7 +121,7 @@ namespace Utils
 		let options = {
 			type: "basic", 
 			title: title, 
-			iconUrl: "icons/icon.svg",
+			iconUrl: "icons/icon128.png",
 			message: msg,
 		};
 		browser.notifications.create(options);

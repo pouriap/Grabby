@@ -79,19 +79,75 @@ ul, li
 	{
 		width: 100%;
 
+		.dl-item
+		{
+			padding: 7px 5px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			width: 100%;
+			font-size: 12px;
+			box-sizing: border-box;
+	
+			&:hover
+			{
+				transition: background 0.1s ease;
+				border-radius: 3px;
+				background: @color-hover !important;
+				color: #f9f9fa;
+			}
+		}
+
+		.separator
+		{
+			border-top: 1px solid @Grey30;
+			width: 95%;
+			margin: -1px auto 0;
+			z-index: -1;
+			position: relative;
+		}
+
+		.separator:last-child{
+			display: none;
+		}
+
 		li
 		{
 			display: flex;
+			flex-direction: column;
 
-			.dl-icon
+			.dl-info
 			{
-				margin-right: 10px;
-			}
+				display: flex;
 
-			.dl-name
-			{
-				margin: auto;
+				.dl-icon
+				{
+					margin-right: 10px;
+				}
+	
+				.dl-name
+				{
+					margin: auto;
+				}
 			}
+		}
+
+		.progress-bar
+		{
+			margin-top: 4px;
+			width: 100%;
+			background-color: #e0e0e0;
+			padding: 2px;
+			border-radius: 3px;
+			box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+		}
+		
+		.progress-bar-fill
+		{
+			display: block;
+			height: 5px;
+			background-color: @ink-light;
+			border-radius: 3px;
+			transition: width 500ms ease-in-out;
 		}
 	}
 
@@ -103,29 +159,6 @@ ul, li
 	.icon-64
 	{
 		width: 64px;
-	}
-
-	.dl-item
-	{
-		padding: 10px 5px;
-		border-radius: 3px;
-		border-bottom: 1px solid @ink-verylight;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		width: 100%;
-		font-size: 12px;
-		box-sizing: border-box;
-
-		&:hover
-		{
-			transition: all 0.1s ease;
-			background: @color-hover !important;
-			color: #f9f9fa;
-		}
-	}
-
-	.dl-item:last-child{
-		border: none;
 	}
 
 	#no-dl
@@ -264,8 +297,9 @@ ul, li
 }
 
 
-#formats-list .format{
-	#popup-downloads .dl-item();
+#formats-list .format
+{
+	#popup-downloads#downloads-list.dl-item();
 	margin: 5px auto;
 	border: 1px solid @ink-med;
 	border-radius: 4px;

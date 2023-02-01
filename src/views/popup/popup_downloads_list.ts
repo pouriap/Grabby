@@ -23,13 +23,6 @@ class ViewDownloadsList extends PopupView
 			if(this.GBPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
 				continue;
 			}
-	
-			let listItem = ui.create('li', {
-				'id': "action-showdl",
-				'class': "dl-item action",
-				'title': download.url,
-				'data-hash': key
-			});
 
 			let icon = ui.create('img', {'src': download.iconURL, 'class': 'dl-icon'}) as HTMLImageElement;
 			icon.classList.add(`icon-${download.iconSize}`);
@@ -57,16 +50,39 @@ class ViewDownloadsList extends PopupView
 			let name = ui.create('span', {'class': 'dl-name'});
 			name.innerHTML = download.filename;
 
-			listItem.appendChild(icon);
-			listItem.appendChild(name);
+			// name and icon
+			let infoDiv = ui.create('div', {'class': 'dl-info'});
+			infoDiv.appendChild(icon);
+			infoDiv.appendChild(name);
+
+			// progress bar
+			let progDiv = ui.create('div', {'class': 'progress-bar', 'style': 'display: none;'});
+			let progFill = ui.create('span', {'class': 'progress-bar-fill', 'style': 'width:0%;'});
+			progDiv.appendChild(progFill);
 
 			if(download.progress?.percent)
 			{
 				let percent = download.progress.percent;
-				listItem.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+				progFill.style.width = `${percent}%`;
+				progDiv.style.display = 'block';
 			}
+
+			// make a list item and add everything to it
+			let listItem = ui.create('li', {
+				'id': "action-showdl",
+				'class': "dl-item action",
+				'title': download.url,
+				'data-hash': key
+			});
+
+			listItem.appendChild(infoDiv);
+			listItem.appendChild(progDiv);
+
+			let separator = ui.create('li', {'class': 'separator'});
 		
-			ui.get("#downloads-list")!.appendChild(listItem);
+			let list = ui.get("#downloads-list")!;
+			list.appendChild(listItem);
+			list.appendChild(separator);
 		}
 
 		this.onProgress(this.handleProgress.bind(this));
@@ -76,10 +92,11 @@ class ViewDownloadsList extends PopupView
 	{
 		let hash = prog.dlHash;
 		let percent = prog.percent;
-		let el = ui.get(`#downloads-list li[data-hash="${hash}"]`);
-		if(typeof el != 'undefined')
+		let progFill = ui.get(`#downloads-list li[data-hash="${hash}"] .progress-bar-fill`);
+		if(typeof progFill != 'undefined')
 		{
-			el.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+			progFill.style.width = `${percent}%`;
+			progFill.parentElement!.style.display = 'block';
 		}
 	}
 

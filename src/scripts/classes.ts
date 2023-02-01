@@ -847,6 +847,9 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 		let formats: FormatData[] = [];
 		let resolutions = new Map<string, ytdl_format[]>();
 
+		//todo: unconventional sizes do not fit in these sizes and therfore are ignored
+		//https://www.youtube.com/watch?v=G7KNmW9a75Y
+		
 		resolutions.set('144p', []);
 		resolutions.set('240p', []);
 		resolutions.set('360p', []);
