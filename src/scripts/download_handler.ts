@@ -240,35 +240,35 @@ class DownloadHandler implements RequestHandler
 		let fileType = Utils.getFileType(this.filter);
 		switch(fileType)
 		{
-			case 'audio':
+			case 'Audio':
 				newDL = new AudioDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'binary':
+			case 'Binary':
 				newDL = new BinaryDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'compressed':
+			case 'Compressed Archive':
 				newDL = new CompressedDownload(download.httpDetails, GB.tabs);
 				break;
 			
-			case 'document':
+			case 'Document':
 				newDL = new DocumentDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'image':
+			case 'Image':
 				newDL = new ImageDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'text':
+			case 'Text':
 				newDL = new TextDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'video':
+			case 'Video File':
 				newDL = new VideoDownload(download.httpDetails, GB.tabs);
 				break;
 
-			case 'other':
+			case 'Other':
 				newDL = new OtherFileDownload(download.httpDetails, GB.tabs);
 				break;
 		}

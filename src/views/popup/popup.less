@@ -13,6 +13,11 @@
 @Grey80: #2a2a2e;
 @Grey90: #0c0c0d;
 
+@fontSmall: 10px;
+@fontNormal: 12px;
+@fontLarge: 14px;
+@fontXlarge: 18px;
+
 @color-text: @ink-med;
 @color-disabled: @Grey40;
 @color-hover: @ink-light;
@@ -21,7 +26,7 @@ html, body
 {
 	overflow-y: auto;
 	//min-width: 350px;
-	font-size: 12px;
+	font-size: @fontNormal;
 	max-width: 350px;
 	margin: 0;
 }
@@ -70,7 +75,7 @@ ul, li
 
 	#list-title
 	{
-		font-size: 14px;
+		font-size: @fontLarge;
 		text-align: center;
 		padding: 15px;
 	}
@@ -85,7 +90,7 @@ ul, li
 			cursor: pointer;
 			transition: all 0.2s ease;
 			width: 100%;
-			font-size: 12px;
+			font-size: @fontNormal;
 			box-sizing: border-box;
 	
 			&:hover
@@ -115,7 +120,7 @@ ul, li
 			display: flex;
 			flex-direction: column;
 
-			.dl-info
+			.dl-wrapper
 			{
 				display: flex;
 
@@ -123,11 +128,24 @@ ul, li
 				{
 					margin-right: 10px;
 				}
-	
-				.dl-name
+
+				.dl-info
 				{
-					margin: auto;
+					display: flex;
+					flex-direction: column;
+
+					.dl-name
+					{
+						flex-grow: 1;
+					}
+
+					.dl-extra
+					{
+						flex-grow: 1;
+						font-size: @fontSmall;
+					}
 				}
+
 			}
 		}
 
@@ -224,7 +242,7 @@ ul, li
 
 	#filename
 	{
-		font-size: 18px;
+		font-size: @fontXlarge;
 		font-weight: bold;
 		margin-bottom: 10px;
 	}
@@ -322,7 +340,7 @@ li.spacer{
 
 #stream-details .available
 {
-	font-size: 14px;
+	font-size: @fontLarge;
 }
 
 .debug_gray{

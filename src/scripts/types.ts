@@ -12,7 +12,7 @@ type browser_info = {name: browser_name, version: number | undefined};
 
 type filetype =  typeof constants.fileTypes[number];
 
-type download_type = filetype | 'stream' | 'youtube-video' | 'youtube-playlist' | 'reddit-video';
+type download_type = filetype | 'Video Stream' | 'YouTube Video' | 'YouTube Playlist' | 'Reddit Video';
 
 type vcodec = 'avc' | 'av' | 'vp9' | 'unknown';
 

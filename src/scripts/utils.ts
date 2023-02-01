@@ -236,14 +236,14 @@ namespace Utils
 
 	export function getFileType(filter: RequestFilter): filetype
 	{
-		if(filter.isImage()) return 'image';
-		if(filter.isText()) return 'text';
-		if(filter.isAudio()) return 'audio';
-		if(filter.isVideo()) return 'video';
-		if(filter.isCompressed()) return 'compressed';
-		if(filter.isBinary()) return 'binary';
-		if(filter.isDocument()) return 'document';
-		return 'other';
+		if(filter.isImage()) return 'Image';
+		if(filter.isText()) return 'Text';
+		if(filter.isAudio()) return 'Audio';
+		if(filter.isVideo()) return 'Video File';
+		if(filter.isCompressed()) return 'Compressed Archive';
+		if(filter.isBinary()) return 'Binary';
+		if(filter.isDocument()) return 'Document';
+		return 'Other';
 	}
 
 	export function gunzip(b64str: string): string

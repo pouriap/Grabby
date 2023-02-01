@@ -24,6 +24,7 @@ class ViewDownloadsList extends PopupView
 				continue;
 			}
 
+			// download icon
 			let icon = ui.create('img', {'src': download.iconURL, 'class': 'dl-icon'}) as HTMLImageElement;
 			icon.classList.add(`icon-${download.iconSize}`);
 			
@@ -47,13 +48,23 @@ class ViewDownloadsList extends PopupView
 				}
 			}
 
+			// download name
 			let name = ui.create('span', {'class': 'dl-name'});
 			name.innerHTML = download.filename;
+			
+			// download extra info
+			let extra = ui.create('span', {'class': 'dl-extra'});
+			extra.innerHTML = download.type;
 
-			// name and icon
+			// container of name and extra info
 			let infoDiv = ui.create('div', {'class': 'dl-info'});
-			infoDiv.appendChild(icon);
 			infoDiv.appendChild(name);
+			infoDiv.appendChild(extra);
+
+			// container of info and icon divs
+			let wrapperDiv = ui.create('div', {'class': 'dl-wrapper'});
+			wrapperDiv.appendChild(icon);
+			wrapperDiv.appendChild(infoDiv);
 
 			// progress bar
 			let progDiv = ui.create('div', {'class': 'progress-bar', 'style': 'display: none;'});
@@ -75,7 +86,7 @@ class ViewDownloadsList extends PopupView
 				'data-hash': key
 			});
 
-			listItem.appendChild(infoDiv);
+			listItem.appendChild(wrapperDiv);
 			listItem.appendChild(progDiv);
 
 			let separator = ui.create('li', {'class': 'separator'});
@@ -134,19 +145,19 @@ class ViewDownloadsList extends PopupView
 
 		switch(selectedDl.type)
 		{
-			case 'stream':
+			case 'Video Stream':
 				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
 				break;
 
-			case 'youtube-video':
+			case 'YouTube Video':
 				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
 				break;
 
-			case 'reddit-video':
+			case 'Reddit Video':
 				(new ViewStreamDetails(selectedDl as StreamDownload)).render();
 				break;
 
-			case 'youtube-playlist':
+			case 'YouTube Playlist':
 				(new ListWindow('yt_playlist', selectedDl.hash)).display();
 				break;
 				

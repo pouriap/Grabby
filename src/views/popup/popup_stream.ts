@@ -39,7 +39,7 @@ class ViewStreamDetails extends PopupView
 			li.innerHTML = `${format.name} [ ${format.resString} / ~${format.fileSizeString} ]`;
 		}
 
-		if(this.download.type === 'youtube-video')
+		if(this.download.type === 'YouTube Video')
 		{
 			let li = ui.create('li', {
 				'class': 'format action',

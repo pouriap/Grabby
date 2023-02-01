@@ -43,53 +43,53 @@ class GrabbyPopup
 
 		switch(dlJSON.type)
 		{
-			case 'audio':
+			case 'Audio':
 				dl = new AudioDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'binary':
+			case 'Binary':
 				dl = new BinaryDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'compressed':
+			case 'Compressed Archive':
 				dl = new CompressedDownload(dlJSON.httpDetails, this.tabs);
 				break;
 			
-			case 'document':
+			case 'Document':
 				dl = new DocumentDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'image':
+			case 'Image':
 				dl = new ImageDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'text':
+			case 'Text':
 				dl = new TextDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'video':
+			case 'Video File':
 				dl = new VideoDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'other':
+			case 'Other':
 				dl = new OtherFileDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'stream':
+			case 'Video Stream':
 				dl = new StreamDownload(dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'youtube-video':
+			case 'YouTube Video':
 				dl = new YoutubeDownload((dlJSON as YoutubeDownload).videoId, 
 					dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'youtube-playlist':
+			case 'YouTube Playlist':
 				dl = new YTPlaylistDownload((dlJSON as YTPlaylistDownload).listId, 
 					dlJSON.httpDetails, this.tabs);
 				break;
 
-			case 'reddit-video':
+			case 'Reddit Video':
 				dl = new RedditDownload(dlJSON.httpDetails, this.tabs);
 				break;
 		}
@@ -623,7 +623,7 @@ function isFileDownload(obj: any): obj is FileDownload
 
 class AudioDownload extends FileDownload
 {
-	type: download_type = 'audio';
+	type: download_type = 'Audio';
 
 	get iconURL()
 	{
@@ -633,7 +633,7 @@ class AudioDownload extends FileDownload
 
 class BinaryDownload extends FileDownload
 {
-	type: download_type = 'binary';
+	type: download_type = 'Binary';
 	
 	get iconURL()
 	{
@@ -643,7 +643,7 @@ class BinaryDownload extends FileDownload
 
 class CompressedDownload extends FileDownload
 {
-	type: download_type = 'compressed';
+	type: download_type = 'Compressed Archive';
 	
 	get iconURL()
 	{
@@ -653,7 +653,7 @@ class CompressedDownload extends FileDownload
 
 class DocumentDownload extends FileDownload
 {
-	type: download_type = 'document';
+	type: download_type = 'Document';
 	
 	get iconURL()
 	{
@@ -663,7 +663,7 @@ class DocumentDownload extends FileDownload
 
 class ImageDownload extends FileDownload
 {
-	type: download_type = 'image';
+	type: download_type = 'Image';
 	
 	get iconURL()
 	{
@@ -674,7 +674,7 @@ class ImageDownload extends FileDownload
 
 class VideoDownload extends FileDownload
 {
-	type: download_type = 'video';
+	type: download_type = 'Video File';
 	thumbData: string = '';
 	
 	get iconURL()
@@ -747,12 +747,12 @@ class VideoDownload extends FileDownload
 
 function isVideoDownload(obj: any): obj is VideoDownload
 {
-	return obj.type === 'video';
+	return (obj.type as download_type) === 'Video File';
 }
 
 class TextDownload extends FileDownload
 {
-	type: download_type = 'text';
+	type: download_type = 'Text';
 	
 	get iconURL()
 	{
@@ -762,7 +762,7 @@ class TextDownload extends FileDownload
 
 class OtherFileDownload extends FileDownload
 {
-	type: download_type = 'other';
+	type: download_type = 'Other';
 	
 	get iconURL()
 	{
@@ -778,7 +778,7 @@ interface YTDLableDownload<T, V>
 
 class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinfo, StreamDownload>
 {
-	type: download_type = 'stream';
+	type: download_type = 'Video Stream';
 	streamData: StreamData | undefined = undefined;
 	
 	get filename(): string
@@ -832,7 +832,7 @@ class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinf
 
 class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinfo, YoutubeDownload>
 {
-	type: download_type = 'youtube-video';
+	type: download_type = 'YouTube Video';
 	videoId: string;
 
 	constructor(videoId: string, details: HTTPDetails, tabs: SureMap<number, tabinfo>)
@@ -958,7 +958,7 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 
 class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytdlinfo_ytplitem[], YTPlaylistDownload>
 {
-	type: download_type = 'youtube-playlist';
+	type: download_type = 'YouTube Playlist';
 	listData: yt_playlist_data | undefined = undefined;
 	listId: string;
 
@@ -1029,7 +1029,7 @@ class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytd
 
 class RedditDownload extends StreamDownload implements YTDLableDownload<ytdlinfo, RedditDownload>
 {
-	type: download_type = 'reddit-video';
+	type: download_type = 'Reddit Video';
 
 	updateData(info: ytdlinfo)
 	{
