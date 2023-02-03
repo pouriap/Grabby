@@ -98,7 +98,7 @@ namespace Messaging
 	export class MSGYTDLProg
 	{
 		type = TYP_YTDL_PROG;
-		constructor(public progress: progress_data){};
+		constructor(public dlHash: string, public plIndex: number, public progress: dl_progress){};
 	}
 
 

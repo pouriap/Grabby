@@ -573,7 +573,26 @@ class BaseDownload
 
 	updateProgress(prog: progress_data)
 	{
-		this.progress = {percent: prog.percent, speed: prog.speed};
+		let status: dl_progress_status;
+
+		if(!this.progress)
+		{
+			status = 'Downloading';
+		}
+		else if(prog.percent === 100)
+		{
+			status = 'Complete';
+		}
+		else if(this.progress.percent > prog.percent)
+		{
+			status = 'Converting';
+		}
+		else
+		{
+			status = this.progress.status;
+		}
+
+		this.progress = {percent: prog.percent, speed: prog.speed, status: status};
 	}
 
 	setSalt(salt: string)
@@ -1014,11 +1033,11 @@ class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytd
 
 		//set the progress for the current item
 		let currIndex = prog.plIndex - 1; //plIndex starts from 1
-		this.listData.items[currIndex].progress = {percent: prog.percent, speed: prog.speed};
+		this.listData.items[currIndex].progress = {percent: prog.percent, speed: prog.speed, status: 'Downloading'};
 		
 		//if we are receiving progress for an item it means the item before it was finished
 		if(currIndex < 1) return;
-		this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a'};
+		this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a', status: 'Complete'};
 	}
 
 	copyData(download: YTPlaylistDownload)

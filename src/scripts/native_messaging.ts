@@ -413,7 +413,6 @@ namespace NativeMessaging
 		let plIndex = Number(msg.playlist_index);
 
 		let prog: progress_data = {
-			dlHash: msg.dlHash,
 			plIndex: plIndex,
 			percent: percent,
 			speed: speed
@@ -424,7 +423,7 @@ namespace NativeMessaging
 
 		//re-send the progress as an internal message so that any
 		//popup/window can receive it and update itself
-		let internalMsg = new Messaging.MSGYTDLProg(prog);
+		let internalMsg = new Messaging.MSGYTDLProg(msg.dlHash, plIndex, dl.progress!);
 		//exception happens when no listener is set for progress, we just ignore it
 		Messaging.sendMessage(internalMsg).catch((e) => {});
 	}

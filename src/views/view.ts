@@ -81,13 +81,13 @@ abstract class View
 		return DMs.options[DMs.selectedIndex].value;
 	}
 
-	protected onProgress(progressHandler: (prog: progress_data) => void)
+	protected onProgress(progressHandler: (msg: Messaging.MSGYTDLProg) => void)
 	{
 		browser.runtime.onMessage.addListener((msg: Messaging.Message) => 
 		{
 			if(msg.type === Messaging.TYP_YTDL_PROGRESS)
 			{
-				progressHandler((msg as Messaging.MSGYTDLProg).progress);
+				progressHandler(msg as Messaging.MSGYTDLProg);
 			}
 		});
 	}

@@ -55,6 +55,7 @@ class ViewDownloadsList extends PopupView
 			// download extra info
 			let extra = ui.create('span', {'class': 'dl-extra'});
 			extra.innerHTML = download.type;
+			extra.setAttribute('data-type', download.type);
 
 			// container of name and extra info
 			let infoDiv = ui.create('div', {'class': 'dl-info'});
@@ -71,11 +72,18 @@ class ViewDownloadsList extends PopupView
 			let progFill = ui.create('span', {'class': 'progress-bar-fill', 'style': 'width:0%;'});
 			progDiv.appendChild(progFill);
 
-			if(download.progress?.percent)
+			if(download.progress)
 			{
-				let percent = download.progress.percent;
-				progFill.style.width = `${percent}%`;
-				progDiv.style.display = 'block';
+				if(download.progress.status)
+				{
+					extra.innerHTML = download.type + ` - Status: ${download.progress.status}`;
+				}
+				if(download.progress.percent && download.progress.status != 'Complete')
+				{
+					let percent = download.progress.percent;
+					progFill.style.width = `${percent}%`;
+					progDiv.style.display = 'block';
+				}
 			}
 
 			// make a list item and add everything to it
@@ -99,16 +107,18 @@ class ViewDownloadsList extends PopupView
 		this.onProgress(this.handleProgress.bind(this));
 	}
 
-	private handleProgress(prog: progress_data)
+	private handleProgress(msg: Messaging.MSGYTDLProg)
 	{
-		let hash = prog.dlHash;
-		let percent = prog.percent;
-		let progFill = ui.get(`#downloads-list li[data-hash="${hash}"] .progress-bar-fill`);
-		if(typeof progFill != 'undefined')
-		{
-			progFill.style.width = `${percent}%`;
-			progFill.parentElement!.style.display = 'block';
-		}
+		let dlHash = msg.dlHash;
+		let percent = msg.progress.percent;
+
+		let progFill = ui.get(`#downloads-list li[data-hash="${dlHash}"] .progress-bar-fill`)!;
+		let extra = ui.get(`#downloads-list li[data-hash="${dlHash}"] .dl-extra`)!;
+		let type = extra.getAttribute('data-type');
+		extra.innerHTML = type + ` - Status: ${msg.progress.status}`;
+
+		progFill.style.width = `${percent}%`;
+		progFill.parentElement!.style.display = 'block';
 	}
 
 	protected onActionClicked(clickedAction: Element)

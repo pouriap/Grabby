@@ -62,12 +62,12 @@ class YTPLaylistView extends ListView
 		this.onProgress(this.handleProgress.bind(this));
 	}
 
-	private handleProgress(prog: progress_data)
+	private handleProgress(msg: Messaging.MSGYTDLProg)
 	{
-		if(prog.dlHash != this.dlHash) return;
+		if(msg.dlHash != this.dlHash) return;
 
-		let index = prog.plIndex;
-		let percent = prog.percent;
+		let index = msg.plIndex;
+		let percent = msg.progress.percent;
 		let el = ui.get(`.list li[data-index="${index}"]`);
 		if(typeof el != 'undefined')
 		{
