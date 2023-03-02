@@ -1,1 +1,2 @@
 <a href="https://www.flaticon.com/free-icons/files-and-folders" title="files and folders icons">Files and folders icons created by juicy_fish - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/activist" title="activist icons">Activist icons created by Freepik - Flaticon</a>

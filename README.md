@@ -1,8 +1,10 @@
 # Grabby
 
+![grabby icon](https://i.imgur.com/ZtRaPDN.png)
+
 Grabby is a WebExtension that was created with the purpose of providing the same functionality that the **FlashGot** addon provided in legacy addon API and older browsers.
 
-## Index:
+## Index
 - [Main Features](#main-features)
 - [Screenshots](#screenshots)
 - [Installation](#installation)
@@ -21,14 +23,19 @@ Grabby is a WebExtension that was created with the purpose of providing the same
 
 ## Screenshots
 
+Overriding Firefox's download dialog
 ![overriding firefox download dialog](https://i.imgur.com/8mXoMxe.png)
 
+A history of downloads of each tab is kept
 ![download saved for later use](https://i.imgur.com/LlPeHEu.png)
 
+Through the right click menu you can choose to download all links in a page or links in a selection, which then opens up a window that lets you filter the links
 ![downloading list of links](https://i.imgur.com/4HKsws2.png)
 
+Download videos from popular video sites in your preferred format
 ![downloading youtube video](https://i.imgur.com/6B7ECjv.png)
 
+Download youtube playlists
 ![downloading youtube playlist](https://i.imgur.com/Bw1xH7E.png)
 
 ## Installation
@@ -62,3 +69,10 @@ Currently the addon only works on Firefox on Windows. I'm planning to provide a 
 Linux is not supported yet but it's quite possible that it will work with wine if you're technical enough to manually set everything up.
 
 I have very limited free time but after the addon itself is complete I will start working on the ports for other browsers (namely Brave) and Linux.
+
+## Attribution
+
+[Files and folders icons created by juicy_fish - Flaticon](https://www.flaticon.com/free-icons/files-and-folders)
+
+[Activist icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/activist)
+
