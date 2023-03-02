@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Grabby",
 	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.50.0a",
+	"version": "0.60.0a",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Grabby",
 
