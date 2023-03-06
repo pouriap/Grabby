@@ -1,9 +1,9 @@
 {
 	"manifest_version": 2,
 	"name": "Grabby",
-	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
-	"version": "0.50.0",
-	"version_name": "0.50.0 alpha",
+	"description": "An extension for downloading files and media from websites.",
+	"version": "0.60.0",
+	"version_name": "0.60.0 alpha",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Grabby",
 	"key": "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Z61bUCTt90ySxy/HiQxseplfx9D4ra1+u2x7YlnHv3kx9Q/QkD+0Q95p4m8Co7D2Zjs3cB+r6ZukhCGEUqFoU+X6dEQfAKXZPkotmtZ8sOVs+tM5S3zay0MHMSmkksEvr4Z1URaseBSg/G8+qu+CvLb4pAS0qCxhZFb8awaBERMFylD7tXta60+2/zPAvw2Wj4WmSNhtXQWzMttM3qUgsEAGJeO5p5QjiJjOjoRC/cAbkTub48A6HgduBFUqkMY2FYQFgqttySrQrJjvK+RBhEu3P6xICUTE5i4PC4q4Yl1r+cYs4mygnWZbwu3wyFl4u7OkFXUIg4QFtlKICfWp",
@@ -24,8 +24,9 @@
 
 	"icons": {
 		"16": "icons/icon16.png",
-		"48": "icons/icon48.png",
-		"128": "icons/icon128.png"
+		"64": "icons/icon64.png",
+		"128": "icons/icon128.png",
+		"256": "icons/icon256.png"
 	},
 
 	"browser_action": {
@@ -33,8 +34,9 @@
 		"browser_style": true,
 		"default_icon": {
 			"16": "icons/icon16.png",
-			"48": "icons/icon48.png",
-			"128": "icons/icon128.png"
+			"64": "icons/icon64.png",
+			"128": "icons/icon128.png",
+			"256": "icons/icon256.png"
 		}
 	},
 
@@ -49,6 +51,7 @@
 			"libs/md5.js",
 			"libs/m3u8-parser.js",
 			"libs/mpd-parser.js",
+			"libs/fflate.js",
 			"scripts/constants.js",
 			"scripts/classes.js",
 			"scripts/log.js",

@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Grabby",
-	"description": "Grabs links of the files that you download as you browse and lets you download them with external tools.",
+	"description": "An extension for downloading files and media from websites.",
 	"version": "0.60.0a",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Grabby",

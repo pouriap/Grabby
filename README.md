@@ -7,12 +7,13 @@ Grabby is a WebExtension that was created with the purpose of providing the same
 ## Index
 - [Main Features](#main-features)
 - [Screenshots](#screenshots)
-- [Installation](#installation)
+- [Installation](#installation-firefox-on-windows)
 - [What is the toolkit?](#what-is-grabby-toolkit)
 - [What is included in the toolkit](#what-is-included-in-the-toolkit)
+- [Browser support](#browser-support)
+- [OS support](#os-support)
 - [Notes](#notes)
 - [How to report bugs](#how-to-report-issues)
-- [Browser and OS support](#browser-and-os-support)
 
 ## Main features
 - Allows you to download files using external download managers.
@@ -38,12 +39,14 @@ Download videos from popular video sites in your preferred format
 Download youtube playlists
 ![downloading youtube playlist](https://i.imgur.com/Bw1xH7E.png)
 
-## Installation
-1- Install the addon on your browser
+## Installation (Firefox on Windows)
+1- First install the toolkit on your computer using the setup file
 
-2- Install the toolkit on your computer (Currently only Windows is supported)
+2- Install the addon on Firefox by clicking on the download link
 
 The latest version of the addon and the toolkit can be found at [here.](https://github.com/pouriap/Grabby/releases/latest)
+
+**For other browsers and operating systems see [browser support](#browser-support)**
 
 ## What is the toolkit?
 Due to the restrictions put on WebExtensions they no longer can function like legacy addon (the way FlashGot did). So in order to provide the same functionality Grabby needs a "Native Application" in order to talk to other programs on your computer (such as your download managers). **Grabby Toolkit** provides this native application as well as other tools.
@@ -55,6 +58,43 @@ The toolkit consists of the following tools, which are all open-source and avail
 - **[yt-dlp.exe](https://github.com/yt-dlp/yt-dlp):** This is a well-known tool for downloading videos from the internet. Grabby uses this tool for downloading videos.
 - **[ffmpeg.exe](https://github.com/FFmpeg/FFmpeg):** Also a well-known tool which is required by yt-dlp in order to download youtube videos.
 
+## Browser support
+**Firefox:** 
+
+Firefox is fully supported. The addon file is signed by Mozilla and all features work on Firefox. 
+
+**Chrome:**
+
+Ever since Google introduced manifest v3 this addon will no longer work on Chrome. I may or may not try to port the addon for manifest v3 in the future.
+
+**Other Chromium-based browsers (such as Brave):**
+
+As long as the browser supports manifest v2 the addon should work but there are two limitation with Chromium-based browsers:
+
+1- Due to lack of API support overwriting the download dialog doesn't work.
+
+2- The addon cannot be signed by Google so it cannot be installed like normal addons. In order to install it you have to add it in developer mode as described below.
+
+**How to install on Brave browser:**
+
+1- Install the Toolkit on your computer first
+
+2- Go to extensions
+
+3- Enable developer mode using the button at the top right
+
+4- Click on "Load unpacked"
+
+5- Go to the location where you installed the toolbox and then go to the "chrome" folder
+
+6- Choose "select folder"
+
+The extension should be added to Brave now.
+
+## OS Support
+
+Currently only Windows is officially supported but if you are technical enough you might be able to get it to work with wine, even tho I have not tried it yet. I will start testing on Linux as soon as I have some free time.
+
 ## Notes
 This addon is currently in pre-alpha stage which means it is not finished yet. I'm releasing it in order to get feedback from people so if you have any ideas or if you encountered any bugs feel free to open an issue.
 
@@ -62,13 +102,6 @@ This addon is currently in pre-alpha stage which means it is not finished yet. I
 
 Please feel free to report any bugs/issues/ideas by opening an issue in the repository.
 
-
-## Browser and OS support
-Currently the addon only works on Firefox on Windows. I'm planning to provide a version for Chromium-based browsers in the future but the override download dialog feature is only avaiable on Firefox because it has the only API that supports this.
-
-Linux is not supported yet but it's quite possible that it will work with wine if you're technical enough to manually set everything up.
-
-I have very limited free time but after the addon itself is complete I will start working on the ports for other browsers (namely Brave) and Linux.
 
 ## Attribution
 
