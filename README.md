@@ -44,7 +44,7 @@ Download youtube playlists
 
 2- Install the addon on Firefox by clicking on the download link
 
-The latest version of the addon and the toolkit can be found at [here.](https://github.com/pouriap/Grabby/releases/latest)
+The latest version of the addon and the toolkit can be found [here.](https://github.com/pouriap/Grabby/releases/latest)
 
 **For other browsers and operating systems see [browser support](#browser-support)**
 
@@ -71,7 +71,7 @@ Ever since Google introduced manifest v3 this addon will no longer work on Chrom
 
 As long as the browser supports manifest v2 the addon should work but there are two limitation with Chromium-based browsers:
 
-1- Due to lack of API support overwriting the download dialog doesn't work.
+1- Due to lack of API support overriding the download dialog doesn't work.
 
 2- The addon cannot be signed by Google so it cannot be installed like normal addons. In order to install it you have to add it in developer mode as described below.
 
@@ -85,7 +85,7 @@ As long as the browser supports manifest v2 the addon should work but there are 
 
 4- Click on "Load unpacked"
 
-5- Go to the location where you installed the toolbox and then go to the "chrome" folder
+5- Go to the location where you installed the toolkit and then go to the "chrome" folder
 
 6- Choose "select folder"
 
@@ -93,10 +93,10 @@ The extension should be added to Brave now.
 
 ## OS Support
 
-Currently only Windows is officially supported but if you are technical enough you might be able to get it to work with wine, even tho I have not tried it yet. I will start testing on Linux as soon as I have some free time.
+Currently only Windows is officially supported but if you are technical enough you might be able to get it to work with wine, tho I have not tested this yet. I will start testing on Linux as soon as I have some free time.
 
 ## Notes
-This addon is currently in pre-alpha stage which means it is not finished yet. I'm releasing it in order to get feedback from people so if you have any ideas or if you encountered any bugs feel free to open an issue.
+This addon is currently in alpha stage which means it is not finished yet. I'm releasing it in order to get feedback from people so if you have any ideas or if you encountered any bugs feel free to open an issue.
 
 ## How to report issues?
 
