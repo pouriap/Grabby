@@ -42,6 +42,9 @@ declare var fflate: any;
 //the request doesn't even show up in the network tool
 //proof: MDN or w3schools page on <video> and <audio> tag
 //the only way is to open the page containing the resouce in a private window
+//todo: show number of selected files in filter dialog
+//todo: add filters based on file type on filter dialog
+//todo: HEAD files in filter dialog
 
 var GB = new Grabby();
 

@@ -865,32 +865,32 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 	{
 		let formats: FormatData[] = [];
 		let resolutions = new Map<string, ytdl_format[]>();
+		let audioSize = 0;
 
-		//todo: unconventional sizes do not fit in these sizes and therfore are ignored
-		//https://www.youtube.com/watch?v=G7KNmW9a75Y
-		
-		resolutions.set('144p', []);
-		resolutions.set('240p', []);
-		resolutions.set('360p', []);
-		resolutions.set('480p', []);
-		resolutions.set('720p', []);
-		resolutions.set('720p60', []);
-		resolutions.set('1080p', []);
-		resolutions.set('1080p60', []);
-		resolutions.set('1440p', []);
-		resolutions.set('1440p60', []);
-		resolutions.set('2160p', []);
-		resolutions.set('2160p60', []);
-
-		//we store all formats of each resolution to a separate array
-		//and then we iterate through each resolution and if there is more than one format in it
-		//we choose the best one 
+		//create a map of useful formats 
+		/*
+		map looks like this
+		{
+			'144p': [],
+			'240p': [],
+			...
+		}
+		the values of the map are arrays of formats with that resolution
+		for example 144p might have 4 different formats and further down the code we choose
+		the best 144p from this array
+		*/
 		for(let format of info.formats)
 		{
-			if(!format.width || !format.height) continue;
-			let pSize = (format.width > format.height)? format.height : format.width;
-			let formatName = pSize.toString() + 'p';
+			if(format.vcodec === 'none') continue;
+			if(!format.format_note) continue;
+
+			let formatName = format.format_note;
 			if(format.fps == 60) formatName += '60';
+
+			if(!resolutions.has(formatName))
+			{
+				resolutions.set(formatName, []);
+			}
 			resolutions.get(formatName)?.push(format);
 		}
 
@@ -1705,16 +1705,18 @@ class DownloadJob
 class FormatData 
 {
 	id: string;
+	name: string;
 	width: number;
 	height: number;
 	fps: number;
 	vcodec: vcodec;
 	filesize: number;
 
-	constructor(id: string, width: number, height: number, fps: number, 
+	constructor(id: string, name: string, width: number, height: number, fps: number, 
 		codec: vcodec, fileSize: number)
 	{
 		this.id = id;
+		this.name = name;
 		this.width = width;
 		this.height = height;
 		this.fps = fps;
@@ -1730,9 +1732,12 @@ class FormatData
 	static getFromYTDLFormat(format: ytdl_format)
 	{
 		let id = format.format_id;
-		let filesize = 0;
-		let codec: vcodec = 'unknown';
+		let width = (format.width)? format.width : 0;
+		let height = (format.height)? format.height : 0;
+		let fps = (format.fps)? format.fps : 0;
 
+		// file size
+		let filesize = 0;
 		if(format.filesize)
 		{
 			filesize = format.filesize;
@@ -1742,6 +1747,8 @@ class FormatData
 			filesize = format.filesize_approx;
 		}
 
+		// codec
+		let codec: vcodec = 'unknown';
 		if(format.vcodec)
 		{
 			if(format.vcodec.startsWith('avc')) codec = 'avc';
@@ -1749,11 +1756,19 @@ class FormatData
 			else if(format.vcodec.startsWith('vp')) codec ='vp9';
 		}
 
-		let width = (format.width)? format.width : 0;
-		let height = (format.height)? format.height : 0;
-		let fps = (format.fps)? format.fps : 0;
+		// name
+		let name = `Format #${id}`;
+		if(format.format_note)
+		{
+			name = format.format_note;
+		}
+		else if(width && height)
+		{
+			let pictureSize = (width > height)? height : width;
+			name = pictureSize.toString() + 'p';
+		}
 
-		return new FormatData(id, width, height, fps, codec, filesize);
+		return new FormatData(id, name, width, height, fps, codec, filesize);
 	}
 }
 
@@ -1789,16 +1804,7 @@ class FormatDataUI
 
 	get name(): string
 	{
-		if(this.formatData.width && this.formatData.height)
-		{
-			let pSize = (this.formatData.width > this.formatData.height)? 
-				this.formatData.height : this.formatData.width;
-			let name = pSize.toString() + 'p';
-			if(this.formatData.fps == 60) name += ' @60fps';
-			return name;
-		}
-
-		return 'Format #' + (this.formatData.id + 1).toString();
+		return this.formatData.name;
 	}
 
 	get resString(): string
@@ -1809,6 +1815,11 @@ class FormatDataUI
 		else{
 			return 'unknown';
 		}
+	}
+
+	get fps(): number
+	{
+		return this.formatData.fps;
 	}
 
 	get fileSizeString(): string

@@ -35,8 +35,10 @@ class ViewStreamDetails extends PopupView
 				li.style.backgroundColor = '#eb5406';
 			}
 			document.querySelector("#stream-details #formats-list")!.appendChild(li);
+
+			let fps = (format.fps > 30)? `/ ${format.fps}FPS ` : '';
 	
-			li.innerHTML = `${format.name} [ ${format.resString} / ~${format.fileSizeString} ]`;
+			li.innerHTML = `${format.name} [ ${format.resString} ${fps}/ ~${format.fileSizeString} ]`;
 		}
 
 		if(this.download.type === 'YouTube Video')
