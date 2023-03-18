@@ -840,7 +840,9 @@ class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinf
 			}
 		}
 
-		this.streamData = new StreamData(title, info.duration, info.thumbnail, formats);
+		let audioSize = Utils.getAudioSize(info);
+
+		this.streamData = new StreamData(title, info.duration, info.thumbnail, formats, audioSize);
 	}
 
 	copyData(download: StreamDownload)
@@ -865,7 +867,6 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 	{
 		let formats: FormatData[] = [];
 		let resolutions = new Map<string, ytdl_format[]>();
-		let audioSize = 0;
 
 		//create a map of useful formats 
 		/*
@@ -881,8 +882,7 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 		*/
 		for(let format of info.formats)
 		{
-			if(format.vcodec === 'none') continue;
-			if(!format.format_note) continue;
+			if(format.vcodec === 'none' || !format.format_note) continue;
 
 			let formatName = format.format_note;
 			if(format.fps == 60) formatName += '60';
@@ -971,7 +971,9 @@ class YoutubeDownload extends StreamDownload implements YTDLableDownload<ytdlinf
 			thumbnail = found.url;
 		}
 
-		this.streamData = new StreamData(info.title, info.duration, thumbnail, formats);
+		let audioSize = Utils.getAudioSize(info);
+
+		this.streamData = new StreamData(info.title, info.duration, thumbnail, formats, audioSize);
 	}
 }
 
@@ -1063,7 +1065,9 @@ class RedditDownload extends StreamDownload implements YTDLableDownload<ytdlinfo
 			}
 		}
 
-		this.streamData = new StreamData(info.title, info.duration, info.thumbnail, formats);
+		let audioSize = Utils.getAudioSize(info);
+
+		this.streamData = new StreamData(info.title, info.duration, info.thumbnail, formats, audioSize);
 	}
 }
 
@@ -1778,13 +1782,16 @@ class StreamData
 	duration: number;
 	thumbnail: string | undefined;
 	formats: FormatData[];
+	audioSize: number;
 
-	constructor(title: string, duration: number, thumbnail: string, formats: FormatData[])
+	constructor(title: string, duration: number, thumbnail: string, 
+		formats: FormatData[], audioSize: number)
 	{
 		this.title = title;
 		this.duration = duration;
 		this.thumbnail = thumbnail;
 		this.formats = formats;
+		this.audioSize = audioSize;
 	}
 }
 
@@ -1825,7 +1832,7 @@ class FormatDataUI
 	get fileSizeString(): string
 	{
 		let size = this.formatData.filesize;
-		return (size > 0)? filesize(size, {round: 0}) : 'unknown';
+		return (size > 0)? filesize(size, {round: 0}) : 'unknown size';
 	}
 
 	get vcodec(): vcodec
@@ -1861,6 +1868,12 @@ class StreamDataUI
 	{
 		return (this.streamData.duration > 0)? 
 			Utils.formatSeconds(this.streamData.duration) : 'unkown duration';
+	}
+
+	get audioSizeString(): string
+	{
+		let size = this.streamData.audioSize;
+		return (size > 0)? filesize(size, {round: 0}) : 'unknown size';
 	}
 }
 

@@ -280,4 +280,23 @@ namespace Utils
 		return parts[parts.length - 1];
 	}
 
+	export function getAudioSize(info: ytdlinfo)
+	{
+		let audioSize = 0;
+
+		for(let format of info.formats)
+		{
+			if(format.vcodec != 'none' || format.acodec === 'none') continue;
+
+			//get the size of the best audio
+			if(format.filesize)
+			{
+				if(format.filesize >= audioSize) audioSize = format.filesize;
+				continue;
+			}
+		}
+
+		return audioSize;
+	}
+
 }

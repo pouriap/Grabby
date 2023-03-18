@@ -48,7 +48,7 @@ class ViewStreamDetails extends PopupView
 				'id': 'action-ytdl-audio',
 			});
 			ui.get('#stream-details #formats-list')!.appendChild(li);
-			li.innerHTML = 'Download as MP3';
+			li.innerHTML = `Download audio [~${this.data.audioSizeString}]`;
 		}
 	}
 
