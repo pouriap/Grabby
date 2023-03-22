@@ -22,15 +22,30 @@ abstract class ListView extends View
 
 	protected selectVisible()
 	{
-		ui.getAll('.list input').forEach((input) => {
+		(ui.getAll('.list [type="checkbox"]') as NodeListOf<HTMLInputElement>).forEach((input) => {
 			input.setAttribute('checked', 'checked');
+			input.checked = true;
 		});
+		this.updateSelection();
 	}
 
 	protected unselectVisible()
 	{
-		ui.getAll('.list input').forEach((input) => {
+		(ui.getAll('.list [type="checkbox"]') as NodeListOf<HTMLInputElement>).forEach((input) => {
 			input.removeAttribute('checked');
+			input.checked = false;
 		});
+		this.updateSelection();
+	}
+
+	protected updateSelection()
+	{
+		let selectionCount = 0;
+		(ui.getAll('.list [type="checkbox"]') as NodeListOf<HTMLInputElement>).forEach((input) => {
+			input.removeAttribute('checked');
+			if(input.checked) selectionCount++;
+		});
+
+		ui.get('#selection-count > span')!.innerHTML = selectionCount.toString();
 	}
 }

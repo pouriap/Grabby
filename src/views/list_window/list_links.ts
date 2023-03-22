@@ -34,7 +34,10 @@ class LinksListView extends ListView
 		for(let link of this.linksData.links)
 		{
 			let id = "link_" + i;
-			let chkbox = ui.create('input', {type: 'checkbox', id: id, 'data-index': i.toString()}) as HTMLInputElement;
+			let chkbox = ui.create('input', {
+				type: 'checkbox', id: 
+				id, 'data-index': i.toString()
+			});
 			let text = ui.create('span', {class: 'text'});
 			text.innerHTML = link.text;
 			let br = ui.create('br');
@@ -42,6 +45,7 @@ class LinksListView extends ListView
 			href.innerHTML = link.href;
 			let div = ui.create('div');
 			let label = ui.create('label', {for: id});
+			label.onchange = (e) => {this.updateSelection()};
 			let li = ui.create('li');
 			div.appendChild(text);
 			div.appendChild(br);

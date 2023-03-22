@@ -19,8 +19,11 @@ class YTPLaylistView extends ListView
 		{
 			let id = "video_" + video.index;
 
-			let chkbox = ui.create('input', 
-				{type: 'checkbox', id: id, 'data-index': video.index.toString()}) as HTMLInputElement;
+			let chkbox = ui.create('input', {
+				type: 'checkbox', 
+				id: id, 
+				'data-index': video.index.toString()
+			});
 			
 			let title = ui.create('span', {class: 'title'});
 			title.innerHTML = video.title;
@@ -35,6 +38,7 @@ class YTPLaylistView extends ListView
 
 			let div = ui.create('div');
 			let label = ui.create('label', {for: id});
+			label.onchange = (e) => {this.updateSelection()};
 			let li = ui.create('li', {'data-index': video.index.toString()});
 
 			if(video.progress?.percent)
