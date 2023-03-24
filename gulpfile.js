@@ -82,6 +82,11 @@ task('production', series(
 	'remove-debug'
 ));
 
+task('alpha', series(
+	'clean', 
+	parallel('copy-statics', 'less', 'ts-prod'), 
+));
+
 task('production-chrome', series('production', 'copy-chrome-manifest'));
 
 
