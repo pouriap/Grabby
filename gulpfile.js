@@ -82,13 +82,14 @@ task('production', series(
 	'remove-debug'
 ));
 
+task('production-chrome', series('production', 'copy-chrome-manifest'));
+
 task('alpha', series(
 	'clean', 
 	parallel('copy-statics', 'less', 'ts-prod'), 
 ));
 
-task('production-chrome', series('production', 'copy-chrome-manifest'));
-
+task('alpha-chrome', series('alpha', 'copy-chrome-manifest'));
 
 task('watch', function(){       
 	watch('./src/**/*.less', series('less'));

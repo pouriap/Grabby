@@ -40,11 +40,9 @@ Download youtube playlists
 ![downloading youtube playlist](https://i.imgur.com/Bw1xH7E.png)
 
 ## Installation (Firefox on Windows)
-1- First install the toolkit on your computer using the setup file
+1- First install the toolkit on your computer [using the provided setup file](https://github.com/pouriap/Grabby-Toolkit/releases/latest)
 
-2- Install the addon on Firefox by clicking on the download link
-
-The latest version of the addon and the toolkit can be found [here.](https://github.com/pouriap/Grabby/releases/latest)
+2- [Install the addon from the AMO](https://addons.mozilla.org/en-US/firefox/addon/grabby/)
 
 **For other browsers and operating systems see [browser support](#browser-support)**
 
@@ -77,17 +75,19 @@ As long as the browser supports manifest v2 the addon should work but there are 
 
 **How to install on Brave browser:**
 
-1- Install the Toolkit on your computer first
+1- Install the Grabby Toolkit on your computer first (https://github.com/pouriap/Grabby-Toolkit/releases/latest)
 
-2- Go to extensions
+2- Go to the [latest release page](https://github.com/pouriap/Grabby/releases/latest) and download the provided zip file
 
-3- Enable developer mode using the button at the top right
+3- Extract the zip file somewhere on your computer
 
-4- Click on "Load unpacked"
+4- In your browser go to the "extensions" menu
 
-5- Go to the location where you installed the toolkit and then go to the "chrome" folder
+5- Enable developer mode using the button at the top right
 
-6- Choose "select folder"
+6- Click on "Load unpacked"
+
+7- Go to the location where you extracted the zip file and choose "select folder"
 
 The extension should be added to Brave now.
 
