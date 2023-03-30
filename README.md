@@ -4,6 +4,11 @@
 
 Grabby is a WebExtension that was created with the purpose of providing the same functionality that the **FlashGot** addon provided in legacy addon API and older browsers.
 
+## Discord Server
+Join Grabby's discrod server to discuss features and ask your questions
+
+[![](https://dcbadge.vercel.app/api/server/Xu6tHt8uXs)](https://discord.gg/Xu6tHt8uXs)
+
 ## Index
 - [Main Features](#main-features)
 - [Screenshots](#screenshots)
