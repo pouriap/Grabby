@@ -84,12 +84,33 @@ html, body
 				{
 					padding-left: 10px;
 					height: 100%;
+					width: 100%;
+					box-sizing: border-box;
 					margin: auto 0;
 
 					span.title
 					{
 						font-weight: bold;
 					}
+				}
+
+				.progress-bar
+				{
+					margin-top: 4px;
+					width: 80%;
+					background-color: #e0e0e0;
+					padding: 2px;
+					border-radius: 3px;
+					box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
+				}
+				
+				.progress-bar-fill
+				{
+					display: block;
+					height: 5px;
+					background-color: @ink-light;
+					border-radius: 3px;
+					transition: width 500ms ease-in-out;
 				}
 			}
 		}

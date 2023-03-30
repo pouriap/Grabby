@@ -78,7 +78,13 @@ class ViewDownloadsList extends PopupView
 				{
 					extra.innerHTML = download.type + ` - Status: ${download.progress.status}`;
 				}
-				if(download.progress.percent && download.progress.status != 'Complete')
+
+				if(download.progress.status === 'Complete')
+				{
+					progFill.style.width = '100%';
+					progDiv.style.display = 'block';
+				}
+				else if(download.progress.percent)
 				{
 					let percent = download.progress.percent;
 					progFill.style.width = `${percent}%`;

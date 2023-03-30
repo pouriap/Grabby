@@ -1036,10 +1036,6 @@ class YTPlaylistDownload extends GrabbedDownload implements YTDLableDownload<ytd
 		//set the progress for the current item
 		let currIndex = prog.plIndex - 1; //plIndex starts from 1
 		this.listData.items[currIndex].progress = {percent: prog.percent, speed: prog.speed, status: 'Downloading'};
-		
-		//if we are receiving progress for an item it means the item before it was finished
-		if(currIndex < 1) return;
-		this.listData.items[currIndex-1].progress = {percent: 100, speed: 'n/a', status: 'Complete'};
 	}
 
 	copyData(download: YTPlaylistDownload)

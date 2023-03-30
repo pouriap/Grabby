@@ -423,13 +423,18 @@ namespace NativeMessaging
 
 		//re-send the progress as an internal message so that any
 		//popup/window can receive it and update itself
-		let internalMsg = new Messaging.MSGYTDLProg(msg.dlHash, plIndex, dl.progress!);
+		let status: dl_progress_status = (dl.progress?.status)? dl.progress.status : 'Downloading';
+		let progToSend: dl_progress = {percent: prog.percent, speed: prog.speed, status: status};
+
+		let internalMsg = new Messaging.MSGYTDLProg(msg.dlHash, plIndex, progToSend);
 		//exception happens when no listener is set for progress, we just ignore it
 		Messaging.sendMessage(internalMsg).catch((e) => {});
 	}
 
 	function handleYTDLComp(msg: MSGRCV_YTDLComp)
 	{
+		log.d('download complete', msg);
+
 		let dl = GB.allDownloads.get(msg.dlHash)!;
 		Utils.notification("Download Complete", dl.filename);
 	}

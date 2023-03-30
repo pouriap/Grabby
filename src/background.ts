@@ -44,6 +44,8 @@ declare var fflate: any;
 //the only way is to open the page containing the resouce in a private window
 //todo: add filters based on file type on filter dialog
 //todo: HEAD files in filter dialog
+//todo: when a url is unsupported fall back to general manifest grabbing (pornzog.com)
+//todo: single format mp4 is not grabbed (https://hclips.com/videos/7485065/lily-s-first-tickle-session/)
 
 var GB = new Grabby();
 

@@ -41,15 +41,30 @@ class YTPLaylistView extends ListView
 			label.onchange = (e) => {this.updateSelection()};
 			let li = ui.create('li', {'data-index': video.index.toString()});
 
-			if(video.progress?.percent)
+			// progress bar
+			let progDiv = ui.create('div', {'class': 'progress-bar', 'style': 'display: none;'});
+			let progFill = ui.create('span', {'class': 'progress-bar-fill', 'style': 'width:0%;'});
+			progDiv.appendChild(progFill);
+
+			if(video.progress)
 			{
-				let percent = video.progress.percent;
-				li.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+				if(video.progress.status === 'Complete')
+				{
+					progFill.style.width = '100%';
+					progDiv.style.display = 'block';
+				}
+				else if(video.progress.percent)
+				{
+					let percent = video.progress.percent;
+					progFill.style.width = `${percent}%`;
+					progDiv.style.display = 'block';
+				}
 			}
 			
 			div.appendChild(title);
 			div.appendChild(br);
 			div.appendChild(duration);
+			div.appendChild(progDiv);
 
 			label.appendChild(chkbox);
 			label.appendChild(thumb);
@@ -71,11 +86,19 @@ class YTPLaylistView extends ListView
 		if(msg.dlHash != this.dlHash) return;
 
 		let index = msg.plIndex;
+		let status = msg.progress.status;
 		let percent = msg.progress.percent;
-		let el = ui.get(`.list li[data-index="${index}"]`);
-		if(typeof el != 'undefined')
+		let progFill = ui.get(`.list li[data-index="${index}"] .progress-bar-fill`);
+
+		if(typeof progFill != 'undefined')
 		{
-			el.style.background = `linear-gradient(to right, #8c8fb1 ${percent}%, #fff 0%)`;
+			if(status === 'Complete')
+			{
+				progFill.style.width = '100%';
+			}
+
+			progFill.style.width = `${percent}%`;
+			progFill.parentElement!.style.display = 'block';
 		}
 	}
 
