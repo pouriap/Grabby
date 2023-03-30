@@ -1914,3 +1914,5 @@ class SureMap<K, V> extends Map<K, V>
 		return item;
 	}
 }
+
+class NativeAppVersionError extends Error{}

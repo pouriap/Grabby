@@ -299,4 +299,23 @@ namespace Utils
 		return audioSize;
 	}
 
+	export function compareVersion(ver1: string, ver2: string)
+	{
+		if(typeof ver1 !== 'string') return false;
+		if(typeof ver2 !== 'string') return false;
+		let v1 = ver1.split('.');
+		let v2 = ver2.split('.');
+		const k = Math.min(v1.length, v2.length);
+
+		for(let i = 0; i < k; ++ i)
+		{
+			let v1part = parseInt(v1[i], 10);
+			let v2part = parseInt(v2[i], 10);
+			if (v1part > v2part) return 1;
+			if (v1part < v2part) return -1;
+		}
+
+		return v1.length == v2.length ? 0: (v1.length < v2.length ? -1 : 1);
+	}
+
 }

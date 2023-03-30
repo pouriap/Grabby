@@ -48,6 +48,7 @@ declare var fflate: any;
 //todo: single format mp4 is not grabbed (https://hclips.com/videos/7485065/lily-s-first-tickle-session/)
 
 var GB = new Grabby();
+var nativeMinVer = '0.61.0';
 
 (async () => {
 
@@ -59,8 +60,20 @@ var GB = new Grabby();
 		let info = await Utils.browserInfo();
 		GB.browser = info;
 
+		//get the native app version (also makes sure native app is present)
+		let version = await NativeMessaging.getVersion();
+
+		log.d('native app version is', version);
+
+		if(Utils.compareVersion(version, nativeMinVer) < 0)
+		{
+			throw new NativeAppVersionError();
+		}
+
 		//get available DMs from flashgot
-		let externalDMs = await NativeMessaging.startListeners();
+		let externalDMs = await NativeMessaging.getAvailableDMs();
+
+		log.d('available dms are', externalDMs);
 
 		//these are TCP server based DMs that we check using the browser itself
 		let browserDms = await BrowserDMs.getAvailableDMs();
@@ -76,6 +89,8 @@ var GB = new Grabby();
 
 		await Options.load(availableDMs);
 
+		NativeMessaging.startListeners();
+
 		Tabs.startListeners();
 
 		Messaging.startListeners();
@@ -88,9 +103,21 @@ var GB = new Grabby();
 	}
 	catch(e)
 	{
-		//todo: remove notifications or make them look good
-		Utils.notification("Error", "Initialization failed\nReason: " + e.toString());
-		log.err('Addon could not be initialized:', e);
+		if(e instanceof NativeMessaging.InitializationError)
+		{
+			Utils.notification("Error", "Could not connect to native app.\n\nHave you installed the Grabby Toolkit?");
+			log.err('Native App not found');
+		}
+		else if(e instanceof NativeAppVersionError)
+		{
+			Utils.notification("Error", "The installed native application is outdated and will not work with the current version of Grabby.\n\nPlease update Grabby Toolkit to the latest version.");
+			log.err('Native App not found');
+		}
+		else
+		{
+			Utils.notification("Error", "Initialization failed\nReason: " + e.toString());
+			log.err('Addon could not be initialized:', e);
+		}
 	}
 
 })();

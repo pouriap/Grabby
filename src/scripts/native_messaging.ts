@@ -66,11 +66,13 @@ namespace NativeMessaging
 		}
 	}
 
+	export class InitializationError extends Error{}
+
 	/* constants */
 	const GB_ADDON_ID = "grabby.pouriap";
 
+	const MSGTYPE_GET_VERSION = "get_version";
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
-	const MSGTYP_AVAIL_DMS = "available_dms";
 	const MSGTYP_DOWNLOAD = "download";
 
 	const MSGTYP_YTDL_INFO = "ytdl_info";
@@ -95,6 +97,16 @@ namespace NativeMessaging
 	export interface NativeMessage
 	{
 		type: string;
+	}
+
+	class MSG_Getversion implements NativeMessage
+	{
+		type = MSGTYPE_GET_VERSION;
+	}
+
+	class MSG_GetAvailDMs implements NativeMessage
+	{
+		type = MSGTYP_GET_AVAIL_DMS;
 	}
 
 	export class MSG_Download implements NativeMessage
@@ -168,12 +180,6 @@ namespace NativeMessaging
 	//these are messages we receive from the native app and never send outself
 	//so just a type will suffice becasue we never want to create a new object
 
-	type MSGRCV_AvailDMs = {
-		name: string,
-		available: boolean,
-		error?: string
-	}
-
 	type MSGRCV_YTDLInfo = {
 		type: string,
 		dlHash: string,
@@ -218,28 +224,23 @@ namespace NativeMessaging
 	
 	let port: ProperPort;
 
-	export function startListeners(): Promise<string[]>
+	export function startListeners()
 	{
 		port = new ProperPort();
 		port.connect();
 
-		return new Promise((resolve, reject) => 
-		{
-			let timer = setTimeout(() => {
-				reject("Native app took too long to respond");
-			}, 5000);
+		//set the final handlers
+		port.setOnMessage(doOnNativeMessage);
 
-			getAvailDMs().then((availableDMs) => {
-				start();
-				resolve(availableDMs);
-			})
-			.catch((reason) => {
-				reject(reason);
-			})
-			//this will always be called regardless of what happened
-			.then(() => {
-				clearTimeout(timer);
-			});
+		port.setOnDisconnect((p:any) => 
+		{
+			if(p.error){
+				log.warn("Port disconnected: ", p.error.message);
+			}
+			else{
+				log.warn("Port disconnected");
+			}
+			port.connect();
 		});
 	}
 		
@@ -249,62 +250,62 @@ namespace NativeMessaging
 	}
 
 	/* private stuff */
-	
-	function getAvailDMs(): Promise<string[]>
+
+	export function getVersion(): Promise<string>
 	{
-		return new Promise((resolve, reject) => {
-			try
-			{
-				port.setOnDisconnect((p: any) => {
-					if(p.error){
-						reject("Native app port disconnected: " + p.error.message);
-					}
-					reject("Native app port disconnected");
-				});
+		return new Promise((resolve, reject) => 
+		{
+			let msg = new MSG_Getversion();
+			let sending: Promise<any> = browser.runtime.sendNativeMessage(GB_ADDON_ID, msg);
 
-				port.setOnMessage((response: any) => 
-				{
-					if(typeof response != 'object'){
-						reject("bad response from native app");
-					}
-					else if (typeof response.type === 'undefined'){
-						reject("no response type from native app");
-					}
-					else if(response.type === MSGTYP_ERR){
-						reject("native app error: " + response.content);
-					}
-					else if(response.type != MSGTYP_AVAIL_DMS){
-						reject("bad response type from native app: " + response.type);
-					}
-					else if(!response.availableDMs){
-						reject("bad DM list from native app");
-					}
-					else{
-						resolve(response.availableDMs);
-					}
-				});
-
-				port.postMessage({type: MSGTYP_GET_AVAIL_DMS});
-				
-			}
-			catch(e){
+			let timer = setTimeout(() => {
+				let e = new InitializationError("Native app took too long to respond");
 				reject(e);
-			}
+			}, 5000);
+
+			sending.then((response) => 
+			{
+				if(typeof response == 'object' && typeof response.version === 'string'){
+					resolve(response.version);
+				}
+				else
+				{
+					let e = new InitializationError("Bad response from native app");
+					reject(e);				}
+			})
+			.catch((reason) => 
+			{
+				let msg = (typeof reason.msg === 'string')? reason.msg : '';
+				let e = new InitializationError(msg);
+				reject(e);
+			})
+			//this will always be called regardless of what happened
+			.then(() => {
+				clearTimeout(timer);
+			});
 		});
 	}
-	
-	function start()
+
+	export function getAvailableDMs(): Promise<string[]>
 	{
-		//set the final handlers
-		port.setOnMessage(doOnNativeMessage);
-		port.setOnDisconnect((p:any) => {
-			if(p.error){
-				log.warn("Port disconnected: ", p.error.message);
-			}
-			else{
-				log.warn("Port disconnected");
-			}
-			port.connect();
+		return new Promise((resolve, reject) => 
+		{
+			let msg = new MSG_GetAvailDMs();
+			let sending: Promise<any> = browser.runtime.sendNativeMessage(GB_ADDON_ID, msg);
+
+			sending.then((response) => 
+			{
+				if(typeof response == 'object' && typeof response.availableDMs === 'object'){
+					resolve(response.availableDMs);
+				}
+				else
+				{
+					reject('Bad response from native app');
+				}
+			})
+			.catch((reason) => {
+				reject(reason);
+			});
 		});
 	}
 
