@@ -24,6 +24,7 @@ namespace Options
 		ytdlProxy: string = '';
 		defaultDM: string = '';
 		forceDefaultDM: boolean = false;
+		JDownloaderAutoStart: boolean = true;
 	}
 
 	export type OptionNames<T> = 
@@ -36,6 +37,7 @@ namespace Options
 		type: 'textbox' | 'checkbox' | 'dropdown' | 'deferred';
 		desc: string;
 		endsection?: boolean;
+		header?: string;
 		attrs?: pair[];
 		getVal: (arg?: any) => T;
 		setVal: (e: V) => void;
@@ -142,7 +144,11 @@ namespace Options
 			return list.split(',');
 		}
 
+		// general options
+		//------------------------------------------------------------------------
+
 		overrideDlDialog: CheckboxOption = {
+			header: 'General options',
 			type: 'checkbox',
 			desc: "Override Firefox's download dialog",
 			getVal: () => {return this.opt.overrideDlDialog},
@@ -166,9 +172,13 @@ namespace Options
 			endsection: true,
 			getVal: () => {return this.opt.showOnlyTabDls},
 			setVal: (e) => {this.opt.showOnlyTabDls = e.checked},
-		};
-	
+		};		
+
+		// grab behavior
+		//------------------------------------------------------------------------
+
 		grabFilesLargerThanMB: TextboxOption = {
+			header: 'Grab behavior',
 			type: 'textbox',
 			desc: "Ignore files smaller than (MB):",
 			getVal: () => {return this.opt.grabFilesLargerThanMB.toString()},
@@ -210,15 +220,23 @@ namespace Options
 			setVal: (e) => {this.opt.blacklistDomains = this.getValuesFromList(e.value)},
 		};
 
+		// ytdl options
+		//------------------------------------------------------------------------
+
 		ytdlProxy: TextboxOption = {
+			header: 'youtube-dl options',
 			type: 'textbox',
-			desc: 'Youtube-DL proxy address',
+			desc: 'Proxy address',
 			endsection: true,
 			getVal: () => {return this.opt.ytdlProxy},
 			setVal: (e) => {this.opt.ytdlProxy = e.value}
 		};
+
+		// default download manager
+		//------------------------------------------------------------------------
 	
 		defaultDM: DropdownOption = {
+			header: 'Default download manager',
 			type: 'dropdown',
 			desc: "Default download manager: ",
 			getVal: (GBPop: GrabbyPopup) =>
@@ -244,9 +262,24 @@ namespace Options
 		forceDefaultDM: CheckboxOption = {
 			type: 'checkbox',
 			desc: 'Automatically download all links with this download manager (do not show download dialog)',
+			endsection: true,
 			getVal: () => {return this.opt.forceDefaultDM},
 			setVal: (e) => {this.opt.forceDefaultDM = e.checked},
 		};
+
+		// advanced options
+		//------------------------------------------------------------------------
+
+		JDownloaderAutoStart: CheckboxOption = {
+			header: 'Advanced options',
+			type: 'checkbox',
+			desc: 'Autostart downloads in JDownloader',
+			getVal: () => {return this.opt.JDownloaderAutoStart},
+			setVal: (e) => {this.opt.JDownloaderAutoStart = e.checked},
+		};
+
+		// deffered options (these guys are calculations that happen before save)
+		//------------------------------------------------------------------------
 
 		excludedMimes: DeferredOption = {
 			type: 'deferred',

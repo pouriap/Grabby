@@ -70,6 +70,13 @@ class OptionsView extends View
 			if(Options.isDeferred(optionUI)){
 				continue;
 			}
+
+			if(optionUI.header)
+			{
+				let header = document.createElement('h3');
+				header.innerHTML = optionUI.header;
+				document.getElementById('options-form')?.appendChild(header);
+			}
 	
 			let d: DrawableOption = {
 				name: optionName,
@@ -129,6 +136,7 @@ class OptionsView extends View
 		}
 	
 		e.setAttribute("id", optionData.name);
+		e.classList.add('option-item');
 	
 		if(optionUI.attrs)
 		{

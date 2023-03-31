@@ -96,7 +96,9 @@ class BrowserDMs
 					cookies += dlInfo.cookies + "\r\n";
 					descriptions += dlInfo.desc + "\r\n";
 				}
-				data.append('autostart', '0');
+
+				let autostart = (Options.opt.JDownloaderAutoStart)? '1' : '0';
+				data.append('autostart', autostart);
 				data.append('package', 'Grabby');
 				data.append('referer', job.referer);
 				data.append('urls', urls);
