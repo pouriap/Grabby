@@ -211,6 +211,11 @@ class DownloadHandler implements RequestHandler
 			return this.ACT_FORCE_DL;
 		}
 
+		if(act === this.ACT_GRAB && Options.opt.forceDefaultDM)
+		{
+			act = this.ACT_FORCE_DL;
+		}
+
 		if(download.class === RequestFilter.CLS_DOWNLOAD && filter.isIncludedInOpts()){
 			download.classReason = 'opts-include';
 			return this.ACT_GRAB;
@@ -289,8 +294,14 @@ class DownloadHandler implements RequestHandler
 		{
 			//only firefox supports this
 			//if we don't have a download manager installed no point in asking what to do
-			if(GB.browser.name !== 'firefox' || typeof GB.availableDMs === 'undefined')
+			if(GB.browser.name !== 'firefox')
 			{
+				log.warn('this browser does not support overriding the download dialog');
+				return Promise.resolve({cancel: false});
+			}
+			else if(typeof GB.availableDMs === 'undefined')
+			{
+				log.warn('no download managers found on the system');
 				return Promise.resolve({cancel: false});
 			}
 

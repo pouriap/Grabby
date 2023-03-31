@@ -23,6 +23,7 @@ namespace Options
 		blacklistURLs: string[] = [];
 		ytdlProxy: string = '';
 		defaultDM: string = '';
+		forceDefaultDM: boolean = false;
 	}
 
 	export type OptionNames<T> = 
@@ -238,6 +239,13 @@ namespace Options
 				}
 			},
 			setVal: (e) => {this.opt.defaultDM = (e.value)? e.value : ''}
+		};
+
+		forceDefaultDM: CheckboxOption = {
+			type: 'checkbox',
+			desc: 'Automatically download all links with this download manager (do not show download dialog)',
+			getVal: () => {return this.opt.forceDefaultDM},
+			setVal: (e) => {this.opt.forceDefaultDM = e.checked},
 		};
 
 		excludedMimes: DeferredOption = {
