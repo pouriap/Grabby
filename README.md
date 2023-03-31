@@ -30,7 +30,7 @@ Join Grabby's discrod server to discuss features and ask your questions
 
 ## Screenshots
 
-### verriding Firefox's download dialog
+### Overriding Firefox's download dialog
 ![overriding firefox download dialog](https://i.imgur.com/8mXoMxe.png)
 
 ### A history of downloads of each tab is kept
