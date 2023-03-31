@@ -13,7 +13,8 @@ Join Grabby's discrod server to discuss features and ask your questions
 - [Main Features](#main-features)
 - [Screenshots](#screenshots)
 - [Installation](#installation-firefox-on-windows)
-- [What is the toolkit?](#what-is-grabby-toolkit)
+- [Supported download managers](#supported-download-managers)
+- [What is the toolkit?](#what-is-the-toolkit)
 - [What is included in the toolkit](#what-is-included-in-the-toolkit)
 - [Browser support](#browser-support)
 - [OS support](#os-support)
@@ -50,6 +51,47 @@ Download youtube playlists
 2- [Install the addon from the AMO](https://addons.mozilla.org/en-US/firefox/addon/grabby/)
 
 **For other browsers and operating systems see [browser support](#browser-support)**
+
+## Supported download managers
+The following download managers are currently supported. 
+
+Note that only newer version of these download managers were tested and older version might not work.
+
+BitComet
+
+Download Accelerator Plus
+
+Download Accelerator Manager
+
+EagleGet
+
+FlareGet
+
+Free Download Manager
+
+GetGo
+
+GetRight
+
+GigaGet
+
+Internet Download Accelerator
+
+Internet Download Manager
+
+Mass Downloader
+
+Net Transport
+
+ReGet Deluxe
+
+wxDownload Fast
+
+Xtreme Download Manager
+
+Jdownloader
+
+Thunder
 
 ## What is the toolkit?
 Due to the restrictions put on WebExtensions they no longer can function like legacy addon (the way FlashGot did). So in order to provide the same functionality Grabby needs a "Native Application" in order to talk to other programs on your computer (such as your download managers). **Grabby Toolkit** provides this native application as well as other tools.
