@@ -65,7 +65,7 @@ abstract class View
 				option.value = dmName;
 				option.innerHTML = dmName;
 				option.id = dmName;			
-				if(defaultDM){
+				if(dmName === defaultDM){
 					option.setAttribute('selected', 'selected');
 				}
 				dmsDropDown.appendChild(option);

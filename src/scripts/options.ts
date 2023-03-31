@@ -83,7 +83,7 @@ namespace Options
 		let defaults = new GBOptions();
 		opt = await browser.storage.local.get(defaults);
 		//todo: can we do something about this disgusting mess?
-		if(!opt.defaulDM && availableDMs && availableDMs.length)
+		if(!opt.defaultDM && availableDMs && availableDMs.length)
 		{
 			opt.defaultDM = availableDMs[0];
 		}
