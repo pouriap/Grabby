@@ -30,19 +30,19 @@ Join Grabby's discrod server to discuss features and ask your questions
 
 ## Screenshots
 
-Overriding Firefox's download dialog
+### verriding Firefox's download dialog
 ![overriding firefox download dialog](https://i.imgur.com/8mXoMxe.png)
 
-A history of downloads of each tab is kept
+### A history of downloads of each tab is kept
 ![download saved for later use](https://i.imgur.com/LlPeHEu.png)
 
-Through the right click menu you can choose to download all links in a page or links in a selection, which then opens up a window that lets you filter the links
+### Through the right click menu you can choose to download all links in a page or links in a selection, which then opens up a window that lets you filter the links
 ![downloading list of links](https://i.imgur.com/4HKsws2.png)
 
-Download videos from popular video sites in your preferred format
+### Download videos from popular video sites in your preferred format
 ![downloading youtube video](https://i.imgur.com/6B7ECjv.png)
 
-Download youtube playlists
+### Download youtube playlists
 ![downloading youtube playlist](https://i.imgur.com/Bw1xH7E.png)
 
 ## Installation (Firefox on Windows)
@@ -57,41 +57,24 @@ The following download managers are currently supported.
 
 Note that only newer version of these download managers were tested and older version might not work.
 
-BitComet
-
-Download Accelerator Plus
-
-Download Accelerator Manager
-
-EagleGet
-
-FlareGet
-
-Free Download Manager
-
-GetGo
-
-GetRight
-
-GigaGet
-
-Internet Download Accelerator
-
-Internet Download Manager
-
-Mass Downloader
-
-Net Transport
-
-ReGet Deluxe
-
-wxDownload Fast
-
-Xtreme Download Manager
-
-Jdownloader
-
-Thunder
+- BitComet
+- Download Accelerator Plus
+- Download Accelerator Manager
+- EagleGet
+- FlareGet
+- Free Download Manager
+- GetGo
+- GetRight
+- GigaGet
+- Internet Download Accelerator
+- Internet Download Manager
+- Mass Downloader
+- Net Transport
+- ReGet Deluxe
+- wxDownload Fast
+- Xtreme Download Manager
+- Jdownloader
+- Thunder
 
 ## What is the toolkit?
 Due to the restrictions put on WebExtensions they no longer can function like legacy addon (the way FlashGot did). So in order to provide the same functionality Grabby needs a "Native Application" in order to talk to other programs on your computer (such as your download managers). **Grabby Toolkit** provides this native application as well as other tools.
