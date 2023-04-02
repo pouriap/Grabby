@@ -24,6 +24,7 @@ namespace Options
 		ytdlProxy: string = '';
 		defaultDM: string = '';
 		forceDefaultDM: boolean = false;
+		customDM: string = '';
 		JDownloaderAutoStart: boolean = true;
 	}
 
@@ -265,6 +266,17 @@ namespace Options
 			endsection: true,
 			getVal: () => {return this.opt.forceDefaultDM},
 			setVal: (e) => {this.opt.forceDefaultDM = e.checked},
+		};
+
+		// custom DM
+		//------------------------------------------------------------------------
+		customDM: TextboxOption = {
+			header: 'command-line download manager',
+			type: 'textbox',
+			desc: 'Command (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST])',
+			endsection: true,
+			getVal: () => {return this.opt.customDM},
+			setVal: (e) => {this.opt.customDM = e.value}
 		};
 
 		// advanced options

@@ -155,7 +155,13 @@ class Grabby
 	doDownloadJob(job: DownloadJob)
 	{
 		log.d("doing job", job);
-		if(this.availBrowserDMs && this.availBrowserDMs.includes(job.dmName))
+
+		if(job.dmName === CommandLineDM.DMNAME)
+		{
+			let dm = new CommandLineDM();
+			dm.download(job);
+		}
+		else if(this.availBrowserDMs && this.availBrowserDMs.includes(job.dmName))
 		{
 			BrowserDMs.dms[job.dmName].download(job);
 		}

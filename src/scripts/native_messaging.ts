@@ -74,6 +74,7 @@ namespace NativeMessaging
 	const MSGTYPE_GET_VERSION = "get_version";
 	const MSGTYP_GET_AVAIL_DMS = "get_available_dms";
 	const MSGTYP_DOWNLOAD = "download";
+	const MSGTYP_USER_CMD = "user_cmd";
 
 	const MSGTYP_YTDL_INFO = "ytdl_info";
 	const MSGTYP_YTDL_INFO_YTPL = "ytdl_info_ytpl";
@@ -113,6 +114,12 @@ namespace NativeMessaging
 	{
 		type = MSGTYP_DOWNLOAD;
 		constructor(public job: DownloadJob){};
+	}
+
+	export class MSG_UserCMD implements NativeMessage
+	{
+		type = MSGTYP_USER_CMD;
+		constructor(public cmd: string){};
 	}
 
 	abstract class MSG_YTDLBase implements NativeMessage

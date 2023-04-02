@@ -73,12 +73,14 @@ var nativeMinVer = '0.61.0';
 		//get available DMs from flashgot
 		let externalDMs = await NativeMessaging.getAvailableDMs();
 
-		log.d('available dms are', externalDMs);
-
 		//these are TCP server based DMs that we check using the browser itself
 		let browserDms = await BrowserDMs.getAvailableDMs();
 
 		let availableDMs: string[] = externalDMs.concat(browserDms);
+
+		availableDMs.push(CommandLineDM.DMNAME);
+
+		log.d('available dms are', externalDMs);
 
 		if(availableDMs.length > 0)
 		{

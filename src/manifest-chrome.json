@@ -70,6 +70,7 @@
 			"scripts/options.js",
 			"scripts/messaging.js",
 			"scripts/browser_dms.js",
+			"scripts/cmd_dms.js",
 			"background.js"
 		]
 	}
