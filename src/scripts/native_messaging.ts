@@ -119,7 +119,8 @@ namespace NativeMessaging
 	export class MSG_UserCMD implements NativeMessage
 	{
 		type = MSGTYP_USER_CMD;
-		constructor(public cmd: string){};
+		constructor(public cmd: string, public filename: string, public showConsole: boolean,
+			public showSaveas: boolean){};
 	}
 
 	abstract class MSG_YTDLBase implements NativeMessage

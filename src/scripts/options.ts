@@ -11,6 +11,7 @@ namespace Options
 		playMediaInBrowser: boolean = true;
 		dlListSize: number = 20;
 		showOnlyTabDls: boolean = true;
+
 		grabFilesLargerThanMB: number = 5;
 		excludeWebFiles: boolean = true;
 		includedExts: string[] = [];
@@ -21,10 +22,16 @@ namespace Options
 		forcedMimes: string[] = [];
 		blacklistDomains: string[] = [];
 		blacklistURLs: string[] = [];
+
 		ytdlProxy: string = '';
+
 		defaultDM: string = '';
 		forceDefaultDM: boolean = false;
+
 		customDM: string = '';
+		showConsoleWindow: boolean = true;
+		showSaveasWindow: boolean = false;
+
 		JDownloaderAutoStart: boolean = true;
 	}
 
@@ -273,10 +280,22 @@ namespace Options
 		customDM: TextboxOption = {
 			header: 'command-line download manager',
 			type: 'textbox',
-			desc: 'Command (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST])',
-			endsection: true,
+			desc: 'Command (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST][FOLDER])',
 			getVal: () => {return this.opt.customDM},
 			setVal: (e) => {this.opt.customDM = e.value}
+		};
+		showConsoleWindow: CheckboxOption = {
+			type: 'checkbox',
+			desc: 'Show console window',
+			getVal: () => {return this.opt.showConsoleWindow},
+			setVal: (e) => {this.opt.showConsoleWindow = e.checked},
+		};
+		showSaveasWindow: CheckboxOption = {
+			type: 'checkbox',
+			desc: 'Show folder selection dialog',
+			endsection: true,
+			getVal: () => {return this.opt.showSaveasWindow},
+			setVal: (e) => {this.opt.showSaveasWindow = e.checked},
 		};
 
 		// advanced options

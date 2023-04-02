@@ -7,7 +7,7 @@ class CommandLineDM
      * [URL] - the URL of the current link
      * [REFERER] - the URL of the document containing current link
      * [COOKIE] - cookie info for the current link
-     * //[FOLDER] - the folder where user wants to save its download (it will be asked with a dialog if Firefox|Tools|Options|Download|Ask me where to save every file is checked).
+     * [FOLDER] - the folder where user wants to save its download (it will be asked with a dialog is show save-as dialog is checked in options)
      * [POST] - data to be sent with POST request if a form button has triggered this download
      * [ULIST] - expands to all the URLs to be downloaded, space separated
      * //[UFILE] - path to a file containing the URLs to be downloaded, one per line
@@ -20,6 +20,8 @@ class CommandLineDM
 		log.d('download custom cmd job', job);
 
 		let cmd = Options.opt.customDM;
+		let showConsole = Options.opt.showConsoleWindow;
+		let showSaveas = Options.opt.showSaveasWindow;
 
 		if(!cmd)
 		{
@@ -47,12 +49,13 @@ class CommandLineDM
 			.replace('[COOKIE]', cookie)
 			.replace('[POST]', post)
 			.replace('[ULIST]', ulist)
-			.replace('[FNAME]', filename);
+			.replace('[FNAME]', filename)
+			.replace('[FOLDER]', '*$*FOLDER*$*');
 
 		// crappy c++ json library cannot handle double quotes in strings
 		let cmd64 = btoa(cmd);
 
-		let msg = new NativeMessaging.MSG_UserCMD(cmd64);
+		let msg = new NativeMessaging.MSG_UserCMD(cmd64, filename, showConsole, showSaveas);
 		NativeMessaging.sendMessage(msg);
 	}
 
