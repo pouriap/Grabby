@@ -7,7 +7,7 @@ class CommandLineDM
      * [URL] - the URL of the current link
      * [REFERER] - the URL of the document containing current link
      * [COOKIE] - cookie info for the current link
-     * [FOLDER] - the folder where user wants to save its download (it will be asked with a dialog is show save-as dialog is checked in options)
+     * [OUTPUT] - output path to save the download (it will be asked with a dialog is show save-as dialog is checked in options)
      * [POST] - data to be sent with POST request if a form button has triggered this download
      * [ULIST] - expands to all the URLs to be downloaded, space separated
      * //[UFILE] - path to a file containing the URLs to be downloaded, one per line
@@ -19,7 +19,8 @@ class CommandLineDM
 	{
 		log.d('download custom cmd job', job);
 
-		let cmd = Options.opt.customDM;
+		let procName = Options.opt.customProc;
+		let cmd = Options.opt.customCmd;
 		let showConsole = Options.opt.showConsoleWindow;
 		let showSaveas = Options.opt.showSaveasWindow;
 
@@ -35,7 +36,7 @@ class CommandLineDM
 		{
 			urls.push(link.url);
 		}
-		
+	
 		let url = job.links[0].url;
 		let post = job.links[0].postdata;
 		let filename = job.links[0].filename;
@@ -50,12 +51,12 @@ class CommandLineDM
 			.replace('[POST]', post)
 			.replace('[ULIST]', ulist)
 			.replace('[FNAME]', filename)
-			.replace('[FOLDER]', '*$*FOLDER*$*');
+			.replace('[OUTPUT]', '*$*OUTPUT*$*');
 
 		// crappy c++ json library cannot handle double quotes in strings
 		let cmd64 = btoa(cmd);
 
-		let msg = new NativeMessaging.MSG_UserCMD(cmd64, filename, showConsole, showSaveas);
+		let msg = new NativeMessaging.MSG_UserCMD(procName, cmd64, filename, showConsole, showSaveas);
 		NativeMessaging.sendMessage(msg);
 	}
 

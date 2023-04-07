@@ -28,7 +28,8 @@ namespace Options
 		defaultDM: string = '';
 		forceDefaultDM: boolean = false;
 
-		customDM: string = '';
+		customProc: string = '';
+		customCmd: string = '';
 		showConsoleWindow: boolean = true;
 		showSaveasWindow: boolean = false;
 
@@ -277,12 +278,18 @@ namespace Options
 
 		// custom DM
 		//------------------------------------------------------------------------
-		customDM: TextboxOption = {
+		customProc: TextboxOption = {
 			header: 'command-line download manager',
 			type: 'textbox',
-			desc: 'Command (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST][FOLDER])',
-			getVal: () => {return this.opt.customDM},
-			setVal: (e) => {this.opt.customDM = e.value}
+			desc: 'Process name with absolute path (/bin/curl)',
+			getVal: () => {return this.opt.customProc},
+			setVal: (e) => {this.opt.customProc = e.value}
+		};
+		customCmd: TextboxOption = {
+			type: 'textbox',
+			desc: 'Arguments (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST][OUTPUT])',
+			getVal: () => {return this.opt.customCmd},
+			setVal: (e) => {this.opt.customCmd = e.value}
 		};
 		showConsoleWindow: CheckboxOption = {
 			type: 'checkbox',
@@ -292,7 +299,7 @@ namespace Options
 		};
 		showSaveasWindow: CheckboxOption = {
 			type: 'checkbox',
-			desc: 'Show folder selection dialog',
+			desc: 'Show save-as dialog (must specify [OUTPUT] above)',
 			endsection: true,
 			getVal: () => {return this.opt.showSaveasWindow},
 			setVal: (e) => {this.opt.showSaveasWindow = e.checked},
