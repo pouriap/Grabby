@@ -7,11 +7,14 @@ namespace Options
 	export class GBOptions
 	{
 		[index: string]: unknown;
+
+		// general
 		overrideDlDialog: boolean = true;
 		playMediaInBrowser: boolean = true;
 		dlListSize: number = 20;
 		showOnlyTabDls: boolean = true;
 
+		// behavior
 		grabFilesLargerThanMB: number = 5;
 		excludeWebFiles: boolean = true;
 		includedExts: string[] = [];
@@ -23,17 +26,22 @@ namespace Options
 		blacklistDomains: string[] = [];
 		blacklistURLs: string[] = [];
 
+		// ytdl
 		ytdlProxy: string = '';
 
+		// defatul dm
 		defaultDM: string = '';
 		forceDefaultDM: boolean = false;
 
+		// custom dm
 		customProc: string = '';
 		customCmd: string = '';
 		showConsoleWindow: boolean = true;
-		showSaveasWindow: boolean = false;
+		showSaveasWindow: boolean = true;
 
+		// advanced
 		JDownloaderAutoStart: boolean = true;
+		autoQuoteCustomCmd: boolean = true;
 	}
 
 	export type OptionNames<T> = 
@@ -299,7 +307,7 @@ namespace Options
 		};
 		showSaveasWindow: CheckboxOption = {
 			type: 'checkbox',
-			desc: 'Show save-as dialog (must specify [OUTPUT] above)',
+			desc: 'Show save-as dialog',
 			endsection: true,
 			getVal: () => {return this.opt.showSaveasWindow},
 			setVal: (e) => {this.opt.showSaveasWindow = e.checked},
@@ -314,6 +322,13 @@ namespace Options
 			desc: 'Autostart downloads in JDownloader',
 			getVal: () => {return this.opt.JDownloaderAutoStart},
 			setVal: (e) => {this.opt.JDownloaderAutoStart = e.checked},
+		};
+		autoQuoteCustomCmd: CheckboxOption = {
+			header: 'Advanced options',
+			type: 'checkbox',
+			desc: 'Automatically put quotes around command line download manager arguments',
+			getVal: () => {return this.opt.autoQuoteCustomCmd},
+			setVal: (e) => {this.opt.autoQuoteCustomCmd = e.checked},
 		};
 
 		// deffered options (these guys are calculations that happen before save)

@@ -42,16 +42,30 @@ class CommandLineDM
 		let filename = job.links[0].filename;
 		let referer = job.referer;
 		let cookie = job.dlpageCookies;
+
+		// sanitize
+		let q = '';
+		
+		if(Options.opt.autoQuoteCustomCmd)
+		{
+			q = (GB.browser.os == 'windows')? '"' : "'";
+			
+			for(let i=0; i<urls.length; i++)
+			{
+				urls[i] = q + urls[i] + q;
+			}
+		}
+
 		let ulist = urls.join(' ');
 
 		cmd = cmd
-			.replace('[URL]', url)
-			.replace('[REFERER]', referer)
-			.replace('[COOKIE]', cookie)
-			.replace('[POST]', post)
+			.replace('[URL]', q + url + q)
+			.replace('[REFERER]', q + referer + q)
+			.replace('[COOKIE]', q + cookie + q)
+			.replace('[POST]', q + post + q)
 			.replace('[ULIST]', ulist)
 			.replace('[FNAME]', filename)
-			.replace('[OUTPUT]', '*$*OUTPUT*$*');
+			.replace('[OUTPUT]', q + '*$*OUTPUT*$*' + q);
 
 		// crappy c++ json library cannot handle double quotes in strings
 		let cmd64 = btoa(cmd);
