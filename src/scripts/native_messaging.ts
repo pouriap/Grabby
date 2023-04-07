@@ -89,6 +89,7 @@ namespace NativeMessaging
 	const MSGTYP_YTDL_KILL = "ytdl_kill";
 
 	const MSGTYP_ERR = "app_error";
+	const MSGTYP_ERR_GUI = "app_error_gui";
 	const MSGTYP_MSG = "app_message";
 	const MSGTYP_UNSUPP = "unsupported";
 
@@ -227,6 +228,11 @@ namespace NativeMessaging
 		content: string
 	}
 
+	type MSGRCV_Error_GUI = {
+		type: string,
+		content: string
+	}
+
 
 	/* now the real stuff */
 	
@@ -361,6 +367,11 @@ namespace NativeMessaging
 			{
 				handleError(msg as MSGRCV_Error);
 			}
+
+			else if(msg.type === MSGTYP_ERR_GUI)
+			{
+				handleErrorGui(msg as MSGRCV_Error_GUI);
+			}
 	
 			else
 			{
@@ -468,5 +479,10 @@ namespace NativeMessaging
 	function handleError(msg: MSGRCV_Error)
 	{
 		log.err('Error in native app:', msg.content);
+	}
+
+	function handleErrorGui(msg: MSGRCV_Error_GUI)
+	{
+		Utils.notification("Error", msg.content);
 	}
 }
