@@ -195,11 +195,27 @@ namespace Utils
 
 	export async function browserInfo(): Promise<browser_info>
 	{
+		let platform = navigator.platform;
+		let os: os = 'other';
+
+		if(platform.toLowerCase().indexOf('win') != -1)
+		{
+			os = 'windows';
+		}
+		else if(platform.toLowerCase().indexOf('linux') != -1)
+		{
+			os = 'linux';
+		}
+		else
+		{
+			os = 'other';
+		}
+
 		try
 		{
 			let info = await browser.runtime.getBrowserInfo();
 			let version = info.version.split('.')[0];
-			return {name: 'firefox', version: Number(version)};
+			return {name: 'firefox', version: Number(version), os: os};
 		}
 		catch(e)
 		{
@@ -215,7 +231,7 @@ namespace Utils
 				browserName = "chrome";
 			}
 
-			return {name: browserName, version: undefined};
+			return {name: browserName, version: undefined, os: os};
 		}
 	}
 

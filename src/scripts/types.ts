@@ -8,7 +8,9 @@ type pair = {name: string, value: string};
 
 type browser_name = 'firefox' | 'chrome' | 'unknown';
 
-type browser_info = {name: browser_name, version: number | undefined};
+type os = 'windows' | 'linux' | 'other';
+
+type browser_info = {name: browser_name, version: number | undefined, os: os};
 
 type filetype =  typeof constants.fileTypes[number];
 
