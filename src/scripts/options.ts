@@ -56,6 +56,7 @@ namespace Options
 		endsection?: boolean;
 		header?: string;
 		attrs?: pair[];
+		hint?: string;
 		getVal: (arg?: any) => T;
 		setVal: (e: V) => void;
 	}
@@ -68,6 +69,7 @@ namespace Options
 	export type TextboxOption = OptionUI<string, HTMLInputElement> & 
 	{
 		type: 'textbox';
+		onKeyUp?: (el: HTMLInputElement, ev: KeyboardEvent) => void;
 	}
 
 	export type DropdownOption = OptionUI<{selected: string, list: string[]}, HTMLOptionElement> & 
@@ -297,7 +299,7 @@ namespace Options
 			type: 'textbox',
 			desc: 'Arguments (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST][OUTPUT])',
 			getVal: () => {return this.opt.customCmd},
-			setVal: (e) => {this.opt.customCmd = e.value}
+			setVal: (e) => {this.opt.customCmd = e.value},
 		};
 		showConsoleWindow: CheckboxOption = {
 			type: 'checkbox',

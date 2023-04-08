@@ -39,9 +39,9 @@ class CommandLineDM
 	
 		let url = job.links[0].url;
 		let post = job.links[0].postdata;
+		let cookie = (job.links.length > 1)? job.dlpageCookies : job.links[0].cookies;
 		let filename = job.links[0].filename;
 		let referer = job.referer;
-		let cookie = job.dlpageCookies;
 
 		// sanitize
 		let q = '';

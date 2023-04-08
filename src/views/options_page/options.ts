@@ -171,6 +171,12 @@ class OptionsView extends View
 		txtBox.setAttribute("type", "text");
 		txtBox.setAttribute("id", id);
 		txtBox.value = optionUI.getVal();
+		if(typeof optionUI.onKeyUp != 'undefined')
+		{
+			txtBox.addEventListener('keyup', function(ev){
+				optionUI.onKeyUp!(this, ev);
+			});
+		}
 		return txtBox;
 	}
 	

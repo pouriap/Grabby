@@ -46,6 +46,8 @@ declare var fflate: any;
 //todo: HEAD files in filter dialog
 //todo: when a url is unsupported fall back to general manifest grabbing (pornzog.com)
 //todo: single format mp4 is not grabbed (https://hclips.com/videos/7485065/lily-s-first-tickle-session/)
+//todo: add different icon for error notifications
+//todo: make initialization error messages more verbose as it's a common error
 
 var GB = new Grabby();
 var nativeMinVer = '0.61.0';
