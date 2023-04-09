@@ -108,6 +108,7 @@ class OptionsView extends View
 		div.setAttribute('class', 'panel-formElements-item');
 		div.appendChild(this.createLabel(optionData));
 		div.appendChild(this.createElement(optionData));
+		div.appendChild(this.createTooltip(optionData));
 		return div;
 	}
 	
@@ -154,6 +155,24 @@ class OptionsView extends View
 		label.setAttribute("for", optionData.name);
 		label.innerHTML = optionData.optionUI.desc;
 		return label;
+	}
+
+	createTooltip(optionData: DrawableOption)
+	{
+		let tooltipDiv = document.createElement('div');
+
+		if(optionData.optionUI.hint)
+		{
+			tooltipDiv.classList.add('tooltip');
+			tooltipDiv.innerHTML = '?';
+			let tip = document.createElement('span');
+			tip.classList.add('tooltiptext');
+			tip.innerHTML = optionData.optionUI.hint;
+			tooltipDiv.appendChild(tip);
+			document.getElementById('options-form')?.appendChild(tooltipDiv);
+		}
+
+		return tooltipDiv;
 	}
 	
 	createCheckBox(id: string, optionUI: Options.CheckboxOption)

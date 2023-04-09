@@ -291,13 +291,14 @@ namespace Options
 		customProc: TextboxOption = {
 			header: 'command-line download manager',
 			type: 'textbox',
-			desc: 'Process name with absolute path (/bin/curl)',
+			desc: 'Executable full path',
 			getVal: () => {return this.opt.customProc},
 			setVal: (e) => {this.opt.customProc = e.value}
 		};
 		customCmd: TextboxOption = {
 			type: 'textbox',
-			desc: 'Arguments (placehoders: [URL][REFERER][COOKIE][FNAME][POST][ULIST][OUTPUT])',
+			desc: 'Command-line arguments',
+			hint: `Visit <a href="https://github.com/pouriap/Grabby/wiki/Custom-download-manager-command-line-arguments">here</a> for help.`,
 			getVal: () => {return this.opt.customCmd},
 			setVal: (e) => {this.opt.customCmd = e.value},
 		};
@@ -326,7 +327,6 @@ namespace Options
 			setVal: (e) => {this.opt.JDownloaderAutoStart = e.checked},
 		};
 		autoQuoteCustomCmd: CheckboxOption = {
-			header: 'Advanced options',
 			type: 'checkbox',
 			desc: 'Automatically put quotes around command line download manager arguments',
 			getVal: () => {return this.opt.autoQuoteCustomCmd},

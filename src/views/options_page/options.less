@@ -5,7 +5,7 @@
 
 input
 {
-	padding: 0 2px;
+	padding: 2px 2px;
 	max-width: 40%;
 }
 
@@ -23,3 +23,57 @@ hr
 		flex-direction: row;	
 	}
 }
+
+/* tooltip stuff */
+
+.tooltip
+{
+	position: relative;
+	display: inline-block;
+	margin-left: 5px;
+	text-align: center;
+	background-color: #bcbcbc;
+	border-radius: 50%;
+	min-width: 15px;
+	min-height: 15px;
+}
+  
+.tooltip .tooltiptext
+{
+	visibility: hidden;
+	width: 200px;
+	margin-left: -100px;
+	background-color: #282828;
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px 0;
+	position: absolute;
+	z-index: 1;
+	bottom: 150%;
+	left: 50%;
+	
+	a, a:visited
+	{
+		color: aqua;
+	}
+}
+
+.tooltip .tooltiptext::after
+{
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: black transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext
+{
+	visibility: visible;
+}
+
+/* end tooltip stuff */
