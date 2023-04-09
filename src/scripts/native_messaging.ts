@@ -120,7 +120,7 @@ namespace NativeMessaging
 	export class MSG_UserCMD implements NativeMessage
 	{
 		type = MSGTYP_USER_CMD;
-		constructor(public procName: string, public cmd: string, public filename: string, 
+		constructor(public procName: string, public args: string[], public filename: string, 
 			public showConsole: boolean, public showSaveas: boolean){};
 	}
 

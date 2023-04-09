@@ -334,4 +334,52 @@ namespace Utils
 		return v1.length == v2.length ? 0: (v1.length < v2.length ? -1 : 1);
 	}
 
+	export function parseCmdArgs(cmd: string)
+	{
+		let str = cmd.split('');
+		let res = [];
+		let temp = '';
+		let waitfor = ' ';
+		let quotes = (GB.browser.os == 'windows')? ['"'] : ['"', "'"];
+
+		for(let char of str)
+		{
+		
+			// if it's the start of a quote then wait for the matching quote
+			if(quotes.includes(char) && waitfor === ' ')
+			{
+				waitfor = char;
+				continue;
+			}
+		
+			// if it's the end of a quote then wait for space
+			if(char === waitfor && quotes.includes(char))
+			{
+				res.push(temp);
+				temp = '';
+				waitfor = ' ';
+				continue;
+			}
+		
+			// if it's the end of a space-separated section
+			if(char === waitfor && temp)
+			{
+				res.push(temp);
+				temp = '';
+				continue;
+			}
+		
+			if(char != waitfor)
+			{
+				temp += char;
+				continue;
+			}
+		}
+
+		//add the last part of the string
+		if(temp) res.push(temp);
+
+		return res;
+	}
+
 }

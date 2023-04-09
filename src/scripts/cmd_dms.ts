@@ -58,19 +58,23 @@ class CommandLineDM
 
 		let ulist = urls.join(' ');
 
-		cmd = cmd
-			.replace('[URL]', q + url + q)
-			.replace('[REFERER]', q + referer + q)
-			.replace('[COOKIE]', q + cookie + q)
-			.replace('[POST]', q + post + q)
-			.replace('[ULIST]', ulist)
-			.replace('[FNAME]', filename)
-			.replace('[OUTPUT]', q + '*$*OUTPUT*$*' + q);
+		let args = Utils.parseCmdArgs(cmd);
+		log.d('args be', args);
 
-		// crappy c++ json library cannot handle double quotes in strings
-		let cmd64 = btoa(cmd);
+		for(let i=0; i<args.length; i++)
+		{
+			args[i] = args[i]
+				.replace('[URL]', url)
+				.replace('[REFERER]', referer)
+				.replace('[COOKIE]', cookie)
+				.replace('[POST]', post)
+				.replace('[ULIST]', ulist)
+				.replace('[FNAME]', filename)
+				.replace('[OUTPUT]', '*$*OUTPUT*$*');
+			args[i] = btoa(args[i]);
+		};
 
-		let msg = new NativeMessaging.MSG_UserCMD(procName, cmd64, filename, showConsole, showSaveas);
+		let msg = new NativeMessaging.MSG_UserCMD(procName, args, filename, showConsole, showSaveas);
 		NativeMessaging.sendMessage(msg);
 	}
 
