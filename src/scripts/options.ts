@@ -56,7 +56,7 @@ namespace Options
 		endsection?: boolean;
 		header?: string;
 		attrs?: pair[];
-		hint?: string;
+		tooltip?: string;
 		getVal: (arg?: any) => T;
 		setVal: (e: V) => void;
 	}
@@ -243,7 +243,7 @@ namespace Options
 		//------------------------------------------------------------------------
 
 		ytdlProxy: TextboxOption = {
-			header: 'youtube-dl options',
+			header: 'YouTube-DL options',
 			type: 'textbox',
 			desc: 'Proxy address',
 			endsection: true,
@@ -289,16 +289,17 @@ namespace Options
 		// custom DM
 		//------------------------------------------------------------------------
 		customProc: TextboxOption = {
-			header: 'command-line download manager',
+			header: 'Command-line download manager',
 			type: 'textbox',
-			desc: 'Executable full path',
+			desc: 'Executable absolute path',
+			tooltip: `Visit <a href="https://github.com/pouriap/Grabby/wiki/Custom-download-manager-command-line-arguments">the wiki</a> for more info.`,
 			getVal: () => {return this.opt.customProc},
 			setVal: (e) => {this.opt.customProc = e.value}
 		};
 		customCmd: TextboxOption = {
 			type: 'textbox',
 			desc: 'Command-line arguments',
-			hint: `Visit <a href="https://github.com/pouriap/Grabby/wiki/Custom-download-manager-command-line-arguments">here</a> for help.`,
+			tooltip: `Visit <a href="https://github.com/pouriap/Grabby/wiki/Custom-download-manager-command-line-arguments">the wiki</a> for more info.`,
 			getVal: () => {return this.opt.customCmd},
 			setVal: (e) => {this.opt.customCmd = e.value},
 		};

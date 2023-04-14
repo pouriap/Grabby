@@ -161,13 +161,13 @@ class OptionsView extends View
 	{
 		let tooltipDiv = document.createElement('div');
 
-		if(optionData.optionUI.hint)
+		if(optionData.optionUI.tooltip)
 		{
 			tooltipDiv.classList.add('tooltip');
 			tooltipDiv.innerHTML = '?';
 			let tip = document.createElement('span');
 			tip.classList.add('tooltiptext');
-			tip.innerHTML = optionData.optionUI.hint;
+			tip.innerHTML = optionData.optionUI.tooltip;
 			tooltipDiv.appendChild(tip);
 			document.getElementById('options-form')?.appendChild(tooltipDiv);
 		}
