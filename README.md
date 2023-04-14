@@ -56,9 +56,7 @@ Join Grabby's discrod server to discuss features and ask your questions
 **For installing on browsers other than Firefox see [the relevant page the in the wiki](https://github.com/pouriap/Grabby/wiki/Browser-Support)**
 
 ## Supported download managers
-The following download managers are currently supported. 
-
-Note that only newer version of these download managers were tested and older version might not work.
+The following download managers are currently supported on Windows:
 
 - BitComet
 - Download Accelerator Plus
@@ -79,6 +77,11 @@ Note that only newer version of these download managers were tested and older ve
 - Jdownloader
 - Thunder
 - Any download manager that is accessible with the command line
+
+**Notes:** 
+- Only newer version of these download managers were tested and older version might not work.
+
+- On Linux currently only download managers that are accesible from the command line are supported.
 
 ## OS Support
 Windows is officially supported.
