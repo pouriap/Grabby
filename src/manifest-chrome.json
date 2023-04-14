@@ -56,6 +56,7 @@
 			"scripts/classes.js",
 			"scripts/log.js",
 			"scripts/utils.js",
+			"scripts/notifications.js",
 			"scripts/ui.js",
 			"scripts/native_messaging.js",
 			"scripts/context_menu.js",

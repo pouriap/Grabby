@@ -100,6 +100,7 @@ type webx_execScriptDetails = {code?: string, file?: string};
 interface webx_browser
 {
 	tabs: {
+		create: (arg: any) => Promise<webx_tab[]>;
 		query: (arg: any) => Promise<webx_tab[]>;
 		get: (arg: number) => Promise<webx_tab>;
 		remove: (arg: number | number[]) => Promise<any>;

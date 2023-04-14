@@ -116,17 +116,6 @@ namespace Utils
 		}
 	}
 
-	export function notification(title: string, msg: string)
-	{
-		let options = {
-			type: "basic", 
-			title: title, 
-			iconUrl: "icons/icon128.png",
-			message: msg,
-		};
-		browser.notifications.create(options);
-	}
-
 	export function showPageAction(tabId: number)
 	{
 		//if(GB.browser.name === 'firefox')

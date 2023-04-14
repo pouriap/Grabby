@@ -27,7 +27,7 @@ class CommandLineDM
 		if(!cmd)
 		{
 			log.warn('no custom command specified');
-			Utils.notification('Error', 'No custom command specified');
+			Notifs.create('Error', 'No custom command specified');
 			return;
 		}
 

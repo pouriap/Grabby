@@ -328,6 +328,7 @@ namespace NativeMessaging
 	{
 		try
 		{
+			// sue me
 			if(msg.type === MSGTYP_YTDLPROG)
 			{
 				handleYTDLProg(msg as MSGRCV_YTDLProg);
@@ -456,24 +457,24 @@ namespace NativeMessaging
 		log.d('download complete', msg);
 
 		let dl = GB.allDownloads.get(msg.dlHash)!;
-		Utils.notification("Download Complete", dl.filename);
+		Notifs.create("Download Complete", dl.filename);
 	}
 
 	function handleYTDLFail(msg: MSGRCV_YTDLFail)
 	{
 		let dl = GB.allDownloads.get(msg.dlHash)!;
-		Utils.notification("Download Failed", dl.filename);
+		Notifs.create("Download Failed", dl.filename);
 	}
 
 	function handleYTDLKill(msg: MSGRCV_YTDLKill)
 	{
 		let dl = GB.allDownloads.get(msg.dlHash)!;
-		Utils.notification("Download Canceled", dl.filename);
+		Notifs.create("Download Canceled", dl.filename);
 	}
 
 	function handleGeneral(msg: MSGRCV_General)
 	{
-		Utils.notification("Message", msg.content);
+		Notifs.create("Message", msg.content);
 	}
 
 	function handleError(msg: MSGRCV_Error)
@@ -483,6 +484,6 @@ namespace NativeMessaging
 
 	function handleErrorGui(msg: MSGRCV_Error_GUI)
 	{
-		Utils.notification("Error", msg.content);
+		Notifs.create("Error", msg.content);
 	}
 }

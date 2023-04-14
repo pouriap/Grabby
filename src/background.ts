@@ -62,6 +62,8 @@ var nativeMinVer = '0.61.0';
 		let info = await Utils.browserInfo();
 		GB.browser = info;
 
+		Notifs.startListeners();
+
 		//get the native app version (also makes sure native app is present)
 		let version = await NativeMessaging.getVersion();
 
@@ -109,17 +111,27 @@ var nativeMinVer = '0.61.0';
 	{
 		if(e instanceof NativeMessaging.InitializationError)
 		{
-			Utils.notification("Error", "Could not connect to native app.\n\nHave you installed the Grabby Toolkit?");
-			log.err('Native App not found');
+			let msg = 'Could not connect to native app.\n';
+				msg += 'Have you installed the Grabby Toolkit?\n\n';
+				msg += '(Click to go to download page)';
+
+			Notifs.create("Error", msg, Notifs.ID_TOOLKIT_PAGE);
+
+			log.err('Native App not found: ', e.message);
 		}
 		else if(e instanceof NativeAppVersionError)
 		{
-			Utils.notification("Error", "The installed native application is outdated and will not work with the current version of Grabby.\n\nPlease update Grabby Toolkit to the latest version.");
-			log.err('Native App not found');
+			let msg = 'The installed native application is outdated.\n';
+				msg += 'Please update Grabby Toolkit to the latest version.\n\n';
+				msg += '(Click to go to download page)';
+
+			Notifs.create("Error", msg, Notifs.ID_TOOLKIT_PAGE);
+
+			log.err('Native App out of date');
 		}
 		else
 		{
-			Utils.notification("Error", "Initialization failed\nReason: " + e.toString());
+			Notifs.create("Error", "Initialization failed\nReason: " + e.toString());
 			log.err('Addon could not be initialized:', e);
 		}
 	}
