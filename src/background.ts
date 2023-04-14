@@ -50,7 +50,7 @@ declare var fflate: any;
 //todo: make initialization error messages more verbose as it's a common error
 
 var GB = new Grabby();
-var nativeMinVer = '0.61.0';
+var nativeMinVer = '0.62.12';
 
 (async () => {
 
