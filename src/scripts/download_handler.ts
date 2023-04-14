@@ -299,7 +299,7 @@ class DownloadHandler implements RequestHandler
 				log.warn('this browser does not support overriding the download dialog');
 				return Promise.resolve({cancel: false});
 			}
-			else if(typeof GB.availableDMs === 'undefined')
+			else if(typeof Options.opt.availableDMs === 'undefined')
 			{
 				log.warn('no download managers found on the system');
 				return Promise.resolve({cancel: false});

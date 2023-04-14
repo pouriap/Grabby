@@ -58,7 +58,10 @@ class OptionsView extends View
 	async loadOptions()
 	{	
 		//get the currently saved options
-		let options = await Options.load(this.GBPop.availableDMs);
+		let options = await Options.load();
+
+		//hide the spinner
+		ui.get('#spinner')!.style.display = 'none';
 	
 		let optionsUI = new Options.OptionsUI(options);
 	
@@ -99,7 +102,6 @@ class OptionsView extends View
 		btn.setAttribute('type', 'submit');
 		btn.innerHTML = "Save";
 		document.getElementById('options-form')?.appendChild(btn);
-		
 	}
 	
 	createOptionDiv(optionData: DrawableOption)
@@ -202,7 +204,7 @@ class OptionsView extends View
 	createDropDown(id: string, optionUI: Options.DropdownOption)
 	{
 		//populate the list
-		let data = optionUI.getVal(this.GBPop);
+		let data = optionUI.getVal();
 		let itemList = data.list;
 		let selectedItem = data.selected;
 	

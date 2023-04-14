@@ -74,17 +74,7 @@ var nativeMinVer = '0.61.0';
 			throw new NativeAppVersionError();
 		}
 
-		let dms = await Utils.getAvailableDMs();
-
-		log.d('available dms are', dms.all);
-
-		if(dms.all.length > 0)
-		{
-			GB.availableDMs = dms.all;
-			GB.availBrowserDMs = dms.browser;
-		}
-
-		await Options.load(dms.all);
+		await Options.load();
 
 		NativeMessaging.startListeners();
 

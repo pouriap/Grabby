@@ -214,7 +214,6 @@ namespace Messaging
 				allDownloads: Utils.mapToArray(GB.allDownloads),
 				tabs: Utils.mapToArray(GB.tabs),
 				options: Options.opt,
-				availableDMs: GB.availableDMs,
 				browser: GB.browser,
 			}
 			resolve(new MSGGBJSON((json)));

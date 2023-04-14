@@ -3,7 +3,6 @@ type GBJSON =
 	allDownloads: [key: string, value: object][];
 	tabs: [key: number, value: any][];
 	options: Options.GBOptions;
-	availableDMs: string[] | undefined;
 	browser: browser_info;
 }
 
@@ -15,13 +14,11 @@ class GrabbyPopup
 	allDownloads = new Map<string, GrabbedDownload>();
 	tabs: SureMap<number, tabinfo>;
 	options: Options.GBOptions;
-	availableDMs: string[] | undefined;
 	browser: browser_info;
 
 	constructor(gbJSON: GBJSON)
 	{
 		this.tabs = new SureMap(gbJSON.tabs);
-		this.availableDMs = gbJSON.availableDMs;
 		this.options = gbJSON.options;
 		this.browser = gbJSON.browser;
 		this.recreateDownloads(gbJSON.allDownloads);
@@ -111,8 +108,6 @@ class Grabby
 	allRequests = new Map<string, HTTPDetails>();
 	allDownloads = new Map<string, GrabbedDownload>();
 	tabs = new SureMap<number, tabinfo>();
-	availableDMs: string[] | undefined = undefined;
-	availBrowserDMs: string[] | undefined = undefined;
 	//@ts-ignore
 	browser: browser_info;
 
@@ -160,7 +155,7 @@ class Grabby
 			let dm = new CommandLineDM();
 			dm.download(job);
 		}
-		else if(this.availBrowserDMs && this.availBrowserDMs.includes(job.dmName))
+		else if(Options.opt.availBrowserDMs.includes(job.dmName))
 		{
 			BrowserDMs.dms[job.dmName].download(job);
 		}

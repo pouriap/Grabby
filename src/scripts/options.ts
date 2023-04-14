@@ -18,13 +18,9 @@ namespace Options
 		grabFilesLargerThanMB: number = 5;
 		excludeWebFiles: boolean = true;
 		includedExts: string[] = [];
-		includedMimes: string[] = [];
 		excludedExts: string[] = [];
-		excludedMimes: string[] = [];
 		forcedExts: string[] = [];
-		forcedMimes: string[] = [];
 		blacklistDomains: string[] = [];
-		blacklistURLs: string[] = [];
 
 		// ytdl
 		ytdlProxy: string = '';
@@ -42,6 +38,14 @@ namespace Options
 		// advanced
 		JDownloaderAutoStart: boolean = true;
 		autoQuoteCustomCmd: boolean = true;
+
+		// deffered (hidden) options
+		blacklistURLs: string[] = [];
+		includedMimes: string[] = [];
+		excludedMimes: string[] = [];
+		forcedMimes: string[] = [];
+		availableDMs: string[] = [];
+		availBrowserDMs: string[] = [];
 	}
 
 	export type OptionNames<T> = 
@@ -57,7 +61,7 @@ namespace Options
 		header?: string;
 		attrs?: pair[];
 		tooltip?: string;
-		getVal: (arg?: any) => T;
+		getVal: () => T;
 		setVal: (e: V) => void;
 	}
 
@@ -100,15 +104,27 @@ namespace Options
 
 	export let opt = new GBOptions();
 
-	export async function load(availableDMs: string[] | undefined): Promise<GBOptions>
+	export async function load(): Promise<GBOptions>
 	{
 		let defaults = new GBOptions();
 		opt = await browser.storage.local.get(defaults);
-		//todo: can we do something about this disgusting mess?
-		if(!opt.defaultDM && availableDMs && availableDMs.length)
+
+		let dms = await Utils.getAvailableDMs();
+
+		log.d('available dms are', dms.all);
+
+		if(dms.all.length > 0)
 		{
-			opt.defaultDM = availableDMs[0];
+			opt.availableDMs = dms.all;
+			opt.availBrowserDMs = dms.browser;
 		}
+
+		//if no default DM is selected, select the first DM as defaul DM
+		if(!opt.defaultDM && dms.all.length)
+		{
+			opt.defaultDM = dms.all[0];
+		}
+
 		return opt;
 	}
 
@@ -258,9 +274,9 @@ namespace Options
 			header: 'Default download manager',
 			type: 'dropdown',
 			desc: "Default download manager: ",
-			getVal: (GBPop: GrabbyPopup) =>
+			getVal: () =>
 			{
-				let availableDMs = GBPop.availableDMs;
+				let availableDMs = this.opt.availableDMs;
 
 				if(typeof availableDMs === 'undefined' || availableDMs.length == 0)
 				{
@@ -335,6 +351,9 @@ namespace Options
 		};
 
 		// deffered options (these guys are calculations that happen before save)
+		// and they don't need to have a getVal because they are not shown in options page
+		// and they don't necessarily need to have a setVal either
+		// setVal() is called in options page after save button is clicked and after all other options are set
 		//------------------------------------------------------------------------
 
 		excludedMimes: DeferredOption = {
@@ -355,8 +374,20 @@ namespace Options
 			getVal: () => {},
 			setVal: () => {this.opt.forcedMimes = this.getMimesForExts(this.opt.forcedExts)}
 		};
-		//this only gets set at runtime when someone blacklists a download
+		//these guys are set in run-time and are only here so they can be accessible with options.opt
 		blacklistURLs: DeferredOption = {
+			type: 'deferred',
+			desc: '',
+			getVal: () => {},
+			setVal: () => {},
+		};
+		availableDMs: DeferredOption = {
+			type: 'deferred',
+			desc: '',
+			getVal: () => {},
+			setVal: () => {},
+		};
+		availBrowserDMs: DeferredOption = {
 			type: 'deferred',
 			desc: '',
 			getVal: () => {},

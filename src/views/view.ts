@@ -43,10 +43,10 @@ abstract class View
 	 */
 	protected getDMSelector(): HTMLSelectElement
 	{
-		let availableDMs = this.GBPop.availableDMs;
+		let availableDMs = this.GBPop.options.availableDMs;
 		let dmsDropDown = ui.create('select', {id: 'available-dms'}) as HTMLSelectElement;
 
-		if(typeof availableDMs === 'undefined')
+		if(!availableDMs)
 		{
 			let option = document.createElement('option');
 			option.value = '';
