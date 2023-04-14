@@ -14,10 +14,9 @@ Join Grabby's discrod server to discuss features and ask your questions
 - [Screenshots](#screenshots)
 - [Installation](#installation-firefox-on-windows)
 - [Supported download managers](#supported-download-managers)
+- [OS support](#os-support)
 - [What is the toolkit?](#what-is-the-toolkit)
 - [What is included in the toolkit](#what-is-included-in-the-toolkit)
-- [Browser support](#browser-support)
-- [OS support](#os-support)
 - [Notes](#notes)
 - [How to report bugs](#how-to-report-issues)
 
@@ -79,6 +78,7 @@ Note that only newer version of these download managers were tested and older ve
 - Xtreme Download Manager
 - Jdownloader
 - Thunder
+- Any download manager that is accessible with the command line
 
 ## OS Support
 Windows is officially supported.
@@ -113,4 +113,4 @@ Please feel free to report any bugs/issues/ideas by opening an issue in the repo
 
 <br />
 
-**This addon is dedicated to Terry A. Davis, the man who kept on pursuing his dreams in spite of his crippling issues.**
+**This addon is dedicated to Terry A. Davis, the man who kept on pursuing his dreams in spite of his crippling mental issues.**
