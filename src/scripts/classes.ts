@@ -112,7 +112,6 @@ class Grabby
 	allDownloads = new Map<string, GrabbedDownload>();
 	tabs = new SureMap<number, tabinfo>();
 	availableDMs: string[] | undefined = undefined;
-	availExtDMs: string[] | undefined = undefined;
 	availBrowserDMs: string[] | undefined = undefined;
 	//@ts-ignore
 	browser: browser_info;

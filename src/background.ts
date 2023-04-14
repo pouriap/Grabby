@@ -74,26 +74,17 @@ var nativeMinVer = '0.61.0';
 			throw new NativeAppVersionError();
 		}
 
-		//get available DMs from flashgot
-		let externalDMs = await NativeMessaging.getAvailableDMs();
+		let dms = await Utils.getAvailableDMs();
 
-		//these are TCP server based DMs that we check using the browser itself
-		let browserDms = await BrowserDMs.getAvailableDMs();
+		log.d('available dms are', dms.all);
 
-		let availableDMs: string[] = externalDMs.concat(browserDms);
-
-		availableDMs.push(CommandLineDM.DMNAME);
-
-		log.d('available dms are', externalDMs);
-
-		if(availableDMs.length > 0)
+		if(dms.all.length > 0)
 		{
-			GB.availableDMs = availableDMs;
-			GB.availBrowserDMs = browserDms;
-			GB.availExtDMs = externalDMs;
+			GB.availableDMs = dms.all;
+			GB.availBrowserDMs = dms.browser;
 		}
 
-		await Options.load(availableDMs);
+		await Options.load(dms.all);
 
 		NativeMessaging.startListeners();
 

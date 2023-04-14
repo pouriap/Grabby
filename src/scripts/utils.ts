@@ -1,5 +1,20 @@
 namespace Utils
 {
+	export async function getAvailableDMs()
+	{
+		//get available DMs from flashgot
+		let externalDMs = await NativeMessaging.getAvailableDMs();
+
+		//these are TCP server based DMs that we check using the browser itself
+		let browserDms = await BrowserDMs.getAvailableDMs();
+
+		let availableDMs: string[] = externalDMs.concat(browserDms);
+
+		availableDMs.push(CommandLineDM.DMNAME);
+
+		return {all: availableDMs, external: externalDMs, browser: browserDms};
+	}
+
 	/**
 	 * Gets domain name of a url
 	 * @param url 
