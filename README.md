@@ -12,7 +12,7 @@ Join Grabby's discrod server to discuss features and ask your questions
 ## Index
 - [Main Features](#main-features)
 - [Screenshots](#screenshots)
-- [Installation](#installation-firefox-on-windows)
+- [Installation](#installation-firefox)
 - [Supported download managers](#supported-download-managers)
 - [OS support](#os-support)
 - [What is the toolkit?](#what-is-the-toolkit)
