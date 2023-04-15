@@ -53,7 +53,7 @@ Join Grabby's discrod server to discuss features and ask your questions
 
 **For detailed instruction for Linux see [the relevant page in the wiki](https://github.com/pouriap/Grabby/wiki/Installing-the-toolkit-on-Linux)**
 
-**For installing on browsers other than Firefox see [the relevant page the in the wiki](https://github.com/pouriap/Grabby/wiki/Browser-Support)**
+**For installing on browsers other than Firefox see [the relevant page in the wiki](https://github.com/pouriap/Grabby/wiki/Browser-Support)**
 
 ## Supported download managers
 The following download managers are currently supported on Windows:

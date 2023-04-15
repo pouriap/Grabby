@@ -193,8 +193,8 @@ class DownloadWindow implements GBWindow
 		let screenH = window.screen.height;
 		let windowW = 480;
 		let windowH = 320;
-		let leftMargin = (screenW/2) - (windowW/2);
-		let topMargin = (screenH/2) - (windowH/2);
+		let leftMargin = Math.floor( (screenW/2) - (windowW/2) );
+		let topMargin = Math.floor( (screenH/2) - (windowH/2) );
 
 		let createData = 
 		{
