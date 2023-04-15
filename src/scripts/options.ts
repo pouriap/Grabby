@@ -38,6 +38,7 @@ namespace Options
 		// advanced
 		JDownloaderAutoStart: boolean = true;
 		autoQuoteCustomCmd: boolean = true;
+		socketDMTimeout: number = 300;
 
 		// deffered (hidden) options
 		blacklistURLs: string[] = [];
@@ -198,6 +199,7 @@ namespace Options
 		dlListSize: TextboxOption = {
 			type: 'textbox',
 			desc: 'Number of items to keep in downloads history:',
+			attrs: [{name: 'class', value: 'small-text'}],
 			getVal: () => {return this.opt.dlListSize.toString()},
 			setVal: (e) => {this.opt.dlListSize = Number(e.value)},
 		};
@@ -216,6 +218,7 @@ namespace Options
 			header: 'Grab behavior',
 			type: 'textbox',
 			desc: "Ignore files smaller than (MB):",
+			attrs: [{name: 'class', value: 'small-text'}],
 			getVal: () => {return this.opt.grabFilesLargerThanMB.toString()},
 			setVal: (e) => {this.opt.grabFilesLargerThanMB = Number(e.value)},
 		};
@@ -348,6 +351,14 @@ namespace Options
 			desc: 'Automatically put quotes around command line download manager arguments',
 			getVal: () => {return this.opt.autoQuoteCustomCmd},
 			setVal: (e) => {this.opt.autoQuoteCustomCmd = e.checked},
+		};
+		socketDMTimeout: TextboxOption = {
+			type: 'textbox',
+			desc: 'Socket timeout for network-based download managers:',
+			attrs: [{name: 'class', value: 'small-text'}],
+			tooltip: 'Timeout for socket-based downlod managers such as JDlownloader and Xtreme<br/>Increase this number if your DM is not being detected',
+			getVal: () => {return this.opt.socketDMTimeout.toString()},
+			setVal: (e) => {this.opt.socketDMTimeout = Number(e.value)},
 		};
 
 		// deffered options (these guys are calculations that happen before save)

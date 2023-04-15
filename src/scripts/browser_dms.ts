@@ -6,7 +6,8 @@ type BrowserDM = {
 
 class BrowserDMs
 {
-	static availableDMs: string[] | undefined = undefined;
+	static availableDMs: string[] = [];
+	static polledDms = 0;
 
 	static dms: {[index: string]: BrowserDM} = {
 
@@ -20,6 +21,7 @@ class BrowserDMs
 	
 				return new Promise((resolve)=>{
 					let xhr = new XMLHttpRequest();
+					xhr.timeout = Options.opt.socketDMTimeout;
 					xhr.onreadystatechange = function () {
 						if (xhr.readyState == XMLHttpRequest.DONE) {
 							if (xhr.status == 200) {
@@ -70,6 +72,7 @@ class BrowserDMs
 	
 				return new Promise((resolve)=>{
 					let xhr = new XMLHttpRequest();
+					xhr.timeout = Options.opt.socketDMTimeout;
 					xhr.onreadystatechange = function () {
 						if (xhr.readyState == XMLHttpRequest.DONE) {
 							if (xhr.status == 404 && xhr.responseText.includes('API_COMMAND_NOT_FOUND')) {
@@ -118,21 +121,33 @@ class BrowserDMs
 	
 	}
 
-	static async getAvailableDMs()
+	static getAvailableDMs(): Promise<string[]>
 	{
-		if(typeof BrowserDMs.availableDMs === 'undefined')
-		{
-			let availableDMs = [];
-			for(let dmName in BrowserDMs.dms){
-				let available = await BrowserDMs.dms[dmName].isAvailable();
-				if(available){
-					availableDMs.push(dmName);
-				}
-			}
-			BrowserDMs.availableDMs = availableDMs;
-		}
+		BrowserDMs.availableDMs = [];
+		BrowserDMs.polledDms = 0;
 
-		return BrowserDMs.availableDMs;
+		return new Promise((resolve) => 
+		{	
+			for(let dmName in BrowserDMs.dms)
+			{
+				BrowserDMs.dms[dmName].isAvailable().then((avail) => {
+					if(avail){
+						BrowserDMs.availableDMs.push(dmName);
+					}
+				})
+				.finally(() => {
+					BrowserDMs.polledDms++;
+				});
+			}
+	
+			let int = setInterval(() => {
+				if(BrowserDMs.polledDms === Object.keys(BrowserDMs.dms).length)
+				{
+					clearInterval(int);
+					resolve(BrowserDMs.availableDMs);
+				}
+			}, 100);
+		});
 	}
 
 }
