@@ -44,6 +44,9 @@ abstract class View
 	protected getDMSelector(): HTMLSelectElement
 	{
 		let availableDMs = this.GBPop.options.availableDMs;
+		
+		log.d('DM selector available: ', availableDMs);
+
 		let dmsDropDown = ui.create('select', {id: 'available-dms'}) as HTMLSelectElement;
 
 		if(!availableDMs)

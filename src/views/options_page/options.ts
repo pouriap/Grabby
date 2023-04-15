@@ -26,11 +26,11 @@ class OptionsView extends View
 	{
 		evt.preventDefault();
 	
-		let defaultOpts = new Options.GBOptions();
-		let optionsUI = new Options.OptionsUI(defaultOpts);
+		let currentOpts = Options.opt;
+		let optionsUI = new Options.OptionsUI(currentOpts);
 	
 		//populate real options first and then do the deferred options
-		for(let optionName in defaultOpts)
+		for(let optionName in currentOpts)
 		{
 			let optionUI = <Options.OptionUI<unknown, Element>> optionsUI[optionName];
 			if(Options.isDeferred(optionUI)) continue;
@@ -43,7 +43,7 @@ class OptionsView extends View
 		}
 	
 		//populate deferred options
-		for(let optionName in defaultOpts)
+		for(let optionName in currentOpts)
 		{
 			let optionUI = optionsUI[optionName];
 			if(!Options.isDeferred(optionUI)) continue;
