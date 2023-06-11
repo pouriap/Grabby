@@ -356,7 +356,7 @@ namespace Options
 			type: 'textbox',
 			desc: 'Socket timeout for network-based download managers:',
 			attrs: [{name: 'class', value: 'small-text'}],
-			tooltip: 'Timeout for socket-based downlod managers such as JDlownloader and Xtreme<br/>Increase this number if your DM is not being detected',
+			tooltip: "Timeout for socket-based downlod managers such as JDlownloader and Xtreme<br/>Increase this number if your DM is not being detected<br/>Set to zero if you don't have such DMs",
 			getVal: () => {return this.opt.socketDMTimeout.toString()},
 			setVal: (e) => {this.opt.socketDMTimeout = Number(e.value)},
 		};

@@ -48,6 +48,10 @@ declare var fflate: any;
 //todo: single format mp4 is not grabbed (https://hclips.com/videos/7485065/lily-s-first-tickle-session/)
 //todo: add different icon for error notifications
 //todo: make initialization error messages more verbose as it's a common error
+//todo: bad ytdl response for a youtube video still makes it show in the list in an error state
+//todo: when app is not initialized do not open options or popup pages
+//todo: when addon is updated toolkit outdated message is not properly shown
+//todo: show proper error if a download manager becomes unavailable when downloading (specially for socket-based ones)
 
 var GB = new Grabby();
 var nativeMinVer = '0.62.12';

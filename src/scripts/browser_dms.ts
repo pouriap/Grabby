@@ -126,6 +126,11 @@ class BrowserDMs
 		BrowserDMs.availableDMs = [];
 		BrowserDMs.polledDms = 0;
 
+		if(Options.opt.socketDMTimeout === 0)
+		{
+			return Promise.resolve(BrowserDMs.availableDMs);
+		}
+
 		return new Promise((resolve) => 
 		{	
 			for(let dmName in BrowserDMs.dms)
