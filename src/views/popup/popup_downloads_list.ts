@@ -19,8 +19,36 @@ class ViewDownloadsList extends PopupView
 			if(download.hidden){
 				continue;
 			}
-	
-			if(this.GBPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
+
+			//todo: fix
+			if(download.url.indexOf('youtube.com') != -1)
+			{
+				if(Utils.getDomain(currTab.url).indexOf('youtube.com') == -1)
+				{
+					continue;
+				}
+			}
+			
+			else if(typeof download.ownerTabId === 'undefined')
+			{
+				if(download.httpDetails.documentUrl)
+				{
+					if(Utils.getDomain(download.httpDetails.documentUrl) != Utils.getDomain(currTab.url)){
+						continue;
+					}
+				}
+				else if(download.httpDetails.originUrl)
+				{
+					if(Utils.getDomain(download.httpDetails.originUrl) != Utils.getDomain(currTab.url)){
+						continue;
+					}
+				}
+				else if(Utils.getDomain(download.url) != Utils.getDomain(currTab.url)){
+					continue;
+				}
+			}
+
+			else if(this.GBPop.options.showOnlyTabDls && download.ownerTabId != currTab.id){
 				continue;
 			}
 

@@ -17,16 +17,15 @@ class StreamHandler implements RequestHandler
 		{	
 			if(this.isRootManifest(manifText))
 			{
-				let tabid = this.download.tabId;
-				if(typeof tabid === 'undefined')
-				{
-					log.err('this main manifest does not have a tab id');
-				}
-
 				// make a new download object with the tab URL as the url
 				// currently the download object represents the manifest file but we want a 
 				// download object that represents the page itself so the URL would be correct
 				// for using with YTDL
+
+				if(!this.download.tabId || !this.download.ownerTabUrl)
+				{
+					log.err('cannot find owner tab of main manifest', this.download);
+				}
 
 				let videoUrl = this.download.ownerTabUrl;
 

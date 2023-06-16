@@ -125,6 +125,16 @@ class Grabby
 
 		log.warn('download is duplicate of', duplicate);
 
+		if(!download.tabId)
+		{
+			download.tabId = download.ownerTabId;
+		}
+
+		if(!duplicate.tabId)
+		{
+			duplicate.tabId = duplicate.ownerTabId;
+		}
+
 		//if the duplicate is from the same tab as the previous download do not add it
 		if(duplicate.tabId === download.tabId)
 		{
@@ -132,9 +142,13 @@ class Grabby
 			return;
 		}
 
+		//todo: handle this
 		if(!download.tabId)
 		{
-			log.err('duplicate download does not have a tab id', download);
+			//if we are here we do not have a tab ID nor a ownertabid so it will be shown
+			//on every tab so no need to add it again
+			log.warn('duplicate download does not have a tab id', download);
+			return;
 		}
 
 		//if there is a duplicate but it's from another tab then add a salt to it
@@ -297,8 +311,6 @@ class BaseDownload
 	private _host: str_und = undefined;
 	private _filesize: num_und = -1;
 	private _fileExtension: str_und = undefined;
-	private _ownerTabId: num_und = undefined;
-	private _ownerTabUrl: str_und = undefined;
 	private _isFromBlankTab: bool_und = undefined;
 	private _tabs: SureMap<number, tabinfo>;
 
@@ -320,50 +332,65 @@ class BaseDownload
 		this._hash_src = details.url;
 	}
 
-	get ownerTabId(): number
+	get ownerTabId(): number | undefined
 	{
-		if(typeof this._ownerTabId === 'undefined')
+		//todo: what do?
+		if(typeof this.tabId === 'undefined')
 		{
-			//todo: handle this case
-			//if this is a download not associated with any tabs like service workers (reddit.com)
-			if(typeof this.tabId === 'undefined'){
-				log.err('download does not have a tab id', this);
+			for(let [tabId, tabInfo] of this._tabs.entries())
+			{
+				if(this.url === tabInfo.url)
+				{
+					return tabId;
+				}
+				log.d(this.url, ' [does not equal] ', tabInfo.url);
 			}
 
-			if(this.isFromBlankTab)
+			for(let [tabId, tabInfo] of this._tabs.entries())
 			{
-				let tab = this._tabs.getsure(this.tabId);
+				if(this.httpDetails.documentUrl === tabInfo.url)
+				{
+					return tabId;
+				}
+			}
 
-				if(typeof tab.openerId === 'undefined')
+			for(let [tabId, tabInfo] of this._tabs.entries())
+			{
+				if(this.httpDetails.originUrl === tabInfo.url)
 				{
-					//this happens when we open a blank tab directly
-					//for example a bookmark to here: https://www.st.com/resource/en/datasheet/lm317.pdf
-					log.warn('blank tab does not have an opener id', tab);
-					this._ownerTabId = this.tabId;
+					return tabId;
 				}
-				else
-				{
-					this._ownerTabId = tab.openerId;
-				}
+			}
+	
+			log.warn('could not find owner tab for download', this);
+			return undefined;
+		}
+		else if(this.isFromBlankTab)
+		{
+			let tab = this._tabs.getsure(this.tabId);
+
+			if(typeof tab.openerId === 'undefined')
+			{
+				//this happens when we open a blank tab directly
+				//for example a bookmark to here: https://www.st.com/resource/en/datasheet/lm317.pdf
+				log.warn('blank tab does not have an opener id', tab);
+				return this.tabId;
 			}
 			else
 			{
-				this._ownerTabId = this.tabId;
+				return tab.openerId;
 			}
 		}
-
-		return this._ownerTabId;
+		else
+		{
+			return this.tabId;
+		}
 	}
 
-	get ownerTabUrl(): string
+	get ownerTabUrl(): string | undefined
 	{
-		if(typeof this._ownerTabUrl === 'undefined')
-		{
-			let tab = this._tabs.getsure(this.ownerTabId);
-			this._ownerTabUrl = tab.url;
-		}
-
-		return this._ownerTabUrl;
+		if(typeof this.ownerTabId == 'undefined') return undefined;
+		return this._tabs.getsure(this.ownerTabId).url;
 	}
 
 	get isFromBlankTab(): boolean
@@ -830,13 +857,20 @@ class StreamDownload extends GrabbedDownload implements YTDLableDownload<ytdlinf
 
 		let title = info.title;
 
-		if(typeof title === 'undefined' || !title)
+		if(!title)
 		{
-			title = (this.tabTitle)? this.tabTitle : 'Unknown Title';
-			if(title != 'Unknown Title')
+			if(this.tabTitle)
 			{
-				let domain = Utils.getDomain(this.ownerTabUrl);
-				title = Utils.removeSitenameFromTitle(title, domain);
+				title = this.tabTitle;
+				if(this.ownerTabUrl)
+				{
+					let domain = Utils.getDomain(this.ownerTabUrl);
+					title = Utils.removeSitenameFromTitle(title, domain);
+				}
+			}
+			else
+			{
+				title = 'Unknown Title';
 			}
 		}
 

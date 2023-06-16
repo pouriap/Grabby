@@ -397,7 +397,7 @@ namespace NativeMessaging
 			dl.updateData(msg.info);
 			dl.hidden = false;
 
-			Utils.showPageAction(dl.ownerTabId);
+			if(dl.ownerTabId) Utils.showPageAction(dl.ownerTabId);
 		}
 		else
 		{
@@ -418,8 +418,7 @@ namespace NativeMessaging
 			dl.updateData(info);
 			dl.hidden = false;
 
-			Utils.showPageAction(dl.ownerTabId);
-
+			if(dl.ownerTabId) Utils.showPageAction(dl.ownerTabId);
 		}
 		catch(e)
 		{

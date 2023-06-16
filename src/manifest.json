@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Grabby",
 	"description": "An extension for downloading files and media from websites.",
-	"version": "0.62.14",
+	"version": "0.62.15",
 	"author": "Pouria Pirhadi",
 	"homepage_url": "https://github.com/pouriap/Grabby",
 
